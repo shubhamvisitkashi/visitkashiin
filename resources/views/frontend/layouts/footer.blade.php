@@ -160,7 +160,7 @@
 
 /* ── Outer footer ── */
 .vkf-footer {
-    background: #FFFFFF;
+    background: #002351;
     border-top: 1px solid #E5E7EB;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -208,7 +208,7 @@
 .vkf-col__title {
     font-size: 12px; font-weight: 800;
     letter-spacing: .08em; text-transform: uppercase;
-    color: #111827; margin-bottom: 20px;
+    color: #a0a2a6; margin-bottom: 20px;
     position: relative; padding-bottom: 10px;
 }
 .vkf-col__title::after {

@@ -91,6 +91,9 @@
 /* Divider inside card */
 .ws-divider{height:1px;background:#F1F5F9;margin:16px 0;}
 
+/* Per-section save row */
+.ws-card-save-row{display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #F1F5F9;}
+
 /* Bottom sticky save bar */
 .ws-bottom-bar{
     position:sticky;bottom:0;left:0;right:0;z-index:100;
@@ -161,17 +164,13 @@
     <button type="button" class="ws-tab" onclick="wsTab('contact',this)">
         <i data-feather="phone"></i> Contact
     </button>
-    <button type="button" class="ws-tab" onclick="wsTab('promo',this)">
-        <i data-feather="gift"></i> Promo Banners
-    </button>
 </div>
-
-<form id="wsForm" method="POST" action="{{ route('web_setup.store') }}" enctype="multipart/form-data">
-@csrf
 
 {{-- ══════════════════════════════════════════════════════════════ --}}
 {{--  TAB 1 — BRANDING                                             --}}
 {{-- ══════════════════════════════════════════════════════════════ --}}
+<form id="form-branding" method="POST" action="{{ route('web_setup.store') }}" enctype="multipart/form-data">
+@csrf
 <div id="panel-branding" class="ws-panel active">
 
     <div class="ws-card">
@@ -242,23 +241,28 @@
                 <input type="hidden" name="type[]" value="footer_description">
                 <p class="ws-hint">1–2 line description displayed beneath the footer logo.</p>
             </div>
+
+            <div class="ws-card-save-row">
+                <button type="submit" class="ws-save-btn">
+                    <i data-feather="save"></i> Save Logos &amp; Identity
+                </button>
+            </div>
         </div>
     </div>
 </div>
+</form>
 
 {{-- ══════════════════════════════════════════════════════════════ --}}
 {{--  TAB 2 — HERO BANNER                                          --}}
 {{-- ══════════════════════════════════════════════════════════════ --}}
 <div id="panel-hero" class="ws-panel">
 
-    {{-- ── Hero Slider Slides Manager ── --}}
-    @php $heroSlides = \App\Models\HeroSlide::orderBy('sort_order')->orderBy('id')->get(); @endphp
     <div class="ws-card" style="margin-bottom:16px;">
         <div class="ws-card-head">
             <div class="ws-card-head-icon"><i data-feather="sliders"></i></div>
             <div style="flex:1;">
                 <div class="ws-card-head-title">Hero Slider Slides</div>
-                <div class="ws-card-head-sub">Add multiple slides — each with its own image, title & button</div>
+                <div class="ws-card-head-sub">Add multiple slides — each with its own image, title &amp; button</div>
             </div>
             <a href="{{ route('hero-slides.index') }}" style="font-size:.72rem;font-weight:700;color:#EA580C;text-decoration:none;white-space:nowrap;">Manage All →</a>
         </div>
@@ -269,7 +273,6 @@
             <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
                 @foreach($heroSlides as $slide)
                 <div style="display:flex;align-items:center;gap:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 14px;">
-                    {{-- Thumb --}}
                     <div style="width:52px;height:36px;border-radius:7px;overflow:hidden;flex-shrink:0;background:#E2E8F0;">
                         @if($slide->image)
                         <img src="{{ $slide->image_url }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
@@ -277,12 +280,10 @@
                         <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.9rem;">🖼</div>
                         @endif
                     </div>
-                    {{-- Info --}}
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:.83rem;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $slide->title }}</div>
                         <div style="font-size:.7rem;color:#94A3B8;">{{ $slide->cta_label }} · Order {{ $slide->sort_order }}</div>
                     </div>
-                    {{-- Status + Delete --}}
                     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                         <form action="{{ route('hero-slides.toggle', $slide->id) }}" method="POST">
                             @csrf
@@ -307,10 +308,10 @@
             </div>
             @endif
 
-            {{-- Quick Add Slide Form --}}
+            {{-- Quick Add Slide Form (standalone — not nested inside any other form) --}}
             <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:16px;margin-bottom:20px;">
                 <div style="font-size:.72rem;font-weight:800;color:#EA580C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">➕ Add New Slide</div>
-                <form action="{{ route('hero-slides.store') }}" method="POST" enctype="multipart/form-data">
+                <form id="form-hero-add" action="{{ route('hero-slides.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
                         <div>
@@ -345,9 +346,11 @@
                         </div>
                     </div>
                     <input type="hidden" name="is_active" value="1">
-                    <button type="submit" style="background:linear-gradient(135deg,#EA580C,#C2410C);color:#fff;border:none;border-radius:9px;padding:9px 20px;font-size:.82rem;font-weight:700;cursor:pointer;width:100%;">
-                        Add Slide to Hero Slider
-                    </button>
+                    <div class="ws-card-save-row" style="border-top:none;padding-top:0;margin-top:0;">
+                        <button type="submit" class="ws-save-btn">
+                            <i data-feather="save"></i> Save Slide
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -359,6 +362,8 @@
 {{-- ══════════════════════════════════════════════════════════════ --}}
 {{--  TAB 3 — CONTACT                                              --}}
 {{-- ══════════════════════════════════════════════════════════════ --}}
+<form id="form-contact" method="POST" action="{{ route('web_setup.store') }}" enctype="multipart/form-data">
+@csrf
 <div id="panel-contact" class="ws-panel">
 
     <div class="ws-card">
@@ -404,157 +409,59 @@
                     placeholder="Full business address…">{{ websiteSetupValue('address') }}</textarea>
                 <input type="hidden" name="type[]" value="address">
             </div>
-        </div>
-    </div>
-</div>
 
-{{-- ══════════════════════════════════════════════════════════════ --}}
-{{--  TAB 4 — PROMO BANNERS                                        --}}
-{{-- ══════════════════════════════════════════════════════════════ --}}
-<div id="panel-promo" class="ws-panel">
-
-    {{-- Images --}}
-    <div class="ws-card">
-        <div class="ws-card-head">
-            <div class="ws-card-head-icon"><i data-feather="image"></i></div>
-            <div>
-                <div class="ws-card-head-title">Promo Banner Images</div>
-                <div class="ws-card-head-sub">Upload up to 3 images — multiple images auto-carousel</div>
-            </div>
-        </div>
-        <div class="ws-card-body">
-            <div class="ws-grid ws-grid-3">
-                @foreach([1 => 'promo_banner', 2 => 'promo_banner_2', 3 => 'promo_banner_3'] as $slot => $key)
-                <div class="ws-field">
-                    <label class="ws-label">Banner Image {{ $slot }}</label>
-                    <input type="file" name="{{ $key }}" class="ws-file" accept="image/*">
-                    <input type="hidden" name="type[]" value="{{ $key }}">
-                    <p class="ws-hint">Max 2 MB. JPG/PNG/WebP.</p>
-                    @if(websiteSetupValue($key))
-                    <div class="ws-preview">
-                        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue($key)) }}"
-                             style="height:54px;max-width:140px;object-fit:cover;border-radius:6px;"
-                             onerror="this.closest('.ws-preview').remove()">
-                        <span>Slot {{ $slot }} active</span>
-                    </div>
-                    @endif
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-
-    {{-- Text & Settings --}}
-    <div class="ws-card">
-        <div class="ws-card-head">
-            <div class="ws-card-head-icon"><i data-feather="edit-3"></i></div>
-            <div>
-                <div class="ws-card-head-title">Promo Text &amp; Settings</div>
-                <div class="ws-card-head-sub">Title, subtitle, link and display options</div>
-            </div>
-        </div>
-        <div class="ws-card-body">
-            <div class="ws-grid ws-grid-2" style="margin-bottom:16px;">
-                <div class="ws-field">
-                    <label class="ws-label">Promo Title</label>
-                    <input type="text" name="promo_banner_title" class="ws-input"
-                        placeholder="e.g. Special Summer Offer!"
-                        value="{{ websiteSetupValue('promo_banner_title') }}">
-                    <input type="hidden" name="type[]" value="promo_banner_title">
-                </div>
-                <div class="ws-field">
-                    <label class="ws-label">Promo Link <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
-                    <input type="text" name="promo_banner_link" class="ws-input"
-                        placeholder="https://..."
-                        value="{{ websiteSetupValue('promo_banner_link') }}">
-                    <input type="hidden" name="type[]" value="promo_banner_link">
-                </div>
-            </div>
-
-            <div class="ws-field" style="margin-bottom:16px;">
-                <label class="ws-label">Promo Sub-text</label>
-                <input type="text" name="promo_banner_subtitle" class="ws-input"
-                    placeholder="e.g. Book before June 30 and save 20%"
-                    value="{{ websiteSetupValue('promo_banner_subtitle') }}">
-                <input type="hidden" name="type[]" value="promo_banner_subtitle">
-            </div>
-
-            <div class="ws-divider"></div>
-
-            <div class="ws-grid ws-grid-2">
-                {{-- Visible toggle --}}
-                <div class="ws-field">
-                    <label class="ws-label">Show on Home Page</label>
-                    @php $promoActive = websiteSetupValue('promo_banner_active'); @endphp
-                    <div class="ws-toggle-row">
-                        <label class="ws-switch">
-                            <input type="checkbox" id="promoActiveToggle"
-                                {{ $promoActive == 'yes' ? 'checked' : '' }}
-                                onchange="document.getElementById('promoActiveVal').value = this.checked ? 'yes' : 'no'">
-                            <span class="ws-switch-slider"></span>
-                        </label>
-                        <span class="ws-switch-lbl" id="promoActiveLbl">
-                            {{ $promoActive == 'yes' ? 'Visible on home page' : 'Hidden from home page' }}
-                        </span>
-                    </div>
-                    <input type="hidden" name="promo_banner_active" id="promoActiveVal"
-                        value="{{ $promoActive == 'yes' ? 'yes' : 'no' }}">
-                    <input type="hidden" name="type[]" value="promo_banner_active">
-                </div>
-
-                {{-- Position --}}
-                <div class="ws-field">
-                    <label class="ws-label">Position on Page</label>
-                    @php
-                        $positions = [
-                            'after_hero'       => 'After Hero Banner',
-                            'after_trust'      => 'After Trust Bar',
-                            'after_categories' => 'After Categories',
-                            'after_packages'   => 'After Popular Packages',
-                            'after_why'        => 'After Why Choose Us',
-                            'after_cta'        => 'After WhatsApp CTA (Bottom)',
-                        ];
-                        $currentPos = websiteSetupValue('promo_banner_position') ?: 'after_hero';
-                    @endphp
-                    <select name="promo_banner_position" class="ws-select">
-                        @foreach($positions as $val => $lbl)
-                        <option value="{{ $val }}" {{ $currentPos == $val ? 'selected' : '' }}>{{ $lbl }}</option>
-                        @endforeach
-                    </select>
-                    <input type="hidden" name="type[]" value="promo_banner_position">
-                    <p class="ws-hint">Section after which the promo banner appears.</p>
-                </div>
+            <div class="ws-card-save-row">
+                <button type="submit" class="ws-save-btn">
+                    <i data-feather="save"></i> Save Contact &amp; Support
+                </button>
             </div>
         </div>
     </div>
 </div>
+</form>
 
-{{-- Bottom save bar --}}
+
+{{-- Bottom sticky save bar --}}
 <div class="ws-bottom-bar">
     <span class="ws-bottom-bar-info">
         <i data-feather="info"></i> Changes will be applied to the live website immediately.
     </span>
-    <button type="submit" class="ws-save-btn" form="wsForm">
+    <button type="button" class="ws-save-btn" onclick="wsSubmitActive()">
         <i data-feather="save"></i> Update Settings
     </button>
 </div>
 
-</form>
 </div>{{-- /.ws-page --}}
 
 <script>
+// Map panel name → form id (hero has no web_setup form)
+var wsFormMap = {
+    branding : 'form-branding',
+    hero     : 'form-hero-add',
+    contact  : 'form-contact'
+};
+var wsActivePanel = 'branding';
+
 function wsTab(name, el) {
-    // hide all panels
     document.querySelectorAll('.ws-panel').forEach(function(p){ p.classList.remove('active'); });
     document.querySelectorAll('.ws-tab').forEach(function(t){ t.classList.remove('active'); });
     document.getElementById('panel-' + name).classList.add('active');
     el.classList.add('active');
+    wsActivePanel = name;
+}
+
+function wsSubmitActive() {
+    var formId = wsFormMap[wsActivePanel];
+    if (formId) {
+        var form = document.getElementById(formId);
+        if (form) form.submit();
+    }
 }
 
 // Promo toggle label
 var promoToggle = document.getElementById('promoActiveToggle');
 var promoLbl    = document.getElementById('promoActiveLbl');
-if(promoToggle && promoLbl){
+if (promoToggle && promoLbl) {
     promoToggle.addEventListener('change', function(){
         promoLbl.textContent = this.checked ? 'Visible on home page' : 'Hidden from home page';
     });

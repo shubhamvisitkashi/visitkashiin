@@ -1053,8 +1053,9 @@ body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opac
 
 /* ---------- 14. WhatsApp CTA Strip ---------- */
 .vk-cta-strip {
-  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  background: linear-gradient(180deg, #ff6600 0%, #00a995 100%);
   padding: 32px 0;
+  margin-bottom: 18px;
 }
 .vk-cta-strip__inner {
   display: flex;
@@ -1080,16 +1081,17 @@ body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opac
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  background: var(--vk-white);
-  color: #128C7E !important;
+  background: #fff;
+  color: #128c83 !important;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
   font-size: 14px;
-  padding: 13px 28px;
+  padding: 12px 26px;
   border-radius: 50px;
+  margin-bottom: 15px;
   text-decoration: none !important;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
-  transition: transform var(--vk-transition), box-shadow var(--vk-transition);
+  box-shadow: 0 4px 18px rgba(0,0,0,.14);
+  transition: transform .22s, box-shadow .22s;
 }
 .vk-cta-strip__btn:hover {
   transform: translateY(-2px);
@@ -1323,8 +1325,9 @@ body.vk-homepage #back-to-top a::after {
 /* ---------- Weather Widget ---------- */
 .vk-weather {
   background: #F2F2F7;
-  border-top: 1px solid var(--vk-border);
-  padding: 32px 0;
+  border-top: 1px solid #e0e0e0;
+  padding: 30px 0;
+  margin-bottom: 32px;
 }
 .vk-weather__inner {
   display: flex;
@@ -1768,7 +1771,8 @@ body.vk-homepage #back-to-top a::after {
 
 /* ── CTA Strip — deeper vibrant gradient ── */
 .vk-cta-strip {
-  background: linear-gradient(135deg, #0d9f5c 0%, #128C7E 40%, #0a6b5e 100%) !important;
+  background: linear-gradient(180deg, #ff6600 0%, #00a995 100%) !important;
+  margin-bottom: 18px;
   position: relative;
   overflow: hidden;
 }
@@ -1783,7 +1787,9 @@ body.vk-homepage #back-to-top a::after {
 }
 .vk-cta-strip__btn {
   background: #fff !important;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.18) !important;
+  color: #128c83 !important;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.14) !important;
 }
 
 /* ── Section separator (rainbow line between sections) ── */

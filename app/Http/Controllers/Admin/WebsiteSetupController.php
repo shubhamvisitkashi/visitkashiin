@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\WebsiteSetup;
+use App\Models\HeroSlide;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
@@ -16,7 +17,12 @@ class WebsiteSetupController extends Controller
 
     public function index()
     {
-        return view('admin.web_site_setup.index', ['page_title' => 'Website Setup']);
+        try {
+            $heroSlides = HeroSlide::orderBy('sort_order')->orderBy('id')->get();
+        } catch (\Exception $e) {
+            $heroSlides = collect();
+        }
+        return view('admin.web_site_setup.index', ['page_title' => 'Website Setup', 'heroSlides' => $heroSlides]);
     }
 
     public function create() {}
