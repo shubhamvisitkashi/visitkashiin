@@ -131,6 +131,12 @@
             gap: 1rem;
             margin-bottom: 1rem;
         }
+        @media(max-width:600px){
+            .lead-card .lead-info{grid-template-columns:repeat(2,1fr);gap:.6rem;}
+        }
+        @media(max-width:360px){
+            .lead-card .lead-info{grid-template-columns:1fr;gap:.5rem;}
+        }
 
         .lead-card .info-item {
             display: flex;

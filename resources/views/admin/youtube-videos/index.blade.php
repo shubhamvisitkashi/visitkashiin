@@ -39,6 +39,8 @@
 
 /* Video grid */
 .yt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:16px;}
+@media(max-width:600px){.yt-grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:12px;}}
+@media(max-width:360px){.yt-grid{grid-template-columns:1fr;gap:8px;padding:10px;}}
 
 /* Video card */
 .yt-vid-card{border-radius:12px;border:1px solid #E2E8F0;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .18s,transform .18s;}

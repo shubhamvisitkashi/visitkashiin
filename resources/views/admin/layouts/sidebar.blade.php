@@ -866,6 +866,11 @@
             }, 300);
         }
 
+        /* Expose globally so the mobile nav Menu button can call them */
+        window.toggleAdminSidebar = function() {
+            sidebar.classList.contains('active') ? closeSidebar() : openSidebar();
+        };
+
         // Toggle on hamburger click
         sidebarTogglers.forEach(function(toggler) {
             toggler.addEventListener('click', function(e) {

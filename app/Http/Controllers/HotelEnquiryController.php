@@ -47,6 +47,6 @@ class HotelEnquiryController extends Controller
             // Mail failure should not block the user
         }
 
-        return redirect()->back()->with('hotel_success', 'Thank you! Your enquiry has been submitted. We will call you shortly.');
+        return redirect()->back()->with('hotel_success', true);
     }
 }

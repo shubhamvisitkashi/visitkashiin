@@ -41,7 +41,7 @@
         @if($product->youtube_link)
         <a href="#video">Video</a>
         @endif
-        <a href="#enquiry">Book Now</a>
+        <a href="#enquiry" onclick="if(window.innerWidth<992){event.preventDefault();hdOpenPopup();}">Book Now</a>
     </div>
 </div>
 
@@ -262,12 +262,21 @@
 
         </div>{{-- /hd-content --}}
 
-        {{-- RIGHT SIDEBAR ─────────────────────────────────────── --}}
+        {{-- RIGHT SIDEBAR (desktop) / BOOKING POPUP (mobile) ──── --}}
+        {{-- Desktop: overlay is position:static → acts as grid column  --}}
+        {{-- Mobile:  overlay is position:fixed  → bottom-sheet popup   --}}
+        <div class="hd-popup-overlay" id="hdBookingPopup">
+            <div class="hd-popup-sheet">
+                <div class="hd-popup-handle">
+                    <div class="hd-popup-handle-bar"></div>
+                    <button class="hd-popup-close" onclick="hdClosePopup()" aria-label="Close">&#10005;</button>
+                </div>
+                <div class="hd-popup-body">
         <div class="hd-sidebar">
             <div class="hd-sidebar-inner" id="enquiry">
 
                 {{-- Price Box ─────────────────────────────────── --}}
-                @if($product->discounted_price > 0 || $product->base_price > 0)
+                @if(($product->discounted_price > 0 || $product->base_price > 0) && !session('hotel_success'))
                 <div class="price-box">
                     <div class="price-from">Starting from</div>
                     <div class="price-tag">
@@ -296,8 +305,13 @@
                     <div class="hotel-card-body">
 
                         @if(session('hotel_success'))
-                        <div class="hc-success">&#10003; {{ session('hotel_success') }}</div>
-                        @endif
+                        <div class="hc-success-card">
+                            <div class="hc-success-icon">&#10003;</div>
+                            <h4 class="hc-success-title">Enquiry Request Sent Successfully!</h4>
+                            <p class="hc-success-msg">Our team will contact you soon to confirm your booking.</p>
+                            <a href="tel:+917080109919" class="hc-success-call">&#128222; Call Us Now</a>
+                        </div>
+                        @else
 
                         @if($errors->any())
                         <div class="hc-errors">
@@ -381,6 +395,7 @@
                             <a href="tel:+917080109919" class="btn-call">&#128222; Call Us</a>
                             <a href="https://wa.me/917080109919" target="_blank" rel="noopener" class="btn-wa">&#128172; WhatsApp</a>
                         </div>
+                        @endif
                     </div>
                 </div>
 
@@ -396,6 +411,9 @@
 
             </div>{{-- /hd-sidebar-inner --}}
         </div>{{-- /hd-sidebar --}}
+                </div>{{-- /.hd-popup-body --}}
+            </div>{{-- /.hd-popup-sheet --}}
+        </div>{{-- /.hd-popup-overlay --}}
 
     </div>{{-- /hd-body --}}
 </div>{{-- /hd-wrap --}}
@@ -607,4 +625,81 @@
 
 })();
 </script>
+
+<script>
+/* ── Hotel Booking Popup (mobile) ── */
+function hdOpenPopup() {
+    var popup = document.getElementById('hdBookingPopup');
+    if (popup) { popup.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function hdClosePopup() {
+    var popup = document.getElementById('hdBookingPopup');
+    if (popup) { popup.classList.remove('open'); document.body.style.overflow = ''; }
+}
+document.getElementById('hdBookingPopup').addEventListener('click', function(e) {
+    if (e.target === this) hdClosePopup();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hdClosePopup();
+});
+/* Auto-open popup on mobile after successful enquiry submission */
+@if(session('hotel_success'))
+if (window.innerWidth < 992) { hdOpenPopup(); }
+@endif
+</script>
+
+{{-- ── Hotel Sticky Mobile Bar ── --}}
+<div class="hkbd-sticky-bar" id="hkbdStickyBar">
+    <div class="hkbd-sticky-info">
+        <div class="hkbd-sticky-name">{{ Str::limit($product->name, 26) }}</div>
+        @php
+            $stickyPrice = $product->discounted_price > 0 ? $product->discounted_price : $product->base_price;
+        @endphp
+        @if($stickyPrice > 0)
+        <div class="hkbd-sticky-price">From ₹{{ number_format($stickyPrice) }}/night</div>
+        @endif
+    </div>
+    <div class="hkbd-sticky-btns">
+        <button class="hkbd-sticky-enq" onclick="hdOpenPopup()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Enquiry Now
+        </button>
+        <a href="https://wa.me/917080109919?text={{ urlencode('Hi VisitKashi, I want to enquire about hotel '.$product->name.'. Please share availability and pricing.') }}"
+           target="_blank" rel="noopener" class="hkbd-sticky-wa">
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="currentColor"><path d="M16 3C8.82 3 3 8.82 3 16c0 2.43.65 4.7 1.78 6.67L3 29l6.55-1.72A13 13 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm6.4 17.72c-.27.76-1.58 1.45-2.16 1.54-.56.09-1.26.13-2.04-.13a18.7 18.7 0 0 1-1.85-.68C13.6 20.3 11.6 17.9 11.45 17.7c-.15-.2-1.22-1.62-1.22-3.1 0-1.47.77-2.2 1.05-2.5.27-.3.6-.37.8-.37l.57.01c.18 0 .43-.07.67.51.25.6.85 2.07.92 2.22.08.15.13.33.03.53-.1.2-.15.32-.3.5-.14.17-.3.38-.43.51-.14.14-.29.3-.12.58.17.28.74 1.22 1.59 1.97 1.09.97 2 1.27 2.29 1.41.28.14.45.12.61-.07.17-.2.72-.84.91-1.13.2-.28.39-.23.66-.14.27.09 1.71.8 2 .95.29.14.48.21.55.33.07.12.07.7-.2 1.46z"/></svg>
+        </a>
+    </div>
+</div>
+
+<style>
+.hkbd-sticky-bar { display:none; }
+@media(max-width:991px){
+    .hkbd-sticky-bar {
+        display:flex; align-items:center; justify-content:space-between; gap:10px;
+        position:fixed; bottom:0; left:0; right:0; z-index:1000;
+        background:#fff; border-top:1px solid #e5e7eb;
+        padding:12px 16px; box-shadow:0 -4px 16px rgba(0,0,0,.08);
+        margin-bottom:65px;
+    }
+    .hkbd-sticky-info { flex:1; min-width:0; overflow:hidden; }
+    .hkbd-sticky-name { font-size:.85rem; font-weight:800; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hkbd-sticky-price { font-size:.8rem; color:#0f3460; font-weight:600; white-space:nowrap; }
+    .hkbd-sticky-btns { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+    .hkbd-sticky-enq {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#0f3460; color:#fff;
+        font-size:.85rem; font-weight:700; line-height:1.2;
+        padding:12px 16px; border-radius:9px; border:none; cursor:pointer;
+        white-space:nowrap; flex-shrink:0; transition:opacity .2s;
+    }
+    .hkbd-sticky-enq:hover { opacity:.88; }
+    .hkbd-sticky-wa {
+        display:inline-flex; align-items:center; justify-content:center;
+        background:#25d366; color:#fff!important;
+        padding:12px 14px; border-radius:9px;
+        text-decoration:none!important; flex-shrink:0; transition:opacity .2s;
+    }
+    .hkbd-sticky-wa:hover { opacity:.88; color:#fff!important; }
+}
+</style>
 @endpush

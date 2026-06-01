@@ -34,6 +34,8 @@
 .cs-card-body{padding:18px;}
 
 .cs-info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+@media(max-width:600px){.cs-info-grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
+@media(max-width:360px){.cs-info-grid{grid-template-columns:1fr;gap:8px;}}
 .cs-info-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94A3B8;margin-bottom:3px;}
 .cs-info-val{font-size:.88rem;font-weight:600;color:#0F172A;}
 .cs-info-val.muted{color:#64748B;font-weight:400;}

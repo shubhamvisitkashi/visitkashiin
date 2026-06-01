@@ -457,7 +457,7 @@
   .bk-page { padding: 12px; }
 
   /* ── Header compact ── */
-  .bk-header { padding:16px 18px; margin-bottom:14px; border-radius:14px; }
+  .bk-header { padding:16px 18px; margin-bottom:14px; border-radius:14px; margin-top:50px; }
   .bk-header-title h1 { font-size:1.1rem; }
   .bk-header-title p  { font-size:.75rem; }
   .bk-header-actions  { gap:6px; }

@@ -206,7 +206,7 @@
             {{-- More Cab Options — before reviews ── --}}
             @if($relatedCabs->isNotEmpty())
             <h2 class="ckbd-section-title">More Cab Options</h2>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+            <div class="ckbd-related-grid">
                 @foreach($relatedCabs->take(4) as $rc)
                 @php
                     $rcImg = (!empty($rc->images)&&is_array($rc->images)) ? asset('backend/admin/product_images/'.$rc->images[0]) : $fallback;
@@ -289,6 +289,9 @@
             .cc-check-row input{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:#0f3460;}
             .cc-check-text{font-size:.81rem;color:#92400E;line-height:1.4;}
             .cc-check-text strong{display:block;font-weight:700;}
+            .ckbd-related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+            @media(max-width:600px){.ckbd-related-grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
+            @media(max-width:360px){.ckbd-related-grid{grid-template-columns:1fr;gap:8px;}}
             </style>
             @endpush
 
@@ -479,14 +482,14 @@ document.getElementById('cabEnqForm').addEventListener('submit',function(){
     </div>
     @endif
     <div class="ckbd-sticky-btns">
+        <button class="ckbd-sticky-enq" onclick="ckbdScrollToForm()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Enquiry Now
+        </button>
         <a href="https://wa.me/91{{ $cPhone }}?text={{ urlencode('Hi VisitKashi, I want to book '.$product->name.'. Please share details and pricing.') }}"
            target="_blank" rel="noopener" class="ckbd-sticky-wa">
             <svg width="22" height="22" viewBox="0 0 32 32" fill="currentColor"><path d="M16 3C8.82 3 3 8.82 3 16c0 2.43.65 4.7 1.78 6.67L3 29l6.55-1.72A13 13 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm6.4 17.72c-.27.76-1.58 1.45-2.16 1.54-.56.09-1.26.13-2.04-.13a18.7 18.7 0 0 1-1.85-.68C13.6 20.3 11.6 17.9 11.45 17.7c-.15-.2-1.22-1.62-1.22-3.1 0-1.47.77-2.2 1.05-2.5.27-.3.6-.37.8-.37l.57.01c.18 0 .43-.07.67.51.25.6.85 2.07.92 2.22.08.15.13.33.03.53-.1.2-.15.32-.3.5-.14.17-.3.38-.43.51-.14.14-.29.3-.12.58.17.28.74 1.22 1.59 1.97 1.09.97 2 1.27 2.29 1.41.28.14.45.12.61-.07.17-.2.72-.84.91-1.13.2-.28.39-.23.66-.14.27.09 1.71.8 2 .95.29.14.48.21.55.33.07.12.07.7-.2 1.46z"/></svg>
         </a>
-        <button class="ckbd-sticky-enq" onclick="ckbdScrollToForm()">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Send Enquiry
-        </button>
     </div>
 </div>
 
@@ -496,36 +499,43 @@ document.getElementById('cabEnqForm').addEventListener('submit',function(){
     .ckbd-sticky-bar {
         display:flex; align-items:center; justify-content:space-between; gap:10px;
         position:fixed; bottom:0; left:0; right:0; z-index:1000;
-        background:#fff; border-top:1px solid #E5E7EB;
-        padding:10px 16px calc(10px + env(safe-area-inset-bottom));
-        box-shadow:0 -4px 20px rgba(0,0,0,.12);
+        background:#fff; border-top:1px solid #e5e7eb;
+        padding:12px 16px; box-shadow:0 -4px 16px rgba(0,0,0,.08);
+        margin-bottom:65px;
     }
     .ckbd-layout { padding-bottom:80px; }
-    .ckbd-sticky-price { display:flex; flex-direction:column; flex-shrink:0; }
-    .ckbd-sticky-price-val { font-size:1.15rem; font-weight:900; color:#0f3460; line-height:1; }
-    .ckbd-sticky-price-sub { font-size:.72rem; color:#9CA3AF; }
-    .ckbd-sticky-btns { display:flex; gap:8px; flex:1; justify-content:flex-end; }
+
+    /* price info — left side, shrinks with ellipsis */
+    .ckbd-sticky-price { flex:1; min-width:0; overflow:hidden; display:flex; flex-direction:column; }
+    .ckbd-sticky-price-val { font-size:1.1rem; font-weight:900; color:#0f3460; line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ckbd-sticky-price-sub { font-size:.72rem; color:#9CA3AF; white-space:nowrap; }
+
+    /* buttons — right side, never shrink */
+    .ckbd-sticky-btns { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+
+    /* Enquiry Now — matches .vkbd-mob-btn.book */
+    .ckbd-sticky-enq {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#0f3460; color:#fff;
+        font-size:.85rem; font-weight:700; line-height:1.2;
+        padding:12px 16px; border-radius:9px; border:none; cursor:pointer;
+        white-space:nowrap; flex-shrink:0;
+        transition:opacity .2s;
+    }
+    .ckbd-sticky-enq:hover { opacity:.88; }
+
+    /* WhatsApp icon — matches .vkbd-mob-btn.wa */
     .ckbd-sticky-wa {
         display:inline-flex; align-items:center; justify-content:center;
-        background:#25D366; color:#fff!important;
-        width:46px; height:46px; border-radius:12px;
+        background:#25d366; color:#fff!important;
+        padding:12px 14px; border-radius:9px;
         text-decoration:none!important; flex-shrink:0;
-        box-shadow:0 3px 10px rgba(37,211,102,.35);
         transition:opacity .2s;
     }
-    .ckbd-sticky-wa:hover { opacity:.9; color:#fff!important; }
-    .ckbd-sticky-enq {
-        display:inline-flex; align-items:center; justify-content:center; gap:6px; flex:1;
-        background:linear-gradient(135deg,#0f3460,#1a5276);
-        color:#fff; font-size:.84rem; font-weight:700;
-        padding:11px 18px; border-radius:10px; border:none; cursor:pointer;
-        white-space:nowrap; box-shadow:0 3px 10px rgba(15,52,96,.30);
-        transition:opacity .2s;
-    }
-    .ckbd-sticky-enq:hover { opacity:.9; }
+    .ckbd-sticky-wa:hover { opacity:.88; color:#fff!important; }
 }
 @media(max-width:767px){
-    .ckbd-sticky-bar { bottom:64px; padding-bottom:10px; }
+    .ckbd-sticky-bar { bottom:0; }
 }
 </style>
 <script>

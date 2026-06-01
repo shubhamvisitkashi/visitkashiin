@@ -122,7 +122,7 @@
             <span>Bookings</span>
         </a>
         @endcanany
-        <a href="#" class="sa-mob-nav__item" onclick="event.preventDefault(); document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active');">
+        <a href="#" class="sa-mob-nav__item" onclick="event.preventDefault(); typeof toggleAdminSidebar === 'function' ? toggleAdminSidebar() : null;">
             <i data-feather="grid"></i>
             <span>Menu</span>
         </a>

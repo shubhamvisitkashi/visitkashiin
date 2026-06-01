@@ -673,7 +673,16 @@
 
         </div>{{-- /.vkbd-main --}}
 
-        {{-- ── SIDEBAR ───────────────────────────────────────── --}}
+        {{-- ── SIDEBAR (desktop) / BOOKING POPUP (mobile) ──────── --}}
+        {{-- On desktop: overlay is position:static → acts as grid column  --}}
+        {{-- On mobile:  overlay is position:fixed  → bottom-sheet popup   --}}
+        <div class="vkbd-popup-overlay" id="vkbdBookingPopup">
+            <div class="vkbd-popup-sheet">
+                <div class="vkbd-popup-handle">
+                    <div class="vkbd-popup-handle-bar"></div>
+                    <button class="vkbd-popup-close" onclick="vkbdClosePopup()" aria-label="Close">✕</button>
+                </div>
+                <div class="vkbd-popup-body">
         <div class="vkbd-sidebar">
 
             {{-- ── Booking Card ── --}}
@@ -902,7 +911,10 @@
                 </div>
             </div>
 
-        </div>{{-- /.vkbd-sidebar --}}
+        </div>{{-- /.vkbd-sidebar (popup inner) --}}
+                </div>{{-- /.vkbd-popup-body --}}
+            </div>{{-- /.vkbd-popup-sheet --}}
+        </div>{{-- /.vkbd-popup-overlay --}}
 
     </div>{{-- /.vkbd-layout --}}
 
@@ -981,9 +993,8 @@
         @endif
     </div>
     <div class="vkbd-mob-btns">
-        <button type="button" class="vkbd-mob-btn book"
-                onclick="document.getElementById('vkbsForm').scrollIntoView({behavior:'smooth'});">
-            <i class="fa fa-calendar-check-o"></i> Book Now
+        <button type="button" class="vkbd-mob-btn book" onclick="vkbdOpenPopup()">
+            <i class="fa fa-calendar-check-o"></i> Enquiry Now
         </button>
         <a href="https://wa.me/917080109917?text=Hi%2C+I+want+to+book+{{ urlencode($product->name) }}" target="_blank" rel="noopener" class="vkbd-mob-btn wa">
             <i class="fa fa-whatsapp"></i>
@@ -1213,6 +1224,32 @@
     });
 
 })();
+</script>
+
+<script>
+/* ── Booking Popup (mobile Book Now) ── */
+function vkbdOpenPopup() {
+    var popup = document.getElementById('vkbdBookingPopup');
+    if (popup) {
+        popup.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+}
+function vkbdClosePopup() {
+    var popup = document.getElementById('vkbdBookingPopup');
+    if (popup) {
+        popup.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+}
+/* Close on overlay backdrop click */
+document.getElementById('vkbdBookingPopup').addEventListener('click', function(e) {
+    if (e.target === this) vkbdClosePopup();
+});
+/* Close on Escape key */
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') vkbdClosePopup();
+});
 </script>
 
 {{-- VideoObject Schema for YouTube Videos --}}

@@ -55,6 +55,12 @@
             gap: 1rem;
             margin-bottom: 1rem;
         }
+        @media(max-width:600px){
+            .booking-card .booking-info{grid-template-columns:repeat(2,1fr);gap:.6rem;}
+        }
+        @media(max-width:360px){
+            .booking-card .booking-info{grid-template-columns:1fr;gap:.5rem;}
+        }
 
         .booking-card .info-item {
             display: flex;

@@ -445,8 +445,9 @@ header .upper-head .contact-info a:hover {
 /* Drawer footer */
 .vk-drawer__foot {
   padding: 14px 20px 24px;
-  border-top: 1px solid rgba(255,255,255,0.07);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
   flex-shrink: 0;
+  margin-bottom: 60px;
 }
 .vk-drawer__whatsapp {
   display: flex;
@@ -849,4 +850,14 @@ footer .footer-upper { background: #0F1B30; }
   content: '↑';
   color: var(--vk-white);
   font-size: 16px;
+}
+
+@media (max-width: 767px) {
+    .navigation {
+        height: 56px !important;
+        min-height: 65px !important;
+        padding: 0px 16px !important;
+        background: rgba(10, 16, 30, 0.98) !important;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, .06) !important;
+    }
 }

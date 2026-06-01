@@ -57,6 +57,12 @@
             gap: 1rem;
             margin-bottom: 2rem;
         }
+        @media(max-width:600px){
+            .info-grid{grid-template-columns:repeat(2,1fr);gap:.6rem;}
+        }
+        @media(max-width:360px){
+            .info-grid{grid-template-columns:1fr;gap:.5rem;}
+        }
 
         .info-box {
             background: white;

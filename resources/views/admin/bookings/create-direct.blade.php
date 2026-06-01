@@ -273,7 +273,7 @@
 /* ── Mobile overrides ── */
 @media(max-width:768px){
   .cb-page{padding:10px;}
-  .cb-header{padding:14px 16px;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .cb-header{padding:14px 16px;margin-bottom:14px;flex-wrap:wrap;gap:10px;margin-top:60px;}
   .cb-header h1{font-size:1.05rem;}
   .cb-header p{font-size:.72rem;}
   .cb-back{padding:6px 11px;font-size:.74rem;}
@@ -284,8 +284,20 @@
   .type-card{padding:16px 10px 12px;border-radius:12px;}
   .cb-step-head{padding:12px 14px;flex-wrap:wrap;gap:8px;}
   .cb-step-head button{font-size:.7rem;padding:5px 10px;}
-  .nb-card-body{padding:14px;}
-  .nb-card-head{padding:12px 14px;}
+
+  /* nb-card-body improvements */
+  .nb-card-body{padding:14px 12px;}
+  .nb-card-head{padding:12px 14px;gap:8px;}
+  .nb-card-icon{width:28px;height:28px;border-radius:8px;flex-shrink:0;}
+  .nb-card-title{font-size:.82rem;}
+  .nb-card{border-radius:12px;margin-bottom:12px;}
+
+  /* form fields inside nb-card-body */
+  .nb-label{font-size:.68rem;margin-bottom:4px;}
+  .nb-input{padding:8px 11px !important;font-size:.82rem !important;border-radius:8px !important;}
+  .row.g-3{--bs-gutter-x:10px;--bs-gutter-y:10px;}
+  .row.g-3>[class*=col-md]{padding-left:5px;padding-right:5px;}
+
   .boat-grid{grid-template-columns:1fr 1fr;display:grid;overflow:visible;}
   .boat-card{min-width:unset;padding:12px 8px;}
   .boat-card-emoji{font-size:1.5rem;margin-bottom:6px;}
@@ -293,12 +305,26 @@
   .boat-card-cap{font-size:.62rem;}
   .boat-card-price{font-size:.85rem;}
   .boat-card-extra{font-size:.6rem;}
-  .nb-counter-wrap{gap:12px;}
-  .nb-counter-val{font-size:1.3rem;}
+
+  .nb-counter-wrap{gap:10px;}
+  .nb-counter-val{font-size:1.3rem;min-width:32px;}
+  .nb-counter-btn{width:34px;height:34px;}
+  .nb-counter-info{font-size:.68rem;}
+
   .nb-layout{gap:12px;}
   .nb-pax-price{padding:10px 12px;}
   .nb-pax-row{font-size:.75rem;}
   .nb-mobile-cta .btn-submit{padding:9px 16px;font-size:.82rem;}
+
+  /* sidebar inside nb-card-body on mobile */
+  .nb-sidebar-card{padding:14px 12px;border-radius:12px;}
+  .nb-sidebar-head{gap:8px;margin-bottom:12px;padding-bottom:10px;}
+  .nb-balance-amount{font-size:1.5rem;}
+  .nb-pay-sum-body{padding:10px 12px;}
+  .nb-pay-sum-row{font-size:.75rem;}
+  .stay-counter-wrap{padding:5px 7px;}
+  .stay-counter-btn{width:28px;height:28px;font-size:1rem;}
+  .stay-counter-val{font-size:1.1rem;min-width:24px;}
 }
 
 @media(max-width:480px){
@@ -308,7 +334,14 @@
   .tc-icon{width:40px;height:40px;}
   .tc-icon svg{width:20px;height:20px;}
   .boat-grid{grid-template-columns:1fr 1fr;gap:8px;}
-  .nb-card-body{padding:12px;}
+
+  /* nb-card-body compact */
+  .nb-card-body{padding:10px;}
+  .nb-card-head{padding:10px 12px;}
+  .nb-card{border-radius:10px;margin-bottom:10px;}
+  .nb-input{padding:7px 10px !important;font-size:.8rem !important;}
+  .nb-label{font-size:.65rem;}
+
   .nb-pax-sections{flex-direction:row !important;gap:16px !important;flex-wrap:nowrap !important;}
   .nb-pax-sections>div{flex:1;min-width:0;}
   .nb-pax-divider{display:block !important;}
@@ -316,7 +349,32 @@
   .nb-counter-btn{width:32px;height:32px;font-size:1rem;}
   .row.g-3>[class*=col-md]{margin-bottom:0;}
   .cb-step-head .cb-step-sub{display:none;}
+
+  .nb-sidebar-card{padding:10px;}
+  .nb-balance-amount{font-size:1.3rem;}
+  .stay-counter-btn{width:26px;height:26px;}
+  .hotel-card{padding:10px 8px;border-radius:10px;}
+  .hotel-card-icon{font-size:1.5rem;margin-bottom:4px;}
+  .hotel-card-name{font-size:.7rem;}
+  .hotel-card-price{font-size:.82rem;}
 }
+
+@media(max-width:360px){
+  .nb-card-body{padding:8px;}
+  .nb-card-head{padding:8px 10px;}
+  .nb-input{padding:6px 9px !important;font-size:.78rem !important;}
+  .nb-label{font-size:.63rem;}
+  .nb-counter-btn{width:30px;height:30px;font-size:.95rem;}
+  .nb-counter-val{font-size:1rem;}
+  .boat-card{padding:10px 6px;}
+  .boat-card-emoji{font-size:1.3rem;}
+  .hotel-card{padding:8px 6px;}
+}
+
+/* Hotel cards grid responsive */
+.hotel-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px;}
+@media(max-width:600px){.hotel-cards-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
+@media(max-width:360px){.hotel-cards-grid{grid-template-columns:1fr;gap:6px;}}
 </style>
 
 <div class="cb-page">
@@ -972,7 +1030,7 @@
               <div class="nb-card-body">
 
                 {{-- Listed properties grid --}}
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px;" id="hotel-cards-grid">
+                <div class="hotel-cards-grid" id="hotel-cards-grid">
                   @foreach($stayTemplates as $t)
                   <div class="hotel-card"
                        data-id="{{ $t->id }}"
