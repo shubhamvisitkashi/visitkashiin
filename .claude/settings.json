@@ -7,7 +7,14 @@
       "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin status --short)",
       "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin rm --cached storage/logs/*.log)",
       "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin status --short storage/)",
-      "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin log --oneline -3)"
+      "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin log --oneline -3)",
+      "Bash(php -l app/Http/Controllers/HomeController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/WebsiteSetupController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/HeroSlideController.php)",
+      "Bash(php -l app/Models/HeroSlide.php)",
+      "Bash(read f *)",
+      "Bash(git filter-branch *)",
+      "Bash(git rm *)"
     ]
   }
 }
