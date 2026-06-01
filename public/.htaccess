@@ -1,31 +1,33 @@
-<IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
+# ── Disable directory listing (safe — does NOT require AllowOverride Options) ──
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
 
+<IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # ── 1. Force HTTPS (production only — skipped on localhost) ──
+    # ── 1. Force HTTPS — works on direct SSL + behind proxy/Cloudflare/CDN ──
     RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteCond %{HTTP_HOST} !^localhost [NC]
     RewriteCond %{HTTP_HOST} !^127\. [NC]
+    RewriteCond %{HTTP_HOST} !^192\.168\. [NC]
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # ── 2. Force non-www → www  (pick one: www OR non-www, not both)
-    #       CURRENTLY SET: www → non-www  (matches canonical visitkashi.in)
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+    # ── 2. www → non-www canonical redirect ──────────────────────
+    RewriteCond %{HTTP_HOST} ^www\.visitkashi\.in$ [NC]
+    RewriteRule ^ https://visitkashi.in%{REQUEST_URI} [L,R=301]
 
-    # ── 3. Handle Authorization Header ───────────────────────────
+    # ── 3. Pass Authorization header to PHP ──────────────────────
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # ── 4. Remove trailing slashes (not a folder) ─────────────────
+    # ── 4. Remove trailing slashes (not a real directory) ─────────
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # ── 5. Route all requests to Laravel front controller ─────────
+    # ── 5. Route everything to Laravel index.php ──────────────────
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]

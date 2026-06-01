@@ -1,14 +1,5 @@
-# ── Root .htaccess ──────────────────────────────────────────────
-# Used when Apache DocumentRoot = project root (not /public).
-# On production where DocumentRoot = /public, this file is ignored.
-# On localhost/XAMPP it redirects everything into public/.
 <IfModule mod_rewrite.c>
     RewriteEngine On
-
-    # Skip if already in public/
     RewriteCond %{REQUEST_URI} !^/public/
-    # Skip actual files/dirs that exist (assets, etc.)
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
