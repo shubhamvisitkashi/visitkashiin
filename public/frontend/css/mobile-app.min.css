@@ -1,0 +1,138 @@
+/* ═══════════════════════════════════════════════════
+   VISITKASHI — Mobile App Experience
+   Applied only on screens ≤ 767px
+═══════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+
+  /* ── Base & Typography ── */
+  html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+  body { background: #F2F3F7 !important; }
+
+  /* ── Safe area support (iPhone notch) ── */
+  body { padding-bottom: env(safe-area-inset-bottom); }
+
+  /* ── Navbar — compact app header ── */
+  .navigation {
+    height: 56px !important;
+    min-height: 56px !important;
+    padding: 0 16px !important;
+    background: rgba(10,16,30,0.98) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,.06) !important;
+  }
+  .navigation .logo img { height: 36px !important; }
+  .navigation .navbar.navbar-default { min-height: 56px !important; }
+
+  /* ── Bottom Nav Bar (Mobile App) ── */
+  .vk-mob-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 9999;
+    background: #fff;
+    border-top: 1px solid #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0,0,0,.10);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .vk-mob-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none !important;
+    flex: 1;
+    padding: 0 4px;
+    min-width: 0;
+  }
+  .vk-mob-nav-icon {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    transition: background .2s;
+  }
+  .vk-mob-nav-icon svg { width: 20px; height: 20px; stroke: #9CA3AF; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: stroke .2s; }
+  .vk-mob-nav-label {
+    font-size: 10px; font-weight: 600;
+    color: #9CA3AF; white-space: nowrap;
+    transition: color .2s;
+    letter-spacing: .01em;
+  }
+  .vk-mob-nav-item.active .vk-mob-nav-icon { background: #FFF3E8; }
+  .vk-mob-nav-item.active .vk-mob-nav-icon svg { stroke: #C94B20; }
+  .vk-mob-nav-item.active .vk-mob-nav-label { color: #C94B20; font-weight: 700; }
+  .vk-mob-nav-item:hover .vk-mob-nav-label { color: #C94B20; }
+  .vk-mob-nav-item:hover .vk-mob-nav-icon svg { stroke: #C94B20; }
+
+  /* ── Body bottom padding for nav bar ── */
+  footer, .vkf-footer { margin-bottom: 64px; }
+
+  /* ── Hero slider ── */
+  #home_banner_video { border-radius: 0 !important; margin-top: 0 !important; }
+  .vkp-hero { margin-top: 0 !important; border-radius: 0 !important; }
+
+  /* ── Section containers — app card style ── */
+  .container { padding-left: 14px !important; padding-right: 14px !important; }
+
+  /* ── Section headings ── */
+  .vk-section__title,
+  .vksvc-title,
+  .vk-why .vk-section__title {
+    font-size: 1.15rem !important;
+    margin-bottom: 6px !important;
+  }
+  .vk-section__subtitle { font-size: 13px !important; }
+  .vk-section { padding: 24px 0 !important; }
+
+  /* ── Trust bar ── */
+  .vk-trust { border-radius: 14px; margin: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  .vk-trust__item { padding: 14px 16px !important; min-width: unset !important; flex: 1; }
+
+  /* ── Product cards (general listing) ── */
+  .vkl-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .vkl-card { border-radius: 14px !important; box-shadow: 0 2px 10px rgba(0,0,0,.08) !important; }
+  .vkl-card__img-wrap { border-radius: 14px 14px 0 0 !important; }
+
+  /* ── Package cards ── */
+  .vk-pkg-card { border-radius: 14px !important; box-shadow: 0 2px 10px rgba(0,0,0,.08) !important; overflow: hidden; }
+
+  /* ── Sale slider ── */
+  .sale-slider .slick-slide,
+  .package-slider .slick-slide { padding: 4px 6px !important; }
+
+  /* ── Our Services grid ── */
+  .vksvc-section { padding: 20px 0 !important; display: block !important; }
+  .vksvc-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .vksvc-card { border-radius: 14px !important; aspect-ratio: 3/3.2 !important; }
+  .vksvc-name { font-size: .88rem !important; }
+  .vksvc-desc { display: none !important; }
+
+  /* ── Why Choose Us cards ── */
+  .vk-why__grid { gap: 10px !important; }
+  .vk-why__card { border-radius: 14px !important; padding: 18px 14px !important; }
+
+  /* ── Footer on mobile ── */
+  .vkf-main { padding: 28px 0 16px !important; }
+  .vkf-explore { display: none !important; }
+  .footer-upper { padding: 28px 0 20px !important; }
+
+  /* ── Scroll behaviour ── */
+  html { scroll-behavior: smooth; }
+
+  /* ── Promo banners ── */
+  .vk-db-promo { padding: 8px 0 !important; }
+  .vk-db-promo-img { border-radius: 12px !important; }
+
+  /* ── Quick action chips — hidden, replaced by vksvc-section cards ── */
+  .vk-mob-chips { display: none !important; }
+
+}
+
+/* ── Hide bottom nav on desktop ── */
+@media (min-width: 768px) {
+  .vk-mob-nav { display: none !important; }
+  .vk-mob-chips { display: none !important; }
+}
