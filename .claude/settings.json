@@ -16,7 +16,9 @@
       "Bash(git filter-branch *)",
       "Bash(git rm *)",
       "Bash(chmod -R 777 /Applications/XAMPP/xamppfiles/htdocs/visitkashiin/storage)",
-      "Bash(chmod -R 777 /Applications/XAMPP/xamppfiles/htdocs/visitkashiin/bootstrap/cache)"
+      "Bash(chmod -R 777 /Applications/XAMPP/xamppfiles/htdocs/visitkashiin/bootstrap/cache)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
