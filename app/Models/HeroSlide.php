@@ -21,18 +21,6 @@ class HeroSlide extends Model
     }
 
     public function getImageUrlAttribute(): string {
-        if (!$this->image) {
-            return asset('backend/assets/images/placeholder.jpg');
-        }
-        // Serve WebP if available, fall back to original
-        $webp = preg_replace('/\.(jpe?g|png)$/i', '.webp', $this->image);
-        if ($webp !== $this->image && file_exists(public_path('backend/admin/hero_slides/' . $webp))) {
-            return asset('backend/admin/hero_slides/' . $webp);
-        }
-        return asset('backend/admin/hero_slides/' . $this->image);
-    }
-
-    public function getImageFallbackUrlAttribute(): string {
         return $this->image
             ? asset('backend/admin/hero_slides/' . $this->image)
             : asset('backend/assets/images/placeholder.jpg');

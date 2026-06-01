@@ -1,68 +1,54 @@
-# ── Disable directory listing (safe — does NOT require AllowOverride Options) ──
-<IfModule mod_autoindex.c>
-    Options -Indexes
-</IfModule>
-
 <IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
     RewriteEngine On
 
-    # ── 1. Force HTTPS — works on direct SSL + behind proxy/Cloudflare/CDN ──
-    RewriteCond %{HTTPS} off
-    RewriteCond %{HTTP:X-Forwarded-Proto} !https
-    RewriteCond %{HTTP_HOST} !^localhost [NC]
-    RewriteCond %{HTTP_HOST} !^127\. [NC]
-    RewriteCond %{HTTP_HOST} !^192\.168\. [NC]
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-    # ── 2. www → non-www canonical redirect ──────────────────────
-    RewriteCond %{HTTP_HOST} ^www\.visitkashi\.in$ [NC]
-    RewriteRule ^ https://visitkashi.in%{REQUEST_URI} [L,R=301]
-
-    # ── 3. Pass Authorization header to PHP ──────────────────────
+    # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # ── 4. Remove trailing slashes (not a real directory) ─────────
+    # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # ── 5. Route everything to Laravel index.php ──────────────────
+    # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# ── Brotli Compression (preferred, falls back to Gzip) ────────
-<IfModule mod_brotli.c>
-    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/xml
-    AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json
-    AddOutputFilterByType BROTLI_COMPRESS application/xml image/svg+xml
-    AddOutputFilterByType BROTLI_COMPRESS font/woff font/woff2
-</IfModule>
-
-# ── Gzip Compression (fallback) ───────────────────────────────
+# ── Gzip Compression ──────────────────────────────────────────
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
-    AddOutputFilterByType DEFLATE application/javascript application/x-javascript
-    AddOutputFilterByType DEFLATE application/json application/xml
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
     AddOutputFilterByType DEFLATE image/svg+xml
-    AddOutputFilterByType DEFLATE font/woff font/woff2
-    AddOutputFilterByType DEFLATE application/font-woff application/font-woff2
+    AddOutputFilterByType DEFLATE font/woff
+    AddOutputFilterByType DEFLATE font/woff2
+    AddOutputFilterByType DEFLATE application/font-woff
+    AddOutputFilterByType DEFLATE application/font-woff2
 </IfModule>
 
 # ── Browser Caching ───────────────────────────────────────────
 <IfModule mod_expires.c>
     ExpiresActive On
-    ExpiresByType text/css                  "access plus 1 year"
-    ExpiresByType application/javascript    "access plus 1 year"
-    ExpiresByType text/javascript           "access plus 1 year"
+    ExpiresByType text/css                  "access plus 1 month"
+    ExpiresByType application/javascript    "access plus 1 month"
+    ExpiresByType text/javascript           "access plus 1 month"
     ExpiresByType image/jpeg                "access plus 1 year"
     ExpiresByType image/jpg                 "access plus 1 year"
     ExpiresByType image/png                 "access plus 1 year"
     ExpiresByType image/gif                 "access plus 1 year"
     ExpiresByType image/webp                "access plus 1 year"
-    ExpiresByType image/avif                "access plus 1 year"
     ExpiresByType image/svg+xml             "access plus 1 year"
     ExpiresByType image/x-icon              "access plus 1 year"
     ExpiresByType font/woff                 "access plus 1 year"
@@ -70,29 +56,17 @@
     ExpiresByType application/font-woff     "access plus 1 year"
     ExpiresByType application/font-woff2    "access plus 1 year"
     ExpiresByType text/html                 "access plus 0 seconds"
-    ExpiresByType application/json          "access plus 0 seconds"
 </IfModule>
 
 # ── Cache-Control Headers ─────────────────────────────────────
 <IfModule mod_headers.c>
-    # Versioned/fingerprinted assets — 1 year immutable
     <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
     </FilesMatch>
-    <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|svg|ico|woff|woff2)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
-    </FilesMatch>
-    # HTML — never cache (always fresh)
     <FilesMatch "\.(html|php)$">
         Header set Cache-Control "no-cache, no-store, must-revalidate"
-        Header set Pragma "no-cache"
     </FilesMatch>
-    # Remove X-Powered-By to reduce attack surface
-    Header always unset X-Powered-By
-    Header unset X-Powered-By
-</IfModule>
-
-# ── Keep-Alive ────────────────────────────────────────────────
-<IfModule mod_headers.c>
-    Header set Connection keep-alive
 </IfModule>

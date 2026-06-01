@@ -39,10 +39,9 @@ class HomeController extends Controller
             return $result;
         });
 
-        // Weather: 3-hour cache, 2-second timeout — non-blocking fallback to null
-        $weather = cache()->remember('varanasi_weather', 10800, function () {
+        $weather = cache()->remember('varanasi_weather', 1800, function () {
             try {
-                $res = Http::timeout(2)->get('https://api.open-meteo.com/v1/forecast', [
+                $res = Http::timeout(4)->get('https://api.open-meteo.com/v1/forecast', [
                     'latitude'       => 25.3176,
                     'longitude'      => 82.9739,
                     'current'        => 'temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m',

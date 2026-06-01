@@ -15,12 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Auto-convert newly uploaded images to WebP every hour
-        $schedule->command('images:webp --quality=82')->hourly()->withoutOverlapping();
-        // Re-minify CSS/JS assets daily (after any manual edits)
-        $schedule->command('assets:minify')->daily()->withoutOverlapping();
-        // NOTE: route:cache is intentionally NOT scheduled — this project uses
-        // wildcard catch-all routes (/{slug}, /{a}/{b}) that conflict with route caching.
+        // $schedule->command('inspire')->hourly();
     }
 
     /**
