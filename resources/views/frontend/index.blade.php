@@ -81,14 +81,16 @@ if ($hero_slides->isNotEmpty()) {
                  class="vkp-img"
                  loading="{{ $i===0 ? 'eager' : 'lazy' }}"
                  {{ $i===0 ? 'fetchpriority="high"' : '' }}
-                 decoding="{{ $i===0 ? 'sync' : 'async' }}">
+                 decoding="{{ $i===0 ? 'sync' : 'async' }}"
+                 onerror="this.style.display='none'">
         </a>
         @else
         <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
              class="vkp-img"
              loading="{{ $i===0 ? 'eager' : 'lazy' }}"
              {{ $i===0 ? 'fetchpriority="high"' : '' }}
-             decoding="{{ $i===0 ? 'sync' : 'async' }}">
+             decoding="{{ $i===0 ? 'sync' : 'async' }}"
+             onerror="this.style.display='none'">
         @endif
     </div>
     @endforeach
@@ -282,7 +284,6 @@ $svcData = [
       <div class="vksvc-header-left">
         <div class="vksvc-badge">✦ What We Offer</div>
         <h2 class="vksvc-title">Our Services</h2>
-        <p class="vksvc-subtitle">Everything you need for a perfect Varanasi experience — all in one place</p>
       </div>
     </div>
 
