@@ -19,22 +19,11 @@
 {{-- ── Homepage stylesheet ── --}}
 @push('styles')
     {{-- homepage.css loaded async — critical above-fold styles are inlined in app.blade.php --}}
-    <link rel="preload" href="{{ asset('frontend/css/homepage.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link href="{{ asset('frontend/css/homepage.css') }}" rel="stylesheet" /></noscript>
+    <link rel="preload" href="{{ asset('frontend/css/homepage.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="{{ asset('frontend/css/homepage.min.css') }}" rel="stylesheet" /></noscript>
 @endpush
 
 @section('content')
-
-{{-- ── Promo Banner Macro ── --}}
-@php
-  $promoBannerActive   = websiteSetupValue('promo_banner_active');
-  $promoBannerPosition = websiteSetupValue('promo_banner_position') ?: 'after_hero';
-  $promoBannerImage    = websiteSetupValue('promo_banner');
-  $promoBannerTitle    = websiteSetupValue('promo_banner_title');
-  $promoBannerSubtitle = websiteSetupValue('promo_banner_subtitle');
-  $promoBannerLink     = websiteSetupValue('promo_banner_link');
-  $showPromoBanner     = ($promoBannerActive === 'yes') && ($promoBannerTitle || $promoBannerImage);
-@endphp
 
 {{-- ════════════════════════════════════════════
      HERO — Premium Luxury Spiritual Tourism
@@ -73,6 +62,13 @@ if ($hero_slides->isNotEmpty()) {
 }
 @endphp
 
+{{-- Preload the LCP hero image so the browser fetches it as early as possible --}}
+@push('preloads')
+@if(!empty($sliderSlides[0]['img']))
+<link rel="preload" as="image" href="{{ $sliderSlides[0]['img'] }}" fetchpriority="high">
+@endif
+@endpush
+
 <section id="home_banner_video" class="vkp-hero">
 
     <div class="vkp-track" id="vkpSlides">
@@ -82,11 +78,17 @@ if ($hero_slides->isNotEmpty()) {
         @if(!empty($slide['cta1']['url']))
         <a href="{{ $slide['cta1']['url'] }}" style="display:block;text-decoration:none;">
             <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
-                 class="vkp-img" loading="{{ $i===0 ? 'eager' : 'lazy' }}">
+                 class="vkp-img"
+                 loading="{{ $i===0 ? 'eager' : 'lazy' }}"
+                 {{ $i===0 ? 'fetchpriority="high"' : '' }}
+                 decoding="{{ $i===0 ? 'sync' : 'async' }}">
         </a>
         @else
         <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
-             class="vkp-img" loading="{{ $i===0 ? 'eager' : 'lazy' }}">
+             class="vkp-img"
+             loading="{{ $i===0 ? 'eager' : 'lazy' }}"
+             {{ $i===0 ? 'fetchpriority="high"' : '' }}
+             decoding="{{ $i===0 ? 'sync' : 'async' }}">
         @endif
     </div>
     @endforeach
@@ -109,10 +111,37 @@ if ($hero_slides->isNotEmpty()) {
 
 </section>
 <style>
-.vkp-hero { position:relative; width:100%; overflow:hidden; background:#000; margin-top:5px; }
-.vkp-track { position:relative; }
-.vkp-slide { display:none; }
-.vkp-slide.is-active { display:block; }
+.vkp-hero  { position:relative; width:100%; overflow:hidden; background:#000; margin-top:5px; }
+.vkp-track { position:relative; overflow:hidden; }
+
+/* ── Slide base: hidden by default ── */
+.vkp-slide {
+    display:none;
+    opacity:0;
+}
+
+/* ── Incoming: fade in ── */
+.vkp-slide.is-active {
+    display:block;
+    animation: vkpFadeIn 0.85s ease-in-out forwards;
+}
+
+/* ── Outgoing: fade out, stay in place so layout holds ── */
+.vkp-slide.is-leaving {
+    display:block;
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    animation: vkpFadeOut 0.85s ease-in-out forwards;
+}
+
+/* ── Active always on top ── */
+.vkp-slide.is-active { z-index:1; position:relative; }
+
+@keyframes vkpFadeIn  { from { opacity:0; } to { opacity:1; } }
+@keyframes vkpFadeOut { from { opacity:1; } to { opacity:0; } }
+
 .vkp-img { width:100%; height:auto; display:block; object-fit:cover; }
 .vkp-arrow {
     position:absolute; top:50%; transform:translateY(-50%); z-index:10;
@@ -139,13 +168,24 @@ if ($hero_slides->isNotEmpty()) {
 (function(){
     var total={{ count($sliderSlides) }};
     if(total<=1)return;
-    var cur=0,timer=null,int=5000;
+    var cur=0,timer=null,int=5500,dur=900;
     function goTo(n){
         var sl=document.querySelectorAll('.vkp-slide'),dt=document.querySelectorAll('.vkp-dot');
-        sl[cur].classList.remove('is-active'); sl[cur].setAttribute('aria-hidden','true');
+        var outgoing=sl[cur];
         if(dt[cur]) dt[cur].classList.remove('active');
+
+        // Mark outgoing slide — keep visible while fading out
+        outgoing.classList.remove('is-active');
+        outgoing.classList.add('is-leaving');
+        outgoing.setAttribute('aria-hidden','true');
+
+        // Remove leaving class once animation finishes
+        var leaving=outgoing;
+        setTimeout(function(){ leaving.classList.remove('is-leaving'); },dur);
+
         cur=(n+total)%total;
-        sl[cur].classList.add('is-active'); sl[cur].setAttribute('aria-hidden','false');
+        sl[cur].classList.add('is-active');
+        sl[cur].setAttribute('aria-hidden','false');
         if(dt[cur]) dt[cur].classList.add('active');
     }
     window.vkhsGoTo=function(n){clearInterval(timer);goTo(n);timer=setInterval(function(){goTo(cur+1);},int);};
@@ -185,17 +225,6 @@ if ($hero_slides->isNotEmpty()) {
     </a>
 </div>
 
-{{-- Promo Banner: after_hero --}}
-@if($showPromoBanner && $promoBannerPosition === 'after_hero')
-@include('frontend._promo_banner')
-@endif
-@include('frontend._db_promo_banner', ['position' => 'after_hero'])
-
-{{-- Promo Banner: after_trust --}}
-@if($showPromoBanner && $promoBannerPosition === 'after_trust')
-@include('frontend._promo_banner')
-@endif
-@include('frontend._db_promo_banner', ['position' => 'after_trust'])
 
 {{-- ════════════════════════════════════════════
      3. OUR SERVICES
@@ -275,11 +304,6 @@ $svcData = [
         {{-- Content --}}
         <div class="vksvc-content">
           <h3 class="vksvc-name">{{ $s['title'] }}</h3>
-          <p class="vksvc-desc">{{ $s['desc'] }}</p>
-          <div class="vksvc-cta">
-            Explore
-            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </div>
         </div>
         {{-- Accent bar --}}
         <div class="vksvc-accent-bar" style="background:{{ $s['accent'] }};"></div>
@@ -289,12 +313,11 @@ $svcData = [
 
   </div>
 </section>
-@include('frontend._db_promo_banner', ['position' => 'after_our_services'])
 
 <style>
 /* ══ Our Services — Redesigned ════════════════════════════════════ */
 .vksvc-section {
-  padding: 64px 0 72px;
+  padding: 11px 0 11px;
   background: #fff;
 }
 
@@ -318,7 +341,7 @@ $svcData = [
   border-radius: 16px;
   overflow: hidden;
   text-decoration: none !important;
-  aspect-ratio: 1 / 1.15;
+  aspect-ratio: 3 / 2;
   transition: transform .28s ease, box-shadow .28s ease;
   background: #e8edf2;
 }
@@ -377,25 +400,6 @@ $svcData = [
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
-.vksvc-desc {
-  font-size: .75rem; color: rgba(255,255,255,.78);
-  line-height: 1.5; margin: 0 0 12px;
-}
-.vksvc-cta {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.30);
-  color: #fff;
-  font-size: .75rem; font-weight: 700;
-  padding: 5px 13px; border-radius: 20px;
-  backdrop-filter: blur(4px);
-  transition: background .2s, gap .2s;
-}
-.vksvc-card:hover .vksvc-cta {
-  background: rgba(255,255,255,.28);
-  gap: 8px;
-}
-.vksvc-cta svg { width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round; }
 
 /* Accent bar — bottom */
 .vksvc-accent-bar {
@@ -409,7 +413,14 @@ $svcData = [
 
 /* Responsive */
 @media(max-width:1024px) { .vksvc-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
-@media(max-width:767px)  { .vksvc-section { display: none !important; } }
+@media(max-width:767px) {
+  .vksvc-section { display: block !important; padding: 10px 0 14px; }
+  .vksvc-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .vksvc-card { aspect-ratio: 3 / 2; border-radius: 12px; }
+  .vksvc-header { margin-bottom: 14px; }
+  .vksvc-title { font-size: 18px; }
+  .vksvc-name { font-size: .82rem; }
+}
 </style>
 
 {{-- ════════════════════════════════════════════
@@ -436,12 +447,11 @@ $svcData = [
                 <div>
                     <span class="vk-section__label">Explore</span>
                     <h2 class="vk-section__title">{{ $on_home_category->meta_title }}</h2>
-                    <p class="vk-section__subtitle">Curated experiences in &amp; around Varanasi</p>
                 </div>
                 <a class="vk-btn vk-btn--outline"
                    href="{{ route('product.list', $on_home_category->slug) }}"
                    aria-label="View all {{ $on_home_category->meta_title }}">
-                    View All <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
             </div>
 
@@ -460,7 +470,9 @@ $svcData = [
                                 <img src="{{ asset(!empty($on_home_category_product->images) ? 'backend/admin/product_images/' . array_values($on_home_category_product->images)[0] : 'backend/assets/images/placeholder.jpg') }}"
                                      alt="{{ $on_home_category_product->name }}"
                                      class="vk-card__img"
-                                     loading="lazy" />
+                                     loading="lazy"
+                                     decoding="async"
+                                     width="400" height="300" />
                             </div>
 
                             <div class="vk-card__body">
@@ -483,13 +495,6 @@ $svcData = [
         </div>
     </section>
 
-    {{-- Promo banners after specific category sections --}}
-    @if(strtolower($on_home_category->slug ?? '') === 'cab')
-    @include('frontend._db_promo_banner', ['position' => 'after_cab'])
-    @endif
-    @if(strtolower($on_home_category->slug ?? '') === 'boat')
-    @include('frontend._db_promo_banner', ['position' => 'after_boat'])
-    @endif
 
     @endforeach
 @endif
@@ -497,10 +502,6 @@ $svcData = [
 
 
 {{-- Promo Banner: after_categories --}}
-@if($showPromoBanner && $promoBannerPosition === 'after_categories')
-@include('frontend._promo_banner')
-@endif
-@include('frontend._db_promo_banner', ['position' => 'after_categories'])
 
 {{-- ════════════════════════════════════════════
      4. POPULAR PACKAGES (dynamic loop)
@@ -523,12 +524,11 @@ $svcData = [
             <div>
                 <span class="vk-section__label">Handpicked</span>
                 <h2 class="vk-section__title">Popular Packages</h2>
-                <p class="vk-section__subtitle">Unforgettable journeys, curated by locals</p>
             </div>
             <a class="vk-btn vk-btn--outline"
                href="{{ route('product.list', 'packages') }}"
                aria-label="View all packages">
-                All Packages <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
         </div>
 
@@ -548,7 +548,9 @@ $svcData = [
                             <img src="{{ asset(!empty($on_home_product->images) ? 'backend/admin/product_images/' . array_values($on_home_product->images)[0] : 'backend/assets/images/placeholder.jpg') }}"
                                  alt="{{ $on_home_product->name }}"
                                  class="vk-pkg-card__img"
-                                 loading="lazy" />
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="600" height="400" />
                             <div class="vk-pkg-card__overlay" aria-hidden="true"></div>
                         </div>
 
@@ -572,12 +574,6 @@ $svcData = [
 
 
 {{-- Promo Banner: after_packages --}}
-@if($showPromoBanner && $promoBannerPosition === 'after_packages')
-@include('frontend._promo_banner')
-@endif
-@include('frontend._db_promo_banner', ['position' => 'after_packages'])
-@include('frontend._db_promo_banner', ['position' => 'after_why'])
-@include('frontend._db_promo_banner', ['position' => 'after_cta'])
 
 {{-- Why, CTA Strip, and Weather are now rendered globally via _before_footer.blade.php --}}
 

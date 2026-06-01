@@ -16,18 +16,24 @@
     <div class="vk-why__grid">
       <div class="vk-why__card vk-reveal">
         <span class="vk-why__icon" aria-hidden="true">🛡️</span>
-        <h3>100% Verified Services</h3>
-        <p>Every hotel, boat operator, and guide is personally verified by our local team before listing on our platform.</p>
+        <div class="vk-why__card-body">
+          <h3>100% Verified Services</h3>
+          <p>Every hotel, boat operator, and guide is personally verified by our local team before listing on our platform.</p>
+        </div>
       </div>
       <div class="vk-why__card vk-reveal vk-reveal--delay-1">
         <span class="vk-why__icon" aria-hidden="true">💬</span>
-        <h3>24 / 7 Local Support</h3>
-        <p>Our on-ground Varanasi team is available round the clock to assist you before, during, and after your trip.</p>
+        <div class="vk-why__card-body">
+          <h3>24 / 7 Local Support</h3>
+          <p>Our on-ground Varanasi team is available round the clock to assist you before, during, and after your trip.</p>
+        </div>
       </div>
       <div class="vk-why__card vk-reveal vk-reveal--delay-2">
         <span class="vk-why__icon" aria-hidden="true">⚡</span>
-        <h3>Instant Confirmation</h3>
-        <p>Book in under a minute. Receive instant booking confirmation with all details directly on your device.</p>
+        <div class="vk-why__card-body">
+          <h3>Instant Confirmation</h3>
+          <p>Book in under a minute. Receive instant booking confirmation with all details directly on your device.</p>
+        </div>
       </div>
     </div>
   </div>

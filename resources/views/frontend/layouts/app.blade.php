@@ -55,8 +55,10 @@
         {{-- DNS prefetch / preconnect for external origins --}}
         <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+        <link rel="dns-prefetch" href="https://api.open-meteo.com" />
+        <link rel="dns-prefetch" href="https://wa.me" />
 
         {{-- Preload jQuery so it's downloaded early, before it's encountered at end of body --}}
         <link rel="preload" href="{{asset('frontend/js/jquery-3.2.1.min.js')}}" as="script" />
@@ -112,37 +114,45 @@
         @media(max-width:991px){.vk-hero__layout{grid-template-columns:1fr;gap:36px}.vk-hero__inner{padding:80px 0 50px}.vk-hero__left{text-align:center}.vk-hero__ctas{justify-content:center}.vk-hero__trust{justify-content:center}.vk-hero__right{align-items:center}}
         </style>
 
-        {{-- All CSS loaded asynchronously — no render-blocking --}}
+        {{-- LCP image preload (pushed from individual pages via @push('preloads')) --}}
+        @stack('preloads')
+
+        {{-- All CSS loaded asynchronously — no render-blocking — minified files served --}}
         <link rel="preload" href="{{asset('frontend/css/bootstrap.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
         <noscript><link href="{{asset('frontend/css/bootstrap.min.css')}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="{{asset('frontend/css/style.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link href="{{asset('frontend/css/style.css')}}" rel="stylesheet" /></noscript>
+        <link rel="preload" href="{{asset('frontend/css/style.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+        <noscript><link href="{{asset('frontend/css/style.min.css')}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="{{asset('frontend/css/global-layout.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link href="{{asset('frontend/css/global-layout.css')}}" rel="stylesheet" /></noscript>
+        <link rel="preload" href="{{asset('frontend/css/global-layout.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+        <noscript><link href="{{asset('frontend/css/global-layout.min.css')}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="{{asset('frontend/css/mobile-app.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link href="{{asset('frontend/css/mobile-app.css')}}" rel="stylesheet" /></noscript>
+        <link rel="preload" href="{{asset('frontend/css/mobile-app.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+        <noscript><link href="{{asset('frontend/css/mobile-app.min.css')}}" rel="stylesheet" /></noscript>
 
         <link rel="preload" href="{{asset('frontend/font/flaticon.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
         <noscript><link href="{{asset('frontend/font/flaticon.css')}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="{{asset('frontend/css/plugin.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link href="{{asset('frontend/css/plugin.css')}}" rel="stylesheet" /></noscript>
+        <link rel="preload" href="{{asset('frontend/css/plugin.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+        <noscript><link href="{{asset('frontend/css/plugin.min.css')}}" rel="stylesheet" /></noscript>
 
         <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin />
         <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /></noscript>
 
         @stack('styles')
 
-        {{-- Google Analytics (deferred, non-blocking) --}}
-        <script defer src="https://www.googletagmanager.com/gtag/js?id=G-QQ2QQ2EB99"></script>
+        {{-- Google Analytics — injected after load, zero TBT impact --}}
         <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.addEventListener('load', function(){
+            var s = document.createElement('script');
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-QQ2QQ2EB99';
+            s.async = true;
+            document.head.appendChild(s);
             gtag('js', new Date());
-            gtag('config', 'G-QQ2QQ2EB99', { 'send_page_view': true });
+            gtag('config', 'G-QQ2QQ2EB99', {'send_page_view': true});
+        });
         </script>
     </head>
 
@@ -185,7 +195,7 @@
         (function(){
             var jqSrc   = '{{asset("frontend/js/jquery-3.2.1.min.js")}}';
             var plugSrc = '{{asset("frontend/js/plugin.js")}}';
-            var mainSrc = '{{asset("frontend/js/main.js")}}';
+            var mainSrc = '{{asset("frontend/js/main.min.js")}}';
             function loadScript(src, cb){
                 var s = document.createElement('script');
                 s.src = src;
