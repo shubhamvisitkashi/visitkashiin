@@ -27,8 +27,13 @@ class Lead extends Model
     protected $fillable = [
         'guest_name',
         'contact',
+        'alt_phone',
         'email',
         'address',
+        'pax',
+        'country',
+        'booking_start_date',
+        'booking_end_date',
         'short_plan',
         'plan_detail',
         'booking_status',

@@ -3,7 +3,10 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\EnquiryController;
+use App\Http\Controllers\HotelEnquiryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Auth\LoginController;
@@ -29,7 +32,7 @@ Route::group(['prefix' => 'admin'], function () {
         return redirect()->route('admin.login');
     });
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('login', [LoginController::class, 'login'])->name('admin.login.submit');
+    Route::post('login', [LoginController::class, 'login'])->name('admin.login.submit')->middleware('throttle:10,1');
 
     Route::middleware(['auth:admin'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -52,19 +55,16 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('product-status-update/{id}', 'ProductController@statusUpdate')->name('product.statusUpdate');
             Route::get('product-on-home-status-update/{id}', 'ProductController@statusOnHomeUpdate')->name('admin.product.on.home.status.update');
 
-            //Vendor
-            Route::resource('vendor', 'VendorController');
-            Route::get('vendor-status-update/{id}', 'VendorController@statusUpdate')->name('vendor.statusUpdate');
+            //Vendor (removed - page disabled)
+            // Route::resource('vendor', 'VendorController');
+            // Route::get('vendor-status-update/{id}', 'VendorController@statusUpdate')->name('vendor.statusUpdate');
 
             //Service Templates
             Route::resource('service-templates', 'ServiceTemplateController');
 
-            //Quotations
-            Route::resource('quotations', 'QuotationController');
-            Route::patch('quotations/{id}/update-status', 'QuotationController@updateStatus')->name('quotations.update-status');
-            Route::post('quotations/{id}/convert-to-booking', 'QuotationController@convertToBooking')->name('quotations.convert-to-booking');
-            Route::get('quotations/{id}/download-pdf', 'QuotationController@downloadPdf')->name('quotations.download-pdf');
-            Route::post('quotations/{id}/send-email', 'QuotationController@sendEmail')->name('quotations.send-email');
+            //Quotations (disabled — section removed)
+            Route::get('quotations/{any?}', function() { return redirect()->route('bookings.index'); })->where('any', '.*');
+            Route::any('quotations/{any}', function() { return redirect()->route('bookings.index'); })->where('any', '.*');
 
 
             //Bookings
@@ -97,6 +97,19 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('booking-report/{id}/export', 'BookingController@exportReport')->name('booking.report.export');            Route::post('bookings/{id}/update-gst', 'BookingController@updateGstDetails')->name('bookings.update-gst');
             Route::get('bookings-calendar', 'BookingController@calendar')->name('bookings.calendar');
             Route::get('bookings-calendar/events', 'BookingController@calendarEvents')->name('bookings.calendar.events');
+
+            // Cab Bookings
+            Route::get('cab-bookings',                                              'CabBookingController@index')->name('cab-bookings.index');
+            Route::get('cab-bookings/create',                                       'CabBookingController@create')->name('cab-bookings.create');
+            Route::post('cab-bookings',                                             'CabBookingController@store')->name('cab-bookings.store');
+            Route::get('cab-bookings/{id}',                                         'CabBookingController@show')->name('cab-bookings.show');
+            Route::get('cab-bookings/{id}/edit',                                    'CabBookingController@edit')->name('cab-bookings.edit');
+            Route::put('cab-bookings/{id}',                                         'CabBookingController@update')->name('cab-bookings.update');
+            Route::delete('cab-bookings/{id}',                                      'CabBookingController@destroy')->name('cab-bookings.destroy');
+            Route::post('cab-bookings/{id}/add-payment',                            'CabBookingController@addPayment')->name('cab-bookings.add-payment');
+            Route::delete('cab-bookings/{id}/payments/{paymentId}',                 'CabBookingController@deletePayment')->name('cab-bookings.delete-payment');
+            Route::post('cab-bookings/{id}/update-status',                          'CabBookingController@updateStatus')->name('cab-bookings.update-status');
+            Route::get('cab-bookings/{id}/invoice',                                 'CabBookingController@invoice')->name('cab-bookings.invoice');
 
             // Service Calendar
             Route::get('service-calendar', 'ServiceCalendarController@index')->name('service-calendar.index');
@@ -133,9 +146,18 @@ Route::group(['prefix' => 'admin'], function () {
             //Enquiry
             Route::get('enquiry-index','EnquiryController@index')->name('enquiry.index');
             Route::delete('enquiry-delete/{id}','EnquiryController@destroy')->name('enquiry.delete');
+            Route::delete('hotel-enquiry-delete/{id}','EnquiryController@destroyHotel')->name('hotel-enquiry.admin.delete');
 
             // Website Setup Route
             Route::resource('web_setup', 'WebsiteSetupController');
+
+            // Hero Slider
+            Route::resource('hero-slides', 'HeroSlideController')->except(['create','show','edit']);
+            Route::post('hero-slides/{heroSlide}/toggle', 'HeroSlideController@toggleStatus')->name('hero-slides.toggle');
+
+            // Promo Banners
+            Route::resource('promo-banners', 'PromoBannerController')->except(['create','show','edit']);
+            Route::post('promo-banners/{promoBanner}/toggle', 'PromoBannerController@toggleStatus')->name('promo-banners.toggle');
 
             //Image Upload
             Route::post('image-upload','ImageUploadController@upload')->name('image.upload');
@@ -202,6 +224,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('payment-accounts/by-type/{type}', 'PaymentAccountController@getByType')->name('payment-accounts.by-type');
             Route::resource('payment-accounts', 'PaymentAccountController');
             Route::post('payment-accounts/{id}/toggle-status', 'PaymentAccountController@toggleStatus')->name('payment-accounts.toggle-status');
+            Route::post('payment-accounts/{id}/reset-balance', 'PaymentAccountController@resetBalance')->name('payment-accounts.reset-balance');
 
             // Target Management
             Route::get('targets', 'UserTargetController@index')->name('targets.index');
@@ -215,11 +238,27 @@ Route::group(['prefix' => 'admin'], function () {
             // Activity Logs
             Route::get('activity-logs', 'ActivityLogController@index')->name('activity-logs.index');
 
+            // YouTube Videos
+            Route::get('youtube-videos', 'YoutubeVideoController@index')->name('youtube-videos.index');
+            Route::post('youtube-videos', 'YoutubeVideoController@store')->name('youtube-videos.store');
+            Route::put('youtube-videos/{youtubeVideo}', 'YoutubeVideoController@update')->name('youtube-videos.update');
+            Route::delete('youtube-videos/{youtubeVideo}', 'YoutubeVideoController@destroy')->name('youtube-videos.destroy');
+            Route::post('youtube-videos/{youtubeVideo}/toggle', 'YoutubeVideoController@toggleStatus')->name('youtube-videos.toggle');
+
+            // Instagram Reels
+            Route::get('instagram-reels', 'InstagramReelController@index')->name('instagram-reels.index');
+            Route::post('instagram-reels', 'InstagramReelController@store')->name('instagram-reels.store');
+            Route::put('instagram-reels/{instagramReel}', 'InstagramReelController@update')->name('instagram-reels.update');
+            Route::delete('instagram-reels/{instagramReel}', 'InstagramReelController@destroy')->name('instagram-reels.destroy');
+            Route::post('instagram-reels/{instagramReel}/toggle', 'InstagramReelController@toggleStatus')->name('instagram-reels.toggle');
+
         });
 
         //Change Password
         Route::get('change-password', ChangePasswordController::class)->name('change.password');
         Route::post('change-password', [ChangePasswordController::class, 'changePassword'])->name('change.password.store');
+        Route::post('staff-reset-password/{id}', [ChangePasswordController::class, 'resetStaffPassword'])->name('staff.reset.password');
+        Route::post('calendar-pin-update', [ChangePasswordController::class, 'updateCalendarPin'])->name('calendar.pin.update');
 
         // Logout
         Route::post('logout/', [LoginController::class, 'logout'])->name('admin.logout');
@@ -229,10 +268,15 @@ Route::group(['prefix' => 'admin'], function () {
 
 //Web Route
 
+// ── Public PIN-protected Calendar ──────────────────────────────
+Route::post('calendar', [\App\Http\Controllers\PublicCalendarController::class, 'verify'])->name('public.calendar.verify');
+Route::get('calendar',  [\App\Http\Controllers\PublicCalendarController::class, 'show'])->name('public.calendar');
+Route::get('calendar/events', [\App\Http\Controllers\PublicCalendarController::class, 'events'])->name('public.calendar.events')->middleware('calendar.pin');
 
 Route::view('email','email.booking_confiramtion')->name('email');
 
 Route::get('/',[HomeController::class,'index'])->name('index');
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('search',[ProductController::class,'productSearch'])->name('product.search');
 Route::get('festival-boat-booking/{boat_type_slug}', [ProductController::class, 'festivalBoatBooking'])->name('festival.boat.booking');
@@ -241,10 +285,21 @@ Route::get('festival-boat-booking-payment/{booking_request_id}', [ProductControl
 Route::post('festival-boat-booking-payment-store/{booking_request_id}', [ProductController::class, 'festivalBoatBookingPaymentStore'])->name('festival.boat.booking.payment.store');
 Route::get('festival-boat-booking-payment-success/{booking_request_id}', [ProductController::class, 'festivalBoatBookingPaymentSuccess'])->name('festival.boat.booking.payment.success');
 Route::get('festival-boat-booking-payment-error/{booking_request_id}', [ProductController::class, 'festivalBoatBookingPaymentError'])->name('festival.boat.booking.payment.error');
+
+// Static pages — must be before catch-all /{slug}
+Route::get('contact-us',         [ContactController::class, 'show'])->name('contact.show');
+Route::post('contact-us',        [ContactController::class, 'store'])->name('contact.store');
+Route::get('privacy-policy',     [PageController::class, 'privacyPolicy'])->name('page.privacy');
+Route::get('cancellation-refund',[PageController::class, 'cancellationRefund'])->name('page.cancellation');
+Route::get('about-us',           [PageController::class, 'aboutUs'])->name('page.about');
+
 Route::get('/{slug}',[ProductController::class,'productList'])->name('product.list');
 Route::get('/{category_slug}/{sub_category_slug}',[ProductController::class,'productSubList'])->name('product.sub.list');
 Route::get('/{category_slug}/{sub_category_slug}/{product_slug}',[ProductController::class,'productDetail'])->name('product.detail');
 
 //Enquiry
 Route::post('enquiry-store',[EnquiryController::class,'store'])->name('enquiry.store');
+
+// Hotel & Homestay Enquiry
+Route::post('hotel-enquiry-store',[HotelEnquiryController::class,'store'])->name('hotel-enquiry.store');
 

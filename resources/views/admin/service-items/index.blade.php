@@ -1,729 +1,216 @@
 @extends('admin.layouts.app')
-
 @section('content')
-    <style>
-        /* Modern Card Styles */
-        .modern-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            margin-bottom: 24px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .modern-card:hover {
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
-        }
-
-        /* Page Header */
-        .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 32px;
-            border-radius: 16px;
-            color: white;
-            margin-bottom: 28px;
-            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .page-header h2 {
-            margin: 0 0 8px 0;
-            font-size: 28px;
-            font-weight: 700;
-            position: relative;
-        }
-
-        .page-header p {
-            margin: 0;
-            opacity: 0.9;
-            font-size: 15px;
-            position: relative;
-        }
-
-        /* Filter Card */
-        .filter-card {
-            background: #f8f9fc;
-            border: 1px solid #e3e6ef;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .filter-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .filter-title i {
-            color: #667eea;
-        }
-
-        /* Form Controls */
-        .form-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .form-select,
-        .form-control {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .form-select:focus,
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            outline: none;
-        }
-
-        /* Modern Buttons */
-        .btn-modern {
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: none;
-        }
-
-        .btn-modern i {
-            width: 18px;
-            height: 18px;
-        }
-
-        .btn-primary-modern {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
-
-        .btn-secondary-modern {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .btn-secondary-modern:hover {
-            background: #cbd5e0;
-            color: #2d3748;
-        }
-
-        /* Table Styles */
-        .modern-table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-
-        .modern-table thead {
-            background: #f8f9fc;
-        }
-
-        .modern-table thead th {
-            padding: 16px 18px;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #4a5568;
-            border: none;
-            white-space: nowrap;
-        }
-
-        .modern-table tbody td {
-            padding: 18px 18px;
-            vertical-align: middle;
-            border-bottom: 1px solid #f1f3f9;
-            color: #2d3748;
-            font-size: 14px;
-        }
-
-        .modern-table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        .modern-table tbody tr:hover {
-            background: #f8f9fc;
-        }
-
-        /* Provider Info */
-        .provider-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .provider-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .provider-details strong {
-            display: block;
-            font-size: 14px;
-            color: #2d3748;
-            margin-bottom: 2px;
-        }
-
-        .provider-details small {
-            font-size: 12px;
-            color: #718096;
-        }
-
-        /* Template Info */
-        .template-info strong {
-            display: block;
-            font-size: 14px;
-            color: #2d3748;
-            margin-bottom: 4px;
-        }
-
-        .template-info small {
-            font-size: 12px;
-            color: #718096;
-            line-height: 1.4;
-        }
-
-        /* Modern Badges */
-        .badge-modern {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            letter-spacing: 0.3px;
-        }
-
-        .badge-success-modern {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-
-        .badge-secondary-modern {
-            background: #e2e8f0;
-            color: #64748b;
-        }
-
-        .badge-info-modern {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-        }
-
-        .badge-warning-modern {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-        }
-
-        /* Price Display */
-        .price-display {
-            font-weight: 600;
-            color: #10b981;
-            font-size: 14px;
-        }
-
-        .vendor-cost {
-            color: #f59e0b;
-        }
-
-        /* Action Buttons */
-        .action-btn {
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            transition: all 0.3s ease;
-            padding: 0;
-        }
-
-        .action-btn i {
-            width: 16px;
-            height: 16px;
-        }
-
-        .btn-edit {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-        }
-
-        .btn-edit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-            color: white;
-        }
-
-        .btn-delete {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-
-        .btn-delete:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-            color: white;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .empty-state-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .empty-state-icon i {
-            width: 40px;
-            height: 40px;
-            color: #667eea;
-        }
-
-        .empty-state h5 {
-            color: #4a5568;
-            margin-bottom: 8px;
-            font-size: 18px;
-        }
-
-        .empty-state p {
-            color: #a0aec0;
-            margin-bottom: 20px;
-        }
-
-        /* Stats Cards */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e3e6ef;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .stat-icon i {
-            width: 24px;
-            height: 24px;
-            color: white;
-        }
-
-        .stat-content h4 {
-            margin: 0 0 4px 0;
-            font-size: 24px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .stat-content p {
-            margin: 0;
-            font-size: 13px;
-            color: #718096;
-        }
-
-        /* Alert Styles */
-        .alert-modern {
-            border-radius: 12px;
-            border: none;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .alert-success-modern {
-            background: linear-gradient(135deg, #10b98115 0%, #05966915 100%);
-            color: #059669;
-            border-left: 4px solid #10b981;
-        }
-
-        .alert-danger-modern {
-            background: linear-gradient(135deg, #ef444415 0%, #dc262615 100%);
-            color: #dc2626;
-            border-left: 4px solid #ef4444;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .page-header {
-                padding: 24px;
-            }
-
-            .page-header h2 {
-                font-size: 24px;
-            }
-
-            .filter-card {
-                padding: 16px;
-            }
-
-            .modern-table thead th,
-            .modern-table tbody td {
-                padding: 12px;
-                font-size: 13px;
-            }
-
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeInUp 0.5s ease-out;
-        }
-    </style>
-
-    <div class="page-content">
-        <!-- Page Header -->
-        <div class="page-header animate-fade-in">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h2>
-                        <i data-feather="grid" style="width: 28px; height: 28px; margin-right: 8px;"></i>
-                        Service Items
-                    </h2>
-                    <p>Manage all your service items and inventory across providers</p>
-                </div>
-                <a href="{{ route('service-items.create') }}" class="btn btn-primary-modern">
-                    <i data-feather="plus-circle"></i>
-                    Add Service Item
-                </a>
-            </div>
-        </div>
-
-        <!-- Alerts -->
-        @if (session('success'))
-            <div class="alert alert-success-modern alert-dismissible fade show animate-fade-in">
-                <i data-feather="check-circle" style="width: 20px; height: 20px;"></i>
-                <span>{{ session('success') }}</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger-modern alert-dismissible fade show animate-fade-in">
-                <i data-feather="alert-circle" style="width: 20px; height: 20px;"></i>
-                <span>{{ session('error') }}</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        <!-- Stats Overview -->
-        <div class="stats-row animate-fade-in" style="animation-delay: 0.1s">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <i data-feather="package"></i>
-                </div>
-                <div class="stat-content">
-                    <h4>{{ $items->total() }}</h4>
-                    <p>Total Items</p>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <i data-feather="check-circle"></i>
-                </div>
-                <div class="stat-content">
-                    <h4>{{ $items->where('is_active', true)->count() }}</h4>
-                    <p>Active Items</p>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
-                    <i data-feather="users"></i>
-                </div>
-                <div class="stat-content">
-                    <h4>{{ $providers->count() }}</h4>
-                    <p>Providers</p>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                    <i data-feather="briefcase"></i>
-                </div>
-                <div class="stat-content">
-                    <h4>{{ $items->sum('booking_services_count') }}</h4>
-                    <p>Total Bookings</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="filter-card animate-fade-in" style="animation-delay: 0.2s">
-            <div class="filter-title">
-                <i data-feather="filter"></i>
-                Filter Service Items
-            </div>
-            <form method="GET" action="{{ route('service-items.index') }}" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Service Provider</label>
-                    <select name="service_provider_id" class="form-select">
-                        <option value="">All Providers</option>
-                        @foreach ($providers as $provider)
-                            <option value="{{ $provider->id }}"
-                                {{ request('service_provider_id') == $provider->id ? 'selected' : '' }}>
-                                {{ $provider->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Service Template</label>
-                    <select name="service_template_id" class="form-select">
-                        <option value="">All Templates</option>
-                        @foreach ($serviceTemplates as $template)
-                            <option value="{{ $template->id }}"
-                                {{ request('service_template_id') == $template->id ? 'selected' : '' }}>
-                                {{ $template->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Search by template name..."
-                        value="{{ request('search') }}">
-                </div>
-
-                <div class="col-md-2 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary-modern flex-fill">
-                        <i data-feather="search"></i>
-                        Filter
-                    </button>
-                    <a href="{{ route('service-items.index') }}" class="btn btn-secondary-modern">
-                        <i data-feather="x"></i>
-                    </a>
-                </div>
-            </form>
-        </div>
-
-        <!-- Service Items Table -->
-        <div class="modern-card animate-fade-in" style="animation-delay: 0.3s">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="modern-table">
-                        <thead>
-                            <tr>
-                                <th>Provider</th>
-                                <th>Service Type</th>
-                                <th>Template</th>
-                                <th>Capacity</th>
-                                <th>Vendor Cost</th>
-                                <th>Base Price</th>
-                                <th>Status</th>
-                                <th>Bookings</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($items as $item)
-                                <tr>
-                                    <td>
-                                        @if ($item->serviceProvider)
-                                            <div class="provider-info">
-                                                <div class="provider-icon">
-                                                    {{ strtoupper(substr($item->serviceProvider->name, 0, 2)) }}
-                                                </div>
-                                                <div class="provider-details">
-                                                    <strong>{{ $item->serviceProvider->name }}</strong>
-                                                    <small>{{ ucfirst($item->serviceProvider->type) }}</small>
-                                                </div>
-                                            </div>
-                                        @else
-                                            <span class="text-muted">N/A</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($item->serviceTemplate && $item->serviceTemplate->serviceType)
-                                            <span class="badge-modern badge-info-modern">
-                                                <i data-feather="layers" style="width: 12px; height: 12px;"></i>
-                                                {{ $item->serviceTemplate->serviceType->name }}
-                                            </span>
-                                        @else
-                                            <span class="badge-modern badge-secondary-modern">
-                                                <i data-feather="help-circle" style="width: 12px; height: 12px;"></i>
-                                                N/A
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($item->serviceTemplate)
-                                            <div class="template-info">
-                                                <strong>{{ $item->serviceTemplate->name }}</strong>
-                                                @if ($item->serviceTemplate->description)
-                                                    <small>{{ Str::limit($item->serviceTemplate->description, 40) }}</small>
-                                                @endif
-                                            </div>
-                                        @else
-                                            <span class="text-muted">N/A</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <span class="badge-modern badge-secondary-modern">
-                                            <i data-feather="users" style="width: 12px; height: 12px;"></i>
-                                            {{ $item->capacity ?? ($item->serviceTemplate?->capacity ?? 'N/A') }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="price-display vendor-cost">
-                                            ₹{{ number_format($item->vendor_cost, 2) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="price-display">
-                                            ₹{{ number_format($item->base_price, 2) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if ($item->is_active)
-                                            <span class="badge-modern badge-success-modern">
-                                                <i data-feather="check-circle" style="width: 12px; height: 12px;"></i>
-                                                Active
-                                            </span>
-                                        @else
-                                            <span class="badge-modern badge-secondary-modern">
-                                                <i data-feather="x-circle" style="width: 12px; height: 12px;"></i>
-                                                Inactive
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <span class="badge-modern badge-warning-modern">
-                                            <i data-feather="calendar" style="width: 12px; height: 12px;"></i>
-                                            {{ $item->booking_services_count }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-2">
-                                            <a href="{{ route('service-items.edit', $item->service_provider_id) }}"
-                                                class="action-btn btn-edit" title="Edit Items">
-                                                <i data-feather="edit-2"></i>
-                                            </a>
-                                            <form action="{{ route('service-items.destroy', $item->id) }}" method="POST"
-                                                class="d-inline" id="delete_form_{{ $item->id }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="action-btn btn-delete" title="Delete"
-                                                    onclick="confirmDeleteItem({{ $item->id }}, '{{ $item->serviceTemplate->name ?? 'this item' }}')">
-                                                    <i data-feather="trash-2"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="border-0">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">
-                                                <i data-feather="inbox"></i>
-                                            </div>
-                                            <h5>No Service Items Found</h5>
-                                            <p>Start by adding your first service item to manage your inventory.</p>
-                                            <a href="{{ route('service-items.create') }}" class="btn btn-primary-modern">
-                                                <i data-feather="plus-circle"></i>
-                                                Add Service Item
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                @if ($items->hasPages())
-                    <div class="p-4 border-top">
-                        {{ $items->links() }}
-                    </div>
-                @endif
-            </div>
+<style>
+.si-page{padding:24px;background:#F1F5F9;min-height:100vh;}
+.si-header{background:linear-gradient(135deg,#064E3B,#065F46,#059669);border-radius:16px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px;margin-top:50px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(5,150,105,.25);}
+.si-header::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.07);border-radius:50%;}
+.si-header-left{position:relative;z-index:1;display:flex;align-items:center;gap:12px;}
+.si-header-icon{width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.si-header-icon i[data-feather]{width:20px;height:20px;stroke:#fff;}
+.si-header-text h1{color:#fff;font-size:1.1rem;font-weight:800;margin:0 0 2px;}
+.si-header-text p{color:rgba(255,255,255,.7);font-size:.76rem;margin:0;}
+.si-add-btn{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;background:#fff;color:#059669;border:none;border-radius:10px;padding:9px 16px;font-size:.82rem;font-weight:700;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:all .2s;white-space:nowrap;}
+.si-add-btn:hover{background:#f0fdf4;color:#047857;text-decoration:none;transform:translateY(-1px);}
+.si-add-btn i[data-feather]{width:14px;height:14px;}
+/* Stats */
+.si-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.si-stat{background:#fff;border-radius:12px;border:1px solid #E2E8F0;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.si-stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.si-stat-icon i[data-feather]{width:18px;height:18px;stroke:#fff;}
+.si-stat-val{font-size:1.3rem;font-weight:900;color:#0F172A;line-height:1;}
+.si-stat-lbl{font-size:.68rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+/* Filter */
+.si-filter{background:#fff;border-radius:12px;border:1px solid #E2E8F0;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:13px 16px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.si-filter select,.si-filter input{border:1.5px solid #E2E8F0;border-radius:9px;padding:7px 11px;font-size:.82rem;color:#0F172A;background:#FAFBFF;height:36px;outline:none;transition:border-color .15s;flex:1;min-width:140px;}
+.si-filter select:focus,.si-filter input:focus{border-color:#059669;}
+.si-filter-btn{height:36px;padding:0 14px;border-radius:9px;border:none;font-size:.8rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;}
+.si-filter-btn.p{background:#059669;color:#fff;}.si-filter-btn.p:hover{background:#047857;}
+.si-filter-btn.g{background:#F1F5F9;color:#64748B;text-decoration:none;}.si-filter-btn.g:hover{background:#E2E8F0;color:#374151;text-decoration:none;}
+.si-filter-btn i[data-feather]{width:13px;height:13px;}
+/* Card */
+.si-card{background:#fff;border-radius:14px;border:1px solid #E2E8F0;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;}
+.si-card-head{padding:13px 18px;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between;background:#F0FDF4;}
+.si-card-title{font-size:.88rem;font-weight:700;color:#0F172A;display:flex;align-items:center;gap:7px;}
+.si-card-title i[data-feather]{width:15px;height:15px;stroke:#059669;}
+/* Table */
+.si-table{width:100%;border-collapse:collapse;}
+.si-table th{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#64748B;padding:10px 12px;border-bottom:1.5px solid #F0F0F5;background:#FAFAFA;white-space:nowrap;}
+.si-table td{padding:11px 12px;border-bottom:1px solid #F8FAFC;font-size:.82rem;color:#0F172A;vertical-align:middle;}
+.si-table tbody tr:last-child td{border-bottom:none;}
+.si-table tbody tr:hover{background:#F0FDF4;}
+/* Provider cell */
+.si-prov{display:flex;align-items:center;gap:9px;}
+.si-prov-av{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#059669,#047857);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
+.si-prov-name{font-weight:700;font-size:.83rem;}
+.si-prov-type{font-size:.7rem;color:#64748B;}
+/* Badges */
+.si-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;}
+.si-badge-type  {background:#FAF5FF;color:#6D28D9;border:1px solid #DDD6FE;}
+.si-badge-cap   {background:#F0F9FF;color:#0369A1;border:1px solid #BAE6FD;}
+.si-badge-on    {background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.si-badge-off   {background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;}
+.si-badge-bk    {background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;}
+/* Price */
+.si-price{font-weight:800;font-size:.84rem;}
+.si-price-vendor{color:#DC2626;}
+.si-price-base  {color:#059669;}
+/* Actions */
+.si-actions{display:flex;gap:5px;}
+.si-act{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;text-decoration:none;transition:all .15s;}
+.si-act i[data-feather]{width:13px;height:13px;}
+.si-act-edit{background:#EEF2FF;color:#4F46E5;}.si-act-edit:hover{background:#ddd6fe;}
+.si-act-del {background:#FEF2F2;color:#DC2626;}.si-act-del:hover{background:#FECACA;}
+.si-empty{text-align:center;padding:44px;color:#94A3B8;}
+.si-pag{padding:12px 18px;border-top:1px solid #F1F5F9;}
+.si-alert{display:flex;align-items:center;gap:10px;border-radius:12px;padding:11px 16px;margin-bottom:14px;font-size:.83rem;font-weight:600;}
+.si-alert-ok {background:#ECFDF5;border:1.5px solid #6EE7B7;color:#065F46;}
+.si-alert-err{background:#FEF2F2;border:1.5px solid #FECACA;color:#991B1B;}
+@media(max-width:900px){.si-stats{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.si-page{padding:12px;}.si-stats{grid-template-columns:1fr 1fr;}.si-filter{gap:7px;}}
+</style>
+
+<div class="si-page">
+
+@if(session('success'))<div class="si-alert si-alert-ok"><i data-feather="check-circle" style="width:18px;height:18px;flex-shrink:0;stroke:#10B981;"></i> {{ session('success') }}</div>@endif
+@if(session('error'))<div class="si-alert si-alert-err"><i data-feather="alert-circle" style="width:18px;height:18px;flex-shrink:0;stroke:#EF4444;"></i> {{ session('error') }}</div>@endif
+
+<div class="si-header">
+    <div class="si-header-left">
+        <div class="si-header-icon"><i data-feather="grid"></i></div>
+        <div class="si-header-text">
+            <h1>Service Items</h1>
+            <p>Manage all service items and inventory across providers</p>
         </div>
     </div>
+    <a href="{{ route('service-items.create') }}" class="si-add-btn">
+        <i data-feather="plus"></i> Add Service Item
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="si-stats">
+    <div class="si-stat">
+        <div class="si-stat-icon" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);"><i data-feather="package"></i></div>
+        <div><div class="si-stat-val">{{ $items->total() }}</div><div class="si-stat-lbl">Total Items</div></div>
+    </div>
+    <div class="si-stat">
+        <div class="si-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);"><i data-feather="check-circle"></i></div>
+        <div><div class="si-stat-val">{{ $items->where('is_active',true)->count() }}</div><div class="si-stat-lbl">Active</div></div>
+    </div>
+    <div class="si-stat">
+        <div class="si-stat-icon" style="background:linear-gradient(135deg,#0369A1,#0EA5E9);"><i data-feather="users"></i></div>
+        <div><div class="si-stat-val">{{ $providers->count() }}</div><div class="si-stat-lbl">Providers</div></div>
+    </div>
+    <div class="si-stat">
+        <div class="si-stat-icon" style="background:linear-gradient(135deg,#B45309,#F59E0B);"><i data-feather="briefcase"></i></div>
+        <div><div class="si-stat-val">{{ $items->sum('booking_services_count') }}</div><div class="si-stat-lbl">Bookings</div></div>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="GET" action="{{ route('service-items.index') }}" class="si-filter">
+    <select name="service_provider_id">
+        <option value="">All Providers</option>
+        @foreach($providers as $p)
+        <option value="{{ $p->id }}" {{ request('service_provider_id')==$p->id?'selected':'' }}>{{ $p->name }}</option>
+        @endforeach
+    </select>
+    <select name="service_template_id">
+        <option value="">All Templates</option>
+        @foreach($serviceTemplates as $t)
+        <option value="{{ $t->id }}" {{ request('service_template_id')==$t->id?'selected':'' }}>{{ $t->name }}</option>
+        @endforeach
+    </select>
+    <input type="text" name="search" placeholder="🔍 Search items…" value="{{ request('search') }}">
+    <button type="submit" class="si-filter-btn p"><i data-feather="search"></i> Filter</button>
+    <a href="{{ route('service-items.index') }}" class="si-filter-btn g"><i data-feather="x"></i> Clear</a>
+</form>
+
+<!-- Table -->
+<div class="si-card">
+    <div class="si-card-head">
+        <div class="si-card-title"><i data-feather="grid"></i> All Service Items</div>
+        <span style="font-size:.73rem;color:#64748B;">{{ $items->total() }} items</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="si-table">
+            <thead>
+                <tr>
+                    <th>Provider</th>
+                    <th>Type</th>
+                    <th>Template</th>
+                    <th class="text-end">Vendor Cost</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($items as $item)
+                <tr>
+                    <td>
+                        @if($item->serviceProvider)
+                        <div class="si-prov">
+                            <div class="si-prov-av">{{ strtoupper(substr($item->serviceProvider->name,0,2)) }}</div>
+                            <div>
+                                <div class="si-prov-name">{{ $item->serviceProvider->name }}</div>
+                                <div class="si-prov-type">{{ ucfirst($item->serviceProvider->type) }}</div>
+                            </div>
+                        </div>
+                        @else<span style="color:#94A3B8;">—</span>@endif
+                    </td>
+                    <td>
+                        @if($item->serviceTemplate && $item->serviceTemplate->serviceType)
+                        <span class="si-badge si-badge-type">{{ $item->serviceTemplate->serviceType->name }}</span>
+                        @else<span style="color:#94A3B8;font-size:.75rem;">—</span>@endif
+                    </td>
+                    <td>
+                        @if($item->serviceTemplate)
+                        <div style="font-weight:700;font-size:.83rem;">{{ $item->serviceTemplate->name }}</div>
+                        @if($item->serviceTemplate->description)<div style="font-size:.71rem;color:#64748B;">{{ Str::limit($item->serviceTemplate->description,35) }}</div>@endif
+                        @else<span style="color:#94A3B8;">—</span>@endif
+                    </td>
+                    <td class="text-end"><span class="si-price si-price-vendor">₹{{ number_format($item->vendor_cost,0) }}</span></td>
+                    <td class="text-center">
+                        <span class="si-badge {{ $item->is_active?'si-badge-on':'si-badge-off' }}">
+                            {{ $item->is_active?'Active':'Inactive' }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="si-actions" style="justify-content:center;">
+                            <a href="{{ route('service-items.edit',$item->service_provider_id) }}" class="si-act si-act-edit" title="Edit">
+                                <i data-feather="edit-2"></i>
+                            </a>
+                            <form action="{{ route('service-items.destroy',$item->id) }}" method="POST" id="delete_form_{{ $item->id }}" style="display:contents;">
+                                @csrf @method('DELETE')
+                                @php $delName = $item->serviceTemplate->name ?? 'this item'; @endphp
+                                <button type="button" class="si-act si-act-del" onclick="confirmDeleteItem({{ $item->id }},'{{ addslashes($delName) }}')" title="Delete">
+                                    <i data-feather="trash-2"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="6">
+                    <div class="si-empty">
+                        <i data-feather="inbox" style="width:48px;height:48px;opacity:.2;display:block;margin:0 auto 12px;stroke:#94A3B8;"></i>
+                        <p style="font-weight:700;color:#374151;margin:0 0 5px;">No service items found</p>
+                        <p style="font-size:.82rem;margin:0 0 14px;">Add your first service item to get started</p>
+                        <a href="{{ route('service-items.create') }}" class="si-add-btn" style="margin:0 auto;">
+                            <i data-feather="plus"></i> Add Service Item
+                        </a>
+                    </div>
+                </td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($items->hasPages())
+    <div class="si-pag">{{ $items->links() }}</div>
+    @endif
+</div>
+
+</div>
 
     @push('scripts')
         <script>

@@ -1,2 +1,24 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Block admin panel and private routes
+Disallow: /admin/
+Disallow: /visitkashiin/public/admin/
+Disallow: /backend/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /password/
+Disallow: /sanctum/
+
+# Block framework internals
+Disallow: /vendor/
+Disallow: /storage/logs/
+
+# Allow public image assets
+Allow: /frontend/
+Allow: /backend/admin/website_setup/
+Allow: /backend/admin/product_images/
+
+# Sitemap
+Sitemap: http://localhost/visitkashiin/public/sitemap.xml

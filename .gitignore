@@ -1,0 +1,55 @@
+# ─── Laravel ───────────────────────────────────────────
+/vendor/
+/node_modules/
+/public/hot
+/public/storage
+/storage/*.key
+/.env
+/.env.*
+!/.env.example
+/.phpunit.result.cache
+/bootstrap/cache/*.php
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# ─── Uploaded User Files (large, managed outside git) ───
+/public/backend/admin/product_images/*
+!/public/backend/admin/product_images/.gitkeep
+/public/backend/admin/website_setup/*
+!/public/backend/admin/website_setup/.gitkeep
+/public/backend/admin/hero_slides/*
+!/public/backend/admin/hero_slides/.gitkeep
+/public/backend/admin/promo_banners/*
+!/public/backend/admin/promo_banners/.gitkeep
+/public/backend/admin/service_items/*
+!/public/backend/admin/service_items/.gitkeep
+/public/uploads/avatars/*
+!/public/uploads/avatars/.gitkeep
+
+# ─── Logs & Cache ───────────────────────────────────────
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+
+# ─── IDE & OS ────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Temporary / Helper scripts ─────────────────────────
+/public/upload_innova.php
+/public/set_cover.php
+/public/upload_helper.php
+
+# ─── Build artifacts ─────────────────────────────────────
+/public/js/app.js
+/public/css/app.css
+mix-manifest.json

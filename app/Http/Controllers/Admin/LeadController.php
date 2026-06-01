@@ -106,12 +106,8 @@ class LeadController extends Controller
     }
 
     public function create(){
-        $lead_sources = LeadSource::oldest('name')->get();
-        $vendor_services = VendorService::oldest('name')->get();
-        $serviceTypes = ServiceType::active()->with('serviceProviders')->get();
-        $serviceItems = ServiceItem::active()->with(['serviceProvider', 'serviceType'])->get();
-
-        return view('admin.lead.create',compact('lead_sources','vendor_services', 'serviceTypes', 'serviceItems'), ['page_title' => 'Add Leads']);
+        return redirect()->route('bookings.create-direct')
+            ->with('info', 'Use the New Booking form to create bookings directly.');
     }
 
     public function store(Request $request){

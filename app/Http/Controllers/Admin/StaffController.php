@@ -18,120 +18,101 @@ class StaffController extends Controller
         $this->middleware('permission:staff-delete', ['only' => ['destroy']]);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $list = Admin::where('id', '!=', 1)->paginate(20);
         return view('admin.staff.index', compact('list'), ['page_title' => 'All Staffs']);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $roles = Role::where('id', '!=', 1)->pluck('name','name')->all();
-        return view('admin.staff.create',compact('roles'), ['page_title' => 'Add Staff']);
+        return view('admin.staff.create', compact('roles'), ['page_title' => 'Add Staff']);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required',
-            'email' => 'required|email|unique:admins,email',
-            'password' => 'required|same:confirm-password',
-            'roles' => 'required'
+            'name'             => 'required',
+            'email'            => 'required|email|unique:admins,email',
+            'password'         => 'required|same:confirm-password|min:8',
+            'roles'            => 'required',
+            'avatar'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $data = new Admin;
-        $data->name = $request->name;
-        $data->email = $request->email;
-        $data->password = bcrypt($request->password);
-        $data->save();
-        $data->assignRole($request->input('roles'));
+        $staff = new Admin;
+        $staff->name     = $request->name;
+        $staff->email    = $request->email;
+        $staff->password = bcrypt($request->password);
+        $staff->plain_password = $request->password;
+
+        if ($request->hasFile('avatar')) {
+            $file     = $request->file('avatar');
+            $filename = 'avatar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/avatars'), $filename);
+            $staff->avatar = $filename;
+        }
+
+        $staff->save();
+        $staff->assignRole($request->input('roles'));
 
         return redirect()->route('staffs.index')->with('success', 'Staff Added Successfully');
-
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+    public function show($id) {}
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        $data = Admin::find($id);
-        $roles = Role::where('id', '!=', 1)->pluck('name','name')->all();
+        $data     = Admin::find($id);
+        $roles    = Role::where('id', '!=', 1)->pluck('name','name')->all();
         $userRole = $data->roles->pluck('name','name')->all();
-
-        return view('admin.staff.edit',compact('data','roles','userRole'), ['page_title' => 'Update Staff']);
+        return view('admin.staff.edit', compact('data','roles','userRole'), ['page_title' => 'Update Staff']);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'name' => 'required',
-            'email' => 'required|email|unique:admins,email,'.$id,
-            'password' => 'same:confirm-password',
-            'roles' => 'required'
+            'name'     => 'required',
+            'email'    => 'required|email|unique:admins,email,'.$id,
+            'password' => 'nullable|min:8|same:confirm-password',
+            'roles'    => 'required',
+            'avatar'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $data = Admin::find($id);
-        $data->name = $request->name;
-        $data->email = $request->email;
-        if(!empty($request->password)){
-            $data->password = bcrypt($request->password);
+        $staff        = Admin::find($id);
+        $staff->name  = $request->name;
+        $staff->email = $request->email;
+
+        if (!empty($request->password)) {
+            $staff->password = bcrypt($request->password);
+        $staff->plain_password = $request->password;
         }
-        $data->save();
 
-        DB::table('model_has_roles')->where('model_id',$id)->delete();
+        if ($request->hasFile('avatar')) {
+            if ($staff->avatar && file_exists(public_path('uploads/avatars/'.$staff->avatar))) {
+                @unlink(public_path('uploads/avatars/'.$staff->avatar));
+            }
+            $file     = $request->file('avatar');
+            $filename = 'avatar_' . $id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/avatars'), $filename);
+            $staff->avatar = $filename;
+        }
 
-        $data->assignRole($request->input('roles'));
+        $staff->save();
 
-        return redirect()->route('staffs.index')->with('success','Staff updated successfully');
+        DB::table('model_has_roles')->where('model_id', $id)->delete();
+        $staff->assignRole($request->input('roles'));
+
+        return redirect()->route('staffs.index')->with('success', 'Staff updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        Admin::find($id)->delete();
-        return redirect()->route('staffs.index')->with('success','Staff deleted successfully');
+        $staff = Admin::find($id);
+        if ($staff && $staff->avatar && file_exists(public_path('uploads/avatars/'.$staff->avatar))) {
+            @unlink(public_path('uploads/avatars/'.$staff->avatar));
+        }
+        $staff->delete();
+        return redirect()->route('staffs.index')->with('success', 'Staff deleted successfully');
     }
 }

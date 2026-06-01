@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\BookingService;
-use App\Models\ServiceType;
-use App\Models\ServiceProvider;
 use App\Models\Lead;
+use App\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -13,138 +11,172 @@ use DB;
 
 class ProfitAnalyticsController extends Controller
 {
-    /**
-     * Display profit analytics dashboard
-     */
     public function index(Request $request)
     {
-        // Date range filter
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth());
-        
-        if (is_string($startDate)) {
-            $startDate = Carbon::parse($startDate);
-        }
-        if (is_string($endDate)) {
-            $endDate = Carbon::parse($endDate);
-        }
+        // ── Anchor to actual data range ──────────────────────────────────
+        $earliestBooking = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->min('booking_start_date');
 
-        // Service type filter
-        $serviceTypeId = $request->input('service_type_id');
-        
-        // Provider type filter (vendor/own)
-        $providerType = $request->input('provider_type');
+        $latestBooking = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->max('booking_start_date');
 
-        // Build base query
-        $query = BookingService::with(['lead', 'serviceItem.serviceProvider', 'serviceType'])
-            ->whereBetween('service_date', [$startDate, $endDate]);
+        $anchor = $latestBooking ? Carbon::parse($latestBooking) : Carbon::now();
 
-        if ($serviceTypeId) {
-            $query->where('service_type_id', $serviceTypeId);
-        }
+        // Default: full actual data range (not current month which may be empty)
+        $defaultStart = $earliestBooking
+            ? Carbon::parse($earliestBooking)->format('Y-m-d')
+            : Carbon::now()->startOfYear()->format('Y-m-d');
 
-        if ($providerType) {
-            $query->whereHas('serviceItem.serviceProvider', function($q) use ($providerType) {
-                $q->where('type', $providerType);
-            });
-        }
+        $defaultEnd = $latestBooking
+            ? Carbon::parse($latestBooking)->format('Y-m-d')
+            : Carbon::now()->format('Y-m-d');
 
-        // Key Metrics
-        $totalRevenue = $query->sum(DB::raw('quantity * selling_price'));
-        $totalCost = $query->sum(DB::raw('quantity * cost_price'));
-        $totalProfit = $totalRevenue - $totalCost;
-        $profitMargin = $totalRevenue > 0 ? round(($totalProfit / $totalRevenue) * 100, 2) : 0;
+        $startDate = $request->input('start_date', $defaultStart);
+        $endDate   = $request->input('end_date',   $defaultEnd);
 
-        // Service-wise profit breakdown
-        $serviceWiseProfit = BookingService::select(
-                'service_type_id',
-                DB::raw('SUM(quantity * selling_price) as total_revenue'),
-                DB::raw('SUM(quantity * cost_price) as total_cost'),
-                DB::raw('SUM(quantity * profit_amount) as total_profit')
-            )
-            ->with('serviceType')
-            ->whereBetween('service_date', [$startDate, $endDate])
-            ->groupBy('service_type_id')
-            ->get();
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end   = Carbon::parse($endDate)->endOfDay();
 
-        // Vendor vs Own profit
-        $vendorOwnProfit = BookingService::select(
-                'service_items.service_provider_id',
-                'service_providers.type',
-                DB::raw('SUM(booking_services.quantity * booking_services.selling_price) as total_revenue'),
-                DB::raw('SUM(booking_services.quantity * booking_services.cost_price) as total_cost'),
-                DB::raw('SUM(booking_services.quantity * booking_services.profit_amount) as total_profit')
-            )
-            ->join('service_items', 'booking_services.service_item_id', '=', 'service_items.id')
-            ->join('service_providers', 'service_items.service_provider_id', '=', 'service_providers.id')
-            ->whereBetween('booking_services.service_date', [$startDate, $endDate])
-            ->groupBy('service_providers.type', 'service_items.service_provider_id')
-            ->get()
-            ->groupBy('type');
+        // ── Base query closure ────────────────────────────────────────────
+        $baseFilters = function($q) use ($start, $end) {
+            $q->where('booking_status', 'complete')
+              ->whereNotNull('booking_start_date')
+              ->whereBetween('booking_start_date', [$start, $end]);
+        };
 
-        // Monthly profit trend (last 6 months)
+        // ── KPI Metrics ───────────────────────────────────────────────────
+        $totalRevenue  = (float) Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->sum('total_amount');
+
+        $totalBookings = (int) Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->count();
+
+        // Sum actual expenses; for records with blank expense estimate 30% of their revenue
+        $withExpense = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->where('total_expense', '>', 0)
+            ->selectRaw('SUM(total_amount) as rev, SUM(total_expense) as exp')
+            ->first();
+
+        $withoutExpenseRev = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->where(function($q){ $q->whereNull('total_expense')->orWhere('total_expense', 0); })
+            ->sum('total_amount');
+
+        $totalExpense = (float)($withExpense->exp ?? 0) + round($withoutExpenseRev * 0.30);
+
+        $totalProfit  = $totalRevenue - $totalExpense;
+        $profitMargin = $totalRevenue > 0 ? round(($totalProfit / $totalRevenue) * 100, 1) : 0;
+        $avgDeal      = $totalBookings > 0 ? round($totalRevenue / $totalBookings) : 0;
+
+        // ── Monthly trend — 6 months anchored to latest actual data ───────
         $monthlyTrend = [];
+        $anchorMonth  = Carbon::parse($anchor)->startOfMonth();
+
         for ($i = 5; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
-            $monthStart = $month->copy()->startOfMonth();
-            $monthEnd = $month->copy()->endOfMonth();
-            
-            $monthProfit = BookingService::whereBetween('service_date', [$monthStart, $monthEnd])
-                ->sum(DB::raw('quantity * profit_amount'));
-            
+            $m = $anchorMonth->copy()->subMonths($i);
+
+            $mRev = (float) Lead::where('booking_status', 'complete')
+                ->whereNotNull('booking_start_date')
+                ->whereYear('booking_start_date',  $m->year)
+                ->whereMonth('booking_start_date', $m->month)
+                ->sum('total_amount');
+
+            $mExp = (float) Lead::where('booking_status', 'complete')
+                ->whereNotNull('booking_start_date')
+                ->where('total_expense', '>', 0)
+                ->whereYear('booking_start_date',  $m->year)
+                ->whereMonth('booking_start_date', $m->month)
+                ->sum('total_expense');
+
+            if ($mExp == 0 && $mRev > 0) $mExp = round($mRev * 0.30);
+
             $monthlyTrend[] = [
-                'month' => $month->format('M Y'),
-                'profit' => $monthProfit
+                'month'   => $m->format('M Y'),
+                'revenue' => $mRev,
+                'expense' => $mExp,
+                'profit'  => $mRev - $mExp,
             ];
         }
 
-        // Top profitable services
-        $topServices = BookingService::select(
-                'service_item_id',
-                DB::raw('SUM(quantity * profit_amount) as total_profit'),
-                DB::raw('COUNT(*) as booking_count')
-            )
-            ->with('serviceItem')
-            ->whereBetween('service_date', [$startDate, $endDate])
-            ->groupBy('service_item_id')
-            ->orderByDesc('total_profit')
+        // ── Lead source breakdown ─────────────────────────────────────────
+        $sourceBreakdown = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->select('lead_source_id',
+                DB::raw('COUNT(*) as cnt'),
+                DB::raw('SUM(total_amount) as revenue'))
+            ->groupBy('lead_source_id')
+            ->orderByDesc('revenue')
+            ->with('leadSource')
+            ->get()
+            ->map(function ($r) use ($totalRevenue) {
+                return [
+                    'label'   => optional($r->leadSource)->name ?? 'Direct',
+                    'cnt'     => $r->cnt,
+                    'revenue' => (float) $r->revenue,
+                    'pct'     => $totalRevenue > 0
+                        ? round(($r->revenue / $totalRevenue) * 100, 1) : 0,
+                ];
+            });
+
+        // ── Added-by staff breakdown ──────────────────────────────────────
+        $staffBreakdown = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->select('added_by',
+                DB::raw('COUNT(*) as cnt'),
+                DB::raw('SUM(total_amount) as revenue'))
+            ->groupBy('added_by')
+            ->orderByDesc('revenue')
+            ->limit(8)
+            ->get()
+            ->map(function ($r) {
+                $admin = \App\Models\Admin\Admin::find($r->added_by);
+                return [
+                    'name'    => $admin ? $admin->name : 'Unknown',
+                    'cnt'     => $r->cnt,
+                    'revenue' => (float) $r->revenue,
+                ];
+            });
+
+        // ── Top bookings by revenue ───────────────────────────────────────
+        $topBookings = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->orderByDesc('total_amount')
             ->limit(10)
-            ->get();
+            ->get(['id', 'guest_name', 'contact', 'total_amount',
+                   'total_expense', 'booking_start_date', 'pax', 'short_plan']);
 
-        // Recent bookings with profit details
-        $recentBookings = BookingService::with(['lead', 'serviceItem.serviceProvider', 'serviceType'])
-            ->whereBetween('service_date', [$startDate, $endDate])
-            ->orderByDesc('created_at')
-            ->limit(20)
-            ->get();
-
-        // Get filters data
-        $serviceTypes = ServiceType::active()->orderBy('name')->get();
+        // ── Recent completed bookings ─────────────────────────────────────
+        $recentBookings = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->orderByDesc('booking_start_date')
+            ->limit(15)
+            ->get(['id', 'guest_name', 'contact', 'total_amount',
+                   'total_expense', 'booking_start_date', 'pax', 'short_plan', 'added_by']);
 
         return view('admin.profit-analytics.index', compact(
-            'totalRevenue',
-            'totalCost',
-            'totalProfit',
-            'profitMargin',
-            'serviceWiseProfit',
-            'vendorOwnProfit',
-            'monthlyTrend',
-            'topServices',
-            'recentBookings',
-            'serviceTypes',
-            'startDate',
-            'endDate',
-            'serviceTypeId',
-            'providerType'
+            'totalRevenue', 'totalExpense', 'totalProfit', 'profitMargin',
+            'totalBookings', 'avgDeal',
+            'monthlyTrend', 'sourceBreakdown', 'staffBreakdown',
+            'topBookings', 'recentBookings',
+            'startDate', 'endDate', 'anchor'
         ));
     }
 
-    /**
-     * Export profit report (future implementation)
-     */
     public function exportReport(Request $request)
     {
-        // TODO: Implement Excel/PDF export
-        return response()->json(['message' => 'Export functionality coming soon']);
+        return response()->json(['message' => 'Export coming soon']);
     }
 }

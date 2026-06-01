@@ -64,6 +64,7 @@ class CategoryController extends Controller
                 'meta_description'  => $request->meta_description,
             ]
         );
+        cache()->forget('home_categories');
         return redirect()->route('category.index')->with('success', 'Category add successfully !!');
     }
 
@@ -125,6 +126,7 @@ class CategoryController extends Controller
                 'meta_description'  => $request->meta_description,
             ]
         );
+        cache()->forget('home_categories');
         return redirect()->route('category.index')->with('success', 'Category add successfully !!');
     }
 
@@ -137,6 +139,7 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         Category::destroy($id);
+        cache()->forget('home_categories');
         return redirect()->route('category.index')->with('error', 'Category deleted successfully !!');
     }
 
@@ -157,6 +160,7 @@ class CategoryController extends Controller
             $message = "Category On Home Successfully";
         }
         $data->save();
+        cache()->forget('home_categories');
         return ["message"=>$message, "res"=>$res];
     }
 

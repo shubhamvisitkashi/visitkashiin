@@ -105,6 +105,24 @@ class PaymentAccountController extends Controller
             ->with('success', 'Payment account updated successfully.');
     }
 
+    public function resetBalance($id, \Illuminate\Http\Request $request)
+    {
+        $account = PaymentAccount::findOrFail($id);
+
+        $resetTo = $request->input('reset_to', 'initial'); // 'initial' or 'zero'
+
+        if ($resetTo === 'zero') {
+            $account->current_balance = 0;
+            $msg = 'Balance reset to ₹0 for "' . $account->account_name . '".';
+        } else {
+            $account->current_balance = $account->initial_balance;
+            $msg = 'Balance reset to initial value ₹' . number_format($account->initial_balance, 2) . ' for "' . $account->account_name . '".';
+        }
+
+        $account->save();
+        return back()->with('success', $msg);
+    }
+
     public function toggleStatus($id)
     {
         $account = PaymentAccount::findOrFail($id);
@@ -119,15 +137,16 @@ class PaymentAccountController extends Controller
     public function destroy($id)
     {
         $account = PaymentAccount::findOrFail($id);
-        
+
+        // Disassociate linked payments (set payment_account_id to null) before deleting
         if ($account->payments()->count() > 0) {
-            return back()->with('error', 'Cannot delete account with existing transactions.');
+            $account->payments()->update(['payment_account_id' => null]);
         }
 
         $account->delete();
 
         return redirect()->route('payment-accounts.index')
-            ->with('success', 'Payment account deleted successfully.');
+            ->with('success', 'Payment account "' . $account->account_name . '" deleted successfully.');
     }
 
     /**

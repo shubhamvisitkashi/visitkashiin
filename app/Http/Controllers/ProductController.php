@@ -11,42 +11,51 @@ use App\Models\Admin\Product;
 use App\Models\Admin\Category;
 use App\Models\Admin\SubCategory;
 use App\Models\BoatBookingRequest;
+use App\Models\YoutubeVideo;
+use App\Models\InstagramReel;
 
 class ProductController extends Controller
 {
 
 
     public function productList($slug){
-        $category = CategoryManager::active()->where('slug',$slug)->first();
-        
-        // Return 404 if category not found
+        $category = CategoryManager::active()->where('slug',$slug)->with('subCategory')->first();
+
         if (!$category) {
             abort(404, 'Category not found');
         }
-        
-        // Eager load relationships to avoid N+1 queries
+
         $products = Product::where('is_active','active')
             ->where('category_id',$category->id)
             ->with(['category','subCategory'])
+            ->orderByDesc('on_home')
+            ->orderBy('name')
             ->get();
-            
-        return view('frontend.details',compact('products','category'));
+
+        $sub_category = null;
+        return view('frontend.details', compact('products','category','sub_category'));
     }
 
     public function productSubList($category_slug,$sub_category_slug){
+        $category = CategoryManager::active()->where('slug', $category_slug)->with('subCategory')->first();
         $sub_category = SubCategory::where('slug',$sub_category_slug)->first();
-        
+
         // Return 404 if subcategory not found
         if (!$sub_category) {
             abort(404, 'Subcategory not found');
         }
-        
+
         // Eager load relationships
         $products = Product::where('is_active','active')
             ->where('subcategory_id',$sub_category->id)
             ->with(['category','subCategory'])
             ->get();
-            
+
+        // Boat category → dedicated Airbnb-style listing
+        if ($category_slug === 'boat') {
+            return view('frontend.boat_listing', compact('products', 'sub_category'));
+        }
+
         // Special handling for festival boat booking
         if($category_slug === 'festivals' && $sub_category_slug === 'dev-diwali-boat-booking') {
             $products = Boat::where('event_type', 'Festival')
@@ -55,8 +64,8 @@ class ProductController extends Controller
                 ->get();
             return view('frontend.boat_booking',compact('products','sub_category'));
         }
-        
-        return view('frontend.details',compact('products','sub_category'));
+
+        return view('frontend.details',compact('products','category','sub_category'));
     }
 
     public function productDetail($category_slug,$sub_category_slug,$product_slug){
@@ -79,8 +88,68 @@ class ProductController extends Controller
         if (!$product) {
             abort(404, 'Product not found');
         }
-        
-        return view('frontend.tour_detail',compact('product'));
+
+        // Tour Packages → dedicated package detail page
+        if ($category_slug === 'packages') {
+            return view('frontend.package_detail', compact('product'));
+        }
+
+        // Boat → dedicated detail page with related boats
+        if ($category_slug === 'boat') {
+            $relatedBoats = Product::where('is_active', 'active')
+                ->where('id', '!=', $product->id)
+                ->whereHas('category', fn($q) => $q->where('slug', 'boat'))
+                ->with(['subCategory'])
+                ->limit(8)
+                ->get();
+            $youtubeVideos = YoutubeVideo::active()
+                ->where(function($q) use ($product) {
+                    $q->where('product_id', $product->id)->orWhereNull('product_id');
+                })
+                ->orderBy('sort_order')->orderByDesc('id')->get();
+            $instagramReels = InstagramReel::active()
+                ->where(function($q) use ($product) {
+                    $q->where('product_id', $product->id)->orWhereNull('product_id');
+                })
+                ->orderBy('sort_order')->orderByDesc('id')->get();
+            return view('frontend.boat_detail', compact('product', 'relatedBoats', 'youtubeVideos', 'instagramReels'));
+        }
+
+        // Hotel & Homestay → dedicated Booking.com-style detail page
+        if (in_array($category_slug, ['hotels', 'homestay'])) {
+            $relatedHotels = Product::where('is_active', 'active')
+                ->where('category_id', $category->id)
+                ->where('id', '!=', $product->id)
+                ->with(['subCategory'])
+                ->limit(6)
+                ->get();
+            return view('frontend.hotel_detail', compact('product', 'relatedHotels'));
+        }
+
+        // Cab → dedicated cab detail page
+        if ($category_slug === 'cab') {
+            $relatedCabs = Product::where('is_active', 'active')
+                ->where('category_id', $product->category_id)
+                ->where('id', '!=', $product->id)
+                ->with(['subCategory'])
+                ->limit(6)
+                ->get();
+            return view('frontend.cab_detail', compact('product', 'relatedCabs'));
+        }
+
+
+        // Festival → tour detail with related festivals for the sidebar
+        $relatedFestivals = collect();
+        if (str_contains(strtolower($category_slug), 'festival')) {
+            $relatedFestivals = Product::where('is_active', 'active')
+                ->where('category_id', $product->category_id)
+                ->where('id', '!=', $product->id)
+                ->with(['subCategory'])
+                ->limit(8)
+                ->get();
+        }
+
+        return view('frontend.tour_detail', compact('product', 'relatedFestivals'));
     }
 
     public function productSearch(Request $request){

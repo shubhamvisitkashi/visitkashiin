@@ -1,7 +1,4 @@
-@import "https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700";
-@import "https://fonts.googleapis.com/css?family=Mukta:300,400,600,700";
-@import 'https://fonts.googleapis.com/css?family=Poppins&amp;display=swap';
-@import 'https://fonts.googleapis.com/css?family=Josefin+Sans&amp;display=swap';
+/* Legacy font @imports removed — fonts loaded via <link> in layout head */
 
 * {
     margin: 0;
@@ -201,11 +198,11 @@ section {
 }
 
 
-section:nth-child(even) {
+.section-even {
     background: #f9f9f9
 }
 
-section:nth-child(odd) {
+.section-odd {
     background: #fff
 }
 
@@ -989,7 +986,7 @@ ul.nav-mini li i {
 }
 
 .upper-head {
-    background: #c12f00;
+    background: #7a3dec;
     padding: 10px 0;
 }
 
@@ -2332,7 +2329,7 @@ section.trusted-partners .row {
 }
 
 footer {
-    background: #d84e22;
+    background: #f8f5f2;
     position: relative
 }
 
@@ -2409,7 +2406,7 @@ footer {
     position: relative;
     z-index: 1;
     padding: 14px 0;
-    background: #c12f00
+    background: #eee8e0
 }
 
 .copyright-content p {
@@ -7358,11 +7355,11 @@ body.style-tab::after {
     }
 }
 
-.dark section:nth-child(odd) {
+.dark .section-odd {
     background: #23282d
 }
 
-.dark section:nth-child(even) {
+.dark .section-even {
     background: #32373c
 }
 

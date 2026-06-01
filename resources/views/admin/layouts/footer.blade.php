@@ -45,8 +45,8 @@
 @stack('scripts')
 <script>
     $(document).ready(function() {
-            CKEDITOR.replace( 'editor' );
-            CKEDITOR.replace( 'editor1' );
+            if (document.getElementById('editor'))  { CKEDITOR.replace('editor');  }
+            if (document.getElementById('editor1')) { CKEDITOR.replace('editor1'); }
         });
 
     $(function () {

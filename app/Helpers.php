@@ -7,7 +7,10 @@ use App\Models\BoatBookingRequest;
 
 if (!function_exists('websiteSetupValue')) {
     function websiteSetupValue($name) {
-        return WebsiteSetup::where('name', $name)->first() ? WebsiteSetup::where('name', $name)->first()->value : "";
+        $settings = cache()->remember('website_setup_all', 3600, function () {
+            return WebsiteSetup::all()->pluck('value', 'name')->toArray();
+        });
+        return $settings[$name] ?? '';
     }
 }
 
@@ -50,6 +53,33 @@ if(!function_exists('moneyFormatIndia')){
             $thecash = $num;
         }
         return $thecash; // writes the final format where $currency is the currency symbol.
+    }
+}
+
+/**
+ * Strip dangerous tags/attributes from admin-entered rich HTML.
+ * Keeps safe formatting tags (p, b, i, ul, li, a, img, table, etc.)
+ * but removes <script>, inline event handlers (onclick, onerror, …),
+ * and javascript: hrefs.
+ */
+if (!function_exists('safe_html')) {
+    function safe_html(?string $html): string
+    {
+        if (empty($html)) {
+            return '';
+        }
+
+        // Remove <script> and <iframe> blocks entirely
+        $html = preg_replace('@<(script|iframe|object|embed|form)[^>]*?>.*?</\1>@si', '', $html);
+
+        // Remove on* event handler attributes (onclick, onerror, onload …)
+        $html = preg_replace('/\s+on\w+\s*=\s*["\'][^"\']*["\']/', '', $html);
+        $html = preg_replace('/\s+on\w+\s*=\s*[^\s>]+/', '', $html);
+
+        // Remove javascript: and vbscript: protocol in href/src
+        $html = preg_replace('/\b(href|src|action)\s*=\s*["\']?\s*(javascript|vbscript):[^"\'>\s]*/i', '$1="#"', $html);
+
+        return $html;
     }
 }
 

@@ -35,7 +35,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissionParent = Permission::groupBy('parent_name')->get();
+        $permissionParent = Permission::select('parent_name')->distinct()->whereNotNull('parent_name')->orderBy('parent_name')->get();
         return view('admin.roles.create',compact('permissionParent'), ['page_title' => 'Create Role']);
     }
 
@@ -82,7 +82,7 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::find($id);
-        $permissionParent = Permission::groupBy('parent_name')->get();
+        $permissionParent = Permission::select('parent_name')->distinct()->whereNotNull('parent_name')->orderBy('parent_name')->get();
         $permission = Permission::get();
         $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id",$id)->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')->all();
         return view('admin.roles.edit',compact('role', 'permission', 'rolePermissions', 'permissionParent'), ['page_title' => 'Edit Role']);

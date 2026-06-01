@@ -1,309 +1,341 @@
 @extends('admin.layouts.app')
-
 @section('content')
 <style>
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 20px;
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    .metric-card.success {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    }
-    .metric-card.warning {
-        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    }
-    .metric-card.info {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-    .metric-value {
-        font-size: 32px;
-        font-weight: 700;
-        margin: 10px 0;
-    }
-    .metric-label {
-        font-size: 14px;
-        opacity: 0.9;
-    }
+:root{--pa:#4F46E5;--pg:#10B981;--pr:#EF4444;--pa-am:#F59E0B;--pt:#0F172A;--pm:#64748B;--pb:#E2E8F0;}
+.pan-page{padding:24px;background:#F1F5F9;min-height:100vh;}
+
+/* Header */
+.pan-header{background:linear-gradient(135deg,#0f172a,#1e3a5f,#4F46E5);border-radius:16px;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;margin-top:50px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(79,70,229,.3);}
+.pan-header::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(255,255,255,.06);border-radius:50%;}
+.pan-header-left{position:relative;z-index:1;}
+.pan-header-left h1{color:#fff;font-size:1.2rem;font-weight:800;margin:0 0 3px;}
+.pan-header-left p{color:rgba(255,255,255,.65);font-size:.78rem;margin:0;}
+.pan-data-note{position:relative;z-index:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:7px 14px;font-size:.75rem;color:rgba(255,255,255,.8);white-space:nowrap;}
+
+/* Filter bar */
+.pan-filter{background:#fff;border-radius:14px;border:1px solid var(--pb);box-shadow:0 1px 4px rgba(0,0,0,.05);padding:14px 20px;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.pan-filter-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:130px;}
+.pan-filter-group label{font-size:.7rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;}
+.pan-filter-group input,.pan-filter-group select{border:1.5px solid var(--pb);border-radius:9px;padding:7px 11px;font-size:.82rem;color:var(--pt);background:#FAFBFF;height:36px;outline:none;transition:border-color .15s;}
+.pan-filter-group input:focus,.pan-filter-group select:focus{border-color:var(--pa);}
+.pan-filter-btn{height:36px;padding:0 18px;border-radius:9px;border:none;background:var(--pa);color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;align-self:flex-end;}
+.pan-filter-clear{height:36px;padding:0 14px;border-radius:9px;border:1.5px solid var(--pb);background:#F1F5F9;color:var(--pm);font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;align-self:flex-end;}
+
+/* KPI grid */
+.pan-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
+.pan-kpi-card{border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;}
+.pan-kpi-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08);}
+.pan-kpi-icon{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0;}
+.pan-kpi-icon i[data-feather]{width:18px;height:18px;stroke:#fff;}
+.pan-kpi-val{font-size:1.5rem;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;}
+.pan-kpi-lbl{font-size:.7rem;font-weight:600;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.05em;}
+.kpi-revenue {background:linear-gradient(135deg,#4F46E5,#7C3AED);}
+.kpi-expense {background:linear-gradient(135deg,#DC2626,#EF4444);}
+.kpi-profit  {background:linear-gradient(135deg,#059669,#10B981);}
+.kpi-margin  {background:linear-gradient(135deg,#B45309,#F59E0B);}
+.kpi-bookings{background:linear-gradient(135deg,#0369A1,#0EA5E9);}
+
+/* Section cards */
+.pan-card{background:#fff;border-radius:14px;border:1px solid var(--pb);box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;margin-bottom:16px;}
+.pan-card-head{padding:14px 20px;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between;background:#FAFBFF;}
+.pan-card-title{font-size:.88rem;font-weight:700;color:var(--pt);display:flex;align-items:center;gap:8px;}
+.pan-card-title i[data-feather]{width:15px;height:15px;stroke:var(--pa);}
+.pan-card-body{padding:18px 20px;}
+
+/* Grid layout */
+.pan-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+/* Source/staff list */
+.pan-list-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F8FAFC;}
+.pan-list-item:last-child{border-bottom:none;}
+.pan-list-name{flex:1;font-size:.83rem;font-weight:600;color:var(--pt);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pan-list-cnt{font-size:.72rem;color:var(--pm);background:#F1F5F9;border-radius:20px;padding:1px 8px;flex-shrink:0;}
+.pan-list-rev{font-size:.83rem;font-weight:800;color:var(--pa);white-space:nowrap;}
+.pan-pbar-wrap{flex:1;min-width:60px;max-width:80px;}
+.pan-pbar{height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden;}
+.pan-pbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#4F46E5,#7C3AED);}
+
+/* Table */
+.pan-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.pan-table th{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--pm);padding:9px 14px;border-bottom:1.5px solid #F0F0F5;background:#FAFAFA;white-space:nowrap;}
+.pan-table td{padding:11px 14px;border-bottom:1px solid #F8FAFC;color:var(--pt);vertical-align:middle;}
+.pan-table tbody tr:hover{background:#FAFBFF;}
+.pan-table tbody tr:last-child td{border-bottom:none;}
+.pan-amt-pos{font-weight:800;color:#065F46;}
+.pan-amt-neg{font-weight:800;color:#991B1B;}
+.pan-amt-blue{font-weight:800;color:var(--pa);}
+
+/* Chart wrap */
+.pan-chart-wrap{height:240px;position:relative;}
+
+/* Responsive */
+@media(max-width:1100px){.pan-kpi{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:768px){
+    .pan-page{padding:12px;}
+    .pan-kpi{grid-template-columns:repeat(2,1fr);}
+    .pan-grid-2{grid-template-columns:1fr;}
+    .pan-header{flex-direction:column;align-items:flex-start;padding:16px 18px;}
+}
+@media(max-width:480px){.pan-kpi{grid-template-columns:1fr 1fr;}}
 </style>
 
-<div class="page-content">
-    <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
-        <div>
-            <h4 class="mb-3 mb-md-0">Profit Analytics</h4>
+<div class="pan-page">
+
+{{-- Header --}}
+<div class="pan-header">
+    <div class="pan-header-left">
+        <h1>📊 Profit Analytics</h1>
+        <p>Real revenue, expense & profit from completed bookings</p>
+    </div>
+    <div class="pan-data-note">
+        📅 {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} – {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+    </div>
+</div>
+
+{{-- Filters --}}
+<form method="GET" action="{{ route('profit-analytics.index') }}" class="pan-filter">
+    <div class="pan-filter-group">
+        <label>Start Date</label>
+        <input type="date" name="start_date" value="{{ $startDate }}">
+    </div>
+    <div class="pan-filter-group">
+        <label>End Date</label>
+        <input type="date" name="end_date" value="{{ $endDate }}">
+    </div>
+    <button type="submit" class="pan-filter-btn">Apply</button>
+    <a href="{{ route('profit-analytics.index') }}" class="pan-filter-clear">Reset</a>
+</form>
+
+{{-- KPI Cards --}}
+<div class="pan-kpi">
+    <div class="pan-kpi-card kpi-revenue">
+        <div class="pan-kpi-icon"><i data-feather="trending-up"></i></div>
+        <div class="pan-kpi-val">₹{{ number_format($totalRevenue,0) }}</div>
+        <div class="pan-kpi-lbl">Total Revenue</div>
+    </div>
+    <div class="pan-kpi-card kpi-expense">
+        <div class="pan-kpi-icon"><i data-feather="trending-down"></i></div>
+        <div class="pan-kpi-val">₹{{ number_format($totalExpense,0) }}</div>
+        <div class="pan-kpi-lbl">Total Expenses</div>
+    </div>
+    <div class="pan-kpi-card kpi-profit">
+        <div class="pan-kpi-icon"><i data-feather="dollar-sign"></i></div>
+        <div class="pan-kpi-val">₹{{ number_format($totalProfit,0) }}</div>
+        <div class="pan-kpi-lbl">Net Profit</div>
+    </div>
+    <div class="pan-kpi-card kpi-margin">
+        <div class="pan-kpi-icon"><i data-feather="percent"></i></div>
+        <div class="pan-kpi-val">{{ $profitMargin }}%</div>
+        <div class="pan-kpi-lbl">Profit Margin</div>
+    </div>
+    <div class="pan-kpi-card kpi-bookings">
+        <div class="pan-kpi-icon"><i data-feather="calendar"></i></div>
+        <div class="pan-kpi-val">{{ $totalBookings }}</div>
+        <div class="pan-kpi-lbl">Completed Bookings</div>
+    </div>
+</div>
+
+{{-- Charts row --}}
+<div class="pan-grid-2">
+    {{-- Monthly Trend --}}
+    <div class="pan-card">
+        <div class="pan-card-head">
+            <div class="pan-card-title"><i data-feather="bar-chart-2"></i> 6-Month Trend</div>
+        </div>
+        <div class="pan-card-body">
+            <div class="pan-chart-wrap"><canvas id="trendChart"></canvas></div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="GET" action="{{ route('profit-analytics.index') }}">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Start Date</label>
-                                <input type="date" name="start_date" class="form-control" value="{{ $startDate->format('Y-m-d') }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">End Date</label>
-                                <input type="date" name="end_date" class="form-control" value="{{ $endDate->format('Y-m-d') }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Service Type</label>
-                                <select name="service_type_id" class="form-select">
-                                    <option value="">All Services</option>
-                                    @foreach($serviceTypes as $type)
-                                        <option value="{{ $type->id }}" {{ $serviceTypeId == $type->id ? 'selected' : '' }}>
-                                            {{ $type->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Provider Type</label>
-                                <select name="provider_type" class="form-select">
-                                    <option value="">All Types</option>
-                                    <option value="vendor" {{ $providerType == 'vendor' ? 'selected' : '' }}>Vendor</option>
-                                    <option value="own" {{ $providerType == 'own' ? 'selected' : '' }}>Own Service</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">&nbsp;</label>
-                                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                            </div>
-                        </div>
-                    </form>
+    {{-- Source Breakdown --}}
+    <div class="pan-card">
+        <div class="pan-card-head">
+            <div class="pan-card-title"><i data-feather="pie-chart"></i> Revenue by Source</div>
+        </div>
+        <div class="pan-card-body">
+            @forelse($sourceBreakdown as $src)
+            <div class="pan-list-item">
+                <div class="pan-list-name">{{ $src['label'] }}</div>
+                <div class="pan-pbar-wrap">
+                    <div class="pan-pbar"><div class="pan-pbar-fill" style="width:{{ $src['pct'] }}%;"></div></div>
                 </div>
+                <div class="pan-list-cnt">{{ $src['cnt'] }}</div>
+                <div class="pan-list-rev">₹{{ number_format($src['revenue'],0) }}</div>
             </div>
-        </div>
-    </div>
-
-    <!-- Key Metrics -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="metric-card">
-                <div class="metric-label">Total Revenue</div>
-                <div class="metric-value">₹{{ number_format($totalRevenue, 2) }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="metric-card warning">
-                <div class="metric-label">Total Cost</div>
-                <div class="metric-value">₹{{ number_format($totalCost, 2) }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="metric-card success">
-                <div class="metric-label">Total Profit</div>
-                <div class="metric-value">₹{{ number_format($totalProfit, 2) }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="metric-card info">
-                <div class="metric-label">Profit Margin</div>
-                <div class="metric-value">{{ $profitMargin }}%</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">Service-wise Profit</h6>
-                    <canvas id="serviceWiseChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">Monthly Profit Trend</h6>
-                    <canvas id="monthlyTrendChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Service-wise Breakdown -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">Service-wise Breakdown</h6>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Service Type</th>
-                                    <th>Revenue</th>
-                                    <th>Cost</th>
-                                    <th>Profit</th>
-                                    <th>Margin %</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($serviceWiseProfit as $service)
-                                <tr>
-                                    <td><strong>{{ $service->serviceType->name }}</strong></td>
-                                    <td>₹{{ number_format($service->total_revenue, 2) }}</td>
-                                    <td>₹{{ number_format($service->total_cost, 2) }}</td>
-                                    <td class="text-success"><strong>₹{{ number_format($service->total_profit, 2) }}</strong></td>
-                                    <td>
-                                        <span class="badge bg-primary">
-                                            {{ $service->total_revenue > 0 ? number_format(($service->total_profit / $service->total_revenue) * 100, 2) : 0 }}%
-                                        </span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Profitable Services -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">Top 10 Profitable Services</h6>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Service Item</th>
-                                    <th>Bookings</th>
-                                    <th>Total Profit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($topServices as $index => $service)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $service->serviceItem->name }}</td>
-                                    <td><span class="badge bg-info">{{ $service->booking_count }}</span></td>
-                                    <td class="text-success"><strong>₹{{ number_format($service->total_profit, 2) }}</strong></td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Bookings -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title">Recent Service Bookings</h6>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Lead</th>
-                                    <th>Service</th>
-                                    <th>Provider</th>
-                                    <th>Qty</th>
-                                    <th>Selling Price</th>
-                                    <th>Cost</th>
-                                    <th>Profit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($recentBookings as $booking)
-                                <tr>
-                                    <td>{{ $booking->service_date->format('d M Y') }}</td>
-                                    <td>{{ $booking->lead->name ?? 'N/A' }}</td>
-                                    <td>{{ $booking->serviceItem->name }}</td>
-                                    <td>
-                                        {{ $booking->serviceItem->serviceProvider->name }}
-                                        <br><small class="text-muted">({{ ucfirst($booking->serviceItem->serviceProvider->type) }})</small>
-                                    </td>
-                                    <td>{{ $booking->quantity }}</td>
-                                    <td>₹{{ number_format($booking->selling_price, 2) }}</td>
-                                    <td>₹{{ number_format($booking->cost_price, 2) }}</td>
-                                    <td class="text-success"><strong>₹{{ number_format($booking->profit_amount, 2) }}</strong></td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            @empty
+            <p style="color:var(--pm);font-size:.83rem;text-align:center;padding:20px 0;">No data for selected period</p>
+            @endforelse
         </div>
     </div>
 </div>
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Service-wise Profit Chart
-const serviceWiseCtx = document.getElementById('serviceWiseChart').getContext('2d');
-new Chart(serviceWiseCtx, {
-    type: 'doughnut',
-    data: {
-        labels: {!! json_encode($serviceWiseProfit->pluck('serviceType.name')) !!},
-        datasets: [{
-            data: {!! json_encode($serviceWiseProfit->pluck('total_profit')) !!},
-            backgroundColor: [
-                'rgba(102, 126, 234, 0.8)',
-                'rgba(17, 153, 142, 0.8)',
-                'rgba(250, 112, 154, 0.8)',
-                'rgba(79, 172, 254, 0.8)',
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
-});
+{{-- Staff & Top Bookings --}}
+<div class="pan-grid-2">
+    {{-- Staff Breakdown --}}
+    <div class="pan-card">
+        <div class="pan-card-head">
+            <div class="pan-card-title"><i data-feather="users"></i> Revenue by Staff</div>
+        </div>
+        <div class="pan-card-body">
+            @php $maxStaff = $staffBreakdown->max('revenue') ?: 1; @endphp
+            @forelse($staffBreakdown as $staff)
+            <div class="pan-list-item">
+                <div class="pan-list-name">{{ $staff['name'] }}</div>
+                <div class="pan-pbar-wrap">
+                    <div class="pan-pbar"><div class="pan-pbar-fill" style="width:{{ round(($staff['revenue']/$maxStaff)*100) }}%;background:linear-gradient(90deg,#059669,#10B981);"></div></div>
+                </div>
+                <div class="pan-list-cnt">{{ $staff['cnt'] }}</div>
+                <div class="pan-list-rev" style="color:#059669;">₹{{ number_format($staff['revenue'],0) }}</div>
+            </div>
+            @empty
+            <p style="color:var(--pm);font-size:.83rem;text-align:center;padding:20px 0;">No data for selected period</p>
+            @endforelse
+        </div>
+    </div>
 
-// Monthly Trend Chart
-const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-new Chart(monthlyTrendCtx, {
-    type: 'line',
-    data: {
-        labels: {!! json_encode(collect($monthlyTrend)->pluck('month')) !!},
-        datasets: [{
-            label: 'Profit',
-            data: {!! json_encode(collect($monthlyTrend)->pluck('profit')) !!},
-            borderColor: 'rgba(102, 126, 234, 1)',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                display: false
+    {{-- Avg deal + margin summary --}}
+    <div class="pan-card">
+        <div class="pan-card-head">
+            <div class="pan-card-title"><i data-feather="activity"></i> Summary Stats</div>
+        </div>
+        <div class="pan-card-body">
+            @php
+                $summaryItems = [
+                    ['label'=>'Avg Deal Value',        'val'=>'₹'.number_format($avgDeal,0),        'color'=>'#4F46E5'],
+                    ['label'=>'Total Revenue',         'val'=>'₹'.number_format($totalRevenue,0),   'color'=>'#4F46E5'],
+                    ['label'=>'Total Expenses',        'val'=>'₹'.number_format($totalExpense,0),   'color'=>'#DC2626'],
+                    ['label'=>'Net Profit',            'val'=>'₹'.number_format($totalProfit,0),    'color'=>'#059669'],
+                    ['label'=>'Profit Margin',         'val'=>$profitMargin.'%',                    'color'=>'#B45309'],
+                    ['label'=>'Completed Bookings',    'val'=>$totalBookings,                       'color'=>'#0369A1'],
+                ];
+            @endphp
+            @foreach($summaryItems as $item)
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed #F1F5F9;">
+                <span style="font-size:.82rem;color:var(--pm);font-weight:600;">{{ $item['label'] }}</span>
+                <span style="font-size:.88rem;font-weight:800;color:{{ $item['color'] }};">{{ $item['val'] }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+{{-- Top Bookings Table --}}
+<div class="pan-card">
+    <div class="pan-card-head">
+        <div class="pan-card-title"><i data-feather="star"></i> Top Bookings by Revenue</div>
+        <span style="font-size:.73rem;color:var(--pm);">Top 10</span>
+    </div>
+    <div class="table-responsive">
+        <table class="pan-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Guest</th>
+                    <th>Date</th>
+                    <th>Plan</th>
+                    <th class="text-end">Revenue</th>
+                    <th class="text-end">Expense</th>
+                    <th class="text-end">Profit</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($topBookings as $i => $b)
+                @php
+                    $exp = ($b->total_expense > 0) ? $b->total_expense : round($b->total_amount * 0.3);
+                    $prf = $b->total_amount - $exp;
+                @endphp
+                <tr>
+                    <td style="font-weight:700;color:var(--pm);">{{ $i+1 }}</td>
+                    <td>
+                        <div style="font-weight:700;font-size:.84rem;">{{ $b->guest_name }}</div>
+                        <div style="font-size:.72rem;color:var(--pm);">{{ $b->contact }}</div>
+                    </td>
+                    <td style="font-size:.78rem;white-space:nowrap;">{{ \Carbon\Carbon::parse($b->booking_start_date)->format('d M Y') }}</td>
+                    <td style="font-size:.75rem;color:var(--pm);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b->short_plan ?? '—' }}</td>
+                    <td class="text-end pan-amt-blue">₹{{ number_format($b->total_amount,0) }}</td>
+                    <td class="text-end pan-amt-neg">₹{{ number_format($exp,0) }}</td>
+                    <td class="text-end pan-amt-pos">₹{{ number_format($prf,0) }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--pm);">No data for selected period</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+
+    // Monthly Trend Chart
+    var trend = @json($monthlyTrend);
+    var ctx = document.getElementById('trendChart');
+    if (ctx && trend.length) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: trend.map(t => t.month),
+                datasets: [
+                    {
+                        label: 'Revenue',
+                        data: trend.map(t => t.revenue),
+                        backgroundColor: 'rgba(79,70,229,.8)',
+                        borderRadius: 5,
+                        order: 2
+                    },
+                    {
+                        label: 'Expense',
+                        data: trend.map(t => t.expense),
+                        backgroundColor: 'rgba(239,68,68,.65)',
+                        borderRadius: 5,
+                        order: 3
+                    },
+                    {
+                        label: 'Net Profit',
+                        data: trend.map(t => t.profit),
+                        type: 'line',
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16,185,129,.12)',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#10B981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: c => ' ' + c.dataset.label + ': ₹' + Math.abs(c.parsed.y).toLocaleString('en-IN')
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,.04)' },
+                        ticks: {
+                            font: { size: 10 },
+                            callback: v => '₹' + (v >= 100000 ? (v/100000).toFixed(1)+'L' : (v/1000).toFixed(0)+'K')
+                        }
+                    },
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                }
             }
-        },
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
+        });
     }
 });
 </script>
-@endpush
 @endsection

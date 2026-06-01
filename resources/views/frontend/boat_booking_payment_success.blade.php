@@ -217,9 +217,11 @@
         }
 
         @media print {
-            .btn, .alert {
+            .btn, .alert, nav, header, footer, .navbar, .sidebar {
                 display: none !important;
             }
+            body { background: #fff !important; }
+            .container { box-shadow: none !important; }
         }
     </style>
 
@@ -234,16 +236,9 @@
             @endif
         }
 
-        // Download receipt function
+        // Download receipt — use CSS @media print instead of innerHTML replacement
         function downloadReceipt() {
-            // Create a printable version
-            const printContent = document.querySelector('.container').innerHTML;
-            const originalContent = document.body.innerHTML;
-
-            document.body.innerHTML = printContent;
             window.print();
-            document.body.innerHTML = originalContent;
-            location.reload();
         }
 
         // Print booking function

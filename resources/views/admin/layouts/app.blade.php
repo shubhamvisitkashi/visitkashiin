@@ -10,7 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&amp;display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&display=swap"
         rel="stylesheet">
     <!-- End fonts -->
 
@@ -59,11 +59,14 @@
         }
     </style>
 
+    <!-- SaaS Admin Design System -->
+    <link rel="stylesheet" href="{{ asset('backend/assets/css/admin-saas.css') }}">
+
     @stack('styles')
 
 </head>
 
-<body>
+<body class="{{ (session('selected_theme') === 'Dark') ? 'dark-mode' : '' }}">
     <div class="main-wrapper">
 
         @include('admin.layouts.sidebar')
@@ -93,6 +96,38 @@
                 // console.error( error );
             } );
         </script> --}}
+    {{-- Mobile Bottom Navigation (visible ≤991px) --}}
+    <nav class="sa-mob-nav" aria-label="Mobile navigation">
+        <a href="{{ route('admin.dashboard') }}"
+           class="sa-mob-nav__item @if(Route::currentRouteName() == 'admin.dashboard') active @endif">
+            <i data-feather="home"></i>
+            <span>Home</span>
+        </a>
+        @canany(['lead-list','agent-list'])
+        <a href="{{ route('lead.index') }}"
+           class="sa-mob-nav__item @if(in_array(Route::currentRouteName(), ['lead.index','lead.show','lead.edit'])) active @endif">
+            <i data-feather="users"></i>
+            <span>Leads</span>
+        </a>
+        @endcanany
+        @can('booking-create')
+        <a href="{{ route('bookings.create-direct') }}" class="sa-mob-nav__fab" aria-label="New Booking">
+            <i data-feather="plus"></i>
+        </a>
+        @endcan
+        @canany(['booking-list','booking-view'])
+        <a href="{{ route('bookings.index') }}"
+           class="sa-mob-nav__item @if(in_array(Route::currentRouteName(), ['bookings.index','bookings.show'])) active @endif">
+            <i data-feather="calendar"></i>
+            <span>Bookings</span>
+        </a>
+        @endcanany
+        <a href="#" class="sa-mob-nav__item" onclick="event.preventDefault(); document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active');">
+            <i data-feather="grid"></i>
+            <span>Menu</span>
+        </a>
+    </nav>
+
     @include('admin.layouts.footer')
 
     <script>

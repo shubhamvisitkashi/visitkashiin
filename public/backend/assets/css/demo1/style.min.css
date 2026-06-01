@@ -23789,7 +23789,7 @@ svg.icon-xxl {
 }
 
 .ht-15 {
-    height: 15px;
+    height: auto;
 }
 
 .ht-20 {
@@ -24090,8 +24090,8 @@ div.tox .buy-now-wrapper .tox-button svg {
     margin-left: 240px;
     display: flex;
     flex-direction: column;
-    -webkit-transition: margin 0.1s ease, width 0.1s ease;
-    transition: margin 0.1s ease, width 0.1s ease;
+    -webkit-transition: none;
+    transition: none;
 }
 
 .main-wrapper .page-wrapper .page-content {
@@ -24371,7 +24371,7 @@ div.tox .buy-now-wrapper .tox-button svg {
 }
 
 .sidebar .sidebar-header {
-    background: #c12f00;
+    background: #1c97e9;
     height: 60px;
     border-bottom: 1px solid #e9ecef;
     display: flex;
@@ -24676,17 +24676,16 @@ div.tox .buy-now-wrapper .tox-button svg {
 .sidebar .sidebar-body {
     max-height: calc(100% - 60px);
     position: relative;
-    border-right: 1px solid #e9ecef;
+    border-right: none;
     height: 100%;
-    -webkit-box-shadow: 0 8px 10px 0 rgba(183, 192, 206, 0.2);
-    box-shadow: 0 8px 10px 0 rgba(183, 192, 206, 0.2);
-    background: #fff;
+    box-shadow: none;
+    background: transparent;
 }
 
 .sidebar .sidebar-body .nav {
     display: flex;
     flex-direction: column;
-    padding: 25px 0;
+    padding: 6px 0;
 }
 
 .sidebar .sidebar-body .nav .nav-item {
@@ -24694,8 +24693,8 @@ div.tox .buy-now-wrapper .tox-button svg {
 }
 
 .sidebar .sidebar-body .nav .nav-item .nav-link:hover {
-    color: #fff !important;
-    background: #c12f00;
+    color: #1a1a1a !important;
+    background: #f9c74f;
     border-radius: 0;
     font-weight: 600;
 }
@@ -24703,16 +24702,16 @@ div.tox .buy-now-wrapper .tox-button svg {
 .sidebar .sidebar-body .nav .nav-item .nav-link {
     display: flex;
     align-items: center;
-    padding: 22px 20px;
-    height: 32px;
+    padding: 10px 18px;
+    height: auto;
     white-space: nowrap;
-    color: #000;
+    color: rgba(255,255,255,.65);
 }
 
 .sidebar .sidebar-body .nav .nav-item .nav-link .link-icon {
     width: 16px;
     height: 16px;
-    fill: rgba(233, 236, 239, 0.21);
+    fill: rgba(255,255,255,.5);
     position: absolute;
     color: inherit;
 }
@@ -24742,7 +24741,7 @@ div.tox .buy-now-wrapper .tox-button svg {
 }
 
 .sidebar .sidebar-body .nav .nav-item .nav-link[aria-expanded="true"] {
-    color: #000;
+    color: rgba(255,255,255,.85);
 }
 
 .sidebar
@@ -24761,17 +24760,17 @@ div.tox .buy-now-wrapper .tox-button svg {
     text-transform: uppercase;
     font-weight: 500;
     letter-spacing: 0.5px;
-    margin-bottom: 5px;
-    height: 15px;
+    margin-bottom: 0;
+    height: auto;
 }
 
 .sidebar .sidebar-body .nav .nav-item.nav-category:not(:first-child) {
-    margin-top: 20px;
-    padding-left: 20px;
+    margin-top: 0;
+    padding-left: 18px;
 }
 
 .sidebar .sidebar-body .nav .nav-item:hover .nav-link {
-    color: #6571ff;
+    color: #fff;
 }
 
 .sidebar .sidebar-body .nav .nav-item:hover .nav-link .link-title {
@@ -24785,7 +24784,7 @@ div.tox .buy-now-wrapper .tox-button svg {
 
 .sidebar .sidebar-body .nav .nav-item.active .nav-link {
     color: #fff !important;
-    background: #c12f00;
+    background: #af05c9;
     border-radius: 0;
     font-weight: 600;
 }
@@ -24794,7 +24793,7 @@ div.tox .buy-now-wrapper .tox-button svg {
     content: "";
     width: 3px;
     height: 26px;
-    background: #c12f00;
+    background: #af05c9;
     position: absolute;
     left: -25px;
 }
@@ -24813,8 +24812,8 @@ div.tox .buy-now-wrapper .tox-button svg {
 }
 
 .sidebar .sidebar-body .nav.sub-menu .nav-item .nav-link {
-    height: 25px;
-    color: #000;
+    height: auto;
+    color: rgba(255,255,255,.5);
     font-size: 13px;
     -webkit-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
@@ -24826,7 +24825,7 @@ div.tox .buy-now-wrapper .tox-button svg {
     height: 6px;
     border-radius: 50%;
     background: 0 0;
-    border: 1px solid #c12f00;
+    border: 1px solid rgba(255,255,255,.3);
     position: absolute;
     left: -29px;
     top: 10px;
@@ -24837,7 +24836,7 @@ div.tox .buy-now-wrapper .tox-button svg {
 
 .sidebar .sidebar-body .nav.sub-menu .nav-item .nav-link.active {
     color: #fff;
-    background: #c12f00;
+    background: #7344ed;
 }
 
 .sidebar .sidebar-body .nav.sub-menu .nav-item .nav-link.active::before {
@@ -24846,13 +24845,13 @@ div.tox .buy-now-wrapper .tox-button svg {
 }
 
 .sidebar .sidebar-body .nav.sub-menu .nav-item:hover .nav-link {
-    color: #6571ff;
+    color: #fff;
     margin-left: 3px;
 }
 
 .sidebar .sidebar-body .nav.sub-menu .nav-item:hover .nav-link::before {
-    border: 1px solid #c12f00;
-    background: #c12f00;
+    border: 1px solid #f9c74f;
+    background: #f9c74f;
 }
 
 @media (max-width: 991px) {
@@ -25499,7 +25498,7 @@ div.tox .btn-icon.btn-sm.tox-button {
 .wizard > .actions a.btn-icon.btn-sm svg,
 div.tox .btn-group-sm > .btn-icon.tox-button svg,
 div.tox .btn-icon.btn-sm.tox-button svg {
-    height: 15px;
+    height: auto;
 }
 
 .btn-group-lg > .btn.btn-icon,
@@ -25600,7 +25599,7 @@ div.tox .btn-group-sm > .btn-icon-text.tox-button .btn-icon-prepend,
 div.tox .btn-icon-text.btn-sm.tox-button .btn-icon-append,
 div.tox .btn-icon-text.btn-sm.tox-button .btn-icon-prepend {
     width: 15px;
-    height: 15px;
+    height: auto;
 }
 
 .btn-group-lg > .btn.btn-icon-text .btn-icon-append,

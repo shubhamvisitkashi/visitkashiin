@@ -101,11 +101,6 @@
                                 <i data-feather="zap" style="width: 18px; height: 18px;"></i>
                                 Quick Booking
                             </a>
-                            <a href="{{ route('quotations.create', ['lead_id' => $data->id]) }}"
-                                class="btn btn-primary btn-action">
-                                <i data-feather="file-text" style="width: 18px; height: 18px;"></i>
-                                Create Quotation
-                            </a>
                             <a href="{{ route('lead.edit', $data->id) }}" class="btn btn-warning btn-action">
                                 <i data-feather="edit" style="width: 18px; height: 18px;"></i>
                                 Edit

@@ -654,38 +654,114 @@
             min-height: 48px;
         }
 
-        .mobile-toggle-btn:hover {
-            background: #f9fafb;
-        }
+        .mobile-toggle-btn:hover { background: #f9fafb; }
+        .mobile-toggle-btn:active { background: #f3f4f6; transform: scale(0.99); }
+        .mobile-toggle-btn i { transition: transform 0.3s ease; }
+        .mobile-toggle-btn.collapsed i:last-child { transform: rotate(-90deg); }
 
-        .mobile-toggle-btn:active {
-            background: #f3f4f6;
-            transform: scale(0.99);
-        }
-
-        .mobile-toggle-btn i {
-            transition: transform 0.3s ease;
-        }
-
-        .mobile-toggle-btn.collapsed i:last-child {
-            transform: rotate(-90deg);
-        }
-
-        /* Touch-friendly improvements */
         @media (hover: none) and (pointer: coarse) {
+            .stat-card:active { transform: scale(0.98); }
+        }
 
-            /* This targets touch devices */
-            .stat-card:active {
-                transform: scale(0.98);
-            }
+        /* ── Compact Lead Rows ── */
+        .lead-list-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(15,23,42,.05);
+            overflow: hidden;
+        }
+        .lead-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            border-bottom: 1px solid #F1F5F9;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .lead-row:last-child { border-bottom: none; }
+        .lead-row:hover { background: #F8FAFF; }
 
-            .action-btn:active {
-                transform: scale(0.96);
-            }
+        /* serial number */
+        .lead-row .lr-num {
+            width: 26px; height: 26px;
+            background: #EEF2FF; color: #4F46E5;
+            border-radius: 7px;
+            font-size: .7rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
 
-            .lead-card:active {
-                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-            }
+        /* name + phone */
+        .lead-row .lr-info { flex: 1; min-width: 0; }
+        .lead-row .lr-name {
+            font-size: .875rem; font-weight: 600; color: #0F172A;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+        .lead-row .lr-phone {
+            font-size: .75rem; color: #64748B;
+            display: flex; align-items: center; gap: 4px;
+            margin-top: 1px;
+        }
+        .lead-row .lr-phone svg { width:11px; height:11px; flex-shrink:0; }
+
+        /* pax pill */
+        .lr-pax {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #F0FDF4; color: #15803D;
+            border: 1px solid #BBF7D0;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: .72rem; font-weight: 700;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .lr-pax svg { width:11px; height:11px; }
+
+        /* added-by + date chips */
+        .lr-meta {
+            display: flex; flex-direction: column; gap: 3px;
+            flex-shrink: 0; min-width: 90px;
+        }
+        .lr-meta-item {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: .7rem; color: #64748B; white-space: nowrap;
+        }
+        .lr-meta-item svg { width:10px; height:10px; flex-shrink:0; }
+        .lr-meta-item strong { color: #334155; font-weight: 600; }
+        @media(max-width:768px) { .lr-meta { display: none; } }
+
+        /* status dot */
+        .lr-status {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .lr-status.complete  { background: #10B981; }
+        .lr-status.confirm   { background: #3B82F6; }
+        .lr-status.follow-up { background: #F59E0B; }
+        .lr-status.cancel    { background: #EF4444; }
+        .lr-status.new       { background: #94A3B8; }
+
+        /* action buttons */
+        .lr-actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .lr-btn {
+            width: 30px; height: 30px;
+            border-radius: 7px; border: 1px solid transparent;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s;
+            text-decoration: none; background: transparent;
+        }
+        .lr-btn svg { width:14px; height:14px; }
+        .lr-btn.edit  { color: #F59E0B; border-color: #FDE68A; }
+        .lr-btn.edit:hover  { background: #FEF3C7; color: #D97706; }
+        .lr-btn.delete { color: #EF4444; border-color: #FECACA; }
+        .lr-btn.delete:hover { background: #FEE2E2; color: #DC2626; }
+        .lr-btn.view  { color: #4F46E5; border-color: #C7D2FE; }
+        .lr-btn.view:hover  { background: #EEF2FF; }
+
+        @media(max-width:576px) {
+            .lead-row { padding: 10px 12px; gap: 9px; }
+            .lead-row .lr-num { display: none; }
         }
     </style>
 
@@ -701,9 +777,9 @@
                     <a href="{{ route('leads.calendar') }}" class="btn btn-light btn-lg">
                         <i data-feather="calendar"></i> Calendar View
                     </a>
-                    @can('lead-create')
-                        <a href="{{ route('lead.create') }}" class="btn btn-light btn-lg">
-                            <i data-feather="plus"></i> Add New Lead
+                    @can('booking-create')
+                        <a href="{{ route('bookings.create-direct') }}" class="btn btn-light btn-lg">
+                            <i data-feather="plus"></i> New Booking
                         </a>
                     @endcan
                 </div>
@@ -877,196 +953,101 @@
         </div>
 
         <!-- Leads List -->
-        <div class="leads-list">
-            @forelse ($list as $key => $data)
-                <div class="lead-card">
-                    <div class="lead-header">
-                        <div>
-                            <div class="lead-name">{{ $data->guest_name }}</div>
-                            <div class="lead-contact">
-                                <i data-feather="phone" style="width: 14px; height: 14px;"></i>
-                                <a href="tel:{{ $data->contact }}" class="d-md-none">{{ $data->contact }}</a>
-                                <span class="d-none d-md-inline">{{ $data->contact }}</span>
+        @if ($list->isEmpty())
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h4>No Leads Found</h4>
+                <p>Try adjusting your search filters or add a new lead to get started.</p>
+            </div>
+        @else
+            <div class="lead-list-card">
+                @foreach ($list as $key => $data)
+                    @php
+                        $statusClass = match($data->booking_status) {
+                            'complete'  => 'complete',
+                            'confirm'   => 'confirm',
+                            'follow up' => 'follow-up',
+                            'cancel'    => 'cancel',
+                            default     => 'new',
+                        };
+                        $latestBooking = $data->bookings()->latest()->first();
+                    @endphp
+                    <div class="lead-row" onclick="window.location='{{ route('lead.details', $data->id) }}'">
+
+                        {{-- Serial --}}
+                        <div class="lr-num">{{ $list->firstItem() + $loop->index }}</div>
+
+                        {{-- Status dot --}}
+                        <span class="lr-status {{ $statusClass }}" title="{{ ucfirst($data->booking_status ?? 'New') }}"></span>
+
+                        {{-- Name + Phone --}}
+                        <div class="lr-info">
+                            <div class="lr-name">{{ $data->guest_name }}</div>
+                            <div class="lr-phone">
+                                <i data-feather="phone"></i>
+                                {{ $data->contact }}
                             </div>
                         </div>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            @php
-                                $latestBooking = $data->bookings()->latest()->first();
-                            @endphp
 
-                            @if ($latestBooking && $data->booking_status == 'complete')
-                                {{-- Clickable badge when booking exists and is complete --}}
+                        {{-- Pax --}}
+                        <span class="lr-pax">
+                            <i data-feather="users"></i>
+                            {{ $data->pax ?? '–' }}
+                        </span>
+
+                        {{-- Added By + Date --}}
+                        <div class="lr-meta">
+                            <span class="lr-meta-item">
+                                <i data-feather="user"></i>
+                                <strong>{{ $data->getAddedBy->name ?? 'N/A' }}</strong>
+                            </span>
+                            <span class="lr-meta-item">
+                                <i data-feather="calendar"></i>
+                                {{ $data->created_at ? $data->created_at->format('d M Y') : '–' }}
+                            </span>
+                        </div>
+
+                        {{-- Actions --}}
+                        <div class="lr-actions" onclick="event.stopPropagation()">
+                            {{-- View / Quick-book --}}
+                            @if ($latestBooking)
                                 <a href="{{ route('bookings.show', $latestBooking->id) }}"
-                                    class="badge-modern bg-primary text-decoration-none"
-                                    style="cursor: pointer; transition: opacity 0.2s;"
-                                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"
-                                    title="Click to view booking details">
-                                    {{ ucfirst($data->booking_status) }}
-                                    <i data-feather="external-link"
-                                        style="width: 12px; height: 12px; margin-left: 4px;"></i>
+                                   class="lr-btn view" title="View Booking">
+                                    <i data-feather="external-link"></i>
                                 </a>
-                            @elseif($data->booking_status == 'complete')
-                                {{-- Regular badge for complete status without booking --}}
-                                <span class="badge-modern bg-primary">
-                                    {{ ucfirst($data->booking_status) }}
-                                </span>
-                            @elseif($data->booking_status == 'follow up')
-                                <span class="badge-modern bg-warning">
-                                    {{ ucfirst($data->booking_status) }}
-                                </span>
-                            @elseif($data->booking_status == 'cancel')
-                                <span class="badge-modern bg-danger">
-                                    {{ ucfirst($data->booking_status) }}
-                                </span>
+                            @else
+                                <a href="{{ route('quick-booking.form', $data->id) }}"
+                                   class="lr-btn view" title="Quick Book">
+                                    <i data-feather="zap"></i>
+                                </a>
                             @endif
-                        </div>
-                    </div>
 
-                    <div class="lead-info">
-                        <div class="info-item">
-                            <div class="info-label">Service Types</div>
-                            <div class="info-value">
-                                @php
-                                    $services = App\Models\ServiceType::whereIn('id', $data->service_ids ?? [])->get();
-                                @endphp
-                                @if ($services->count() > 0)
-                                    @foreach ($services as $service)
-                                        <span class="badge bg-primary me-1">{{ $service->name }}</span>
-                                    @endforeach
-                                @else
-                                    <span class="text-muted">Not specified</span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="info-item">
-                            <div class="info-label">Booking Date</div>
-                            <div class="info-value">
-                                @if ($data->booking_start_date)
-                                    {{ dateFormat($data->booking_start_date) }}
-                                    @if ($data->booking_start_date != $data->booking_end_date)
-                                        - {{ dateFormat($data->booking_end_date) }}
-                                    @endif
-                                    @if (date('Y-m-d') == $data->booking_start_date)
-                                        <span class="badge bg-success ms-1">Today</span>
-                                    @endif
-                                @else
-                                    -
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="d-flex gap-3 mb-3">
-                            @canany(['staff-list', 'lead-list'])
-                                <div class="info-item flex-fill">
-                                    <div class="info-label">Added By</div>
-                                    <div class="info-value">{{ $data->getAddedBy->name ?? 'N/A' }}</div>
-                                </div>
-                            @endcanany
-
-                            <div class="info-item flex-fill">
-                                <div class="info-label">Number of Pax</div>
-                                <div class="info-value">
-                                    <strong>
-                                        <i data-feather="users" style="width: 16px; height: 16px;"></i>
-                                        {{ $data->pax ?? 'N/A' }}
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Old System Payment Data --}}
-                    @if ($data->bookings->isEmpty() && ($data->total_amount > 0 || $data->paid_amount > 0 || $data->pending_amount > 0))
-                        <div class="old-payment-section">
-                            <div class="section-header">
-                                <div class="section-title">
-                                    <i data-feather="database" style="width: 12px; height: 12px;"></i>
-                                    Payment Details (Legacy Data)
-                                </div>
-                                <span class="old-system-badge">
-                                    <i data-feather="alert-circle"></i>
-                                    Old System
-                                </span>
-                            </div>
-                            <div class="old-payment-grid">
-                                <div class="old-payment-item total">
-                                    <div class="label">Total</div>
-                                    <div class="value">₹{{ number_format($data->total_amount ?? 0, 0) }}</div>
-                                </div>
-                                <div class="old-payment-item paid">
-                                    <div class="label">Paid</div>
-                                    <div class="value">₹{{ number_format($data->paid_amount ?? 0, 0) }}</div>
-                                </div>
-                                <div class="old-payment-item due">
-                                    <div class="label">Due</div>
-                                    <div class="value">₹{{ number_format($data->pending_amount ?? 0, 0) }}</div>
-                                </div>
-                            </div>
-                            <div class="mt-2 text-center">
-                                <a href="{{ route('lead.legacy-details', $data->id) }}" class="btn btn-sm btn-warning"
-                                    style="font-size: 11px; padding: 6px 12px; font-weight: 600;">
-                                    <i data-feather="eye" style="width: 12px; height: 12px;"></i>
-                                    View Full Details
+                            @can('lead-edit')
+                                <a href="{{ route('lead.edit', $data->id) }}"
+                                   class="lr-btn edit" title="Edit">
+                                    <i data-feather="edit-2"></i>
                                 </a>
-                            </div>
-                        </div>
-                    @endif
+                            @endcan
 
-                    <div class="actions">
-                        @if ($data->bookings->isEmpty())
-                            <a href="{{ route('quick-booking.form', $data->id) }}" class="action-btn btn-success"
-                                title="Quick Booking">
-                                <i data-feather="zap" style="width: 16px; height: 16px;"></i>
-                                <span>Quick Book</span>
-                            </a>
-                        @else
-                            @php
-                                $latestBooking = $data->bookings()->latest()->first();
-                            @endphp
-                            <a href="{{ route('bookings.show', $latestBooking->id) }}" class="action-btn btn-success"
-                                title="View Booking Details">
-                                <i data-feather="check-circle" style="width: 16px; height: 16px;"></i>
-                                <span>Booked</span>
-                            </a>
-                        @endif
-                        {{-- Quote button temporarily hidden --}}
-                        {{-- <a href="{{ route('quotations.create', ['lead_id' => $data->id]) }}"
-                            class="action-btn btn-primary" title="Create Quotation">
-                            <i data-feather="file-text" style="width: 16px; height: 16px;"></i>
-                            <span>Quote</span>
-                        </a> --}}
-                        @can('lead-edit')
-                            <a href="{{ route('lead.edit', $data->id) }}" class="action-btn btn-warning" title="Edit">
-                                <i data-feather="edit" style="width: 16px; height: 16px;"></i>
-                                <span>Edit</span>
-                            </a>
-                        @endcan
-                        @can('lead-delete')
-                            <form action="{{ route('lead.destroy', $data->id) }}" method="POST" class="d-inline"
-                                id="delete_form_{{ $data->id }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" class="action-btn btn-danger" title="Delete"
-                                    onclick="confirmDeleteLead({{ $data->id }}, '{{ $data->guest_name }}')">
-                                    <i data-feather="trash-2" style="width: 16px; height: 16px;"></i>
-                                    <span>Delete</span>
-                                </button>
-                            </form>
-                        @endcan
+                            @can('lead-delete')
+                                <form action="{{ route('lead.destroy', $data->id) }}" method="POST"
+                                      id="delete_form_{{ $data->id }}" style="display:contents;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="lr-btn delete" title="Delete"
+                                            onclick="confirmDeleteLead({{ $data->id }}, '{{ addslashes($data->guest_name) }}')">
+                                        <i data-feather="trash-2"></i>
+                                    </button>
+                                </form>
+                            @endcan
+                        </div>
                     </div>
-                </div>
-            @empty
-                <div class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                    <h4>No Leads Found</h4>
-                    <p>Try adjusting your search filters or add a new lead to get started.</p>
-                </div>
-            @endforelse
-        </div>
+                @endforeach
+            </div>
+        @endif
 
         <!-- Pagination -->
         @if ($list->hasPages())

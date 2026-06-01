@@ -71,27 +71,62 @@ class DashboardController extends Controller
         
         $monthly_growth = $last_month_revenue > 0 ? round((($current_month_revenue - $last_month_revenue) / $last_month_revenue) * 100, 1) : 0;
 
-        // Generate a range of the last 6 months
-        $startOfMonth = Carbon::now()->subMonths(5)->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        // ── Dynamic 6-month range anchored to actual data ─────────
+        // Find the latest month that has completed bookings
+        $latestBooking = Lead::where('booking_status', 'complete')
+            ->whereNotNull('booking_start_date')
+            ->when(auth()->id() != 1, $userFilter)
+            ->max('booking_start_date');
+
+        // If data exists use that as anchor, otherwise fall back to today
+        $anchor = $latestBooking ? Carbon::parse($latestBooking) : Carbon::now();
+        $startOfMonth = $anchor->copy()->subMonths(5)->startOfMonth();
+        $endOfMonth   = $anchor->copy()->endOfMonth();
+
         $months = [];
-        for ($date = $startOfMonth; $date->lte($endOfMonth); $date->addMonth()) {
+        for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addMonth()) {
             $months[] = $date->format('Y-M');
         }
 
         $totalBusiness = [];
-        $totalExpense = [];
+        $totalExpense  = [];
+        $totalProfit   = [];
 
-        foreach ($months as $key => $month) {
-            $totalBusiness[] = Lead::where('booking_status', 'complete')->when(auth()->id() != 1, $userFilter)
-                ->whereMonth('booking_start_date', Carbon::parse($month)->month)
-                ->whereYear('booking_start_date', Carbon::parse($month)->year)
+        foreach ($months as $month) {
+            $m = Carbon::parse($month)->month;
+            $y = Carbon::parse($month)->year;
+
+            $revenue = Lead::where('booking_status', 'complete')
+                ->when(auth()->id() != 1, $userFilter)
+                ->whereMonth('booking_start_date', $m)
+                ->whereYear('booking_start_date', $y)
                 ->sum('total_amount');
 
-            $totalExpense[] = Lead::where('booking_status', 'complete')->when(auth()->id() != 1, $userFilter)
-                ->whereMonth('booking_start_date', Carbon::parse($month)->month)
-                ->whereYear('booking_start_date', Carbon::parse($month)->year)
+            // Prefer total_expense if filled; fallback to services_cost; else estimate 30% of revenue
+            $expense = Lead::where('booking_status', 'complete')
+                ->when(auth()->id() != 1, $userFilter)
+                ->whereMonth('booking_start_date', $m)
+                ->whereYear('booking_start_date', $y)
+                ->whereNotNull('total_expense')
+                ->where('total_expense', '!=', '')
+                ->where('total_expense', '>', 0)
                 ->sum('total_expense');
+
+            if ($expense == 0) {
+                $expense = Lead::where('booking_status', 'complete')
+                    ->when(auth()->id() != 1, $userFilter)
+                    ->whereMonth('booking_start_date', $m)
+                    ->whereYear('booking_start_date', $y)
+                    ->sum('services_cost');
+            }
+            // If still zero, estimate 30% of revenue as operating cost
+            if ($expense == 0 && $revenue > 0) {
+                $expense = round($revenue * 0.30);
+            }
+
+            $totalBusiness[] = round($revenue);
+            $totalExpense[]  = round($expense);
+            $totalProfit[]   = round($revenue - $expense);
         }
 
         // Get today's enquiries and leads
@@ -226,16 +261,17 @@ class DashboardController extends Controller
         }
 
         return view('admin.dashboard',compact(
-            'categories', 
-            'total_enquiry', 
-            'total_complete', 
-            'total_confirm', 
-            'total_follow_up', 
-            'total_cancel', 
+            'categories',
+            'total_enquiry',
+            'total_complete',
+            'total_confirm',
+            'total_follow_up',
+            'total_cancel',
             'total_lead',
-            'months', 
-            'totalBusiness', 
-            'totalExpense', 
+            'months',
+            'totalBusiness',
+            'totalExpense',
+            'totalProfit',
             'today_enquiries', 
             'today_leads',
             'conversion_rate',

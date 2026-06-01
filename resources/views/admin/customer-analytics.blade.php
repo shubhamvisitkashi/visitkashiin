@@ -9,49 +9,52 @@
             --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
 
-        body {
-            background: #f5f7fa;
-        }
-
+        /* ── Fix page-content padding & margin conflict with fixed navbar ── */
         .page-content {
-            width: 100%;
-            padding: 0 20px;
+            padding: 20px !important;
+            margin-top: 0 !important;
+            box-sizing: border-box;
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         /* Page Header */
         .page-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 18px 24px;
+            border-radius: 14px;
             color: white;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            margin-bottom: 18px;
+            margin-top: 50px;
+            box-shadow: 0 6px 24px rgba(102, 126, 234, 0.28);
         }
 
         .page-header h2 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 4px;
         }
 
         .page-header p {
-            font-size: 15px;
-            opacity: 0.9;
+            font-size: .78rem;
+            opacity: 0.8;
             margin: 0;
         }
 
         /* Metric Cards */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            gap: 12px;
+            margin-bottom: 18px;
         }
+        @media(max-width:1100px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:640px) {.metrics-grid{grid-template-columns:1fr 1fr;}}
 
         .metric-card {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 16px 18px;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
             transition: all 0.3s ease;
             position: relative;
@@ -89,8 +92,8 @@
         }
 
         .metric-icon {
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -100,14 +103,15 @@
 
         .metric-icon i {
             color: white;
-            font-size: 20px;
+            font-size: 15px;
         }
 
         .metric-value {
-            font-size: 32px;
-            font-weight: 700;
+            font-size: clamp(1.2rem,2vw,1.6rem);
+            font-weight: 800;
             color: #2d3748;
-            margin-bottom: 8px;
+            line-height: 1.1;
+            margin-bottom: 5px;
         }
 
         .metric-change {
@@ -129,15 +133,15 @@
         /* Modern Card */
         .modern-card {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,.07);
             overflow: hidden;
-            margin-bottom: 25px;
+            margin-bottom: 14px;
         }
 
         .modern-card-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px 25px;
+            padding: 14px 18px;
             color: white;
             display: flex;
             justify-content: space-between;
@@ -146,7 +150,7 @@
 
         .modern-card-header h5 {
             margin: 0;
-            font-size: 18px;
+            font-size: .9rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -156,7 +160,7 @@
         .chart-card {
             background: #f8f9fc;
             border-radius: 12px;
-            padding: 20px;
+            padding: 12px;
             height: 100%;
         }
 
@@ -180,9 +184,9 @@
         }
 
         .modern-table thead th {
-            padding: 15px;
+            padding: 9px 12px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #4a5568;
@@ -190,11 +194,11 @@
         }
 
         .modern-table tbody td {
-            padding: 15px;
+            padding: 9px 12px;
             vertical-align: middle;
             border-bottom: 1px solid #f1f3f9;
             color: #2d3748;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .modern-table tbody tr:hover {
@@ -256,11 +260,10 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
         .filter-btn:hover {
@@ -444,19 +447,6 @@
                     </h6>
                     <div style="position: relative; height: 300px;">
                         <canvas id="segmentationChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Geographic Distribution -->
-            <div class="col-lg-6">
-                <div class="chart-card">
-                    <h6 class="chart-title">
-                        <i data-feather="map-pin" style="width: 18px; height: 18px;"></i>
-                        Top 10 Cities
-                    </h6>
-                    <div style="position: relative; height: 300px;">
-                        <canvas id="cityChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -713,30 +703,6 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 } } }
-                }
-            }
-        });
-
-        // Geographic Distribution
-        new Chart(document.getElementById('cityChart'), {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($city_labels) !!},
-                datasets: [{
-                    label: 'Customers',
-                    data: {!! json_encode($city_data) !!},
-                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-                    y: { grid: { display: false } }
                 }
             }
         });

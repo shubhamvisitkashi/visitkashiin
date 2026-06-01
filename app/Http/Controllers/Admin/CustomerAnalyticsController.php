@@ -12,10 +12,14 @@ class CustomerAnalyticsController extends Controller
 {
     public function index(Request $request)
     {
-        // Determine date range based on filter
-        $dateRange = $request->get('date_range', 'all');
+        // Whitelist-validate date_range to prevent parameter injection
+        $allowed = ['all', 'today', '7days', '30days', '6months', 'year', 'custom'];
+        $dateRange = in_array($request->get('date_range'), $allowed, true)
+            ? $request->get('date_range')
+            : 'all';
+
         $startDate = null;
-        $endDate = Carbon::now();
+        $endDate   = Carbon::now();
 
         switch ($dateRange) {
             case 'today':
@@ -34,12 +38,14 @@ class CustomerAnalyticsController extends Controller
                 $startDate = Carbon::now()->subYear();
                 break;
             case 'custom':
-                if ($request->has('start_date') && $request->has('end_date')) {
-                    $startDate = Carbon::parse($request->start_date);
-                    $endDate = Carbon::parse($request->end_date);
-                }
+                $request->validate([
+                    'start_date' => 'required|date|before_or_equal:today',
+                    'end_date'   => 'required|date|after_or_equal:start_date|before_or_equal:today',
+                ]);
+                $startDate = Carbon::parse($request->start_date)->startOfDay();
+                $endDate   = Carbon::parse($request->end_date)->endOfDay();
                 break;
-            default: // 'all'
+            default:
                 $startDate = null;
                 break;
         }

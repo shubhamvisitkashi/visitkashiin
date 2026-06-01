@@ -1,0 +1,1805 @@
+/* ============================================================
+   Visit Kashi — Airbnb-Inspired Homepage
+   Font: Plus Jakarta Sans (closest free match to Airbnb Circular)
+   Scoped via body.vk-homepage
+   ============================================================ */
+
+/* Font loaded via <link rel="preload"> in layout — no @import needed */
+
+/* ---------- 1. Design Tokens ---------- */
+:root {
+  --vk-primary:    #D94F2B;
+  --vk-primary-h:  #C04426;
+  --vk-text:       #222222;
+  --vk-muted:      #717171;
+  --vk-bg:         #FFFFFF;
+  --vk-bg-soft:    #F7F7F7;
+  --vk-white:      #FFFFFF;
+  --vk-border:     #DDDDDD;
+  --vk-shadow-sm:  0 2px 8px rgba(0,0,0,0.08);
+  --vk-shadow:     0 6px 20px rgba(0,0,0,0.10);
+  --vk-shadow-lg:  0 14px 40px rgba(0,0,0,0.14);
+  --vk-radius:     16px;
+  --vk-radius-sm:  10px;
+  --vk-radius-xs:  6px;
+  --vk-ease:       cubic-bezier(0.4, 0, 0.2, 1);
+  --vk-transition: 0.22s var(--vk-ease);
+}
+
+/* ---------- 2. Base ---------- */
+body.vk-homepage {
+  background: #FFFFFF;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #222222;
+}
+body.vk-homepage *,
+body.vk-homepage *::before,
+body.vk-homepage *::after { box-sizing: border-box; }
+
+/* ---------- 3. Top Info Bar ---------- */
+/* top header removed */
+
+/* ---------- 4. Navigation — Transparent overlay → solid on scroll ---------- */
+
+/* Fixed position so the hero image runs edge-to-edge behind it */
+body.vk-homepage .navigation {
+  position: sticky !important;
+  top: 0;
+  background: rgba(10,16,30,0.98) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.22) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+body.vk-homepage .navigation.vk-nav--scrolled {
+  background: rgba(10,16,30,0.98) !important;
+  box-shadow: 0 2px 28px rgba(0,0,0,0.28) !important;
+}
+
+/* Nav links — always white since nav is over the dark hero or dark solid */
+body.vk-homepage .navigation .nav.navbar-nav > li > a {
+  color: rgba(255,255,255,0.88) !important;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 8px 14px !important;
+  border-radius: 8px;
+  transition: color 0.22s, background 0.22s;
+}
+body.vk-homepage .navigation .nav.navbar-nav > li > a:hover,
+body.vk-homepage .navigation .nav.navbar-nav > li.active > a {
+  color: #fff !important;
+  background: rgba(255,255,255,0.10);
+}
+
+/* Book Now CTA pill in nav — shown on homepage desktop only */
+body.vk-homepage .navbar-nav-wrapper .vk-nav__cta {
+  display: inline-flex !important;
+}
+body.vk-homepage .vk-nav__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding: 10px 22px !important;
+  background: linear-gradient(135deg, #FF6B00, #FF8C00) !important;
+  color: #fff !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  border-radius: 50px !important;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(255,107,0,0.35);
+  transition: transform 0.22s, box-shadow 0.22s, background 0.22s !important;
+}
+body.vk-homepage .vk-nav__cta:hover {
+  background: linear-gradient(135deg, #e85e00, #f07800) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(255,107,0,0.50) !important;
+  color: #fff !important;
+}
+
+/* Logo size */
+body.vk-homepage .navigation .logo img {
+  max-height: 52px;
+  width: auto;
+}
+
+/* Dropdown — stays white card for readability */
+body.vk-homepage .navigation .nav.navbar-nav li ul {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.16);
+  min-width: 200px;
+  padding: 6px;
+}
+body.vk-homepage .navigation .nav.navbar-nav li ul li a {
+  color: #222 !important;
+  padding: 10px 14px !important;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+body.vk-homepage .navigation .nav.navbar-nav li ul li a:hover {
+  background: #f5f5f5 !important;
+  color: #FF6B00 !important;
+}
+
+/* ---------- 5. Hero Section — Premium Luxury Split Layout ---------- */
+.vk-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0d1420;
+}
+.vk-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.vk-hero__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+  animation: vkKenBurns 22s ease-in-out infinite alternate;
+  transform-origin: center center;
+}
+@keyframes vkKenBurns {
+  from { transform: scale(1.0) translate(0, 0); }
+  to   { transform: scale(1.10) translate(-1.5%, 1%); }
+}
+.vk-hero__overlay {
+  position: absolute;
+  inset: 0;
+  /* Strong left darkness for text; photo breathes through center-right */
+  background: linear-gradient(
+    to right,
+    rgba(5,10,24,0.96) 0%,
+    rgba(5,10,24,0.80) 38%,
+    rgba(5,10,24,0.55) 68%,
+    rgba(5,10,24,0.46) 100%
+  );
+}
+.vk-hero__overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(5,10,24,0.90) 0%,
+    rgba(5,10,24,0.30) 28%,
+    transparent 60%
+  );
+}
+
+/* Ambient glow decorations */
+.vk-hero__deco {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+.vk-hero__deco--top {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(255,107,0,0.18) 0%, transparent 70%);
+  top: -15%;
+  right: 5%;
+}
+.vk-hero__deco--bottom {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(26,43,76,0.60) 0%, transparent 70%);
+  bottom: -10%;
+  left: 10%;
+}
+
+/* Inner — top padding accounts for fixed nav height (~66px) + breathing room */
+.vk-hero__inner {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 120px 0 72px;
+}
+
+/* Split grid: 55% left content / 45% right booking card */
+.vk-hero__layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+
+/* ── LEFT ── */
+.vk-hero__left {
+  animation: vkHeroFadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.10s both;
+}
+@keyframes vkHeroFadeUp {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Live badge */
+.vk-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.90);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 8px 20px 8px 14px;
+  border-radius: 50px;
+  margin-bottom: 18px;
+}
+.vk-hero__badge-dot {
+  width: 7px;
+  height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: vkDotPulse 2.4s ease-in-out infinite;
+}
+@keyframes vkDotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.55); }
+  50%       { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+}
+
+/* Headline */
+.vk-hero__title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(36px, 4.6vw, 66px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: #fff;
+  margin: 0 0 14px;
+  text-shadow: 0 2px 28px rgba(0,0,0,0.22);
+}
+
+/* Tagline */
+.vk-hero__tagline {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(15px, 1.5vw, 19px);
+  font-weight: 400;
+  color: rgba(255,255,255,0.68);
+  margin: 0 0 28px;
+  line-height: 1.60;
+  max-width: 500px;
+}
+
+/* CTA buttons */
+.vk-hero__ctas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.vk-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 26px;
+  border-radius: 50px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  border: none;
+}
+.vk-hero__cta--primary {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+  color: #fff !important;
+  box-shadow: 0 6px 24px rgba(255,107,0,0.38);
+  position: relative;
+}
+.vk-hero__cta--primary::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid rgba(255,107,0,0.55);
+  animation: vkCtaPulse 2.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes vkCtaPulse {
+  0%   { opacity: 0.9; transform: scale(1); }
+  65%  { opacity: 0;   transform: scale(1.22); }
+  100% { opacity: 0;   transform: scale(1.22); }
+}
+.vk-hero__cta--primary:hover {
+  background: linear-gradient(135deg, #e85e00 0%, #f07800 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(255,107,0,0.50);
+  color: #fff !important;
+}
+.vk-hero__cta--outline {
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.45);
+  color: #fff !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.vk-hero__cta--outline:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.70);
+  transform: translateY(-2px);
+  color: #fff !important;
+}
+
+/* Trust badges row */
+.vk-hero__trust {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 14px;
+  padding: 14px 20px 14px 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.vk-hero__trust-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+}
+.vk-hero__trust-item:first-child { padding-left: 20px; }
+.vk-hero__trust-item strong {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #FF6B00;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.vk-hero__trust-item span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.vk-hero__trust-sep {
+  width: 1px;
+  height: 34px;
+  background: rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+/* ── RIGHT ── */
+.vk-hero__right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: vkHeroFadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.22s both;
+}
+
+/* Floating review badge */
+.vk-hero__review {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 50px;
+  padding: 8px 18px 8px 8px;
+  align-self: flex-start;
+}
+.vk-hero__review-avatars {
+  display: flex;
+  align-items: center;
+}
+.vk-hero__review-av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B00, #FF8C00);
+  border: 2px solid rgba(255,255,255,0.80);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  margin-left: -8px;
+  flex-shrink: 0;
+}
+.vk-hero__review-av:first-child  { margin-left: 0; background: linear-gradient(135deg, #FF6B00, #FF8C00); }
+.vk-hero__review-av:nth-child(2) { background: linear-gradient(135deg, #7C3AED, #A78BFA); }
+.vk-hero__review-av:nth-child(3) { background: linear-gradient(135deg, #059669, #34D399); }
+.vk-hero__review-stars {
+  font-size: 14px;
+  color: #FFA726;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.vk-hero__review-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.78);
+  font-weight: 400;
+  margin-top: 2px;
+}
+.vk-hero__review-label strong { color: #fff; font-weight: 700; }
+
+/* ── Glassmorphism Booking Card ── */
+.vk-booking-card {
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.17);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+/* Card orange header strip */
+.vk-booking-card__head {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+  padding: 13px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.vk-booking-card__head-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.vk-booking-card__head-live {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+.vk-booking-card__head-dot {
+  width: 5px;
+  height: 5px;
+  background: #4ade80;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: vkDotPulse 2.4s ease-in-out infinite;
+}
+
+/* Tabs */
+.vk-booking-card__tabs {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.vk-booking-card__tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 13px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: rgba(255,255,255,0.55);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+}
+.vk-booking-card__tab:hover {
+  color: rgba(255,255,255,0.88);
+  background: rgba(255,255,255,0.06);
+}
+.vk-booking-card__tab.is-active {
+  color: #FF6B00;
+  border-bottom-color: #FF6B00;
+  background: rgba(255,107,0,0.08);
+}
+
+/* Card body */
+.vk-booking-card__body { padding: 22px; }
+
+/* Form panels */
+.vk-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.vk-booking-form.is-hidden { display: none; }
+
+/* Field wrapper */
+.vk-bfield {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.vk-bfield label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.vk-bfield__wrap { position: relative; }
+.vk-bfield__ico {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.40);
+  pointer-events: none;
+}
+.vk-bfield__wrap input,
+.vk-bfield__wrap select {
+  width: 100%;
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 10px;
+  padding: 10px 12px 10px 34px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.vk-bfield__wrap input::placeholder { color: rgba(255,255,255,0.32); }
+.vk-bfield__wrap input:focus,
+.vk-bfield__wrap select:focus {
+  border-color: rgba(255,107,0,0.75);
+  background: rgba(255,255,255,0.13);
+  box-shadow: 0 0 0 3px rgba(255,107,0,0.16);
+}
+.vk-bfield__wrap select option { background: #1a2b4c; color: #fff; }
+
+/* Custom chevron arrow for select fields */
+.vk-bfield__wrap select { padding-right: 30px; }
+.vk-bfield__wrap:has(select)::after {
+  content: '';
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid rgba(255,255,255,0.45);
+  pointer-events: none;
+}
+
+/* Live activity chip */
+.vk-hero__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,0.62);
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+.vk-hero__live-dot {
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: vkDotPulse 1.8s ease-in-out infinite;
+}
+
+/* Two-column field row */
+.vk-bfield-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Submit button */
+.vk-booking-card__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 20px;
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+  color: #fff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none !important;
+  margin-top: 4px;
+  box-shadow: 0 6px 20px rgba(255,107,0,0.36);
+  transition: all 0.22s ease;
+  letter-spacing: -0.01em;
+}
+.vk-booking-card__btn:hover {
+  background: linear-gradient(135deg, #e85e00 0%, #f07800 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255,107,0,0.48);
+  color: #fff !important;
+}
+
+/* Scroll chevron indicator */
+.vk-hero__scroll {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.vk-hero__scroll a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-decoration: none !important;
+}
+.vk-hero__scroll-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid rgba(255,255,255,0.28);
+  border-radius: 50%;
+  color: rgba(255,255,255,0.60);
+  animation: vkChevronBounce 2.2s ease-in-out infinite;
+}
+@keyframes vkChevronBounce {
+  0%, 100% { transform: translateY(0);   opacity: 0.55; }
+  50%       { transform: translateY(7px); opacity: 0.90; }
+}
+
+/* ---------- 8. Trust Bar ---------- */
+.vk-trust {
+  background: var(--vk-white);
+  border-bottom: 1px solid var(--vk-border);
+  padding: 0;
+}
+.vk-trust__grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.vk-trust__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 28px;
+  border-right: 1px solid var(--vk-border);
+  flex: 1;
+  min-width: 190px;
+  max-width: 280px;
+  justify-content: center;
+  transition: background var(--vk-transition);
+}
+.vk-trust__item:last-child { border-right: none; }
+.vk-trust__item:hover { background: var(--vk-bg-soft); }
+.vk-trust__icon { font-size: 26px; line-height: 1; flex-shrink: 0; }
+.vk-trust__text strong {
+  display: block;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vk-text);
+  line-height: 1.2;
+}
+.vk-trust__text span {
+  display: block;
+  font-size: 12px;
+  color: var(--vk-muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* ---------- 9. Section Layout ---------- */
+.vk-section { padding: 48px 0; }
+.vk-section--alt { background: #ffffff; }
+.vk-section--alt:nth-of-type(even) { background: var(--vk-bg-soft); }
+
+.vk-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.vk-section__header--center {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 40px;
+}
+.vk-section__label { display: none; } /* Airbnb doesn't use colored label chips */
+.vk-section__title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 800;
+  color: var(--vk-text);
+  margin: 0 0 6px;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+.vk-section__subtitle {
+  font-size: 14px;
+  color: var(--vk-muted);
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* ---------- 10. CTA Buttons ---------- */
+.vk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: all var(--vk-transition);
+  white-space: nowrap;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+}
+.vk-btn--primary {
+  background: var(--vk-primary);
+  color: var(--vk-white) !important;
+  border-color: var(--vk-primary);
+}
+.vk-btn--primary:hover {
+  background: var(--vk-primary-h);
+  border-color: var(--vk-primary-h);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(217,79,43,0.28);
+  color: var(--vk-white) !important;
+}
+.vk-btn--outline {
+  background: transparent;
+  color: var(--vk-text) !important;
+  border-color: var(--vk-text);
+}
+.vk-btn--outline:hover {
+  background: var(--vk-text);
+  color: var(--vk-white) !important;
+}
+
+/* ---------- 11. Category Cards (sale-slider) — Airbnb style ---------- */
+body.vk-homepage .sale-slider .package-item,
+.vk-card {
+  background: var(--vk-white);
+  border-radius: var(--vk-radius);
+  overflow: hidden;
+  box-shadow: none;
+  border: none;
+  transition: box-shadow var(--vk-transition), transform var(--vk-transition);
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none !important;
+}
+body.vk-homepage .sale-slider .package-item:hover,
+.vk-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+}
+.vk-card__img-wrap,
+body.vk-homepage .sale-slider .package-image {
+  position: relative;
+  overflow: hidden;
+  height: 210px;
+  border-radius: var(--vk-radius);
+  flex-shrink: 0;
+}
+body.vk-homepage .sale-slider .package-image img,
+.vk-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--vk-ease);
+  display: block;
+}
+body.vk-homepage .sale-slider .package-item:hover .package-image img,
+.vk-card:hover .vk-card__img { transform: scale(1.06); }
+
+.vk-card__badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--vk-white);
+  color: var(--vk-text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.vk-rupee { font-family: system-ui, sans-serif; margin-right: 1px; }
+.vk-card__body {
+  padding: 14px 4px 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* .vk-card__link removed — <a> is now the .vk-card wrapper itself */
+.vk-card__title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--vk-text);
+  margin: 0;
+  line-height: 1.3;
+  transition: none;
+}
+.vk-card__price {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--vk-muted);
+  margin: 0;
+}
+.vk-card__price strong {
+  color: #d50000;
+  font-size: 14px;
+  font-weight: 700;
+}
+.vk-card__price small { font-size: 12px; color: var(--vk-muted); }
+
+/* ---------- 12. Package Cards (package-slider) ---------- */
+body.vk-homepage .package-slider .package-item a,
+.vk-pkg-card {
+  display: block;
+  border-radius: var(--vk-radius);
+  overflow: hidden;
+  position: relative;
+  text-decoration: none !important;
+  box-shadow: none;
+  transition: box-shadow var(--vk-transition), transform var(--vk-transition);
+  background: #1a1a1a;
+  height: 300px;
+  border: none;
+}
+body.vk-homepage .package-slider .package-item a:hover,
+.vk-pkg-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.18);
+}
+body.vk-homepage .package-slider .package-image,
+.vk-pkg-card__img-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+body.vk-homepage .package-slider .package-image img,
+.vk-pkg-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.55s var(--vk-ease);
+  display: block;
+}
+body.vk-homepage .package-slider .package-item a:hover img,
+.vk-pkg-card:hover .vk-pkg-card__img { transform: scale(1.07); }
+
+.vk-pkg-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.20) 55%, transparent 100%);
+}
+body.vk-homepage .package-slider .package-content,
+.vk-pkg-card__body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 18px;
+  z-index: 1;
+}
+body.vk-homepage .package-slider .package-content h3,
+.vk-pkg-card__title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--vk-white) !important;
+  font-size: 15.5px;
+  font-weight: 800;
+  margin: 0 0 5px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+body.vk-homepage .package-slider .package-content p,
+.vk-pkg-card__price {
+  color: rgba(255,255,255,0.78) !important;
+  font-size: 13px;
+  margin: 0 0 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+body.vk-homepage .package-slider .package-content p b,
+.vk-pkg-card__price strong { color: #FFFFFF; font-weight: 700; }
+
+.vk-pkg-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.30);
+  color: var(--vk-white);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 50px;
+  backdrop-filter: blur(6px);
+  transition: background var(--vk-transition), border-color var(--vk-transition);
+}
+.vk-pkg-card:hover .vk-pkg-card__btn {
+  background: var(--vk-primary);
+  border-color: var(--vk-primary);
+}
+
+/* Slick arrow overrides */
+body.vk-homepage .slider-button .slick-prev,
+body.vk-homepage .slider-button .slick-next {
+  width: 40px;
+  height: 40px;
+  background: var(--vk-white);
+  border-radius: 50%;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.16);
+  border: 1px solid var(--vk-border);
+  z-index: 10;
+  transition: box-shadow var(--vk-transition), transform var(--vk-transition);
+}
+body.vk-homepage .slider-button .slick-prev:hover,
+body.vk-homepage .slider-button .slick-next:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+  transform: scale(1.06);
+}
+body.vk-homepage .slider-button .slick-prev:before,
+body.vk-homepage .slider-button .slick-next:before {
+  color: var(--vk-text);
+  font-size: 14px;
+}
+body.vk-homepage .slider-button .slick-dots li button:before {
+  color: var(--vk-text);
+  font-size: 8px;
+  opacity: 0.25;
+}
+body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opacity: 0.85; }
+
+/* ---------- 13. Why Choose Us ---------- */
+/* Popular Packages — soft gray to alternate after categories */
+#vk-packages { background: var(--vk-bg-soft); }
+
+.vk-why {
+  padding: 60px 0;
+  background: #ffffff;
+  position: relative;
+}
+.vk-why .vk-section__header--center { margin-bottom: 40px; }
+.vk-why__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.vk-why__card {
+  background: var(--vk-white);
+  border: 1px solid var(--vk-border);
+  border-radius: var(--vk-radius);
+  padding: 32px 26px;
+  text-align: center;
+  transition: box-shadow var(--vk-transition), transform var(--vk-transition);
+}
+.vk-why__card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+  transform: translateY(-4px);
+}
+.vk-why__icon { font-size: 38px; margin-bottom: 16px; display: block; line-height: 1; }
+.vk-why__card h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--vk-text) !important;
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.vk-why__card p {
+  color: var(--vk-muted);
+  font-size: 13.5px;
+  line-height: 1.65;
+  margin: 0;
+}
+.vk-why .vk-section__title { color: var(--vk-text) !important; }
+.vk-why .vk-section__subtitle { color: var(--vk-muted); }
+.vk-why .vk-section__label { display: none; }
+
+/* ---------- 14. WhatsApp CTA Strip ---------- */
+.vk-cta-strip {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  padding: 32px 0;
+}
+.vk-cta-strip__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.vk-cta-strip__text strong {
+  display: block;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--vk-white);
+  margin-bottom: 3px;
+  letter-spacing: -0.01em;
+}
+.vk-cta-strip__text span {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.80);
+}
+.vk-cta-strip__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--vk-white);
+  color: #128C7E !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 13px 28px;
+  border-radius: 50px;
+  text-decoration: none !important;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  transition: transform var(--vk-transition), box-shadow var(--vk-transition);
+}
+.vk-cta-strip__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+  color: #128C7E !important;
+}
+.vk-cta-strip__btn img { width: 22px; height: 22px; }
+
+/* ---------- 15. Footer ---------- */
+body.vk-homepage footer,
+body.vk-homepage footer .footer-upper { background: #0F1B30; }
+
+body.vk-homepage .footer-upper {
+  padding: 52px 0 40px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+body.vk-homepage .footer-upper .footer-about h3 {
+  color: var(--vk-white) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  position: relative;
+  padding-bottom: 10px;
+}
+body.vk-homepage .footer-upper .footer-about h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background: var(--vk-primary);
+  border-radius: 2px;
+}
+body.vk-homepage .footer-upper .footer-about ul li a {
+  color: rgba(255,255,255,0.52);
+  font-size: 13.5px;
+  font-weight: 400;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+  transition: color var(--vk-transition), gap var(--vk-transition);
+}
+body.vk-homepage .footer-upper .footer-about ul li a:hover {
+  color: rgba(255,255,255,0.92);
+  gap: 10px;
+}
+body.vk-homepage .footer-upper .footer-about ul li a .fa {
+  color: var(--vk-primary);
+  font-size: 10px;
+}
+body.vk-homepage .footer-upper .about-location ul li {
+  color: rgba(255,255,255,0.55);
+  font-size: 13px;
+  padding: 5px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+}
+body.vk-homepage .footer-upper .about-location ul li a {
+  color: rgba(255,255,255,0.55);
+  transition: color var(--vk-transition);
+}
+body.vk-homepage .footer-upper .about-location ul li a:hover { color: rgba(255,255,255,0.92); }
+body.vk-homepage .footer-upper .about-location [class^=flaticon-],
+body.vk-homepage .footer-upper .about-location [class*=" flaticon-"] {
+  color: var(--vk-primary);
+  font-size: 14px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Social icons */
+body.vk-homepage .footer-social-links ul {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 0;
+  list-style: none;
+}
+body.vk-homepage .footer-social-links .social-icon a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.62);
+  font-size: 13px;
+  transition: all var(--vk-transition);
+  text-decoration: none;
+}
+body.vk-homepage .footer-social-links .social-icon a:hover {
+  background: var(--vk-primary);
+  border-color: var(--vk-primary);
+  color: var(--vk-white);
+  transform: translateY(-2px);
+}
+
+/* Copyright */
+body.vk-homepage .copyright {
+  background: #09111F;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+body.vk-homepage .copyright .copyright-content p {
+  color: rgba(255,255,255,0.36);
+  font-size: 12.5px;
+  margin: 0;
+}
+
+/* WhatsApp float */
+body.vk-homepage .whatsapp {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  animation: vkFadeUp 1s var(--vk-ease) 1s both;
+}
+body.vk-homepage .whatsapp img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+  transition: transform var(--vk-transition), box-shadow var(--vk-transition);
+}
+body.vk-homepage .whatsapp img:hover {
+  transform: scale(1.10) translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+}
+
+/* Back to top */
+body.vk-homepage #back-to-top {
+  position: fixed;
+  bottom: 90px;
+  right: 30px;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity var(--vk-transition);
+}
+body.vk-homepage #back-to-top a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--vk-text);
+  border-radius: 50%;
+  box-shadow: var(--vk-shadow);
+}
+body.vk-homepage #back-to-top a::after {
+  content: '↑';
+  color: var(--vk-white);
+  font-size: 16px;
+}
+
+/* ---------- 16. Reveal Animations ---------- */
+.vk-reveal { opacity: 1; transform: none; }
+.vk-reveal.is-visible { opacity: 1; transform: none; }
+.vk-reveal--delay-1 { transition-delay: 0.08s; }
+.vk-reveal--delay-2 { transition-delay: 0.16s; }
+.vk-reveal--delay-3 { transition-delay: 0.24s; }
+.vk-reveal--delay-4 { transition-delay: 0.32s; }
+
+/* ---------- 17. Responsive ---------- */
+@media (max-width: 991px) {
+  .vk-why__grid { grid-template-columns: 1fr 1fr; }
+  .vk-hero__layout { grid-template-columns: 1fr; gap: 36px; }
+  .vk-hero__inner { padding: 100px 0 56px; }
+  .vk-hero__left { text-align: center; }
+  .vk-hero__badge { display: inline-flex; }
+  .vk-hero__tagline { max-width: 100%; margin-left: auto; margin-right: auto; }
+  .vk-hero__ctas { justify-content: center; }
+  .vk-hero__trust { justify-content: center; }
+  .vk-hero__right { align-items: center; }
+  .vk-hero__review { align-self: center; }
+  .vk-hero__scroll { display: none; }
+}
+
+@media (max-width: 767px) {
+  body.vk-homepage header .upper-head { display: none; }
+  .vk-hero__inner { padding: 60px 0 60px; }
+  .vk-hero__layout { gap: 28px; }
+  .vk-hero__title { font-size: clamp(28px, 8vw, 42px); }
+  .vk-hero__trust { flex-wrap: nowrap; padding: 12px 16px; }
+  .vk-hero__trust-sep { display: none; }
+  .vk-hero__trust-item { padding: 0 10px; }
+  .vk-hero__trust-item strong { font-size: 16px; }
+  .vk-hero__trust-item span { font-size: 9.5px; }
+  .vk-hero__live { font-size: 11px; }
+  .vk-bfield-row { grid-template-columns: 1fr; }
+  .vk-booking-card__body { padding: 14px; }
+  .vk-booking-card__tab { font-size: 11px; padding: 11px 5px; gap: 3px; }
+  .vk-booking-card__head { padding: 11px 14px; }
+  .vk-hero__badge { margin-bottom: 14px; }
+  .vk-hero__scroll { display: none; }
+  .vk-trust__item {
+    min-width: 48%;
+    padding: 14px 12px;
+  }
+  .vk-trust__item:nth-child(2),
+  .vk-trust__item:nth-child(3),
+  .vk-trust__item:nth-child(4) { border-right: none; }
+  .vk-why__grid { grid-template-columns: 1fr; gap: 14px; }
+  .vk-section { padding: 36px 0; }
+  .vk-section__header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .vk-cta-strip__inner { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .vk-search__inner .ec-search-group-form { padding: 4px 4px 4px 16px; }
+  .vk-trust__item {
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--vk-border);
+    justify-content: flex-start;
+    padding: 12px 20px;
+  }
+  .vk-trust__item:last-child { border-bottom: none; }
+}
+
+/* ---------- Weather Widget ---------- */
+.vk-weather {
+  background: #F2F2F7;
+  border-top: 1px solid var(--vk-border);
+  padding: 32px 0;
+}
+.vk-weather__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.vk-weather__heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--vk-text);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+.vk-weather__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.vk-weather__temp {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--vk-text);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.vk-weather__icon { font-size: 2rem; line-height: 1; }
+.vk-weather__condition {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--vk-text);
+}
+.vk-weather__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vk-wt-btn {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: none;
+  border: none;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--vk-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color .2s;
+}
+.vk-wt-btn.active { color: #7B2D8B; font-weight: 700; }
+.vk-wt-btn:hover  { color: var(--vk-text); }
+.vk-wt-sep { color: var(--vk-border); font-size: .85rem; }
+
+/* Stats row */
+.vk-weather__stats {
+  display: flex;
+  align-items: flex-start;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+.vk-weather__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.vk-ws-lbl {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--vk-muted);
+}
+.vk-ws-val {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #7B2D8B;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 768px) {
+  .vk-weather__inner { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .vk-weather__stats { gap: 20px; }
+  .vk-weather__temp  { font-size: 2.4rem; }
+}
+
+/* ---------- Our Services ---------- */
+/* ── Our Services ── */
+.vk-services {
+  padding: 24px 0 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--vk-border);
+}
+.vk-services__heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 800;
+  color: var(--vk-text);
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+.vk-services__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.vk-svc-card {
+  display: block;
+  border-radius: 15px;
+  overflow: hidden;
+  text-decoration: none !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.vk-svc-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.13);
+}
+.vk-svc-img {
+  position: relative;
+  height: 190px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 15px;
+  overflow: hidden;
+}
+.vk-svc-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 36px 14px 14px;
+  background: linear-gradient(to top, rgba(0,0,0,0.70) 0%, transparent 100%);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 768px) {
+  .vk-services__grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .vk-svc-img { height: 150px; }
+}
+@media (max-width: 480px) {
+  .vk-svc-img { height: 130px; }
+  .vk-svc-label { font-size: .9rem; }
+}
+
+/* ================================================================
+   §MC — MULTI-COLOR DESIGN SYSTEM
+   Orange #FF6B00 · Purple #7C3AED · Green #059669 · Yellow #F59E0B
+   ================================================================ */
+
+/* ── Color Tokens ── */
+:root {
+  --mc-orange:  #FF6B00; --mc-orange-2: #FF8C00;
+  --mc-purple:  #7C3AED; --mc-purple-2: #A78BFA;
+  --mc-green:   #059669; --mc-green-2:  #34D399;
+  --mc-yellow:  #F59E0B; --mc-yellow-2: #FCD34D;
+}
+
+/* ── Multi-color Button Variants ── */
+.vk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: all 0.24s ease;
+  white-space: nowrap;
+  border: none;
+  letter-spacing: -0.01em;
+}
+.vk-btn--orange {
+  background: linear-gradient(135deg, #FF6B00, #FF8C00);
+  color: #fff !important;
+  box-shadow: 0 4px 18px rgba(255,107,0,0.32);
+}
+.vk-btn--orange:hover, .vk-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255,107,0,0.45) !important;
+  color: #fff !important;
+}
+.vk-btn--primary {
+  background: linear-gradient(135deg, #FF6B00, #FF8C00);
+  color: #fff !important;
+  box-shadow: 0 4px 18px rgba(255,107,0,0.32);
+}
+.vk-btn--purple {
+  background: linear-gradient(135deg, #7C3AED, #A78BFA);
+  color: #fff !important;
+  box-shadow: 0 4px 18px rgba(124,58,237,0.32);
+}
+.vk-btn--purple:hover {
+  background: linear-gradient(135deg, #6d28d9, #9270f5) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(124,58,237,0.45) !important;
+  color: #fff !important;
+}
+.vk-btn--green {
+  background: linear-gradient(135deg, #059669, #34D399);
+  color: #fff !important;
+  box-shadow: 0 4px 18px rgba(5,150,105,0.30);
+}
+.vk-btn--green:hover {
+  background: linear-gradient(135deg, #047857, #2ec890) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(5,150,105,0.42) !important;
+  color: #fff !important;
+}
+.vk-btn--yellow {
+  background: linear-gradient(135deg, #F59E0B, #FCD34D);
+  color: #3d1d00 !important;
+  box-shadow: 0 4px 18px rgba(245,158,11,0.32);
+}
+.vk-btn--yellow:hover {
+  background: linear-gradient(135deg, #d97706, #f9c24a) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(245,158,11,0.45) !important;
+  color: #3d1d00 !important;
+}
+.vk-btn--outline {
+  background: transparent;
+  border: 2px solid currentColor;
+  color: var(--mc-orange) !important;
+}
+.vk-btn--outline:hover {
+  background: var(--mc-orange) !important;
+  color: #fff !important;
+  border-color: var(--mc-orange) !important;
+}
+
+/* ── Section Labels — shown + colorful chips ── */
+.vk-section__label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  padding: 4px 13px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  background: rgba(255,107,0,0.10);
+  color: #FF6B00;
+  border: 1px solid rgba(255,107,0,0.22);
+}
+.vk-section__label::before { content: '✦'; font-size: 7px; }
+
+/* ── Section Title — gradient underline ── */
+.vk-section__header .vk-section__title,
+.vk-section__header--center .vk-section__title {
+  position: relative;
+  padding-bottom: 14px;
+}
+.vk-section__header .vk-section__title::after,
+.vk-section__header--center .vk-section__title::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 52px; height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #FF6B00, #7C3AED);
+}
+.vk-section__header--center .vk-section__title::after { left: 50%; transform: translateX(-50%); }
+
+/* ── Services Section — colorful bg + per-card theming ── */
+.vk-services {
+  background: linear-gradient(135deg, #fdf9ff 0%, #fff8f3 50%, #f3fdf8 100%);
+  padding: 32px 0 52px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.vk-services__heading {
+  position: relative;
+  padding-bottom: 14px;
+  font-size: clamp(20px,2.8vw,28px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #1a1a2e;
+}
+.vk-services__heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 80px; height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #FF6B00, #7C3AED, #059669, #F59E0B);
+}
+
+/* Card accent bar + per-card overlay tint */
+.vk-svc-card { position: relative; }
+.vk-svc-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  z-index: 3;
+  border-radius: 15px 15px 0 0;
+  transition: height 0.22s ease;
+}
+.vk-svc-card:hover::before { height: 7px; }
+.vk-svc-card:nth-child(1)::before { background: linear-gradient(to right,#7C3AED,#A78BFA); }
+.vk-svc-card:nth-child(2)::before { background: linear-gradient(to right,#059669,#34D399); }
+.vk-svc-card:nth-child(3)::before { background: linear-gradient(to right,#FF6B00,#FF8C00); }
+.vk-svc-card:nth-child(4)::before { background: linear-gradient(to right,#F59E0B,#FCD34D); }
+
+.vk-svc-card:nth-child(1) .vk-svc-label { background: linear-gradient(to top, rgba(124,58,237,0.88) 0%, rgba(124,58,237,0.15) 55%, transparent 100%); }
+.vk-svc-card:nth-child(2) .vk-svc-label { background: linear-gradient(to top, rgba(5,150,105,0.88)  0%, rgba(5,150,105,0.15)  55%, transparent 100%); }
+.vk-svc-card:nth-child(3) .vk-svc-label { background: linear-gradient(to top, rgba(255,107,0,0.88)  0%, rgba(255,107,0,0.15)  55%, transparent 100%); }
+.vk-svc-card:nth-child(4) .vk-svc-label { background: linear-gradient(to top, rgba(245,158,11,0.90) 0%, rgba(245,158,11,0.15) 55%, transparent 100%); }
+
+.vk-svc-card:nth-child(1):hover { box-shadow: 0 14px 44px rgba(124,58,237,0.26); }
+.vk-svc-card:nth-child(2):hover { box-shadow: 0 14px 44px rgba(5,150,105,0.26);  }
+.vk-svc-card:nth-child(3):hover { box-shadow: 0 14px 44px rgba(255,107,0,0.26);  }
+.vk-svc-card:nth-child(4):hover { box-shadow: 0 14px 44px rgba(245,158,11,0.26); }
+.vk-svc-img { height: 210px; } /* slightly taller */
+
+/* ── Category Sections — alternating accent colors ── */
+#vk-categories .deals-on-sale:nth-child(4n+1) { background: #fffaf5; }
+#vk-categories .deals-on-sale:nth-child(4n+2) { background: #f9f7ff; }
+#vk-categories .deals-on-sale:nth-child(4n+3) { background: #f3fdf8; }
+#vk-categories .deals-on-sale:nth-child(4n+4) { background: #fffdf2; }
+
+/* Section label colors */
+#vk-categories .deals-on-sale:nth-child(4n+1) .vk-section__label { background:rgba(255,107,0,0.10); color:#FF6B00; border-color:rgba(255,107,0,0.22); }
+#vk-categories .deals-on-sale:nth-child(4n+2) .vk-section__label { background:rgba(124,58,237,0.10); color:#7C3AED; border-color:rgba(124,58,237,0.22); }
+#vk-categories .deals-on-sale:nth-child(4n+3) .vk-section__label { background:rgba(5,150,105,0.10);  color:#059669; border-color:rgba(5,150,105,0.22); }
+#vk-categories .deals-on-sale:nth-child(4n+4) .vk-section__label { background:rgba(245,158,11,0.12); color:#92400e; border-color:rgba(245,158,11,0.30); }
+
+/* Title underline per section */
+#vk-categories .deals-on-sale:nth-child(4n+1) .vk-section__title::after { background: linear-gradient(to right,#FF6B00,#FF8C00); }
+#vk-categories .deals-on-sale:nth-child(4n+2) .vk-section__title::after { background: linear-gradient(to right,#7C3AED,#A78BFA); }
+#vk-categories .deals-on-sale:nth-child(4n+3) .vk-section__title::after { background: linear-gradient(to right,#059669,#34D399); }
+#vk-categories .deals-on-sale:nth-child(4n+4) .vk-section__title::after { background: linear-gradient(to right,#F59E0B,#FCD34D); }
+
+/* View All buttons per section */
+#vk-categories .deals-on-sale:nth-child(4n+1) .vk-btn { background:linear-gradient(135deg,#FF6B00,#FF8C00)!important; color:#fff!important; border:none; box-shadow:0 4px 16px rgba(255,107,0,.28); }
+#vk-categories .deals-on-sale:nth-child(4n+2) .vk-btn { background:linear-gradient(135deg,#7C3AED,#A78BFA)!important; color:#fff!important; border:none; box-shadow:0 4px 16px rgba(124,58,237,.28); }
+#vk-categories .deals-on-sale:nth-child(4n+3) .vk-btn { background:linear-gradient(135deg,#059669,#34D399)!important; color:#fff!important; border:none; box-shadow:0 4px 16px rgba(5,150,105,.28); }
+#vk-categories .deals-on-sale:nth-child(4n+4) .vk-btn { background:linear-gradient(135deg,#F59E0B,#FCD34D)!important; color:#3d1d00!important; border:none; box-shadow:0 4px 16px rgba(245,158,11,.28); }
+#vk-categories .deals-on-sale .vk-btn:hover { transform: translateY(-2px) !important; filter: brightness(1.08); }
+
+/* Card badge colors per section */
+.vk-card__badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 10px;
+  letter-spacing: -0.01em;
+}
+#vk-categories .deals-on-sale:nth-child(4n+1) .vk-card__badge { background:#FF6B00; color:#fff; box-shadow:0 2px 8px rgba(255,107,0,.35); }
+#vk-categories .deals-on-sale:nth-child(4n+2) .vk-card__badge { background:#7C3AED; color:#fff; box-shadow:0 2px 8px rgba(124,58,237,.35); }
+#vk-categories .deals-on-sale:nth-child(4n+3) .vk-card__badge { background:#059669; color:#fff; box-shadow:0 2px 8px rgba(5,150,105,.35); }
+#vk-categories .deals-on-sale:nth-child(4n+4) .vk-card__badge { background:#F59E0B; color:#1a1200; box-shadow:0 2px 8px rgba(245,158,11,.35); }
+
+/* Card hover color ring per section */
+#vk-categories .deals-on-sale:nth-child(4n+1) .vk-card:hover { box-shadow:0 8px 32px rgba(255,107,0,0.16); }
+#vk-categories .deals-on-sale:nth-child(4n+2) .vk-card:hover { box-shadow:0 8px 32px rgba(124,58,237,0.16); }
+#vk-categories .deals-on-sale:nth-child(4n+3) .vk-card:hover { box-shadow:0 8px 32px rgba(5,150,105,0.16); }
+#vk-categories .deals-on-sale:nth-child(4n+4) .vk-card:hover { box-shadow:0 8px 32px rgba(245,158,11,0.16); }
+
+/* ── Popular Packages — dark immersive section ── */
+#vk-packages {
+  background: linear-gradient(135deg, #0d1420 0%, #16213e 60%, #0f3460 100%) !important;
+  padding: 60px 0;
+  position: relative;
+  overflow: hidden;
+}
+#vk-packages::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+#vk-packages::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: -80px;
+  width: 350px; height: 350px;
+  background: radial-gradient(ellipse, rgba(5,150,105,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+#vk-packages .vk-section__title  { color:#fff !important; }
+#vk-packages .vk-section__subtitle { color:rgba(255,255,255,0.52) !important; }
+#vk-packages .vk-section__label  { background:rgba(255,107,0,0.18); color:#FF8C00; border-color:rgba(255,107,0,0.35); }
+#vk-packages .vk-section__title::after { background:linear-gradient(to right, #FF6B00, #F59E0B, #059669); width:60px; }
+#vk-packages .vk-btn { background:rgba(255,255,255,0.10) !important; border:1.5px solid rgba(255,255,255,0.30) !important; color:#fff !important; }
+#vk-packages .vk-btn:hover { background:rgba(255,255,255,0.20) !important; color:#fff !important; transform:translateY(-2px) !important; }
+
+/* Package card "Book Now" button — multicolor per card */
+.vk-pkg-card__btn {
+  border: none !important;
+  color: #fff !important;
+  font-size: 12.5px;
+  padding: 7px 18px;
+  border-radius: 50px;
+}
+.vk-pkg-card:nth-child(3n+1) .vk-pkg-card__btn { background:linear-gradient(135deg,#FF6B00,#FF8C00); box-shadow:0 3px 12px rgba(255,107,0,.35); }
+.vk-pkg-card:nth-child(3n+2) .vk-pkg-card__btn { background:linear-gradient(135deg,#7C3AED,#A78BFA); box-shadow:0 3px 12px rgba(124,58,237,.35); }
+.vk-pkg-card:nth-child(3n+3) .vk-pkg-card__btn { background:linear-gradient(135deg,#059669,#34D399); box-shadow:0 3px 12px rgba(5,150,105,.35); }
+
+/* Package card overlay tint on hover */
+.vk-pkg-card:nth-child(3n+1):hover .vk-pkg-card__overlay { background:linear-gradient(to top, rgba(255,107,0,0.55) 0%, rgba(0,0,0,0.15) 55%, transparent 100%); }
+.vk-pkg-card:nth-child(3n+2):hover .vk-pkg-card__overlay { background:linear-gradient(to top, rgba(124,58,237,0.55) 0%, rgba(0,0,0,0.15) 55%, transparent 100%); }
+.vk-pkg-card:nth-child(3n+3):hover .vk-pkg-card__overlay { background:linear-gradient(to top, rgba(5,150,105,0.55) 0%, rgba(0,0,0,0.15) 55%, transparent 100%); }
+
+/* ── Why Choose Us — per-card accent ── */
+.vk-why__card { border-top: 4px solid transparent; transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s; }
+.vk-why__card:nth-child(1) { border-top-color: #FF6B00; }
+.vk-why__card:nth-child(2) { border-top-color: #7C3AED; }
+.vk-why__card:nth-child(3) { border-top-color: #059669; }
+.vk-why__card:nth-child(4) { border-top-color: #F59E0B; }
+.vk-why__card:nth-child(5) { border-top-color: #FF4757; }
+.vk-why__card:nth-child(6) { border-top-color: #3B82F6; }
+.vk-why__card:nth-child(1):hover { box-shadow:0 10px 36px rgba(255,107,0,0.16); }
+.vk-why__card:nth-child(2):hover { box-shadow:0 10px 36px rgba(124,58,237,0.16); }
+.vk-why__card:nth-child(3):hover { box-shadow:0 10px 36px rgba(5,150,105,0.16); }
+
+/* Icon glow */
+.vk-why__card:nth-child(1) .vk-why__icon { filter:drop-shadow(0 0 6px rgba(255,107,0,0.45)); }
+.vk-why__card:nth-child(2) .vk-why__icon { filter:drop-shadow(0 0 6px rgba(124,58,237,0.45)); }
+.vk-why__card:nth-child(3) .vk-why__icon { filter:drop-shadow(0 0 6px rgba(5,150,105,0.45)); }
+
+/* Why section label */
+.vk-why .vk-section__label { background:rgba(124,58,237,0.10) !important; color:#7C3AED !important; border-color:rgba(124,58,237,0.22) !important; }
+.vk-why .vk-section__title::after { background:linear-gradient(to right,#7C3AED,#059669) !important; }
+.vk-why .vk-section__header--center { margin-bottom: 40px; }
+
+/* ── CTA Strip — deeper vibrant gradient ── */
+.vk-cta-strip {
+  background: linear-gradient(135deg, #0d9f5c 0%, #128C7E 40%, #0a6b5e 100%) !important;
+  position: relative;
+  overflow: hidden;
+}
+.vk-cta-strip::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.vk-cta-strip__btn {
+  background: #fff !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18) !important;
+}
+
+/* ── Section separator (rainbow line between sections) ── */
+.vk-section--alt + .vk-section--alt {
+  border-top: 2px solid transparent;
+}
+
+/* ---------- Accessibility: reduce motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .vk-hero__bg img,
+  .vk-hero__left,
+  .vk-hero__right,
+  .vk-reveal,
+  .vk-hero__cta--primary::after,
+  .vk-hero__scroll-chevron,
+  .vk-hero__badge-dot,
+  .vk-booking-card__head-dot,
+  .vk-hero__live-dot { animation: none !important; transition: none !important; }
+}

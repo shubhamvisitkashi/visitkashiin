@@ -39,18 +39,17 @@
             }
         });
     });
-    $(window).scroll(function() {
-        if ($(window).scrollTop() > 10) {
-            $('.navigation').addClass('navbar-sticky')
-        } else {
-            $('.navigation').removeClass('navbar-sticky')
-        }
-    });
-    $(window).scroll(function() {
-        if ($(window).scrollTop() > 10) {
-            $('.tabs-navbar').addClass('navbar-sticky')
-        } else {
-            $('.tabs-navbar').removeClass('navbar-sticky')
+    // Merged + debounced scroll handler (eliminates two separate scroll listeners)
+    var _scrollTicking = false;
+    $(window).on('scroll.vkSticky', function() {
+        if (!_scrollTicking) {
+            window.requestAnimationFrame(function() {
+                var st = $(window).scrollTop() > 10;
+                $('.navigation').toggleClass('navbar-sticky', st);
+                $('.tabs-navbar').toggleClass('navbar-sticky', st);
+                _scrollTicking = false;
+            });
+            _scrollTicking = true;
         }
     });
     var $slicknav_label;

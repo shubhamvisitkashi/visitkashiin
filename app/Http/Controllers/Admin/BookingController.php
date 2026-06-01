@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\BookingPayment;
 use App\Services\GstInvoiceService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -166,7 +168,11 @@ class BookingController extends Controller
      */
     public function edit($id)
     {
-        $booking = Booking::with(['lead', 'quotation'])->findOrFail($id);
+        $booking = Booking::with([
+            'lead',
+            'quotation.items.serviceTemplate.serviceType',
+            'payments.paymentAccount',
+        ])->findOrFail($id);
 
         // Role-based authorization: Staff can only edit their own bookings
         if (!auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager'])) {
@@ -175,7 +181,12 @@ class BookingController extends Controller
             }
         }
 
-        return view('admin.bookings.edit', compact('booking'), ['page_title' => 'Edit Booking']);
+        $serviceTypes     = \App\Models\ServiceType::with(['serviceTemplates' => function($q) {
+            $q->where('is_active', 1)->orderBy('name');
+        }])->get();
+        $paymentAccounts  = \App\Models\PaymentAccount::where('is_active', 1)->orderBy('account_name')->get();
+
+        return view('admin.bookings.edit', compact('booking', 'serviceTypes', 'paymentAccounts'), ['page_title' => 'Modify Booking']);
     }
 
     /**
@@ -183,9 +194,9 @@ class BookingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with(['lead', 'quotation.items', 'payments'])->findOrFail($id);
 
-        // Role-based authorization: Staff can only update their own bookings
+        // Role-based authorization
         if (!auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager'])) {
             if ($booking->created_by !== auth('admin')->id()) {
                 abort(403, 'Unauthorized access. You can only update bookings you created.');
@@ -193,85 +204,139 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'guest_name' => 'required|string|max:255',
-            'contact' => 'required|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'pax' => 'nullable|integer|min:1',
-            'tour_plan' => 'nullable|string',
-            'booking_date' => 'required|date',
-            'total_amount' => 'required|numeric|min:0',
-            'services' => 'nullable|array',
-            'services.*.id' => 'required|exists:quotation_items,id',
-            'services.*.quantity' => 'required|integer|min:1',
-            'services.*.unit_price' => 'required|numeric|min:0',
-            'services.*.total_price' => 'required|numeric|min:0',
-            'services.*.service_date' => 'nullable|date',
-            'deleted_services' => 'nullable|array',
-            'deleted_services.*' => 'exists:quotation_items,id',
+            'guest_name'         => 'required|string|max:255',
+            'contact'            => 'required|string|max:20',
+            'alt_phone'          => 'nullable|string|max:20',
+            'email'              => 'nullable|email|max:255',
+            'country'            => 'nullable|string|max:100',
+            'pax'                => 'nullable|string|max:20',
+            'tour_plan'          => 'nullable|string',
+            'short_plan'         => 'nullable|string',
+            'booking_date'       => 'required|date',
+            'booking_start_date' => 'nullable|date',
+            'booking_end_date'   => 'nullable|date',
+            'booking_status'     => 'nullable|in:confirmed,in_progress,completed,cancelled',
+            'discount'           => 'nullable|numeric|min:0',
+            'notes'              => 'nullable|string',
+            // Existing service rows
+            'services'                    => 'nullable|array',
+            'services.*.id'               => 'required|exists:quotation_items,id',
+            'services.*.quantity'         => 'required|integer|min:1',
+            'services.*.unit_price'       => 'required|numeric|min:0',
+            'services.*.total_price'      => 'required|numeric|min:0',
+            'services.*.service_date'     => 'nullable|date',
+            // New service rows
+            'new_services'                        => 'nullable|array',
+            'new_services.*.service_template_id'  => 'nullable|exists:service_templates,id',
+            'new_services.*.quantity'             => 'required|integer|min:1',
+            'new_services.*.unit_price'           => 'required|numeric|min:0',
+            'new_services.*.service_date'         => 'nullable|date',
+            // Deleted services
+            'deleted_services'    => 'nullable|array',
+            'deleted_services.*'  => 'exists:quotation_items,id',
         ]);
 
-        // Update lead details (only fields that exist in database)
-        if ($booking->lead) {
-            $booking->lead->update([
-                'guest_name' => $validated['guest_name'],
-                'contact' => $validated['contact'],
-                'short_plan' => $validated['tour_plan'],
-            ]);
-        }
+        DB::beginTransaction();
+        try {
+            // ── Lead update ─────────────────────────────────────────────
+            if ($booking->lead) {
+                $leadData = [
+                    'guest_name'         => $validated['guest_name'],
+                    'contact'            => $validated['contact'],
+                    'alt_phone'          => $validated['alt_phone'] ?? null,
+                    'email'              => $validated['email'] ?? null,
+                    'country'            => $validated['country'] ?? null,
+                    'pax'                => $validated['pax'] ?? null,
+                    'booking_start_date' => $validated['booking_start_date'] ?? null,
+                    'booking_end_date'   => $validated['booking_end_date'] ?? null,
+                    'notes'              => $validated['notes'] ?? null,
+                    'plan_detail'        => $validated['tour_plan'] ?? null,
+                ];
+                if ($request->filled('short_plan')) {
+                    $leadData['short_plan'] = $validated['short_plan'];
+                }
+                $booking->lead->update($leadData);
+            }
 
-        // Update booking details
-        $booking->update([
-            'booking_date' => $validated['booking_date'],
-            'total_amount' => $validated['total_amount'],
-        ]);
+            // ── Service updates ─────────────────────────────────────────
+            if (!empty($validated['services'])) {
+                foreach ($validated['services'] as $svc) {
+                    $item = \App\Models\QuotationItem::find($svc['id']);
+                    if ($item) {
+                        $item->update([
+                            'quantity'     => $svc['quantity'],
+                            'unit_price'   => $svc['unit_price'],
+                            'total_price'  => $svc['total_price'],
+                            'service_date' => $svc['service_date'] ?? null,
+                        ]);
+                    }
+                }
+            }
 
-        // Update quotation itinerary if exists
-        if ($booking->quotation && $request->has('tour_plan')) {
-            $booking->quotation->update([
-                'itinerary' => $validated['tour_plan'],
-            ]);
-        }
-
-        // Handle service updates
-        if ($request->has('services')) {
-            foreach ($request->services as $serviceData) {
-                $quotationItem = \App\Models\QuotationItem::find($serviceData['id']);
-                if ($quotationItem) {
-                    $quotationItem->update([
-                        'quantity' => $serviceData['quantity'],
-                        'unit_price' => $serviceData['unit_price'],
-                        'total_price' => $serviceData['total_price'],
-                        'service_date' => $serviceData['service_date'] ?? null,
+            // ── New service rows ────────────────────────────────────────
+            if (!empty($validated['new_services']) && $booking->quotation) {
+                foreach ($validated['new_services'] as $nsvc) {
+                    if (empty($nsvc['unit_price'])) continue;
+                    $tplId    = $nsvc['service_template_id'] ?? null;
+                    $template = $tplId ? \App\Models\ServiceTemplate::find($tplId) : null;
+                    \App\Models\QuotationItem::create([
+                        'quotation_id'        => $booking->quotation->id,
+                        'service_template_id' => $tplId,
+                        'service_type_id'     => $template ? $template->service_type_id : null,
+                        'quantity'            => $nsvc['quantity'],
+                        'unit_price'          => $nsvc['unit_price'],
+                        'total_price'         => $nsvc['quantity'] * $nsvc['unit_price'],
+                        'service_date'        => $nsvc['service_date'] ?? null,
                     ]);
                 }
             }
-        }
 
-        // Handle service deletions
-        if ($request->has('deleted_services')) {
-            foreach ($request->deleted_services as $itemId) {
-                $quotationItem = \App\Models\QuotationItem::find($itemId);
-                if ($quotationItem && $quotationItem->quotation_id == $booking->quotation_id) {
-                    $quotationItem->delete();
+            // ── Service deletions ────────────────────────────────────────
+            if (!empty($validated['deleted_services'])) {
+                foreach ($validated['deleted_services'] as $itemId) {
+                    $item = \App\Models\QuotationItem::find($itemId);
+                    if ($item && $item->quotation_id == $booking->quotation_id) {
+                        $item->delete();
+                    }
                 }
             }
-        }
 
-        // Recalculate quotation total if services were modified
-        if ($booking->quotation && ($request->has('services') || $request->has('deleted_services'))) {
-            $booking->quotation->calculateTotal();
+            // ── Recalculate financials ───────────────────────────────────
+            $discount    = (float)($validated['discount'] ?? 0);
+            $currentPaid = $booking->payments->sum('amount') ?: (float)$booking->paid_amount;
 
-            // Update booking total amount from quotation
+            if ($booking->quotation) {
+                // Subtotal = sum of all item total_prices (fresh)
+                $subtotal  = (float)$booking->quotation->items()->sum('total_price');
+                $netTotal  = max(0, $subtotal - $discount);
+
+                $booking->quotation->update([
+                    'subtotal'     => $subtotal,
+                    'total_amount' => $netTotal,
+                    'itinerary_html' => $validated['tour_plan'] ?? $booking->quotation->itinerary_html,
+                ]);
+            } else {
+                $netTotal = (float)$request->input('total_amount', $booking->total_amount);
+            }
+
             $booking->update([
-                'total_amount' => $booking->quotation->fresh()->total_amount,
+                'booking_date'   => $validated['booking_date'],
+                'booking_status' => $validated['booking_status'] ?? $booking->booking_status,
+                'total_amount'   => $netTotal,
+                'paid_amount'    => $currentPaid,
+                'pending_amount' => max(0, $netTotal - $currentPaid),
             ]);
 
-            // Recalculate pending amount
-            $booking->updatePaidAmount();
-        }
+            DB::commit();
 
-        return redirect()->route('bookings.index')
-            ->with('success', 'Booking updated successfully.');
+            return redirect()->route('bookings.show', $booking->id)
+                ->with('success', 'Booking updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Booking update failed', ['error' => $e->getMessage(), 'id' => $id]);
+            return back()->withInput()->with('error', 'Failed to update booking: ' . $e->getMessage());
+        }
     }
 
     /**

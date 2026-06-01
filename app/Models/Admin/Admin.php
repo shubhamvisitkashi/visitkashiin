@@ -16,7 +16,17 @@ class Admin extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password'
+        'password',
+        'plain_password',
+        'avatar',
     ];
+
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar && file_exists(public_path('uploads/avatars/'.$this->avatar))) {
+            return asset('uploads/avatars/'.$this->avatar);
+        }
+        return '';
+    }
 
 }

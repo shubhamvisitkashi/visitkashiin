@@ -75,6 +75,7 @@ class ProductController extends Controller
         $data->map_location = $request->map_location;
         $data->youtube_link = $request->youtube_link;
         $data->save();
+        cache()->forget('home_products'); cache()->forget('home_search_list'); cache()->forget('home_service_images');
         return redirect()->route('product.index')->with('success', 'Product Added Successfully');
     }
 
@@ -133,6 +134,7 @@ class ProductController extends Controller
         $data->map_location = $request->map_location;
         $data->youtube_link = $request->youtube_link;
         $data->save();
+        cache()->forget('home_products'); cache()->forget('home_search_list'); cache()->forget('home_service_images');
         return redirect()->route('product.index')->with('success', 'Product Updated Successfully');
     }
 
@@ -145,6 +147,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         Product::destroy($id);
+        cache()->forget('home_products'); cache()->forget('home_search_list'); cache()->forget('home_service_images');
         return redirect()->route('product.index')->with('error', 'Product deleted successfully !!');
     }
 

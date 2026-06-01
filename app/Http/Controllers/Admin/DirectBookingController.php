@@ -12,6 +12,7 @@ use App\Models\Booking;
 use App\Models\ServiceTemplate;
 use App\Models\ServiceType;
 use App\Models\Payment;
+use App\Models\BookingPayment;
 use App\Models\PaymentAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -58,22 +59,39 @@ class DirectBookingController extends Controller
             // Validation
             $validated = $request->validate([
                 // Customer Information (Required)
-                'guest_name' => 'required|string|max:255',
-                'phone' => 'required|string|max:20',
-                'email' => 'nullable|email|max:255',
-                'short_plan' => 'required|string',
-                'lead_source_id' => 'required|exists:lead_sources,id',
-                
+                'guest_name'        => 'required|string|max:255',
+                'phone'             => 'required|string|max:20',
+                'alt_phone'         => 'nullable|string|max:20',
+                'email'             => 'nullable|email|max:255',
+                'country'           => 'nullable|string|max:100',
+                'pax'               => 'nullable|integer|min:1',
+                'short_plan'        => 'required|string',
+                'lead_source_id'    => 'required|exists:lead_sources,id',
+
+                // Stay-specific (optional — only sent by Stay form)
+                'booking_start_date' => 'nullable|date',
+                'booking_end_date'   => 'nullable|date',
+                'checkin_time'       => 'nullable|string|max:10',
+                'checkout_time'      => 'nullable|string|max:10',
+
                 // Services (Required)
-                'services' => 'required|array|min:1',
-                'services.*.service_template_id' => 'required|exists:service_templates,id',
-                'services.*.quantity' => 'nullable|integer|min:1',
-                'services.*.unit_price' => 'required|numeric|min:0',
-                'services.*.service_date' => 'nullable|date',
-                
+                'services'                          => 'required|array|min:1',
+                'services.*.service_template_id'    => 'nullable|exists:service_templates,id',
+                'services.*.quantity'               => 'nullable|integer|min:1',
+                'services.*.unit_price'             => 'required|numeric|min:0',
+                'services.*.service_date'           => 'nullable|date',
+
+                // Payment (Optional)
+                'advance_paid'     => 'nullable|numeric|min:0',
+                'discount'         => 'nullable|numeric|min:0',
+                'payment_status'   => 'nullable|string',
+                'payment_method'   => 'nullable|string',
+
                 // Additional Details (Optional)
-                'tour_plan' => 'nullable|string',
-                'internal_notes' => 'nullable|string',
+                'tour_plan'        => 'nullable|string',
+                'guest_notes'      => 'nullable|string',
+                'internal_notes'   => 'nullable|string',
+                'tags'             => 'nullable|string',
             ]);
 
             // Set default quantity if not provided
@@ -101,17 +119,9 @@ class DirectBookingController extends Controller
                 $subtotal += $service['quantity'] * $service['unit_price'];
             }
 
-            // Apply discount
-            $discountAmount = 0;
-            if (!empty($validated['discount_amount'])) {
-                if ($validated['discount_type'] === 'percentage') {
-                    $discountAmount = ($subtotal * $validated['discount_amount']) / 100;
-                } else {
-                    $discountAmount = $validated['discount_amount'];
-                }
-            }
-
-            $amountAfterDiscount = $subtotal - $discountAmount;
+            // Apply discount (form field name is 'discount')
+            $discountAmount      = (float)($validated['discount'] ?? 0);
+            $amountAfterDiscount = max(0, $subtotal - $discountAmount);
 
             // Apply GST
             $gstAmount = 0;
@@ -123,24 +133,31 @@ class DirectBookingController extends Controller
 
             // STEP 1: Auto-create Lead (background)
             $lead = Lead::create([
-                'guest_name' => $validated['guest_name'],
-                'contact' => $validated['phone'],
-                'short_plan' => $validated['short_plan'],
-                'lead_source_id' => $validated['lead_source_id'],
-                'booking_status' => 'confirm',
-                'total_amount' => $totalAmount,
-                'plan_detail' => $validated['tour_plan'] ?? null,
-                'added_by' => auth('admin')->id(),
+                'guest_name'          => $validated['guest_name'],
+                'contact'             => $validated['phone'],
+                'alt_phone'           => $validated['alt_phone'] ?? null,
+                'email'               => $validated['email'] ?? null,
+                'country'             => $validated['country'] ?? null,
+                'pax'                 => $validated['pax'] ?? null,
+                'booking_start_date'  => $validated['booking_start_date'] ?? null,
+                'booking_end_date'    => $validated['booking_end_date'] ?? null,
+                'short_plan'          => $validated['short_plan'],
+                'lead_source_id'      => $validated['lead_source_id'],
+                'booking_status'      => 'confirm',
+                'total_amount'        => $totalAmount,
+                'plan_detail'         => $validated['tour_plan'] ?? null,
+                'notes'               => $validated['internal_notes'] ?? null,
+                'added_by'            => auth('admin')->id(),
             ]);
 
             // STEP 2: Auto-create Quotation (background, auto-approved)
             $quotation = Quotation::create([
                 'lead_id' => $lead->id,
                 'quotation_number' => 'QT-' . time() . '-' . $lead->id,
-                'quotation_date' => now()->format('Y-m-d'), // Use today's date
+                'quotation_date' => now()->format('Y-m-d'),
                 'valid_until' => now()->addDays(7),
                 'total_amount' => $totalAmount,
-                'discount_amount' => 0,
+                'discount_amount' => $discountAmount,
                 'discount_type' => 'fixed',
                 'subtotal' => $subtotal,
                 'tax_amount' => 0,
@@ -153,34 +170,38 @@ class DirectBookingController extends Controller
 
             // STEP 3: Create Quotation Items (services)
             foreach ($validated['services'] as $service) {
-                $template = ServiceTemplate::find($service['service_template_id']);
-                
+                $templateId = $service['service_template_id'] ?? null;
+                $template   = $templateId ? ServiceTemplate::find($templateId) : null;
+
                 QuotationItem::create([
-                    'quotation_id' => $quotation->id,
-                    'service_type_id' => $template->service_type_id,
-                    'service_template_id' => $service['service_template_id'],
-                    'quantity' => $service['quantity'],
-                    'unit_price' => $service['unit_price'],
-                    'total_price' => $service['quantity'] * $service['unit_price'],
-                    'service_date' => $service['service_date'] ?? null,
-                    'notes' => $service['notes'] ?? null,
+                    'quotation_id'        => $quotation->id,
+                    'service_type_id'     => $template ? $template->service_type_id : null,
+                    'service_template_id' => $templateId,
+                    'quantity'            => $service['quantity'] ?? 1,
+                    'unit_price'          => $service['unit_price'],
+                    'total_price'         => ($service['quantity'] ?? 1) * $service['unit_price'],
+                    'service_date'        => $service['service_date'] ?? null,
+                    'notes'               => $service['notes'] ?? null,
                 ]);
             }
 
             // STEP 4: Create Booking (main entity)
+            $advancePaid    = (float)($validated['advance_paid'] ?? 0);
+            $pendingAmount  = max(0, $totalAmount - $advancePaid);
+
             $booking = Booking::create([
-                'quotation_id' => $quotation->id,
-                'lead_id' => $lead->id,
-                'booking_number' => 'BK-' . date('Ymd') . '-' . str_pad($lead->id, 4, '0', STR_PAD_LEFT),
-                'booking_date' => now()->format('Y-m-d'),
-                'booking_status' => 'confirmed',
-                'total_amount' => $totalAmount,
-                'paid_amount' => 0,
-                'pending_amount' => $totalAmount,
-                'discount_amount' => 0,
-                'tax_amount' => 0,
-                'notes' => $validated['internal_notes'] ?? null,
-                'created_by' => auth('admin')->id(),
+                'quotation_id'    => $quotation->id,
+                'lead_id'         => $lead->id,
+                'booking_number'  => 'BK-' . date('Ymd') . '-' . str_pad($lead->id, 4, '0', STR_PAD_LEFT),
+                'booking_date'    => now()->format('Y-m-d'),
+                'booking_status'  => 'confirmed',
+                'total_amount'    => $totalAmount,
+                'paid_amount'     => $advancePaid,
+                'pending_amount'  => $pendingAmount,
+                'discount_amount' => $discountAmount,
+                'tax_amount'      => 0,
+                'notes'           => $validated['internal_notes'] ?? null,
+                'created_by'      => auth('admin')->id(),
             ]);
 
             // STEP 5: Link quotation to booking
@@ -188,6 +209,19 @@ class DirectBookingController extends Controller
                 'is_converted' => true,
                 'booking_id' => $booking->id,
             ]);
+
+            // STEP 6: Create payment record for advance paid
+            if ($advancePaid > 0) {
+                $defaultAccount = PaymentAccount::first();
+                BookingPayment::create([
+                    'booking_id'         => $booking->id,
+                    'payment_account_id' => $defaultAccount?->id,
+                    'payment_date'       => now()->format('Y-m-d'),
+                    'amount'             => $advancePaid,
+                    'payment_method'     => $validated['payment_method'] ?? 'cash',
+                    'received_by'        => auth('admin')->id(),
+                ]);
+            }
 
             DB::commit();
 

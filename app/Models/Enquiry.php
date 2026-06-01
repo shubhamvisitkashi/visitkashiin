@@ -19,5 +19,12 @@ class Enquiry extends Model
         'message',
         'package_id',
         'package_name',
+        'booking_amount',
+        'time_slot',
+        'pickup_ghat',
+        'children_count',
+        'special_notes',
+        'luggage_bags',
+        'roof_carrier',
     ];
 }

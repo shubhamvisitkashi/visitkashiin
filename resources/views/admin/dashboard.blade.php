@@ -1,3083 +1,1327 @@
 @extends('admin.layouts.app')
 @section('content')
-    <style>
-        /* Compact Target Widget Styles */
-        .modern-card.target-compact {
-            padding: 1rem !important;
-            margin-bottom: 1rem !important;
-        }
-
-        .modern-card.target-compact .modern-card-header {
-            padding: 0 0 0.75rem 0 !important;
-            margin-bottom: 0.75rem !important;
-        }
-
-        .modern-card.target-compact .modern-card-header h5 {
-            font-size: 0.875rem !important;
-            margin: 0 !important;
-        }
-
-        .modern-card.target-compact .modern-card-body {
-            padding: 0 !important;
-        }
-
-        .modern-card.target-compact .stat-box {
-            padding: 0.625rem !important;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .modern-card.target-compact .stat-label {
-            font-size: 0.688rem !important;
-            margin-bottom: 0.25rem !important;
-        }
-
-        .modern-card.target-compact .stat-value {
-            font-size: 1.125rem !important;
-        }
-
-        .modern-card.target-compact .progress {
-            height: 6px !important;
-        }
-
-        .modern-card.target-compact .alert {
-            padding: 0.5rem 0.75rem !important;
-            font-size: 0.75rem !important;
-        }
-
-        .modern-card.target-compact .badge {
-            font-size: 0.688rem !important;
-            padding: 0.25rem 0.625rem !important;
-        }
-
-        /* Mobile Optimizations */
-        @media (max-width: 768px) {
-            .modern-card.target-compact {
-                padding: 0.875rem !important;
-                margin-bottom: 0.875rem !important;
-            }
-
-            .modern-card.target-compact .modern-card-header {
-                padding: 0.75rem 0.875rem !important;
-                margin-bottom: 0.75rem !important;
-            }
-
-            .modern-card.target-compact .modern-card-header h5 {
-                font-size: 0.813rem !important;
-            }
-
-            .modern-card.target-compact .modern-card-header .badge {
-                font-size: 0.625rem !important;
-                padding: 0.188rem 0.5rem !important;
-            }
-
-            /* Keep stats side by side on mobile */
-            .modern-card.target-compact .row.g-3 {
-                gap: 0.625rem !important;
-            }
-
-            .modern-card.target-compact .stat-box {
-                padding: 0.5rem !important;
-            }
-
-            .modern-card.target-compact .stat-label {
-                font-size: 0.625rem !important;
-                margin-bottom: 0.188rem !important;
-            }
-
-            .modern-card.target-compact .stat-value {
-                font-size: 0.938rem !important;
-                font-weight: 700;
-            }
-
-            .modern-card.target-compact .progress {
-                height: 5px !important;
-            }
-
-            .modern-card.target-compact .alert {
-                padding: 0.438rem 0.625rem !important;
-                font-size: 0.688rem !important;
-            }
-
-            .modern-card.target-compact .alert i {
-                width: 12px !important;
-                height: 12px !important;
-            }
-
-            .modern-card.target-compact .small {
-                font-size: 0.688rem !important;
-            }
-
-            /* Stack target cards on mobile */
-            .row.g-3.mb-3>.col-lg-6 {
-                margin-bottom: 0.5rem;
-            }
-
-            .row.g-3.mb-3>.col-lg-6:last-child {
-                margin-bottom: 0;
-            }
-        }
-
-        /* Extra small devices */
-        @media (max-width: 576px) {
-            .modern-card.target-compact {
-                padding: 0.75rem !important;
-            }
-
-            .modern-card.target-compact .modern-card-header h5 {
-                font-size: 0.75rem !important;
-            }
-
-            .modern-card.target-compact .stat-value {
-                font-size: 0.875rem !important;
-            }
-
-            .modern-card.target-compact .alert {
-                font-size: 0.625rem !important;
-            }
-        }
-
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --purple-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        }
-
-        body {
-            background: #f5f7fa;
-        }
-
-        .page-content {
-            width: 100%;
-            padding: 0 20px;
-        }
-
-        /* Welcome Header - Optimized */
-        .welcome-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px 30px;
-            border-radius: 15px;
-            color: white;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .welcome-header::before {
-            content: '';
-            position: absolute;
-            top: -30%;
-            right: -30px;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 50%;
-        }
-
-        .welcome-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .welcome-header h2 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-
-        .welcome-header p {
-            font-size: 13px;
-            opacity: 0.85;
-            margin: 0;
-        }
-
-        /* Quick Actions Bar */
-        .quick-actions-bar {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-        }
-
-        .quick-actions-container {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-
-        .quick-actions-container::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .quick-actions-container::-webkit-scrollbar-track {
-            background: #f1f3f9;
-            border-radius: 10px;
-        }
-
-        .quick-actions-container::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 10px;
-        }
-
-        .quick-action-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px 20px;
-            background: #f8f9fc;
-            border-radius: 12px;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-width: 180px;
-            border: 2px solid transparent;
-        }
-
-        .quick-action-item:hover {
-            background: white;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            border-color: #e5e7eb;
-        }
-
-        .quick-action-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: transform 0.3s ease;
-        }
-
-        .quick-action-item:hover .quick-action-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .quick-action-icon i {
-            color: white;
-            width: 22px;
-            height: 22px;
-        }
-
-        .quick-action-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .quick-action-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .quick-action-subtitle {
-            font-size: 12px;
-            color: #718096;
-        }
-
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 18px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-            cursor: pointer;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--primary-gradient);
-            transition: width 0.3s ease;
-        }
-
-        .stat-card:hover::before {
-            width: 100%;
-            opacity: 0.05;
-        }
-
-        .stat-card.complete::before {
-            background: var(--success-gradient);
-        }
-
-        .stat-card.confirm::before {
-            background: var(--info-gradient);
-        }
-
-        .stat-card.followup::before {
-            background: var(--warning-gradient);
-        }
-
-        .stat-card.cancel::before {
-            background: var(--danger-gradient);
-        }
-
-        .stat-card-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover .stat-card-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .stat-card.complete .stat-card-icon {
-            background: var(--success-gradient);
-        }
-
-        .stat-card.confirm .stat-card-icon {
-            background: var(--info-gradient);
-        }
-
-        .stat-card.followup .stat-card-icon {
-            background: var(--warning-gradient);
-        }
-
-        .stat-card.cancel .stat-card-icon {
-            background: var(--danger-gradient);
-        }
-
-        .stat-card-icon i {
-            color: white;
-            font-size: 22px;
-        }
-
-        .stat-card h3 {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-            color: #2d3748;
-            counter-reset: num var(--num);
-        }
-
-        .stat-card p {
-            font-size: 13px;
-            color: #718096;
-            margin: 5px 0 0 0;
-            font-weight: 500;
-        }
-
-        /* Performance Metrics */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 25px;
-        }
-
-        .metric-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .metric-title {
-            font-size: 13px;
-            color: #718096;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .metric-icon {
-            width: 35px;
-            height: 35px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--info-gradient);
-        }
-
-        .metric-icon i {
-            color: white;
-            font-size: 18px;
-        }
-
-        .metric-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-
-        .metric-change {
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .metric-change.positive {
-            color: #38ef7d;
-        }
-
-        .metric-change.negative {
-            color: #ff6b6b;
-        }
-
-        /* Modern Card Styles */
-        .modern-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-        }
-
-        .modern-card:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        .modern-card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 12px 18px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .modern-card-header h5 {
-            margin: 0;
-            font-size: 0.938rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-        }
-
-        .modern-card-header .badge {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-
-        .modern-card-header .btn-light {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            border-radius: 10px;
-            padding: 5px 14px;
-            transition: all 0.3s ease;
-            font-size: 0.813rem;
-        }
-
-        .modern-card-header .btn-light:hover {
-            background: white;
-            color: #667eea;
-        }
-
-        /* Target Widget Header Enhancement */
-        .modern-card.target-compact .modern-card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 0.875rem 1rem !important;
-            border-radius: 8px;
-            margin-bottom: 0.875rem !important;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
-        }
-
-        .modern-card.target-compact .modern-card-header h5 {
-            font-size: 0.875rem !important;
-            font-weight: 600 !important;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .modern-card.target-compact .modern-card-header .badge {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            padding: 0.25rem 0.75rem;
-            font-size: 0.688rem;
-            border-radius: 20px;
-        }
-
-        /* Mobile Responsive Headers */
-        @media (max-width: 768px) {
-            .modern-card-header {
-                padding: 10px 14px;
-            }
-
-            .modern-card-header h5 {
-                font-size: 0.875rem;
-            }
-
-            .modern-card.target-compact .modern-card-header {
-                padding: 0.75rem 0.875rem !important;
-            }
-        }
-
-        /* Modern Table */
-        .modern-table {
-            width: 100%;
-        }
-
-        .modern-table thead {
-            background: #f8f9fc;
-        }
-
-        .modern-table thead th {
-            padding: 15px;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #4a5568;
-            border: none;
-        }
-
-        .modern-table tbody td {
-            padding: 15px;
-            vertical-align: middle;
-            border-bottom: 1px solid #f1f3f9;
-            color: #2d3748;
-            font-size: 14px;
-        }
-
-        .modern-table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        .modern-table tbody tr:hover {
-            background: #f8f9fc;
-        }
-
-        /* User Avatar */
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-        }
-
-        .user-avatar i {
-            color: white;
-        }
-
-        /* Modern Badges */
-        .modern-badge {
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .badge-complete {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-        }
-
-        .badge-confirm {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .badge-followup {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-        }
-
-        .badge-cancel {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
-        }
-
-        .badge-new {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        /* Action Button */
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .action-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-        }
-
-        .empty-state-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.1;
-        }
-
-        .empty-state-icon i {
-            font-size: 40px;
-            color: white;
-        }
-
-        .empty-state h5 {
-            color: #4a5568;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .empty-state p {
-            color: #a0aec0;
-            margin: 0;
-            font-size: 14px;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            position: relative;
-            height: 350px;
-            padding: 20px;
-        }
-
-        /* Chart Card */
-        .chart-card {
-            background: #f8f9fc;
-            border-radius: 12px;
-            padding: 20px;
-            height: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .chart-card:hover {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .chart-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Summary Stats */
-        .summary-stat {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .summary-stat:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .summary-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .summary-icon i {
-            color: white;
-            font-size: 22px;
-        }
-
-        .summary-content {
-            flex: 1;
-        }
-
-        .summary-label {
-            font-size: 12px;
-            color: #718096;
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .summary-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-
-        /* Recent Activity Timeline */
-        .activity-timeline {
-            padding: 20px;
-        }
-
-        .activity-item {
-            display: flex;
-            gap: 15px;
-            padding: 15px 0;
-            border-bottom: 1px solid #f1f3f9;
-            transition: all 0.2s ease;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-item:hover {
-            background: #f8f9fc;
-            padding-left: 10px;
-            margin-left: -10px;
-            padding-right: 10px;
-            margin-right: -10px;
-            border-radius: 10px;
-        }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .activity-icon.lead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .activity-icon.enquiry {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .activity-icon i {
-            color: white;
-            font-size: 18px;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .activity-description {
-            color: #718096;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-
-        .activity-time {
-            color: #a0aec0;
-            font-size: 12px;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .quick-action-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .quick-action-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 28px rgba(102, 126, 234, 0.5);
-        }
-
-        .quick-action-btn i {
-            font-size: 24px;
-        }
-
-        .quick-action-tooltip {
-            position: absolute;
-            right: 70px;
-            background: #2d3748;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .quick-action-btn:hover .quick-action-tooltip {
-            opacity: 1;
-        }
-
-        /* Two Column Layout */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-
-            .metrics-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .welcome-header {
-                padding: 20px;
-            }
-
-            .welcome-header h2 {
-                font-size: 22px;
-            }
-
-            .quick-actions-bar {
-                padding: 15px;
-                margin-bottom: 20px;
-            }
-
-            .quick-action-item {
-                min-width: 160px;
-                padding: 12px 15px;
-            }
-
-            .quick-action-icon {
-                width: 40px;
-                height: 40px;
-            }
-
-            .quick-action-title {
-                font-size: 13px;
-            }
-
-            .quick-action-subtitle {
-                font-size: 11px;
-            }
-
-            /* Mobile Responsive Table */
-            .upcoming-services-table thead {
-                display: none;
-            }
-
-            .upcoming-services-table tbody tr {
-                display: block;
-                margin-bottom: 15px;
-                border: 1px solid #e5e7eb;
-                border-radius: 12px;
-                padding: 15px;
-                background: white;
-            }
-
-            .upcoming-services-table tbody td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 10px 0;
-                border: none;
-            }
-
-            .upcoming-services-table tbody td:before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: #718096;
-                font-size: 12px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                flex-shrink: 0;
-                width: 80px;
-            }
-
-            .upcoming-services-table tbody td:last-child {
-                border-bottom: none;
-            }
-
-            .modern-table thead th,
-            .modern-table tbody td {
-                padding: 10px;
-                font-size: 12px;
-            }
-
-            .quick-actions {
-                bottom: 20px;
-                right: 20px;
-            }
-
-            .quick-action-btn {
-                width: 48px;
-                height: 48px;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Upcoming Services - Card Layout */
-        .upcoming-services-container {
-            padding: 25px;
-        }
-
-        .service-date-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f3f9;
-        }
-
-        .date-badge {
-            width: 65px;
-            height: 65px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .date-day {
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-            line-height: 1;
-        }
-
-        .date-month {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
-        }
-
-        .date-info {
-            flex: 1;
-        }
-
-        .date-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 4px;
-        }
-
-        .date-subtitle {
-            font-size: 13px;
-            color: #718096;
-        }
-
-        .today-badge,
-        .tomorrow-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .today-badge {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-        }
-
-        .tomorrow-badge {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        /* Services Grid */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .service-card {
-            background: white;
-            border-radius: 15px;
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-            border-color: #667eea;
-        }
-
-        /* Service Card Header */
-        .service-card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 18px;
-            background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
-            border-bottom: 1px solid #f1f3f9;
-        }
-
-        .service-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .service-icon i {
-            color: white;
-            width: 22px;
-            height: 22px;
-        }
-
-        .service-title-section {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .service-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .service-type {
-            font-size: 12px;
-            color: #718096;
-        }
-
-        .service-status-badge {
-            flex-shrink: 0;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .status-badge i {
-            width: 12px;
-            height: 12px;
-        }
-
-        .status-confirmed {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .status-completed {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-        }
-
-        .status-pending {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        /* Service Card Body */
-        .service-card-body {
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .service-info-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .info-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .info-icon i {
-            color: white;
-            width: 18px;
-            height: 18px;
-        }
-
-        .customer-icon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .booking-icon {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .vendor-icon.assigned {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        }
-
-        .vendor-icon.unassigned {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-        }
-
-        .info-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .info-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .info-value {
-            font-size: 14px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 3px;
-        }
-
-        .info-meta {
-            font-size: 12px;
-            color: #a0aec0;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .phone-link {
-            color: #667eea;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .phone-link:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        .assigned-meta {
-            color: #38ef7d;
-        }
-
-        .unassigned-meta {
-            color: #fa709a;
-        }
-
-        /* Service Card Footer */
-        .service-card-footer {
-            padding: 15px 18px;
-            background: #f8f9fc;
-            border-top: 1px solid #f1f3f9;
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-view-details,
-        .btn-assign-vendor {
-            flex: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-view-details {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-view-details:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
-
-        .btn-assign-vendor {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-        }
-
-        .btn-assign-vendor:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes countUp {
-            from {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .animate-fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-
-        .animate-count {
-            animation: countUp 0.5s ease-out forwards;
-        }
-
-        /* Mobile Responsive for Service Cards */
-        @media (max-width: 768px) {
-            .upcoming-services-container {
-                padding: 15px;
-            }
-
-            .services-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .service-date-header {
-                margin-bottom: 15px;
-            }
-
-            .date-badge {
-                width: 55px;
-                height: 55px;
-            }
-
-            .date-day {
-                font-size: 20px;
-            }
-
-            .date-title {
-                font-size: 16px;
-            }
-
-            .date-subtitle {
-                font-size: 12px;
-            }
-
-            .service-card-header {
-                padding: 15px;
-            }
-
-            .service-card-body {
-                padding: 15px;
-            }
-
-            .service-card-footer {
-                flex-direction: row;
-            }
-
-            .btn-view-details {
-                width: 100%;
-            }
-
-            /* Hide assign vendor button on mobile */
-            .btn-assign-vendor {
-                display: none;
-            }
-        }
-    </style>
-
-
-    <div class="page-content">
-        <!-- Welcome Header - Optimized -->
-        <div class="welcome-header animate-fade-in-up">
-            <div class="welcome-content">
-                <h2>👋 Welcome, {{ auth()->user()->name ?? 'Admin' }}!</h2>
-                <p>{{ now()->format('l, F j, Y') }}</p>
-            </div>
+<style>
+/* ══════════════════════════════════════════════
+   HORIZON DASHBOARD — Clean Enterprise SaaS UI
+   Palette: Slate bg · White cards · Indigo accent
+   ══════════════════════════════════════════════ */
+
+/* ── Tokens ─────────────────────────────────── */
+:root {
+    --h-bg:        #EEF2FF;
+    --h-card:      #FFFFFF;
+    --h-border:    #E2E8F0;
+    --h-shadow:    0 1px 3px rgba(15,23,42,.06), 0 4px 16px rgba(15,23,42,.04);
+    --h-shadow-md: 0 4px 24px rgba(15,23,42,.10);
+    --h-text:      #0F172A;
+    --h-sub:       #475569;
+    --h-muted:     #94A3B8;
+    --h-indigo:    #4F46E5;
+    --h-emerald:   #10B981;
+    --h-amber:     #F59E0B;
+    --h-rose:      #EF4444;
+    --h-sky:       #0EA5E9;
+    --h-violet:    #7C3AED;
+    --h-r:         14px;
+    --h-t:         0.2s ease;
+}
+
+/* ── Base ───────────────────────────────────── */
+.page-content {
+    background: var(--h-bg);
+    min-height: 100vh;
+    padding: clamp(14px, 2vw, 24px);
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+@media (max-width: 767px) { .page-content { padding: 12px; } }
+
+/* ── Horizon Header ─────────────────────────── */
+.hz-header {
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #0EA5E9 100%);
+    border-radius: 16px;
+    padding: clamp(16px,2.5vw,28px) clamp(18px,3vw,32px);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+}
+.hz-header::before {
+    content:'';
+    position:absolute; inset:0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hz-header-left { position:relative; z-index:1; }
+.hz-header h1 { color:#fff; font-size:clamp(1.25rem,3vw,1.75rem); font-weight:700; margin:0; }
+.hz-header p  { color:rgba(255,255,255,.75); font-size:.875rem; margin:.25rem 0 0; }
+.hz-header-actions { display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:1; }
+.hz-header-btn {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:9px 18px; border-radius:10px; font-size:.8rem; font-weight:600;
+    text-decoration:none; transition: var(--h-t); white-space:nowrap;
+    background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.25);
+    backdrop-filter:blur(8px);
+}
+.hz-header-btn:hover { background:rgba(255,255,255,.25); color:#fff; transform:translateY(-1px); }
+.hz-header-btn.primary { background:#fff; color:var(--h-indigo); border-color:#fff; }
+.hz-header-btn.primary:hover { background:#f0f0ff; }
+@media(max-width:600px) { .hz-header { flex-direction:column; align-items:flex-start; } }
+
+/* ── Card base ──────────────────────────────── */
+.hz-card {
+    background: var(--h-card);
+    border-radius: var(--h-r);
+    box-shadow: var(--h-shadow);
+    border: 1px solid var(--h-border);
+    overflow: hidden;
+    transition: box-shadow var(--h-t);
+}
+.hz-card:hover { box-shadow: var(--h-shadow-md); }
+.hz-card-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 22px 0;
+    gap:12px;
+}
+.hz-card-title {
+    display:flex; align-items:center; gap:9px;
+    font-size:.9rem; font-weight:700; color: var(--h-text);
+}
+.hz-card-title svg, .hz-card-title i[data-feather] {
+    width:17px; height:17px; stroke:var(--h-indigo); flex-shrink:0;
+}
+.hz-card-body { padding:18px 22px 22px; }
+
+/* ── KPI Row ── */
+.hz-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(8px, 1vw, 14px);
+    margin-bottom: 20px;
+}
+@media(max-width:1200px) { .hz-kpi-row { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+/* ── KPI Card ── */
+.hz-kpi {
+    background: var(--h-card);
+    border-radius: var(--h-r);
+    box-shadow: var(--h-shadow);
+    border: 1px solid var(--h-border);
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: box-shadow var(--h-t), transform var(--h-t);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+}
+.hz-kpi::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: var(--kpi-color, var(--h-indigo));
+    border-radius: 0 0 var(--h-r) var(--h-r);
+}
+.hz-kpi:hover { box-shadow: var(--h-shadow-md); transform: translateY(-2px); }
+.hz-kpi-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--kpi-bg, rgba(79,70,229,.1));
+    margin-bottom: 4px;
+}
+.hz-kpi-icon svg, .hz-kpi-icon i[data-feather] {
+    width: 18px; height: 18px; stroke: var(--kpi-color, var(--h-indigo));
+}
+.hz-kpi-value { font-size: 1.75rem; font-weight: 800; color: var(--h-text); line-height: 1; }
+.hz-kpi-label { font-size: .75rem; font-weight: 600; color: var(--h-muted); text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── Mobile KPI: horizontal swipe scroll ── */
+@media(max-width:640px) {
+    .hz-kpi-row {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+    .hz-kpi-row::-webkit-scrollbar { display: none; }
+
+    .hz-kpi {
+        flex: 0 0 130px;
+        min-width: 130px;
+        padding: 14px 13px 16px;
+        gap: 6px;
+        border-radius: 14px;
+        scroll-snap-align: start;
+    }
+    /* Left colour bar on mobile instead of bottom bar */
+    .hz-kpi::after {
+        top: 0; bottom: 0; left: 0; right: auto;
+        width: 4px; height: 100%;
+        border-radius: var(--h-r) 0 0 var(--h-r);
+    }
+    .hz-kpi-icon {
+        width: 34px; height: 34px;
+        border-radius: 9px;
+        margin-bottom: 2px;
+    }
+    .hz-kpi-icon svg, .hz-kpi-icon i[data-feather] { width: 16px; height: 16px; }
+    .hz-kpi-value { font-size: 1.5rem; }
+    .hz-kpi-label { font-size: .62rem; letter-spacing: .3px; }
+}
+
+/* ── Metrics Row ────────────────────────────── */
+.hz-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(8px,1vw,14px); margin-bottom:20px; }
+@media(max-width:1000px) { .hz-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:480px)  { .hz-metrics { grid-template-columns:1fr; } }
+
+.hz-metric {
+    background:var(--h-card); border-radius:var(--h-r);
+    border:1px solid var(--h-border); box-shadow:var(--h-shadow);
+    padding:18px 20px;
+    display:flex; align-items:center; gap:16px;
+}
+.hz-metric-icon {
+    width:48px; height:48px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--met-bg, rgba(79,70,229,.1));
+}
+.hz-metric-icon svg, .hz-metric-icon i[data-feather] {
+    width:20px; height:20px; stroke:var(--met-color, var(--h-indigo));
+}
+.hz-metric-info { flex:1; min-width:0; }
+.hz-metric-label { font-size:.72rem; color:var(--h-muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.hz-metric-val { font-size:1.3rem; font-weight:800; color:var(--h-text); line-height:1.3; }
+.hz-metric-badge {
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:.7rem; font-weight:700; padding:3px 8px; border-radius:20px;
+    margin-top:4px;
+}
+.hz-metric-badge.up   { background:#d1fae5; color:#065f46; }
+.hz-metric-badge.down { background:#fee2e2; color:#991b1b; }
+.hz-metric-badge svg, .hz-metric-badge i[data-feather] { width:11px; height:11px; }
+
+/* ── Two-col grid ───────────────────────────── */
+.hz-grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(10px,1.2vw,16px); margin-bottom:20px; }
+.hz-grid-3 { display:grid; grid-template-columns:2fr minmax(0,1fr); gap:clamp(10px,1.2vw,16px); margin-bottom:20px; }
+@media(max-width:1000px) { .hz-grid-2, .hz-grid-3 { grid-template-columns:1fr; } }
+
+/* ── Target Widget ──────────────────────────── */
+.hz-target-month { font-size:.72rem; color:var(--h-muted); font-weight:600; text-transform:uppercase; margin-bottom:14px; letter-spacing:.5px; }
+.hz-target-row { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px; }
+.hz-target-val { font-size:1.6rem; font-weight:800; color:var(--h-text); }
+.hz-target-pct { font-size:1rem; font-weight:700; }
+.hz-progress-track { background:#F1F5F9; border-radius:99px; height:10px; overflow:hidden; margin-bottom:10px; }
+.hz-progress-fill  { height:100%; border-radius:99px; transition:width .6s cubic-bezier(.4,0,.2,1); }
+.hz-target-stats { display:flex; gap:12px; }
+.hz-tstat { flex:1; background:#F8FAFC; border-radius:10px; padding:10px 12px; }
+.hz-tstat-label { font-size:.68rem; color:var(--h-muted); font-weight:600; text-transform:uppercase; }
+.hz-tstat-val   { font-size:1rem; font-weight:700; color:var(--h-text); margin-top:2px; }
+.hz-target-note { margin-top:12px; font-size:.78rem; font-weight:600; padding:8px 12px; border-radius:8px; display:flex; align-items:center; gap:6px; }
+.hz-target-note.info { background:#EEF2FF; color:var(--h-indigo); }
+.hz-target-note.success { background:#D1FAE5; color:#065F46; }
+.hz-target-note svg, .hz-target-note i[data-feather] { width:14px; height:14px; flex-shrink:0; }
+
+/* ── Upcoming services ──────────────────────── */
+.hz-svc-date { display:flex; align-items:center; gap:10px; padding:10px 0 6px; }
+.hz-svc-date-badge {
+    min-width:38px; height:38px; border-radius:10px;
+    background:var(--h-indigo); color:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:.62rem; font-weight:700; line-height:1.1; text-transform:uppercase;
+}
+.hz-svc-date-badge b { font-size:1rem; font-weight:800; }
+.hz-svc-date-label { font-size:.83rem; font-weight:700; color:var(--h-text); }
+.hz-svc-date-sub   { font-size:.72rem; color:var(--h-muted); }
+
+.hz-svc-item {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:12px 0; border-bottom:1px solid var(--h-border);
+}
+.hz-svc-item:last-child { border-bottom:none; }
+.hz-svc-dot { width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+.hz-svc-name { font-size:.85rem; font-weight:700; color:var(--h-text); }
+.hz-svc-meta { font-size:.72rem; color:var(--h-muted); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap; }
+.hz-svc-tag { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:.7rem; font-weight:600; }
+.hz-svc-actions { margin-left:auto; display:flex; gap:6px; }
+.hz-link-btn {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:5px 11px; border-radius:7px; font-size:.75rem; font-weight:600;
+    text-decoration:none; transition:var(--h-t); border:1px solid var(--h-border);
+    background:#fff; color:var(--h-sub);
+}
+.hz-link-btn:hover { background:var(--h-indigo); color:#fff; border-color:var(--h-indigo); }
+
+/* ── Chart card ─────────────────────────────── */
+.hz-chart-wrap { padding:20px 22px; }
+.hz-chart-wrap canvas { max-height:260px; }
+.hz-chart-tabs { display:flex; gap:4px; margin-bottom:16px; }
+.hz-chart-tab {
+    padding:5px 14px; border-radius:8px; font-size:.75rem; font-weight:600;
+    cursor:pointer; border:1px solid transparent; transition:var(--h-t);
+    color:var(--h-muted);
+}
+.hz-chart-tab.active { background:var(--h-indigo); color:#fff; }
+.hz-chart-tab:not(.active):hover { background:#F1F5F9; color:var(--h-text); }
+
+/* ── Activity feed ──────────────────────────── */
+.hz-activity { padding:0; max-height:340px; overflow-y:auto; }
+.hz-activity::-webkit-scrollbar { width:4px; }
+.hz-activity::-webkit-scrollbar-thumb { background:#E2E8F0; border-radius:4px; }
+
+.hz-act-item { display:flex; gap:12px; padding:12px 22px; transition:background var(--h-t); }
+.hz-act-item:hover { background:#F8FAFC; }
+.hz-act-line { display:flex; flex-direction:column; align-items:center; }
+.hz-act-dot {
+    width:32px; height:32px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+}
+.hz-act-dot svg, .hz-act-dot i[data-feather] { width:14px; height:14px; }
+.hz-act-connector { width:2px; flex:1; min-height:12px; background:var(--h-border); margin-top:4px; }
+.hz-act-body { flex:1; padding-top:4px; }
+.hz-act-title { font-size:.82rem; font-weight:600; color:var(--h-text); }
+.hz-act-desc  { font-size:.75rem; color:var(--h-muted); margin-top:2px; }
+.hz-act-time  { font-size:.68rem; color:var(--h-muted); margin-top:4px; display:flex; align-items:center; gap:4px; }
+.hz-act-time svg, .hz-act-time i[data-feather] { width:11px; height:11px; }
+
+/* ── Mini charts row ────────────────────────── */
+.hz-charts-4 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(8px,1vw,14px); }
+.hz-mini-chart { background:var(--h-card); border-radius:var(--h-r); border:1px solid var(--h-border); box-shadow:var(--h-shadow); padding:18px; min-width:0; }
+.hz-mini-chart-title { font-size:.8rem; font-weight:700; color:var(--h-text); display:flex; align-items:center; gap:7px; margin-bottom:14px; }
+.hz-mini-chart-title svg, .hz-mini-chart-title i[data-feather] { width:15px; height:15px; stroke:var(--h-indigo); flex-shrink:0; }
+.hz-mini-chart canvas { max-height:180px; width:100% !important; }
+/* Mobile horizontal scroll wrapper */
+.hz-charts-4-scroll { display:none; }
+@media(max-width:767px) {
+  .hz-charts-4 { display:none !important; }
+  .hz-charts-4-scroll {
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    padding-bottom:10px;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    margin-bottom:20px;
+  }
+  .hz-charts-4-scroll::-webkit-scrollbar { height:4px; }
+  .hz-charts-4-scroll::-webkit-scrollbar-track { background:#f0f0f0; border-radius:2px; }
+  .hz-charts-4-scroll::-webkit-scrollbar-thumb { background:var(--h-indigo); border-radius:2px; }
+  .hz-charts-4-scroll .hz-mini-chart {
+    flex:0 0 75vw;
+    max-width:260px;
+    scroll-snap-align:start;
+    padding:16px;
+  }
+  .hz-charts-4-scroll .hz-mini-chart canvas { max-height:160px; width:100% !important; }
+  .hz-charts-4-scroll .hz-mini-chart-title { font-size:.78rem; margin-bottom:12px; }
+}
+
+/* ── Summary strip ──────────────────────────── */
+.hz-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(8px,1vw,12px); margin-bottom:20px; }
+@media(max-width:900px) { .hz-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+.hz-sum-item { display:flex; align-items:center; gap:12px; background:var(--h-card); border-radius:var(--h-r); border:1px solid var(--h-border); padding:14px 16px; box-shadow:var(--h-shadow); }
+.hz-sum-icon { width:40px; height:40px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.hz-sum-icon svg, .hz-sum-icon i[data-feather] { width:18px; height:18px; }
+.hz-sum-label { font-size:.7rem; color:var(--h-muted); font-weight:600; text-transform:uppercase; }
+.hz-sum-val   { font-size:1.1rem; font-weight:800; color:var(--h-text); }
+
+/* ── Team table ─────────────────────────────── */
+.hz-team-head { display:flex; align-items:center; gap:12px; padding:18px 22px 14px; border-bottom:1px solid var(--h-border); flex-wrap:wrap; }
+.hz-team-head h6 { font-size:.9rem; font-weight:700; color:var(--h-text); margin:0; flex:1; }
+.hz-table { width:100%; border-collapse:collapse; }
+.hz-table th { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--h-muted); padding:10px 14px; background:#F8FAFC; border-bottom:1px solid var(--h-border); white-space:nowrap; }
+.hz-table td { padding:13px 14px; font-size:.82rem; color:var(--h-text); border-bottom:1px solid #F1F5F9; vertical-align:middle; }
+.hz-table tr:hover td { background:#FAFBFF; }
+.hz-table tr:last-child td { border-bottom:none; }
+.hz-table tfoot td { background:#F8FAFC; font-weight:700; font-size:.82rem; border-top:2px solid var(--h-border); }
+
+/* Avatar */
+.hz-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--h-indigo),var(--h-violet)); color:#fff; font-size:.78rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 6px rgba(99,102,241,.30); }
+.hz-lead-avatar { width:28px; height:28px; border-radius:8px; background:#EEF2FF; color:var(--h-indigo); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hz-lead-avatar svg, .hz-lead-avatar i[data-feather] { width:13px; height:13px; }
+
+/* ── Dual-color progress bar ─────────────────── */
+.hz-pbar {
+    position:relative;
+    background:#EEF2FF;
+    border-radius:99px;
+    height:10px;
+    overflow:hidden;
+    width:100%;
+    min-width:120px;
+}
+/* Achieved fill (foreground) */
+.hz-pbar-fill {
+    height:100%;
+    border-radius:99px;
+    position:relative;
+    z-index:2;
+    transition:width .6s ease;
+}
+/* Target marker line */
+.hz-pbar-target {
+    position:absolute;
+    top:0; bottom:0;
+    width:3px;
+    background:rgba(99,102,241,.55);
+    border-radius:2px;
+    z-index:3;
+}
+/* Labels under bar */
+.hz-pbar-labels {
+    display:flex;
+    justify-content:space-between;
+    margin-top:4px;
+    font-size:.64rem;
+    font-weight:600;
+    color:var(--h-muted);
+}
+.hz-pbar-labels .lbl-achieved { color:var(--h-emerald); }
+.hz-pbar-labels .lbl-target   { color:var(--h-indigo); }
+
+/* Legend dots */
+.hz-pbar-legend {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:10px 14px 14px;
+    font-size:.7rem;
+    font-weight:600;
+    color:var(--h-muted);
+}
+.hz-pbar-legend span { display:inline-flex; align-items:center; gap:5px; }
+.hz-pbar-legend .dot { width:10px; height:10px; border-radius:3px; display:inline-block; }
+.hz-pbar-legend .dot-achieved { background:linear-gradient(90deg,#10B981,#34D399); }
+.hz-pbar-legend .dot-overachieved { background:linear-gradient(90deg,#F59E0B,#FBBF24); }
+.hz-pbar-legend .dot-target { background:#C7D2FE; border:2px solid #6366F1; }
+
+/* ── Status badges ──────────────────────────── */
+.hz-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 10px; border-radius:20px; font-size:.7rem; font-weight:700;
+}
+.hz-badge svg, .hz-badge i[data-feather] { width:11px; height:11px; }
+.hz-badge.complete  { background:#D1FAE5; color:#065F46; }
+.hz-badge.confirm   { background:#DBEAFE; color:#1E40AF; }
+.hz-badge.followup  { background:#FEF3C7; color:#92400E; }
+.hz-badge.cancel    { background:#FEE2E2; color:#991B1B; }
+.hz-badge.new       { background:#EEF2FF; color:#3730A3; }
+.hz-badge.pending   { background:#F1F5F9; color:#475569; }
+
+/* ── Today bar ──────────────────────────────── */
+.hz-today-tag { display:inline-flex; align-items:center; gap:5px; font-size:.7rem; font-weight:700; padding:3px 10px; border-radius:20px; }
+.hz-today-tag.today    { background:rgba(239,68,68,.12); color:var(--h-rose); }
+.hz-today-tag.tomorrow { background:rgba(245,158,11,.12); color:var(--h-amber); }
+
+/* ── Empty state ────────────────────────────── */
+.hz-empty { text-align:center; padding:40px 20px; }
+.hz-empty-icon { width:56px; height:56px; background:#F1F5F9; border-radius:16px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px; }
+.hz-empty-icon svg, .hz-empty-icon i[data-feather] { width:24px; height:24px; stroke:var(--h-muted); }
+.hz-empty h6 { font-size:.9rem; font-weight:700; color:var(--h-sub); margin-bottom:4px; }
+.hz-empty p  { font-size:.78rem; color:var(--h-muted); margin:0; }
+
+/* ── FAB ─────────────────────────────────────── */
+.hz-fab {
+    position:fixed; bottom:28px; right:28px; z-index:100;
+    width:54px; height:54px; border-radius:50%;
+    background:linear-gradient(135deg,var(--h-indigo),var(--h-violet));
+    color:#fff; box-shadow:0 8px 24px rgba(79,70,229,.4);
+    display:flex; align-items:center; justify-content:center;
+    text-decoration:none; transition:transform var(--h-t), box-shadow var(--h-t);
+}
+.hz-fab:hover { transform:scale(1.1); box-shadow:0 12px 32px rgba(79,70,229,.5); color:#fff; }
+.hz-fab svg, .hz-fab i[data-feather] { width:22px; height:22px; }
+@media(max-width:991px) { .hz-fab { bottom:76px; } }
+
+/* ── Section label ──────────────────────────── */
+.hz-section-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--h-muted); margin-bottom:10px; margin-top:8px; }
+
+/* ── Animate ────────────────────────────────── */
+@keyframes hzFadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.hz-fade { animation:hzFadeUp .4s ease both; }
+.hz-fade-1 { animation-delay:.05s; }
+.hz-fade-2 { animation-delay:.10s; }
+.hz-fade-3 { animation-delay:.15s; }
+.hz-fade-4 { animation-delay:.20s; }
+.hz-fade-5 { animation-delay:.25s; }
+
+/* ══════════════════════════════════════════════
+   MOBILE RESPONSIVE IMPROVEMENTS
+   ══════════════════════════════════════════════ */
+
+/* Hide specific columns on mobile */
+@media(max-width:767px) { .hz-hide-mob { display:none !important; } }
+
+/* Header: tighter */
+@media(max-width:580px) {
+  .hz-header { padding:18px 16px; border-radius:16px; margin-bottom:16px; }
+  .hz-header h1 { font-size:1.1rem; }
+  .hz-header p  { font-size:.76rem; }
+  .hz-header-btn {
+    padding: 5px 5px;
+    font-size: 11px;
+    gap: 5px;
+    border-radius: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+  .hz-header-actions { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .hz-header-actions::-webkit-scrollbar { display: none; }
+}
+
+
+/* Cards: tighter padding */
+@media(max-width:600px) {
+  .hz-card-head { padding:14px 14px 0; flex-wrap:wrap; gap:8px; }
+  .hz-card-body { padding:12px 14px 16px; }
+  .hz-chart-wrap { padding:12px 14px; }
+  .hz-team-head { padding:12px 14px; flex-wrap:wrap; gap:8px; }
+}
+
+/* Target cards */
+@media(max-width:600px) {
+  .hz-target-val { font-size:1.3rem; }
+  .hz-target-stats { gap:8px; }
+  .hz-tstat { padding:8px 9px; }
+  .hz-tstat-val { font-size:.9rem; }
+  .hz-target-note { font-size:.73rem; padding:7px 10px; }
+}
+
+/* Mini charts: desktop responsive breakpoints */
+@media(max-width:1100px) {
+  .hz-charts-4 { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:640px) {
+  .hz-chart-wrap canvas { max-height:220px; }
+}
+
+/* Upcoming services: actions stack below content */
+@media(max-width:600px) {
+  .hz-svc-item { flex-wrap:wrap; }
+  .hz-svc-actions { margin-left:0 !important; flex-wrap:wrap; }
+  .hz-svc-meta { gap:4px 8px; }
+  .hz-svc-date-badge { min-width:34px; height:34px; }
+}
+
+/* Summary strip */
+@media(max-width:480px) {
+  .hz-sum-item { padding:11px 12px; gap:9px; }
+  .hz-sum-icon { width:34px; height:34px; border-radius:8px; }
+  .hz-sum-icon svg,.hz-sum-icon i[data-feather] { width:15px; height:15px; }
+  .hz-sum-val { font-size:.98rem; }
+  .hz-sum-label { font-size:.63rem; }
+}
+
+/* Tables: tighter cells */
+@media(max-width:640px) {
+  .hz-table th { padding:8px 9px; font-size:.62rem; }
+  .hz-table td { padding:9px 9px; font-size:.78rem; }
+  .hz-table .hz-avatar { width:28px; height:28px; font-size:.68rem; }
+  .hz-table .hz-lead-avatar { width:24px; height:24px; }
+}
+
+/* Pbar: no min-width on mobile */
+@media(max-width:640px) { .hz-pbar { min-width:60px; } }
+
+/* Activity feed */
+@media(max-width:600px) {
+  .hz-act-item { padding:10px 14px; gap:9px; }
+  .hz-act-title { font-size:.8rem; }
+  .hz-act-desc  { font-size:.71rem; }
+  .hz-act-dot { width:28px; height:28px; }
+}
+
+/* FAB: higher + smaller on tiny screens */
+@media(max-width:480px) {
+  .hz-fab { bottom:72px; right:14px; width:48px; height:48px; }
+  .hz-fab svg,.hz-fab i[data-feather] { width:19px; height:19px; }
+}
+</style>
+
+<div class="page-content">
+
+    {{-- ── HEADER ──────────────────────────────────────────── --}}
+    <div class="hz-header hz-fade">
+        <div class="hz-header-left">
+            <h1>
+                @php
+                    $hour = now()->hour;
+                    $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
+                @endphp
+                {{ $greeting }}, {{ auth()->user()->name ?? 'Admin' }} 👋
+            </h1>
+            <p>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; Visit Kashi Admin Dashboard</p>
         </div>
-
-        <!-- Quick Actions Bar -->
-        <div class="quick-actions-bar animate-fade-in-up" style="animation-delay: 0.05s">
-            <div class="quick-actions-container">
-                @can('lead-create')
-                    <a href="{{ route('lead.create') }}" class="quick-action-item">
-                        <div class="quick-action-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <i data-feather="user-plus"></i>
-                        </div>
-                        <div class="quick-action-text">
-                            <span class="quick-action-title">New Lead</span>
-                            <span class="quick-action-subtitle">Add customer</span>
-                        </div>
-                    </a>
-                @endcan
-
-                @can('booking-list')
-                    <a href="{{ route('bookings.index') }}" class="quick-action-item">
-                        <div class="quick-action-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                            <i data-feather="calendar"></i>
-                        </div>
-                        <div class="quick-action-text">
-                            <span class="quick-action-title">Bookings</span>
-                            <span class="quick-action-subtitle">View all</span>
-                        </div>
-                    </a>
-                @endcan
-
-                @can('payment-create')
-                    <a href="{{ route('bookings.index') }}" class="quick-action-item">
-                        <div class="quick-action-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                            <i data-feather="credit-card"></i>
-                        </div>
-                        <div class="quick-action-text">
-                            <span class="quick-action-title">Payments</span>
-                            <span class="quick-action-subtitle">Manage payments</span>
-                        </div>
-                    </a>
-                @endcan
-
-                @can('service-provider-list')
-                    <a href="{{ route('service-providers.index') }}" class="quick-action-item">
-                        <div class="quick-action-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
-                            <i data-feather="users"></i>
-                        </div>
-                        <div class="quick-action-text">
-                            <span class="quick-action-title">Vendors</span>
-                            <span class="quick-action-subtitle">Manage vendors</span>
-                        </div>
-                    </a>
-                @endcan
-
-                @can('service-template-list')
-                    <a href="{{ route('service-templates.index') }}" class="quick-action-item">
-                        <div class="quick-action-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-                            <i data-feather="package"></i>
-                        </div>
-                        <div class="quick-action-text">
-                            <span class="quick-action-title">Services</span>
-                            <span class="quick-action-subtitle">View services</span>
-                        </div>
-                    </a>
-                @endcan
-
-                @can('user-list')
-                    <a href="{{ route('users.index') }}" class="quick-action-item">
-                        <div class="quick-action-icon" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-                            <i data-feather="settings"></i>
-                        </div>
-                        <div class="quick-action-text">
-                            <span class="quick-action-title">Settings</span>
-                            <span class="quick-action-subtitle">Manage users</span>
-                        </div>
-                    </a>
-                @endcan
-            </div>
+        <div class="hz-header-actions">
+            @can('booking-create')
+            <a href="{{ route('bookings.create-direct') }}" class="hz-header-btn primary">
+                <i data-feather="plus-circle"></i> New Booking
+            </a>
+            @endcan
+            @can('booking-list')
+            <a href="{{ route('bookings.index') }}" class="hz-header-btn">
+                <i data-feather="calendar"></i> Bookings
+            </a>
+            @endcan
+            @can('payment-create')
+            <a href="{{ route('payment-analytics.index') }}" class="hz-header-btn">
+                <i data-feather="credit-card"></i> Payments
+            </a>
+            @endcan
         </div>
+    </div>
 
-        <!-- Monthly Target Tracking Widget - Compact & Modern -->
-        @php
-            $targetService = app(\App\Services\TargetCalculationService::class);
+    {{-- ── KPI ROW ───────────────────────────────────────── --}}
+    @canany(['lead-list','dashboard-view'])
+    <div class="hz-kpi-row hz-fade hz-fade-1">
+        <a href="{{ route('lead.index') }}" class="hz-kpi" style="--kpi-color:var(--h-indigo);--kpi-bg:rgba(79,70,229,.1)">
+            <div class="hz-kpi-icon"><i data-feather="users"></i></div>
+            <div class="hz-kpi-value">{{ $total_lead }}</div>
+            <div class="hz-kpi-label">Today's Leads</div>
+        </a>
+        <a href="{{ route('lead.index') }}" class="hz-kpi" style="--kpi-color:var(--h-emerald);--kpi-bg:rgba(16,185,129,.1)">
+            <div class="hz-kpi-icon"><i data-feather="check-circle"></i></div>
+            <div class="hz-kpi-value">{{ $total_complete }}</div>
+            <div class="hz-kpi-label">Completed</div>
+        </a>
+        <a href="{{ route('lead.index') }}" class="hz-kpi" style="--kpi-color:var(--h-sky);--kpi-bg:rgba(14,165,233,.1)">
+            <div class="hz-kpi-icon"><i data-feather="check"></i></div>
+            <div class="hz-kpi-value">{{ $total_confirm }}</div>
+            <div class="hz-kpi-label">Confirmed</div>
+        </a>
+        <a href="{{ route('lead.index') }}" class="hz-kpi" style="--kpi-color:var(--h-amber);--kpi-bg:rgba(245,158,11,.1)">
+            <div class="hz-kpi-icon"><i data-feather="repeat"></i></div>
+            <div class="hz-kpi-value">{{ $total_follow_up }}</div>
+            <div class="hz-kpi-label">Follow Up</div>
+        </a>
+        <a href="{{ route('lead.index') }}" class="hz-kpi" style="--kpi-color:var(--h-rose);--kpi-bg:rgba(239,68,68,.1)">
+            <div class="hz-kpi-icon"><i data-feather="x-circle"></i></div>
+            <div class="hz-kpi-value">{{ $total_cancel }}</div>
+            <div class="hz-kpi-label">Cancelled</div>
+        </a>
+    </div>
+    @endcanany
 
-            // Get targets with calculated margins using centralized service
-            $currentTarget = $targetService->getCurrentMonthTarget(auth('admin')->id());
-            $lastTarget = $targetService->getLastMonthTarget(auth('admin')->id());
-        @endphp
+    {{-- ── METRICS ROW (hidden) ── --}}
 
-        @if ($currentTarget || $lastTarget)
-            <div class="row g-3 mb-3">
-                <!-- Current Month Target -->
-                @if ($currentTarget)
-                    <div class="col-lg-6">
-                        <div class="modern-card target-compact animate-fade-in-up" style="animation-delay: 0.05s">
-                            <div class="modern-card-header">
-                                <h5>
-                                    <i data-feather="target" style="width: 20px; height: 20px; margin-right: 8px;"></i>
-                                    {{ now()->format('F Y') }} Target
-                                </h5>
-                                @if ($currentTarget->is_achieved)
-                                    <span class="badge bg-success">
-                                        <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
-                                        Achieved
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="modern-card-body">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-6">
-                                        <div class="stat-box">
-                                            <div class="stat-label">Target Margin</div>
-                                            <div class="stat-value text-primary">
-                                                ₹{{ number_format($currentTarget->target_margin, 0) }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="stat-box">
-                                            <div class="stat-label">Achieved</div>
-                                            <div class="stat-value text-success">
-                                                ₹{{ number_format($currentTarget->achieved_margin, 0) }}</div>
-                                        </div>
-                                    </div>
-                                </div>
+    {{-- ── TARGET + UPCOMING ────────────────────────────── --}}
+    @php
+        $targetService = app(\App\Services\TargetCalculationService::class);
+        $currentTarget = $targetService->getCurrentMonthTarget(auth('admin')->id());
+        $lastTarget    = $targetService->getLastMonthTarget(auth('admin')->id());
+    @endphp
 
-                                <!-- Progress Bar -->
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="small fw-semibold">Progress</span>
-                                        <span
-                                            class="small fw-bold text-primary">{{ $currentTarget->achievement_percentage }}%</span>
-                                    </div>
-                                    <div class="progress" style="height: 12px; border-radius: 6px;">
-                                        <div class="progress-bar {{ $currentTarget->is_achieved ? 'bg-success' : 'bg-primary' }}"
-                                            role="progressbar"
-                                            style="width: {{ min(100, $currentTarget->achievement_percentage) }}%"
-                                            aria-valuenow="{{ $currentTarget->achievement_percentage }}" aria-valuemin="0"
-                                            aria-valuemax="100">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @if (!$currentTarget->is_achieved)
-                                    <div class="alert alert-info mb-0"
-                                        style="background: #e0f2fe; border: none; padding: 0.75rem;">
-                                        <small>
-                                            <i data-feather="info" style="width: 14px; height: 14px;"></i>
-                                            <strong>₹{{ number_format($currentTarget->remaining_margin, 0) }}</strong>
-                                            remaining to achieve target
-                                        </small>
-                                    </div>
-                                @else
-                                    <div class="alert alert-success mb-0"
-                                        style="background: #d1fae5; border: none; padding: 0.75rem;">
-                                        <small>
-                                            <i data-feather="trophy" style="width: 14px; height: 14px;"></i>
-                                            Congratulations! Target achieved with
-                                            <strong>₹{{ number_format($currentTarget->achieved_margin - $currentTarget->target_margin, 0) }}</strong>
-                                            extra margin
-                                        </small>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Last Month Summary -->
-                @if ($lastTarget)
-                    <div class="col-lg-6">
-                        <div class="modern-card target-compact animate-fade-in-up" style="animation-delay: 0.1s">
-                            <div class="modern-card-header">
-                                <h5>
-                                    <i data-feather="bar-chart-2" style="width: 20px; height: 20px; margin-right: 8px;"></i>
-                                    {{ now()->subMonth()->format('F Y') }} Performance
-                                </h5>
-                                @if ($lastTarget->is_achieved)
-                                    <span class="badge bg-success">
-                                        <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
-                                        Achieved
-                                    </span>
-                                @else
-                                    <span class="badge bg-warning">
-                                        <i data-feather="alert-circle" style="width: 14px; height: 14px;"></i>
-                                        Not Achieved
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="modern-card-body">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-6">
-                                        <div class="stat-box">
-                                            <div class="stat-label">Target</div>
-                                            <div class="stat-value text-muted">
-                                                ₹{{ number_format($lastTarget->target_margin, 0) }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="stat-box">
-                                            <div class="stat-label">Achieved</div>
-                                            <div
-                                                class="stat-value {{ $lastTarget->is_achieved ? 'text-success' : 'text-warning' }}">
-                                                ₹{{ number_format($lastTarget->achieved_margin, 0) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Achievement Bar -->
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="small fw-semibold">Achievement</span>
-                                        <span
-                                            class="small fw-bold {{ $lastTarget->is_achieved ? 'text-success' : 'text-warning' }}">
-                                            {{ $lastTarget->achievement_percentage }}%
-                                        </span>
-                                    </div>
-                                    <div class="progress" style="height: 12px; border-radius: 6px;">
-                                        <div class="progress-bar {{ $lastTarget->is_achieved ? 'bg-success' : 'bg-warning' }}"
-                                            role="progressbar"
-                                            style="width: {{ min(100, $lastTarget->achievement_percentage) }}%"
-                                            aria-valuenow="{{ $lastTarget->achievement_percentage }}" aria-valuemin="0"
-                                            aria-valuemax="100">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @if ($lastTarget->is_achieved)
-                                    <div class="alert alert-success mb-0"
-                                        style="background: #d1fae5; border: none; padding: 0.75rem;">
-                                        <small>
-                                            <i data-feather="thumbs-up" style="width: 14px; height: 14px;"></i>
-                                            Great job! Exceeded target by
-                                            <strong>{{ number_format($lastTarget->achievement_percentage - 100, 1) }}%</strong>
-                                        </small>
-                                    </div>
-                                @else
-                                    <div class="alert alert-warning mb-0"
-                                        style="background: #fef3c7; border: none; padding: 0.75rem;">
-                                        <small>
-                                            <i data-feather="trending-down" style="width: 14px; height: 14px;"></i>
-                                            Achieved <strong>{{ $lastTarget->achievement_percentage }}%</strong> of target
-                                        </small>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+    @if ($currentTarget || $lastTarget)
+    <div class="hz-grid-2 hz-fade hz-fade-3">
+        @if ($currentTarget)
+        <div class="hz-card">
+            <div class="hz-card-head">
+                <div class="hz-card-title"><i data-feather="target"></i> {{ now()->format('F Y') }} Target</div>
+                @if ($currentTarget->is_achieved)
+                    <span class="hz-badge complete"><i data-feather="award"></i> Achieved!</span>
                 @endif
             </div>
+            <div class="hz-card-body">
+                <div class="hz-target-month">Progress Tracker</div>
+                <div class="hz-target-row">
+                    <div>
+                        <div style="font-size:.72rem;color:var(--h-muted);font-weight:600;">Achieved</div>
+                        <div class="hz-target-val" style="color:{{ $currentTarget->is_achieved ? 'var(--h-emerald)' : 'var(--h-indigo)' }}">
+                            ₹{{ number_format($currentTarget->achieved_margin, 0) }}
+                        </div>
+                    </div>
+                    <div class="hz-target-pct" style="color:{{ $currentTarget->is_achieved ? 'var(--h-emerald)' : 'var(--h-indigo)' }}">
+                        {{ $currentTarget->achievement_percentage }}%
+                    </div>
+                </div>
+                <div class="hz-progress-track">
+                    <div class="hz-progress-fill" style="width:{{ min(100, $currentTarget->achievement_percentage) }}%; background:{{ $currentTarget->is_achieved ? 'var(--h-emerald)' : 'linear-gradient(90deg,var(--h-indigo),var(--h-violet))' }}"></div>
+                </div>
+                <div class="hz-target-stats">
+                    <div class="hz-tstat">
+                        <div class="hz-tstat-label">Target</div>
+                        <div class="hz-tstat-val">₹{{ number_format($currentTarget->target_margin, 0) }}</div>
+                    </div>
+                    <div class="hz-tstat">
+                        <div class="hz-tstat-label">{{ $currentTarget->is_achieved ? 'Exceeded by' : 'Remaining' }}</div>
+                        <div class="hz-tstat-val" style="color:{{ $currentTarget->is_achieved ? 'var(--h-emerald)' : 'var(--h-rose)' }}">
+                            ₹{{ number_format(abs($currentTarget->is_achieved ? $currentTarget->achieved_margin - $currentTarget->target_margin : $currentTarget->remaining_margin), 0) }}
+                        </div>
+                    </div>
+                </div>
+                @if (!$currentTarget->is_achieved)
+                    <div class="hz-target-note info"><i data-feather="info"></i> ₹{{ number_format($currentTarget->remaining_margin, 0) }} more to hit this month's target</div>
+                @else
+                    <div class="hz-target-note success"><i data-feather="award"></i> Exceeded target by ₹{{ number_format($currentTarget->achieved_margin - $currentTarget->target_margin, 0) }}</div>
+                @endif
+            </div>
+        </div>
         @endif
 
-        <!-- Team Target Tracking (Admin Only) -->
-        @canany(['dashboard-view', 'staff-list'])
-            @php
-                // Get all current month targets with calculated margins using service
-                $teamTargets = $targetService->getTeamCurrentMonthTargets();
-
-                if ($teamTargets->count() > 0) {
-                    $totalTeamTarget = $teamTargets->sum('target_margin');
-                    $totalTeamAchieved = $teamTargets->sum('achieved_margin');
-
-                    $teamAchievementPercentage =
-                        $totalTeamTarget > 0 ? round(($totalTeamAchieved / $totalTeamTarget) * 100, 2) : 0;
-                    $teamIsAchieved = $totalTeamAchieved >= $totalTeamTarget;
-                }
-            @endphp
-
-            @if (isset($teamTargets) && $teamTargets->count() > 0)
-                <div class="modern-card animate-fade-in-up mb-3" style="animation-delay: 0.15s">
-                    <div class="modern-card-header">
-                        <h5>
-                            <i data-feather="users" style="width: 20px; height: 20px; margin-right: 8px;"></i>
-                            Team Target - {{ now()->format('F Y') }}
-                        </h5>
-                        @if ($teamIsAchieved)
-                            <span class="badge bg-success">
-                                <i data-feather="trophy" style="width: 14px; height: 14px;"></i>
-                                Team Goal Achieved
-                            </span>
-                        @endif
-                    </div>
-                    <div class="modern-card-body">
-                        <!-- Team Summary -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-3 col-6">
-                                <div class="stat-box" style="background: #f0f9ff; padding: 1rem; border-radius: 8px;">
-                                    <div class="stat-label"
-                                        style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem;">Team Target</div>
-                                    <div class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: #0284c7;">
-                                        ₹{{ number_format($totalTeamTarget / 1000, 0) }}K
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-6">
-                                <div class="stat-box"
-                                    style="background: {{ $teamIsAchieved ? '#f0fdf4' : '#fef3c7' }}; padding: 1rem; border-radius: 8px;">
-                                    <div class="stat-label"
-                                        style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem;">Team Achieved</div>
-                                    <div class="stat-value"
-                                        style="font-size: 1.5rem; font-weight: 700; color: {{ $teamIsAchieved ? '#10b981' : '#f59e0b' }};">
-                                        ₹{{ number_format($totalTeamAchieved / 1000, 0) }}K
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-6">
-                                <div class="stat-box" style="background: #faf5ff; padding: 1rem; border-radius: 8px;">
-                                    <div class="stat-label"
-                                        style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem;">Achievement</div>
-                                    <div class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: #9333ea;">
-                                        {{ $teamAchievementPercentage }}%
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-6">
-                                <div class="stat-box" style="background: #fef2f2; padding: 1rem; border-radius: 8px;">
-                                    <div class="stat-label"
-                                        style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem;">Team Size</div>
-                                    <div class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: #dc2626;">
-                                        {{ $teamTargets->count() }} {{ Str::plural('Member', $teamTargets->count()) }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Team Progress Bar -->
-                        <div class="mb-4">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-semibold">Overall Team Progress</span>
-                                <span class="fw-bold text-primary">{{ $teamAchievementPercentage }}%</span>
-                            </div>
-                            <div class="progress" style="height: 14px; border-radius: 7px;">
-                                <div class="progress-bar {{ $teamIsAchieved ? 'bg-success' : 'bg-primary' }}"
-                                    role="progressbar" style="width: {{ min(100, $teamAchievementPercentage) }}%"
-                                    aria-valuenow="{{ $teamAchievementPercentage }}" aria-valuemin="0" aria-valuemax="100">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Individual Staff Contributions -->
-                        <div class="mb-2">
-                            <h6 class="fw-semibold mb-3">
-                                <i data-feather="bar-chart-2" style="width: 16px; height: 16px;"></i>
-                                Individual Contributions
-                            </h6>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle" style="font-size: 0.875rem;">
-                                <thead style="background: #f9fafb;">
-                                    <tr>
-                                        <th style="padding: 0.75rem;">Staff Member</th>
-                                        <th class="text-end" style="padding: 0.75rem;">Target</th>
-                                        <th class="text-end" style="padding: 0.75rem;">Achieved</th>
-                                        <th class="text-center" style="padding: 0.75rem; width: 200px;">Progress</th>
-                                        <th class="text-center" style="padding: 0.75rem;">Contribution</th>
-                                        <th class="text-center" style="padding: 0.75rem;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($teamTargets->sortByDesc('achieved_margin') as $target)
-                                        @php
-                                            $contribution =
-                                                $totalTeamAchieved > 0
-                                                    ? round(($target->achieved_margin / $totalTeamAchieved) * 100, 1)
-                                                    : 0;
-                                        @endphp
-                                        <tr>
-                                            <td style="padding: 0.75rem;">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar-circle"
-                                                        style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem; margin-right: 0.75rem;">
-                                                        {{ strtoupper(substr($target->user->name, 0, 1)) }}
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold">{{ $target->user->name }}</div>
-                                                        <small class="text-muted">{{ $target->user->email }}</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end" style="padding: 0.75rem;">
-                                                <span
-                                                    class="fw-semibold">₹{{ number_format($target->target_margin, 0) }}</span>
-                                            </td>
-                                            <td class="text-end" style="padding: 0.75rem;">
-                                                <span
-                                                    class="fw-semibold text-{{ $target->is_achieved ? 'success' : 'warning' }}">
-                                                    ₹{{ number_format($target->achieved_margin, 0) }}
-                                                </span>
-                                            </td>
-                                            <td style="padding: 0.75rem;">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="progress flex-grow-1"
-                                                        style="height: 8px; border-radius: 4px;">
-                                                        <div class="progress-bar {{ $target->is_achieved ? 'bg-success' : 'bg-warning' }}"
-                                                            style="width: {{ min(100, $target->achievement_percentage) }}%">
-                                                        </div>
-                                                    </div>
-                                                    <small class="fw-bold" style="min-width: 45px; text-align: right;">
-                                                        {{ $target->achievement_percentage }}%
-                                                    </small>
-                                                </div>
-                                            </td>
-                                            <td class="text-center" style="padding: 0.75rem;">
-                                                <span class="badge"
-                                                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-size: 0.75rem;">
-                                                    {{ $contribution }}%
-                                                </span>
-                                            </td>
-                                            <td class="text-center" style="padding: 0.75rem;">
-                                                @if ($target->is_achieved)
-                                                    <span class="badge bg-success">
-                                                        <i data-feather="check" style="width: 12px; height: 12px;"></i>
-                                                        Done
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-warning">
-                                                        <i data-feather="clock" style="width: 12px; height: 12px;"></i>
-                                                        {{ $target->achievement_percentage }}%
-                                                    </span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot style="background: #f9fafb; font-weight: 600;">
-                                    <tr>
-                                        <td style="padding: 0.75rem;">TOTAL</td>
-                                        <td class="text-end" style="padding: 0.75rem;">
-                                            ₹{{ number_format($totalTeamTarget, 0) }}</td>
-                                        <td class="text-end" style="padding: 0.75rem;">
-                                            ₹{{ number_format($totalTeamAchieved, 0) }}</td>
-                                        <td colspan="3" class="text-center" style="padding: 0.75rem;">
-                                            <span class="badge {{ $teamIsAchieved ? 'bg-success' : 'bg-primary' }}"
-                                                style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-                                                Team Achievement: {{ $teamAchievementPercentage }}%
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                        @if (!$teamIsAchieved)
-                            <div class="alert alert-info mt-3 mb-0" style="background: #e0f2fe; border: none;">
-                                <i data-feather="info" style="width: 16px; height: 16px;"></i>
-                                <strong>₹{{ number_format($totalTeamTarget - $totalTeamAchieved, 0) }}</strong> more needed to
-                                achieve team target
-                            </div>
-                        @else
-                            <div class="alert alert-success mt-3 mb-0" style="background: #d1fae5; border: none;">
-                                <i data-feather="trophy" style="width: 16px; height: 16px;"></i>
-                                Congratulations! Team has exceeded the target by
-                                <strong>₹{{ number_format($totalTeamAchieved - $totalTeamTarget, 0) }}</strong>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            @endif
-        @endcanany
-
-        <!-- Upcoming Services (Next 3 Days) - Improved UI -->
-        @canany(['booking-list', 'dashboard-view'])
-            <div class="modern-card animate-fade-in-up" style="animation-delay: 0.1s">
-                <div class="modern-card-header">
-                    <h5>
-                        <i data-feather="calendar" style="width: 20px; height: 20px; margin-right: 8px;"></i>
-                        Upcoming Services (Next 3 Days)
-                    </h5>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge" id="upcomingServicesCount">0</span>
-                        <a href="{{ route('bookings.index') }}" class="btn-light">View All</a>
-                    </div>
-                </div>
-                @php
-                    $upcomingServices = \App\Models\Booking::with([
-                        'lead',
-                        'quotation.items.serviceTemplate.serviceType',
-                        'serviceAssignments.serviceProvider',
-                    ])
-                        ->whereHas('quotation.items', function ($query) {
-                            $query
-                                ->whereBetween('service_date', [now()->startOfDay(), now()->addDays(3)->endOfDay()])
-                                ->whereNotNull('service_date');
-                        })
-                        ->where('booking_status', '!=', 'cancelled')
-                        // Role-based filtering:
-                        // - Super Admin, Admin, Manager, Accountant, Viewer: See all bookings
-                        // - Staff, Sales: See only their own bookings
-                        ->when(
-                            !auth()
-                                ->user()
-                                ->hasAnyRole(['Super Admin', 'Admin', 'Manager', 'Accountant', 'Viewer']),
-                            function ($query) {
-                                $query->where('created_by', auth()->id());
-                            },
-                        )
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-
-                    // Group services by date
-                    $servicesByDate = collect();
-                    foreach ($upcomingServices as $booking) {
-                        $upcomingItems = $booking->quotation->items->filter(function ($item) {
-                            return $item->service_date &&
-                                $item->service_date->between(now()->startOfDay(), now()->addDays(3)->endOfDay());
-                        });
-
-                        foreach ($upcomingItems as $item) {
-                            $dateKey = $item->service_date->format('Y-m-d');
-                            if (!$servicesByDate->has($dateKey)) {
-                                $servicesByDate->put($dateKey, collect());
-                            }
-
-                            // Group by booking within each date
-                            $bookingKey = $booking->id;
-                            $dateServices = $servicesByDate->get($dateKey);
-
-                            if (!$dateServices->has($bookingKey)) {
-                                $dateServices->put($bookingKey, [
-                                    'booking' => $booking,
-                                    'services' => collect(),
-                                ]);
-                            }
-
-                            $dateServices->get($bookingKey)['services']->push($item);
-                        }
-                    }
-                    $servicesByDate = $servicesByDate->sortKeys();
-                    $totalBookings = $servicesByDate->flatten(1)->count();
-                @endphp
-
-                @if ($totalBookings > 0)
-                    <div class="upcoming-services-container">
-                        @foreach ($servicesByDate as $date => $bookingsOnDate)
-                            @php
-                                $dateObj = \Carbon\Carbon::parse($date);
-                                $isToday = $dateObj->isToday();
-                                $isTomorrow = $dateObj->isTomorrow();
-                                $totalServicesOnDate = $bookingsOnDate->sum(function ($bookingData) {
-                                    return $bookingData['services']->count();
-                                });
-                            @endphp
-
-                            <!-- Date Header -->
-                            <div class="service-date-header">
-                                <div class="date-badge">
-                                    <div class="date-day">{{ $dateObj->format('d') }}</div>
-                                    <div class="date-month">{{ $dateObj->format('M') }}</div>
-                                </div>
-                                <div class="date-info">
-                                    <div class="date-title">
-                                        @if ($isToday)
-                                            <span class="today-badge"><i data-feather="zap"
-                                                    style="width: 14px; height: 14px;"></i> Today</span>
-                                        @elseif($isTomorrow)
-                                            <span class="tomorrow-badge"><i data-feather="sunrise"
-                                                    style="width: 14px; height: 14px;"></i> Tomorrow</span>
-                                        @else
-                                            {{ $dateObj->format('l') }}
-                                        @endif
-                                    </div>
-                                    <div class="date-subtitle">{{ $bookingsOnDate->count() }}
-                                        {{ Str::plural('booking', $bookingsOnDate->count()) }} • {{ $totalServicesOnDate }}
-                                        {{ Str::plural('service', $totalServicesOnDate) }}</div>
-                                </div>
-                            </div>
-
-                            <!-- Bookings Grid -->
-                            <div class="services-grid">
-                                @foreach ($bookingsOnDate as $bookingData)
-                                    @php
-                                        $booking = $bookingData['booking'];
-                                        $services = $bookingData['services'];
-                                        $hasUnassigned = $services->contains(function ($item) use ($booking) {
-                                            return !$booking->serviceAssignments
-                                                ->where('quotation_item_id', $item->id)
-                                                ->first();
-                                        });
-                                    @endphp
-
-                                    <div class="service-card">
-                                        <!-- Booking Header -->
-                                        <div class="service-card-header">
-                                            <div class="service-icon">
-                                                <i data-feather="calendar"></i>
-                                            </div>
-                                            <div class="service-title-section">
-                                                <div class="service-name">{{ $booking->lead->guest_name }}</div>
-                                                <div class="service-type">
-                                                    {{ $booking->booking_number }} • {{ $services->count() }}
-                                                    {{ Str::plural('service', $services->count()) }}</div>
-                                            </div>
-                                            <div class="service-status-badge">
-                                                @if ($booking->booking_status == 'confirmed')
-                                                    <span class="status-badge status-confirmed">
-                                                        <i data-feather="check-circle"></i> Confirmed
-                                                    </span>
-                                                @elseif($booking->booking_status == 'completed')
-                                                    <span class="status-badge status-completed">
-                                                        <i data-feather="check"></i> Completed
-                                                    </span>
-                                                @else
-                                                    <span class="status-badge status-pending">
-                                                        {{ ucfirst($booking->booking_status) }}
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <!-- Booking Body -->
-                                        <div class="service-card-body">
-                                            <!-- Services List -->
-                                            <div class="service-info-row"
-                                                style="border-bottom: 1px solid #f1f3f9; padding-bottom: 12px; margin-bottom: 12px;">
-                                                <div class="info-icon"
-                                                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                                    <i data-feather="package"></i>
-                                                </div>
-                                                <div class="info-content">
-                                                    <div class="info-label">Services Scheduled</div>
-                                                    <div class="info-value"
-                                                        style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
-                                                        @foreach ($services as $service)
-                                                            @php
-                                                                $assignment = $booking->serviceAssignments
-                                                                    ->where('quotation_item_id', $service->id)
-                                                                    ->first();
-                                                            @endphp
-                                                            <span class="badge"
-                                                                style="background: {{ $assignment ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                                                                <i data-feather="{{ $assignment ? 'check-circle' : 'alert-circle' }}"
-                                                                    style="width: 12px; height: 12px;"></i>
-                                                                {{ $service->serviceTemplate->name }}
-                                                            </span>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Contact Info -->
-                                            <div class="service-info-row">
-                                                <div class="info-icon customer-icon">
-                                                    <i data-feather="phone"></i>
-                                                </div>
-                                                <div class="info-content">
-                                                    <div class="info-label">Contact</div>
-                                                    <div class="info-value">
-                                                        <a href="tel:{{ $booking->lead->contact }}"
-                                                            class="phone-link">{{ $booking->lead->contact }}</a>
-                                                    </div>
-                                                    <div class="info-meta">
-                                                        <i data-feather="users" style="width: 12px; height: 12px;"></i>
-                                                        {{ $booking->lead->pax ?? 'N/A' }}
-                                                        {{ Str::plural('person', $booking->lead->pax ?? 0) }}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Assignment Status -->
-                                            @if ($hasUnassigned)
-                                                <div class="service-info-row">
-                                                    <div class="info-icon vendor-icon unassigned">
-                                                        <i data-feather="alert-triangle"></i>
-                                                    </div>
-                                                    <div class="info-content">
-                                                        <div class="info-label">Vendor Assignment</div>
-                                                        <div class="info-value text-warning">Some services need vendor
-                                                            assignment</div>
-                                                        <div class="info-meta unassigned-meta">
-                                                            <i data-feather="alert-circle"
-                                                                style="width: 12px; height: 12px;"></i>
-                                                            Action required
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <div class="service-info-row">
-                                                    <div class="info-icon vendor-icon assigned">
-                                                        <i data-feather="check-circle"></i>
-                                                    </div>
-                                                    <div class="info-content">
-                                                        <div class="info-label">Vendor Assignment</div>
-                                                        <div class="info-value text-success">All services assigned</div>
-                                                        <div class="info-meta assigned-meta">
-                                                            <i data-feather="check-circle"
-                                                                style="width: 12px; height: 12px;"></i>
-                                                            Ready to go
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                        </div>
-
-                                        <!-- Booking Footer -->
-                                        <div class="service-card-footer">
-                                            <a href="{{ route('bookings.show', $booking->id) }}" class="btn-view-details">
-                                                <i data-feather="eye" style="width: 16px; height: 16px;"></i>
-                                                View Details
-                                            </a>
-                                            @if ($hasUnassigned)
-                                                <a href="{{ route('bookings.show', $booking->id) }}"
-                                                    class="btn-assign-vendor">
-                                                    <i data-feather="user-plus" style="width: 16px; height: 16px;"></i>
-                                                    Assign Vendors
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            document.getElementById('upcomingServicesCount').textContent = '{{ $totalBookings }}';
-                        });
-                    </script>
+        @if ($lastTarget)
+        <div class="hz-card">
+            <div class="hz-card-head">
+                <div class="hz-card-title"><i data-feather="clock"></i> {{ now()->subMonth()->format('F Y') }} Performance</div>
+                @if ($lastTarget->is_achieved)
+                    <span class="hz-badge complete"><i data-feather="star"></i> Hit!</span>
                 @else
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <i data-feather="calendar"></i>
+                    <span class="hz-badge cancel">{{ $lastTarget->achievement_percentage }}%</span>
+                @endif
+            </div>
+            <div class="hz-card-body">
+                <div class="hz-target-month">Last Month Review</div>
+                <div class="hz-target-row">
+                    <div>
+                        <div style="font-size:.72rem;color:var(--h-muted);font-weight:600;">Achieved</div>
+                        <div class="hz-target-val" style="color:{{ $lastTarget->is_achieved ? 'var(--h-emerald)' : 'var(--h-sub)' }}">
+                            ₹{{ number_format($lastTarget->achieved_margin, 0) }}
                         </div>
-                        <h5>No Upcoming Services</h5>
-                        <p>No services scheduled for the next 3 days</p>
+                    </div>
+                    <div class="hz-target-pct" style="color:{{ $lastTarget->is_achieved ? 'var(--h-emerald)' : 'var(--h-amber)' }}">
+                        {{ $lastTarget->achievement_percentage }}%
+                    </div>
+                </div>
+                <div class="hz-progress-track">
+                    <div class="hz-progress-fill" style="width:{{ min(100, $lastTarget->achievement_percentage) }}%; background:{{ $lastTarget->is_achieved ? 'var(--h-emerald)' : 'var(--h-amber)' }}"></div>
+                </div>
+                <div class="hz-target-stats">
+                    <div class="hz-tstat">
+                        <div class="hz-tstat-label">Target</div>
+                        <div class="hz-tstat-val">₹{{ number_format($lastTarget->target_margin, 0) }}</div>
+                    </div>
+                    <div class="hz-tstat">
+                        <div class="hz-tstat-label">{{ $lastTarget->is_achieved ? 'Exceeded' : 'Shortfall' }}</div>
+                        <div class="hz-tstat-val" style="color:{{ $lastTarget->is_achieved ? 'var(--h-emerald)' : 'var(--h-rose)' }}">
+                            {{ $lastTarget->is_achieved ? '+' : '-' }}{{ number_format(abs($lastTarget->achievement_percentage - 100), 1) }}%
+                        </div>
+                    </div>
+                </div>
+                @if ($lastTarget->is_achieved)
+                    <div class="hz-target-note success"><i data-feather="award"></i> Exceeded by {{ number_format($lastTarget->achievement_percentage - 100, 1) }}% above target</div>
+                @else
+                    <div class="hz-target-note info"><i data-feather="activity"></i> Achieved {{ $lastTarget->achievement_percentage }}% of last month's target</div>
+                @endif
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
+
+    {{-- ── TEAM TARGET ────────────────────────────────────── --}}
+    @canany(['dashboard-view','staff-list'])
+    @php
+        $targetService = app(\App\Services\TargetCalculationService::class);
+        $teamTargets = $targetService->getTeamCurrentMonthTargets();
+        if ($teamTargets->count() > 0) {
+            $totalTeamTarget   = $teamTargets->sum('target_margin');
+            $totalTeamAchieved = $teamTargets->sum('achieved_margin');
+            $teamAchievementPercentage = $totalTeamTarget > 0 ? round(($totalTeamAchieved / $totalTeamTarget) * 100, 1) : 0;
+            $teamIsAchieved    = $totalTeamAchieved >= $totalTeamTarget;
+        }
+    @endphp
+    @if (isset($teamTargets) && $teamTargets->count() > 0)
+    <div class="hz-card hz-fade hz-fade-3" style="margin-bottom:20px;overflow:hidden;">
+
+        {{-- Header --}}
+        <div class="hz-team-head">
+            <div class="hz-card-title"><i data-feather="users"></i> Team Target — {{ now()->format('F Y') }}</div>
+            @if ($teamIsAchieved)
+                <span class="hz-badge complete"><i data-feather="award"></i> Team Achieved!</span>
+            @else
+                <span class="hz-badge pending"><i data-feather="activity"></i> {{ $teamAchievementPercentage }}% of target</span>
+            @endif
+            <div style="margin-left:auto;font-size:.75rem;font-weight:600;color:var(--h-muted);background:#F1F5F9;padding:4px 10px;border-radius:20px;">
+                {{ $teamTargets->count() }} {{ Str::plural('Member', $teamTargets->count()) }}
+            </div>
+        </div>
+
+        {{-- Team overall bar --}}
+        <div style="padding:14px 22px 0;background:linear-gradient(to right,#F8FAFF,#FAFBFF);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:.72rem;font-weight:700;color:var(--h-muted);text-transform:uppercase;letter-spacing:.5px;">Team Overall Progress</span>
+                <span style="font-size:.78rem;font-weight:800;color:{{ $teamIsAchieved ? 'var(--h-emerald)' : 'var(--h-indigo)' }}">{{ $teamAchievementPercentage }}%</span>
+            </div>
+            <div class="hz-pbar" style="height:14px;">
+                <div class="hz-pbar-fill" style="width:{{ min(100,$teamAchievementPercentage) }}%;background:{{ $teamIsAchieved ? 'linear-gradient(90deg,#10B981,#34D399)' : 'linear-gradient(90deg,#6366F1,#818CF8)' }};"></div>
+                <div class="hz-pbar-target" style="left:calc(100% - 3px);"></div>
+            </div>
+            <div class="hz-pbar-labels">
+                <span class="lbl-achieved">Achieved ₹{{ number_format($totalTeamAchieved, 0) }}</span>
+                <span class="lbl-target">Target ₹{{ number_format($totalTeamTarget, 0) }}</span>
+            </div>
+        </div>
+
+        {{-- Legend --}}
+        <div class="hz-pbar-legend">
+            <span><i class="dot dot-achieved"></i> Achieved</span>
+            <span><i class="dot dot-overachieved"></i> Near Target (75%+)</span>
+            <span><i class="dot dot-target"></i> Target (100%)</span>
+        </div>
+
+        {{-- Table --}}
+        <div class="table-responsive">
+            <table class="hz-table">
+                <thead>
+                    <tr>
+                        <th class="hz-hide-mob">#</th>
+                        <th>Member</th>
+                        <th>Target</th>
+                        <th>Achieved</th>
+                        <th class="hz-hide-mob" style="min-width:180px;">Progress</th>
+                        <th>%</th>
+                        <th class="hz-hide-mob">Share</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($teamTargets->sortByDesc('achieved_margin') as $i => $target)
+                    @php
+                        $share    = $totalTeamAchieved > 0 ? round(($target->achieved_margin / $totalTeamAchieved) * 100, 1) : 0;
+                        $pct      = min(100, $target->achievement_percentage);
+                        $barColor = $target->is_achieved
+                            ? 'linear-gradient(90deg,#10B981,#34D399)'
+                            : ($pct >= 75
+                                ? 'linear-gradient(90deg,#F59E0B,#FBBF24)'
+                                : 'linear-gradient(90deg,#6366F1,#818CF8)');
+                        $avatarColors = [
+                            'linear-gradient(135deg,#6366F1,#8B5CF6)',
+                            'linear-gradient(135deg,#10B981,#059669)',
+                            'linear-gradient(135deg,#F59E0B,#D97706)',
+                            'linear-gradient(135deg,#EF4444,#DC2626)',
+                            'linear-gradient(135deg,#3B82F6,#2563EB)',
+                            'linear-gradient(135deg,#EC4899,#DB2777)',
+                        ];
+                        $avatarBg = $avatarColors[$i % count($avatarColors)];
+                    @endphp
+                    <tr>
+                        <td class="hz-hide-mob" style="color:var(--h-muted);font-weight:700;font-size:.72rem;">{{ $i + 1 }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="hz-avatar" style="background:{{ $avatarBg }}">
+                                    {{ strtoupper(substr($target->user->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <div style="font-weight:700;font-size:.83rem;">{{ $target->user->name }}</div>
+                                    @if($target->is_achieved)
+                                    <div style="font-size:.65rem;color:var(--h-emerald);font-weight:600;">🏆 Target hit!</div>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                        <td style="font-weight:600;">₹{{ number_format($target->target_margin, 0) }}</td>
+                        <td style="font-weight:800;color:{{ $target->is_achieved ? 'var(--h-emerald)' : ($pct >= 75 ? '#D97706' : 'var(--h-text)') }}">
+                            ₹{{ number_format($target->achieved_margin, 0) }}
+                        </td>
+                        <td class="hz-hide-mob">
+                            <div class="hz-pbar" style="height:10px;">
+                                <div class="hz-pbar-fill" style="width:{{ $pct }}%;background:{{ $barColor }};"></div>
+                                <div class="hz-pbar-target" style="left:calc(100% - 3px);"></div>
+                            </div>
+                            <div class="hz-pbar-labels">
+                                <span class="lbl-achieved">{{ $pct }}%</span>
+                                <span class="lbl-target">100%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-weight:800;font-size:.88rem;color:{{ $target->is_achieved ? 'var(--h-emerald)' : ($pct >= 75 ? '#D97706' : 'var(--h-indigo)') }}">
+                                {{ $target->achievement_percentage }}%
+                            </span>
+                        </td>
+                        <td class="hz-hide-mob">
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <div style="background:#EEF2FF;border-radius:99px;height:5px;flex:1;min-width:40px;overflow:hidden;">
+                                    <div style="height:100%;width:{{ $share }}%;background:var(--h-indigo);border-radius:99px;"></div>
+                                </div>
+                                <span style="font-weight:700;font-size:.78rem;color:var(--h-indigo);min-width:32px;">{{ $share }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            @if ($target->is_achieved)
+                                <span class="hz-badge complete"><i data-feather="check-circle"></i> Done</span>
+                            @elseif($pct >= 75)
+                                <span class="hz-badge followup"><i data-feather="trending-up"></i> Near</span>
+                            @else
+                                <span class="hz-badge pending"><i data-feather="clock"></i> {{ $target->achievement_percentage }}%</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" style="font-weight:700;font-size:.82rem;">TEAM TOTAL</td>
+                        <td style="font-weight:700;">₹{{ number_format($totalTeamTarget, 0) }}</td>
+                        <td style="font-weight:800;color:{{ $teamIsAchieved ? 'var(--h-emerald)' : 'var(--h-text)' }}">
+                            ₹{{ number_format($totalTeamAchieved, 0) }}
+                        </td>
+                        <td class="hz-hide-mob">
+                            <div class="hz-pbar" style="height:10px;">
+                                <div class="hz-pbar-fill" style="width:{{ min(100,$teamAchievementPercentage) }}%;background:{{ $teamIsAchieved ? 'linear-gradient(90deg,#10B981,#34D399)' : 'linear-gradient(90deg,#6366F1,#818CF8)' }};"></div>
+                                <div class="hz-pbar-target" style="left:calc(100% - 3px);"></div>
+                            </div>
+                            <div class="hz-pbar-labels">
+                                <span class="lbl-achieved">{{ min(100,$teamAchievementPercentage) }}%</span>
+                                <span class="lbl-target">100%</span>
+                            </div>
+                        </td>
+                        <td><span style="font-weight:800;color:{{ $teamIsAchieved ? 'var(--h-emerald)' : 'var(--h-indigo)' }}">{{ $teamAchievementPercentage }}%</span></td>
+                        <td colspan="2">
+                            <span class="hz-badge {{ $teamIsAchieved ? 'complete' : 'confirm' }}">
+                                <i data-feather="{{ $teamIsAchieved ? 'award' : 'bar-chart-2' }}"></i>
+                                {{ $teamIsAchieved ? 'Target Achieved' : 'In Progress' }}
+                            </span>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    @endif
+    @endcanany
+
+    {{-- ── MAIN CHART + ACTIVITY ────────────────────────── --}}
+    @canany(['dashboard-view','analytics-customer','activity-log-view'])
+    <div class="hz-grid-3 hz-fade hz-fade-3">
+        <div class="hz-card">
+            <div class="hz-card-head">
+                <div class="hz-card-title"><i data-feather="bar-chart-2"></i> Business Analytics</div>
+                <span style="font-size:.72rem;color:var(--h-muted);">Last 6 Months</span>
+            </div>
+            <div class="hz-chart-wrap">
+                <canvas id="businessChart"></canvas>
+            </div>
+        </div>
+
+        <div class="hz-card">
+            <div class="hz-card-head">
+                <div class="hz-card-title"><i data-feather="activity"></i> Recent Activity</div>
+            </div>
+            <div class="hz-activity" id="activityFeed">
+                @if ($recent_activity->count() > 0)
+                    @foreach ($recent_activity as $i => $activity)
+                    <div class="hz-act-item">
+                        <div class="hz-act-line">
+                            <div class="hz-act-dot" style="background:{{ ['booking'=>'rgba(79,70,229,.12)','lead'=>'rgba(16,185,129,.12)','payment'=>'rgba(14,165,233,.12)'][$activity['type']] ?? 'rgba(148,163,184,.15)' }}">
+                                <i data-feather="{{ $activity['icon'] }}" style="stroke:{{ ['booking'=>'var(--h-indigo)','lead'=>'var(--h-emerald)','payment'=>'var(--h-sky)'][$activity['type']] ?? 'var(--h-muted)' }}"></i>
+                            </div>
+                            @if (!$loop->last)<div class="hz-act-connector"></div>@endif
+                        </div>
+                        <div class="hz-act-body">
+                            <div class="hz-act-title">{{ $activity['title'] }}</div>
+                            <div class="hz-act-desc">{{ $activity['description'] }}</div>
+                            <div class="hz-act-time"><i data-feather="clock"></i>{{ $activity['time']->diffForHumans() }}</div>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="hz-empty" style="padding:30px 20px;">
+                        <div class="hz-empty-icon"><i data-feather="activity"></i></div>
+                        <h6>No Recent Activity</h6>
+                        <p>Activity will appear here as you work</p>
                     </div>
                 @endif
             </div>
-        @endcanany
+        </div>
+    </div>
+    @endcanany
 
-        <!-- Lead Status Stats -->
-        @canany(['lead-list', 'dashboard-view'])
-            <div class="stats-grid animate-fade-in-up" style="animation-delay: 0.1s">
-                <a href="{{ route('lead.index') }}" class="text-decoration-none">
-                    <div class="stat-card">
-                        <div class="stat-card-icon">
-                            <i data-feather="calendar"></i>
-                        </div>
-                        <h3 class="animate-count">{{ $total_lead }}</h3>
-                        <p>Today's Leads</p>
-                    </div>
-                </a>
 
-                <a href="{{ route('lead.index') }}" class="text-decoration-none">
-                    <div class="stat-card complete">
-                        <div class="stat-card-icon">
-                            <i data-feather="check-circle"></i>
-                        </div>
-                        <h3 class="animate-count">{{ $total_complete }}</h3>
-                        <p>Completed</p>
-                    </div>
-                </a>
+    {{-- ── MINI CHARTS ─────────────────────────────────── --}}
+    @canany(['dashboard-view','analytics-customer','analytics-profit'])
+    <div class="hz-section-label hz-fade hz-fade-4">Analytics Overview</div>
 
-                <a href="{{ route('lead.index') }}" class="text-decoration-none">
-                    <div class="stat-card confirm">
-                        <div class="stat-card-icon">
-                            <i data-feather="check"></i>
-                        </div>
-                        <h3 class="animate-count">{{ $total_confirm }}</h3>
-                        <p>Confirmed</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('lead.index') }}" class="text-decoration-none">
-                    <div class="stat-card followup">
-                        <div class="stat-card-icon">
-                            <i data-feather="repeat"></i>
-                        </div>
-                        <h3 class="animate-count">{{ $total_follow_up }}</h3>
-                        <p>Follow Up</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('lead.index') }}" class="text-decoration-none">
-                    <div class="stat-card cancel">
-                        <div class="stat-card-icon">
-                            <i data-feather="x-circle"></i>
-                        </div>
-                        <h3 class="animate-count">{{ $total_cancel }}</h3>
-                        <p>Cancelled</p>
-                    </div>
-                </a>
-            </div>
-        @endcanany
-
-        <!-- Performance Metrics -->
-        @canany(['dashboard-view', 'analytics-profit', 'analytics-customer'])
-            <div class="metrics-grid animate-fade-in-up" style="animation-delay: 0.15s">
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Conversion Rate</span>
-                        <div class="metric-icon" style="background: var(--success-gradient);">
-                            <i data-feather="trending-up"></i>
-                        </div>
-                    </div>
-                    <div class="metric-value">{{ $conversion_rate }}%</div>
-                    <div class="metric-change positive">
-                        <i data-feather="arrow-up" style="width: 16px; height: 16px;"></i>
-                        This Month
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Avg Deal Value</span>
-                        <div class="metric-icon" style="background: var(--info-gradient);">
-                            <i data-feather="dollar-sign"></i>
-                        </div>
-                    </div>
-                    <div class="metric-value">₹{{ number_format($avg_deal_value, 0) }}</div>
-                    <div class="metric-change positive">
-                        <i data-feather="arrow-up" style="width: 16px; height: 16px;"></i>
-                        Per Booking
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Monthly Growth</span>
-                        <div class="metric-icon"
-                            style="background: {{ $monthly_growth >= 0 ? 'var(--success-gradient)' : 'var(--danger-gradient)' }};">
-                            <i data-feather="{{ $monthly_growth >= 0 ? 'trending-up' : 'trending-down' }}"></i>
-                        </div>
-                    </div>
-                    <div class="metric-value">{{ $monthly_growth >= 0 ? '+' : '' }}{{ $monthly_growth }}%</div>
-                    <div class="metric-change {{ $monthly_growth >= 0 ? 'positive' : 'negative' }}">
-                        <i data-feather="{{ $monthly_growth >= 0 ? 'arrow-up' : 'arrow-down' }}"
-                            style="width: 16px; height: 16px;"></i>
-                        vs Last Month
-                    </div>
-                </div>
-            </div>
-        @endcanany
-
-        <!-- Dashboard Grid: Chart + Activity -->
-        @canany(['dashboard-view', 'analytics-customer', 'activity-log-view'])
-            <div class="dashboard-grid animate-fade-in-up" style="animation-delay: 0.2s">
-                <!-- Business Analytics Chart -->
-                <div class="modern-card">
-                    <div class="modern-card-header">
-                        <h5>
-                            <i data-feather="bar-chart-2" class="me-2"></i>
-                            Business Analytics (Last 6 Months)
-                        </h5>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="businessChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="modern-card">
-                    <div class="modern-card-header">
-                        <h5>
-                            <i data-feather="activity" class="me-2"></i>
-                            Recent Activity
-                        </h5>
-                    </div>
-                    <div class="activity-timeline">
-                        @if ($recent_activity->count() > 0)
-                            @foreach ($recent_activity as $activity)
-                                <div class="activity-item">
-                                    <div class="activity-icon {{ $activity['type'] }}">
-                                        <i data-feather="{{ $activity['icon'] }}"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title">{{ $activity['title'] }}</div>
-                                        <div class="activity-description">{{ $activity['description'] }}</div>
-                                        <div class="activity-time">
-                                            <i data-feather="clock" style="width: 12px; height: 12px;"></i>
-                                            {{ $activity['time']->diffForHumans() }}
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="empty-state" style="padding: 30px 20px;">
-                                <div class="empty-state-icon" style="width: 60px; height: 60px;">
-                                    <i data-feather="activity" style="font-size: 30px;"></i>
-                                </div>
-                                <h5 style="font-size: 14px;">No Recent Activity</h5>
-                                <p style="font-size: 12px;">Activity will appear here</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        @endcanany
-
-        <!-- Comprehensive Analytics Section -->
-        @canany(['dashboard-view', 'analytics-customer', 'analytics-profit'])
-            <div class="modern-card animate-fade-in-up" style="animation-delay: 0.23s">
-                <div class="modern-card-header">
-                    <h5>
-                        <i data-feather="pie-chart" class="me-2"></i>
-                        Comprehensive Analytics & Reports
-                    </h5>
-                </div>
-                <div style="padding: 25px;">
-                    <!-- Analytics Grid -->
-                    <div class="row g-4">
-                        <!-- Booking Status Distribution -->
-                        <div class="col-lg-4 col-md-6">
-                            <div class="chart-card">
-                                <h6 class="chart-title">
-                                    <i data-feather="pie-chart" style="width: 18px; height: 18px;"></i>
-                                    Booking Status Distribution
-                                </h6>
-                                <div style="position: relative; height: 280px;">
-                                    <canvas id="statusChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Lead Sources -->
-                        <div class="col-lg-4 col-md-6">
-                            <div class="chart-card">
-                                <h6 class="chart-title">
-                                    <i data-feather="users" style="width: 18px; height: 18px;"></i>
-                                    Top Lead Sources
-                                </h6>
-                                <div style="position: relative; height: 280px;">
-                                    <canvas id="leadSourceChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Top Cities -->
-                        <div class="col-lg-4 col-md-6">
-                            <div class="chart-card">
-                                <h6 class="chart-title">
-                                    <i data-feather="map-pin" style="width: 18px; height: 18px;"></i>
-                                    Top Cities
-                                </h6>
-                                <div style="position: relative; height: 280px;">
-                                    <canvas id="cityChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Payment Status -->
-                        <div class="col-lg-4 col-md-6">
-                            <div class="chart-card">
-                                <h6 class="chart-title">
-                                    <i data-feather="credit-card" style="width: 18px; height: 18px;"></i>
-                                    Payment Status
-                                </h6>
-                                <div style="position: relative; height: 280px;">
-                                    <canvas id="paymentChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Booking Trends -->
-                        <div class="col-lg-4 col-md-6">
-                            <div class="chart-card">
-                                <h6 class="chart-title">
-                                    <i data-feather="trending-up" style="width: 18px; height: 18px;"></i>
-                                    Booking Trends (6 Months)
-                                </h6>
-                                <div style="position: relative; height: 280px;">
-                                    <canvas id="trendChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Daily Pattern -->
-                        <div class="col-lg-4 col-md-6">
-                            <div class="chart-card">
-                                <h6 class="chart-title">
-                                    <i data-feather="calendar" style="width: 18px; height: 18px;"></i>
-                                    Daily Booking Pattern (7 Days)
-                                </h6>
-                                <div style="position: relative; height: 280px;">
-                                    <canvas id="dailyChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Summary Stats Row -->
-                    <div class="row g-3 mt-3">
-                        <div class="col-lg-3 col-md-6">
-                            <div class="summary-stat">
-                                <div class="summary-icon" style="background: var(--success-gradient);">
-                                    <i data-feather="dollar-sign"></i>
-                                </div>
-                                <div class="summary-content">
-                                    <div class="summary-label">Total Revenue</div>
-                                    <div class="summary-value">₹{{ number_format($total_revenue_all, 0) }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="summary-stat">
-                                <div class="summary-icon" style="background: var(--info-gradient);">
-                                    <i data-feather="users"></i>
-                                </div>
-                                <div class="summary-content">
-                                    <div class="summary-label">Avg PAX per Booking</div>
-                                    <div class="summary-value">{{ $avg_pax }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="summary-stat">
-                                <div class="summary-icon" style="background: var(--warning-gradient);">
-                                    <i data-feather="calendar"></i>
-                                </div>
-                                <div class="summary-content">
-                                    <div class="summary-label">Total Bookings</div>
-                                    <div class="summary-value">{{ array_sum($booking_trends) }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="summary-stat">
-                                <div class="summary-icon" style="background: var(--primary-gradient);">
-                                    <i data-feather="trending-up"></i>
-                                </div>
-                                <div class="summary-content">
-                                    <div class="summary-label">Conversion Rate</div>
-                                    <div class="summary-value">{{ $conversion_rate }}%</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endcanany
-
-        <!-- Today's Leads -->
-        @can('lead-list')
-            <div class="modern-card animate-fade-in-up" style="animation-delay: 0.25s">
-                <div class="modern-card-header">
-                    <h5>
-                        <i data-feather="calendar" class="me-2"></i>
-                        Today's Leads
-                        <span class="badge ms-2">{{ $today_leads->count() }}</span>
-                    </h5>
-                    <a href="{{ route('lead.index') }}" class="btn btn-light btn-sm">
-                        <i data-feather="arrow-right" class="me-1" style="width: 16px; height: 16px;"></i>View All
-                    </a>
-                </div>
-                <div class="modern-card-body">
-                    @if ($today_leads->count() > 0)
-                        <div class="table-responsive">
-                            <table class="modern-table">
-                                <thead>
-                                    <tr>
-                                        <th>Guest</th>
-                                        <th>Contact</th>
-                                        <th>Pax</th>
-                                        <th>Booking Date</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($today_leads as $lead)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="user-avatar">
-                                                        <i data-feather="user"></i>
-                                                    </div>
-                                                    <span class="fw-semibold">{{ $lead->guest_name ?? 'N/A' }}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <i data-feather="phone" class="text-success me-1"
-                                                    style="width: 16px; height: 16px;"></i>
-                                                {{ $lead->contact ?? 'N/A' }}
-                                            </td>
-                                            <td>
-                                                <i data-feather="users" class="text-primary me-1"
-                                                    style="width: 16px; height: 16px;"></i>
-                                                {{ $lead->pax ?? 'N/A' }}
-                                            </td>
-                                            <td>
-                                                <div class="text-muted">
-                                                    {{ $lead->booking_start_date ? \Carbon\Carbon::parse($lead->booking_start_date)->format('d M Y') : 'N/A' }}
-                                                    @if ($lead->booking_end_date)
-                                                        <br><small>to
-                                                            {{ \Carbon\Carbon::parse($lead->booking_end_date)->format('d M Y') }}</small>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td>
-                                                @if ($lead->booking_status == 'complete')
-                                                    <span class="modern-badge badge-complete">
-                                                        <i data-feather="check-circle" style="width: 14px; height: 14px;"></i>
-                                                        Complete
-                                                    </span>
-                                                @elseif($lead->booking_status == 'confirm')
-                                                    <span class="modern-badge badge-confirm">
-                                                        <i data-feather="check" style="width: 14px; height: 14px;"></i>
-                                                        Confirmed
-                                                    </span>
-                                                @elseif($lead->booking_status == 'follow up')
-                                                    <span class="modern-badge badge-followup">
-                                                        <i data-feather="repeat" style="width: 14px; height: 14px;"></i>
-                                                        Follow Up
-                                                    </span>
-                                                @elseif($lead->booking_status == 'cancel')
-                                                    <span class="modern-badge badge-cancel">
-                                                        <i data-feather="x-circle" style="width: 14px; height: 14px;"></i>
-                                                        Cancelled
-                                                    </span>
-                                                @else
-                                                    <span class="modern-badge badge-new">
-                                                        <i data-feather="clock" style="width: 14px; height: 14px;"></i>
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('lead.show', $lead->id) }}" class="action-btn">
-                                                    <i data-feather="eye" style="width: 16px; height: 16px;"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <i data-feather="calendar"></i>
-                            </div>
-                            <h5>No Leads Today</h5>
-                            <p>There are no leads with booking starting today.</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        @endcan
-
-        <!-- Today's Enquiries -->
-        @can('enquiry-list')
-            <div class="modern-card animate-fade-in-up" style="animation-delay: 0.3s">
-                <div class="modern-card-header">
-                    <h5>
-                        <i data-feather="message-circle" class="me-2"></i>
-                        New Enquiries
-                        <span class="badge ms-2">{{ $today_enquiries->count() }}</span>
-                    </h5>
-                    <a href="{{ route('enquiry.index') }}" class="btn btn-light btn-sm">
-                        <i data-feather="arrow-right" class="me-1" style="width: 16px; height: 16px;"></i>View All
-                    </a>
-                </div>
-                <div class="modern-card-body">
-                    @if ($today_enquiries->count() > 0)
-                        <div class="table-responsive">
-                            <table class="modern-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Contact</th>
-                                        <th>Email</th>
-                                        <th>Message</th>
-                                        <th>Time</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($today_enquiries as $enquiry)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="user-avatar">
-                                                        <i data-feather="user"></i>
-                                                    </div>
-                                                    <span class="fw-semibold">{{ $enquiry->name ?? 'N/A' }}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <i data-feather="phone" class="text-success me-1"
-                                                    style="width: 16px; height: 16px;"></i>
-                                                {{ $enquiry->phone ?? 'N/A' }}
-                                            </td>
-                                            <td>
-                                                <i data-feather="mail" class="text-info me-1"
-                                                    style="width: 16px; height: 16px;"></i>
-                                                {{ $enquiry->email ?? 'N/A' }}
-                                            </td>
-                                            <td>
-                                                <span class="text-muted" title="{{ $enquiry->message ?? 'No message' }}">
-                                                    {{ Str::limit($enquiry->message ?? 'No message', 40) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <small class="text-muted">
-                                                    <i data-feather="clock" class="me-1"
-                                                        style="width: 14px; height: 14px;"></i>
-                                                    {{ $enquiry->created_at->format('h:i A') }}
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <span class="modern-badge badge-new">
-                                                    <i data-feather="star" style="width: 14px; height: 14px;"></i>
-                                                    New
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <i data-feather="inbox"></i>
-                            </div>
-                            <h5>No Enquiries Today</h5>
-                            <p>There are no new enquiries for today.</p>
-                        </div>
-                    @endif
-                </div>
+    @php
+        $totalRevenueChart  = array_sum($totalBusiness);
+        $totalExpenseChart  = array_sum($totalExpense);
+        $totalProfitChart   = array_sum($totalProfit);
+        $profitMarginPct    = $totalRevenueChart > 0 ? round(($totalProfitChart / $totalRevenueChart) * 100, 1) : 0;
+    @endphp
+    <div class="hz-summary hz-fade hz-fade-4">
+        <div class="hz-sum-item">
+            <div class="hz-sum-icon" style="background:rgba(99,102,241,.1)"><i data-feather="dollar-sign" style="stroke:#6366F1"></i></div>
+            <div>
+                <div class="hz-sum-label">Total Revenue</div>
+                <div class="hz-sum-val">₹{{ number_format($totalRevenueChart) }}</div>
             </div>
         </div>
-    @endcan
-
-    <!-- Quick Actions -->
-    @can('lead-create')
-        <div class="quick-actions">
-            <a href="{{ route('lead.create') }}" class="quick-action-btn">
-                <i data-feather="plus"></i>
-                <span class="quick-action-tooltip">Add New Lead</span>
-            </a>
+        <div class="hz-sum-item">
+            <div class="hz-sum-icon" style="background:rgba(239,68,68,.1)"><i data-feather="trending-down" style="stroke:var(--h-rose)"></i></div>
+            <div>
+                <div class="hz-sum-label">Total Expenses</div>
+                <div class="hz-sum-val" style="color:var(--h-rose);">₹{{ number_format($totalExpenseChart) }}</div>
+            </div>
         </div>
+        <div class="hz-sum-item">
+            <div class="hz-sum-icon" style="background:rgba(16,185,129,.1)"><i data-feather="trending-up" style="stroke:var(--h-emerald)"></i></div>
+            <div>
+                <div class="hz-sum-label">Net Profit</div>
+                <div class="hz-sum-val" style="color:var(--h-emerald);">₹{{ number_format($totalProfitChart) }}</div>
+            </div>
+        </div>
+        <div class="hz-sum-item">
+            <div class="hz-sum-icon" style="background:rgba(245,158,11,.1)"><i data-feather="percent" style="stroke:var(--h-amber)"></i></div>
+            <div>
+                <div class="hz-sum-label">Profit Margin</div>
+                <div class="hz-sum-val" style="color:var(--h-amber);">{{ $profitMarginPct }}%</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Desktop: 4-column grid --}}
+    <div class="hz-charts-4 hz-fade hz-fade-4" style="margin-bottom:20px;">
+        <div class="hz-mini-chart">
+            <div class="hz-mini-chart-title"><i data-feather="pie-chart"></i> Booking Status</div>
+            <canvas id="statusChart"></canvas>
+        </div>
+        <div class="hz-mini-chart">
+            <div class="hz-mini-chart-title"><i data-feather="users"></i> Lead Sources</div>
+            <canvas id="leadSourceChart"></canvas>
+        </div>
+        <div class="hz-mini-chart">
+            <div class="hz-mini-chart-title"><i data-feather="credit-card"></i> Payment Status</div>
+            <canvas id="paymentChart"></canvas>
+        </div>
+    </div>
+
+    {{-- Mobile: horizontal swipe scroll --}}
+    <div class="hz-charts-4-scroll hz-fade hz-fade-4">
+        <div class="hz-mini-chart">
+            <div class="hz-mini-chart-title"><i data-feather="pie-chart"></i> Booking Status</div>
+            <canvas id="statusChartM"></canvas>
+        </div>
+        <div class="hz-mini-chart">
+            <div class="hz-mini-chart-title"><i data-feather="users"></i> Lead Sources</div>
+            <canvas id="leadSourceChartM"></canvas>
+        </div>
+        <div class="hz-mini-chart">
+            <div class="hz-mini-chart-title"><i data-feather="credit-card"></i> Payment Status</div>
+            <canvas id="paymentChartM"></canvas>
+        </div>
+    </div>
+
+    <div class="hz-grid-2 hz-fade hz-fade-5" style="margin-bottom:20px;">
+        <div class="hz-card">
+            <div class="hz-card-head"><div class="hz-card-title"><i data-feather="trending-up"></i> Booking Trends (6 Months)</div></div>
+            <div class="hz-chart-wrap"><canvas id="trendChart"></canvas></div>
+        </div>
+        <div class="hz-card">
+            <div class="hz-card-head"><div class="hz-card-title"><i data-feather="clock"></i> Daily Bookings (7 Days)</div></div>
+            <div class="hz-chart-wrap"><canvas id="dailyChart"></canvas></div>
+        </div>
+    </div>
+    @endcanany
+
+    {{-- ── TODAY'S LEADS ────────────────────────────────── --}}
+    @can('lead-list')
+    <div class="hz-card hz-fade hz-fade-5" style="margin-bottom:20px;">
+        <div class="hz-card-head">
+            <div class="hz-card-title"><i data-feather="calendar"></i> Today's Leads <span class="hz-badge confirm ms-2">{{ $today_leads->count() }}</span></div>
+            <a href="{{ route('lead.index') }}" class="hz-link-btn"><i data-feather="arrow-right" style="width:13px;height:13px;"></i>View All</a>
+        </div>
+        <div class="hz-card-body" style="padding:0;">
+            @if ($today_leads->count() > 0)
+            <div class="table-responsive">
+                <table class="hz-table">
+                    <thead><tr><th>Guest</th><th>Contact</th><th class="hz-hide-mob">Pax</th><th class="hz-hide-mob">Booking Date</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                        @foreach ($today_leads as $lead)
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="hz-lead-avatar"><i data-feather="user"></i></div>
+                                    <span style="font-weight:600;">{{ $lead->guest_name ?? 'N/A' }}</span>
+                                </div>
+                            </td>
+                            <td>{{ $lead->contact ?? 'N/A' }}</td>
+                            <td class="hz-hide-mob">{{ $lead->pax ?? '—' }}</td>
+                            <td class="hz-hide-mob">
+                                {{ $lead->booking_start_date ? \Carbon\Carbon::parse($lead->booking_start_date)->format('d M Y') : '—' }}
+                                @if ($lead->booking_end_date)
+                                    <span style="color:var(--h-muted);font-size:.72rem;display:block;">to {{ \Carbon\Carbon::parse($lead->booking_end_date)->format('d M Y') }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($lead->booking_status == 'complete')   <span class="hz-badge complete"><i data-feather="check-circle"></i> Complete</span>
+                                @elseif($lead->booking_status == 'confirm')  <span class="hz-badge confirm"><i data-feather="check"></i> Confirmed</span>
+                                @elseif($lead->booking_status == 'follow up')<span class="hz-badge followup"><i data-feather="repeat"></i> Follow Up</span>
+                                @elseif($lead->booking_status == 'cancel')   <span class="hz-badge cancel"><i data-feather="x-circle"></i> Cancelled</span>
+                                @else                                         <span class="hz-badge new"><i data-feather="clock"></i> Pending</span>
+                                @endif
+                            </td>
+                            <td>
+                                <a href="{{ route('lead.show', $lead->id) }}" class="hz-link-btn"><i data-feather="eye" style="width:13px;height:13px;"></i> View</a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+                <div class="hz-empty"><div class="hz-empty-icon"><i data-feather="calendar"></i></div><h6>No Leads Today</h6><p>No leads with booking starting today</p></div>
+            @endif
+        </div>
+    </div>
     @endcan
 
-    <!-- Chart.js Script -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    {{-- ── TODAY'S ENQUIRIES ───────────────────────────── --}}
+    @can('enquiry-list')
+    <div class="hz-card hz-fade hz-fade-5" style="margin-bottom:20px;">
+        <div class="hz-card-head">
+            <div class="hz-card-title"><i data-feather="message-circle"></i> New Enquiries <span class="hz-badge confirm ms-2">{{ $today_enquiries->count() }}</span></div>
+            <a href="{{ route('enquiry.index') }}" class="hz-link-btn"><i data-feather="arrow-right" style="width:13px;height:13px;"></i>View All</a>
+        </div>
+        <div class="hz-card-body" style="padding:0;">
+            @if ($today_enquiries->count() > 0)
+            <div class="table-responsive">
+                <table class="hz-table">
+                    <thead><tr><th>Name</th><th>Contact</th><th class="hz-hide-mob">Email</th><th class="hz-hide-mob">Message</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                        @foreach ($today_enquiries as $enquiry)
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="hz-lead-avatar"><i data-feather="user"></i></div>
+                                    <span style="font-weight:600;">{{ $enquiry->name ?? 'N/A' }}</span>
+                                </div>
+                            </td>
+                            <td>{{ $enquiry->phone ?? '—' }}</td>
+                            <td class="hz-hide-mob" style="color:var(--h-sky);">{{ $enquiry->email ?? '—' }}</td>
+                            <td class="hz-hide-mob" style="color:var(--h-sub);max-width:200px;">{{ Str::limit($enquiry->message ?? '—', 45) }}</td>
+                            <td style="color:var(--h-muted);font-size:.75rem;">{{ $enquiry->created_at->format('h:i A') }}</td>
+                            <td><span class="hz-badge new"><i data-feather="star"></i> New</span></td>
+                            <td>
+                                <button type="button" class="hz-link-btn"
+                                    onclick="hzEnqView({{ json_encode(['name'=>$enquiry->name,'phone'=>$enquiry->phone,'email'=>$enquiry->email,'message'=>$enquiry->message,'time'=>$enquiry->created_at->format('d M Y h:i A')]) }})"
+                                    style="border:none;background:none;cursor:pointer;">
+                                    <i data-feather="eye" style="width:13px;height:13px;"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+                <div class="hz-empty"><div class="hz-empty-icon"><i data-feather="inbox"></i></div><h6>No Enquiries Today</h6><p>No new enquiries for today</p></div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Enquiry Quick-View Modal --}}
+    <div id="hzEnqModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:16px;padding:24px;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;">
+            <button onclick="document.getElementById('hzEnqModal').style.display='none'" style="position:absolute;top:14px;right:14px;border:none;background:#F1F5F9;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;color:#64748B;">✕</button>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#4F46E5,#7C3AED);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i data-feather="message-circle" style="width:16px;height:16px;stroke:#fff;"></i>
+                </div>
+                <div>
+                    <div style="font-size:.9rem;font-weight:800;color:#0F172A;">Enquiry Details</div>
+                    <div style="font-size:.72rem;color:#94A3B8;" id="hzEnqTime"></div>
+                </div>
+            </div>
+            <div style="display:grid;gap:10px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div style="background:#F8FAFC;border-radius:10px;padding:10px 13px;">
+                        <div style="font-size:.65rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Name</div>
+                        <div style="font-size:.85rem;font-weight:700;color:#0F172A;" id="hzEnqName">—</div>
+                    </div>
+                    <div style="background:#F8FAFC;border-radius:10px;padding:10px 13px;">
+                        <div style="font-size:.65rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Phone</div>
+                        <div style="font-size:.85rem;font-weight:700;color:#0F172A;" id="hzEnqPhone">—</div>
+                    </div>
+                </div>
+                <div style="background:#F8FAFC;border-radius:10px;padding:10px 13px;">
+                    <div style="font-size:.65rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Email</div>
+                    <div style="font-size:.85rem;color:#4F46E5;" id="hzEnqEmail">—</div>
+                </div>
+                <div style="background:#F8FAFC;border-radius:10px;padding:10px 13px;">
+                    <div style="font-size:.65rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Message</div>
+                    <div style="font-size:.85rem;color:#374151;line-height:1.6;white-space:pre-wrap;" id="hzEnqMessage">—</div>
+                </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:8px;">
+                <a href="{{ route('enquiry.index') }}" class="hz-link-btn" style="flex:1;justify-content:center;">
+                    <i data-feather="list" style="width:13px;height:13px;"></i> All Enquiries
+                </a>
+                <button onclick="document.getElementById('hzEnqModal').style.display='none'" style="flex:1;height:36px;border:1.5px solid #E2E8F0;border-radius:9px;background:#F1F5F9;color:#64748B;font-size:.82rem;font-weight:700;cursor:pointer;">Close</button>
+            </div>
+        </div>
+    </div>
     <script>
-        // Business Analytics Chart
-        const ctx = document.getElementById('businessChart');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {!! json_encode($months) !!},
-                    datasets: [{
-                        label: 'Revenue',
-                        data: {!! json_encode($totalBusiness) !!},
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: '#667eea',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }, {
-                        label: 'Expenses',
-                        data: {!! json_encode($totalExpense) !!},
-                        borderColor: '#ff6b6b',
-                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: '#ff6b6b',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: {
-                                    size: 13,
-                                    weight: '600'
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            borderRadius: 8,
-                            titleFont: {
-                                size: 14,
-                                weight: '600'
-                            },
-                            bodyFont: {
-                                size: 13
-                            },
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ₹' + context.parsed.y.toLocaleString();
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return '₹' + value.toLocaleString();
-                                },
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
-                    },
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    }
-                }
-            });
-        }
-
-        // Booking Status Distribution Chart (Doughnut)
-        const statusCtx = document.getElementById('statusChart');
-        if (statusCtx) {
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: {!! json_encode($status_labels) !!},
-                    datasets: [{
-                        data: {!! json_encode($status_data) !!},
-                        backgroundColor: [
-                            '#667eea',
-                            '#38ef7d',
-                            '#00f2fe',
-                            '#fee140',
-                            '#ff6b6b'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Lead Source Chart (Bar)
-        const leadSourceCtx = document.getElementById('leadSourceChart');
-        if (leadSourceCtx) {
-            new Chart(leadSourceCtx, {
-                type: 'bar',
-                data: {
-                    labels: {!! json_encode($lead_source_labels) !!},
-                    datasets: [{
-                        label: 'Leads',
-                        data: {!! json_encode($lead_source_data) !!},
-                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Top Cities Chart (Horizontal Bar)
-        const cityCtx = document.getElementById('cityChart');
-        if (cityCtx) {
-            new Chart(cityCtx, {
-                type: 'bar',
-                data: {
-                    labels: {!! json_encode($city_labels) !!},
-                    datasets: [{
-                        label: 'Bookings',
-                        data: {!! json_encode($city_data) !!},
-                        backgroundColor: 'rgba(56, 239, 125, 0.8)',
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Payment Status Chart (Pie)
-        const paymentCtx = document.getElementById('paymentChart');
-        if (paymentCtx) {
-            new Chart(paymentCtx, {
-                type: 'pie',
-                data: {
-                    labels: {!! json_encode($payment_labels) !!},
-                    datasets: [{
-                        data: {!! json_encode($payment_data) !!},
-                        backgroundColor: [
-                            '#38ef7d',
-                            '#fee140',
-                            '#ff6b6b',
-                            '#00f2fe'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Booking Trends Chart (Area)
-        const trendCtx = document.getElementById('trendChart');
-        if (trendCtx) {
-            new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: {!! json_encode($months) !!},
-                    datasets: [{
-                        label: 'Bookings',
-                        data: {!! json_encode($booking_trends) !!},
-                        borderColor: '#4facfe',
-                        backgroundColor: 'rgba(79, 172, 254, 0.2)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#4facfe',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Daily Booking Pattern Chart (Line)
-        const dailyCtx = document.getElementById('dailyChart');
-        if (dailyCtx) {
-            new Chart(dailyCtx, {
-                type: 'line',
-                data: {
-                    labels: {!! json_encode($daily_labels) !!},
-                    datasets: [{
-                        label: 'Bookings',
-                        data: {!! json_encode($daily_bookings) !!},
-                        borderColor: '#fa709a',
-                        backgroundColor: 'rgba(250, 112, 154, 0.2)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: '#fa709a',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                },
-                                stepSize: 1
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+    function hzEnqView(data) {
+        document.getElementById('hzEnqName').textContent    = data.name    || '—';
+        document.getElementById('hzEnqPhone').textContent   = data.phone   || '—';
+        document.getElementById('hzEnqEmail').textContent   = data.email   || '—';
+        document.getElementById('hzEnqMessage').textContent = data.message || '—';
+        document.getElementById('hzEnqTime').textContent    = data.time    || '';
+        var m = document.getElementById('hzEnqModal');
+        m.style.display = 'flex';
+        if (typeof feather !== 'undefined') feather.replace();
+    }
+    document.getElementById('hzEnqModal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
     </script>
+    @endcan
+
+</div>{{-- /.page-content --}}
+
+
+{{-- ── CHARTS ────────────────────────────────────────────── --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const HZ_PALETTE = ['#4F46E5','#10B981','#0EA5E9','#F59E0B','#EF4444','#7C3AED','#06B6D4'];
+
+const chartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+        tooltip: {
+            backgroundColor: 'rgba(15,23,42,.9)', padding: 10, cornerRadius: 8,
+            titleFont: { size: 13, weight: '600' }, bodyFont: { size: 12 }
+        }
+    },
+    scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(15,23,42,.06)', drawBorder: false }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false, drawBorder: false }, ticks: { font: { size: 11 } } }
+    }
+};
+
+// Business Analytics chart
+const bCtx = document.getElementById('businessChart');
+if (bCtx) new Chart(bCtx, {
+    type: 'bar',
+    data: {
+        labels: {!! json_encode(array_map(fn($m) => \Carbon\Carbon::parse($m)->format('M Y'), $months)) !!},
+        datasets: [
+            {
+                label: 'Revenue',
+                data: {!! json_encode($totalBusiness) !!},
+                backgroundColor: 'rgba(99,102,241,.85)',
+                borderRadius: 6, borderSkipped: false, order: 1
+            },
+            {
+                label: 'Expenses',
+                data: {!! json_encode($totalExpense) !!},
+                backgroundColor: 'rgba(239,68,68,.65)',
+                borderRadius: 6, borderSkipped: false, order: 2
+            },
+            {
+                label: 'Net Profit',
+                data: {!! json_encode($totalProfit) !!},
+                type: 'line',
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16,185,129,.12)',
+                borderWidth: 2.5,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#10B981',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                order: 0
+            }
+        ]
+    },
+    options: {
+        ...chartDefaults,
+        plugins: {
+            ...chartDefaults.plugins,
+            legend: {
+                display: true,
+                position: 'top',
+                labels: { usePointStyle: true, padding: 18, font: { size: 12, weight: '600' } }
+            },
+            tooltip: {
+                ...chartDefaults.plugins.tooltip,
+                callbacks: {
+                    label: c => ' ' + c.dataset.label + ': ₹' + Math.abs(c.parsed.y).toLocaleString('en-IN')
+                }
+            }
+        },
+        scales: {
+            ...chartDefaults.scales,
+            y: {
+                ...chartDefaults.scales.y,
+                ticks: {
+                    callback: v => '₹' + (Math.abs(v) >= 100000 ? (v/100000).toFixed(1)+'L' : (v/1000).toFixed(0)+'K'),
+                    font: { size: 11 },
+                    maxTicksLimit: 8
+                }
+            }
+        }
+    }
+});
+
+// Status doughnut
+const sCtx = document.getElementById('statusChart');
+if (sCtx) new Chart(sCtx, {
+    type: 'doughnut',
+    data: { labels: {!! json_encode($status_labels) !!}, datasets: [{ data: {!! json_encode($status_data) !!}, backgroundColor: HZ_PALETTE, borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } }, tooltip: chartDefaults.plugins.tooltip }, cutout: '60%' }
+});
+
+// Lead source bar
+const lCtx = document.getElementById('leadSourceChart');
+if (lCtx) new Chart(lCtx, {
+    type: 'bar',
+    data: { labels: {!! json_encode($lead_source_labels) !!}, datasets: [{ label: 'Leads', data: {!! json_encode($lead_source_data) !!}, backgroundColor: HZ_PALETTE.map(c => c + 'CC'), borderRadius: 6 }] },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { font:{ size:10 }, maxTicksLimit:8, precision:0 } }, x: { ...chartDefaults.scales.x, ticks: { font:{ size:10 } } } } }
+});
+
+// Payment pie
+const pCtx = document.getElementById('paymentChart');
+if (pCtx) new Chart(pCtx, {
+    type: 'pie',
+    data: { labels: {!! json_encode($payment_labels) !!}, datasets: [{ data: {!! json_encode($payment_data) !!}, backgroundColor: ['#10B981','#F59E0B','#EF4444','#0EA5E9'], borderWidth: 2, borderColor: '#fff', hoverOffset: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, font:{ size:11 } } }, tooltip: chartDefaults.plugins.tooltip } }
+});
+
+// Mobile duplicates (shown only on ≤767px via CSS)
+const sMCtx = document.getElementById('statusChartM');
+if (sMCtx) new Chart(sMCtx, {
+    type: 'doughnut',
+    data: { labels: {!! json_encode($status_labels) !!}, datasets: [{ data: {!! json_encode($status_data) !!}, backgroundColor: HZ_PALETTE, borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 10, font: { size: 10 } } }, tooltip: chartDefaults.plugins.tooltip }, cutout: '58%' }
+});
+const lMCtx = document.getElementById('leadSourceChartM');
+if (lMCtx) new Chart(lMCtx, {
+    type: 'bar',
+    data: { labels: {!! json_encode($lead_source_labels) !!}, datasets: [{ label: 'Leads', data: {!! json_encode($lead_source_data) !!}, backgroundColor: HZ_PALETTE.map(c => c + 'CC'), borderRadius: 5 }] },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { font:{size:9}, maxTicksLimit:8, precision:0 } }, x: { ...chartDefaults.scales.x, ticks: { font:{size:9} } } } }
+});
+const pMCtx = document.getElementById('paymentChartM');
+if (pMCtx) new Chart(pMCtx, {
+    type: 'pie',
+    data: { labels: {!! json_encode($payment_labels) !!}, datasets: [{ data: {!! json_encode($payment_data) !!}, backgroundColor: ['#10B981','#F59E0B','#EF4444','#0EA5E9'], borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 10, font:{size:10} } }, tooltip: chartDefaults.plugins.tooltip } }
+});
+
+// Trend line
+const tCtx = document.getElementById('trendChart');
+if (tCtx) new Chart(tCtx, {
+    type: 'line',
+    data: { labels: {!! json_encode($months) !!}, datasets: [{ label: 'Bookings', data: {!! json_encode($booking_trends) !!}, borderColor: '#0EA5E9', backgroundColor: 'rgba(14,165,233,.12)', borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#0EA5E9', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
+    options: { ...chartDefaults }
+});
+
+// Daily line
+const dCtx = document.getElementById('dailyChart');
+if (dCtx) new Chart(dCtx, {
+    type: 'line',
+    data: { labels: {!! json_encode($daily_labels) !!}, datasets: [{ label: 'Bookings', data: {!! json_encode($daily_bookings) !!}, borderColor: '#7C3AED', backgroundColor: 'rgba(124,58,237,.12)', borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#7C3AED', pointBorderColor: '#fff', pointBorderWidth: 2 }] },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { font:{ size:11 }, maxTicksLimit:8, precision:0 } } } }
+});
+</script>
 @endsection

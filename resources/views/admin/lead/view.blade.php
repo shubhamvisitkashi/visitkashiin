@@ -17,11 +17,6 @@
                                         <i class="btn-icon-prepend" data-feather="zap"></i>
                                         Quick Booking
                                     </a>
-                                    <a href="{{ route('quotations.create', ['lead_id' => $data->id]) }}"
-                                        class="btn btn-primary btn-icon-text me-2">
-                                        <i class="btn-icon-prepend" data-feather="file-text"></i>
-                                        Create Quotation
-                                    </a>
                                     <x-cancle-btn route="{!! route('lead.index', $searchForm) !!}" text="Back" />
                                 </div>
                             </div>
