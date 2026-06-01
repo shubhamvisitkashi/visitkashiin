@@ -6,7 +6,8 @@
       "Bash(chmod +x /Applications/XAMPP/xamppfiles/htdocs/visitkashiin/deploy.sh)",
       "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin status --short)",
       "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin rm --cached storage/logs/*.log)",
-      "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin status --short storage/)"
+      "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin status --short storage/)",
+      "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/visitkashiin log --oneline -3)"
     ]
   }
 }
