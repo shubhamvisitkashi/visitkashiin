@@ -91,7 +91,25 @@
 /* Divider inside card */
 .ws-divider{height:1px;background:#F1F5F9;margin:16px 0;}
 
-@media(max-width:640px){.ws-page{padding:12px;}.ws-tabs{gap:5px;}.ws-tab{padding:7px 11px;font-size:.74rem;}}
+/* Bottom sticky save bar */
+.ws-bottom-bar{
+    position:sticky;bottom:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    background:#fff;border-top:1px solid #E2E8F0;
+    padding:14px 20px;margin-top:24px;
+    box-shadow:0 -4px 16px rgba(0,0,0,.07);
+    border-radius:12px 12px 0 0;
+}
+.ws-bottom-bar-info{display:flex;align-items:center;gap:6px;font-size:.78rem;color:#64748B;}
+.ws-bottom-bar-info i[data-feather]{width:14px;height:14px;stroke:#94A3B8;flex-shrink:0;}
+@media(max-width:640px){
+    .ws-page{padding:12px;}
+    .ws-tabs{gap:5px;}
+    .ws-tab{padding:7px 11px;font-size:.74rem;}
+    .ws-bottom-bar{flex-direction:column;align-items:stretch;padding:12px 16px;}
+    .ws-bottom-bar .ws-save-btn{width:100%;justify-content:center;}
+    .ws-bottom-bar-info{justify-content:center;}
+}
 </style>
 
 <div class="ws-page">
@@ -512,6 +530,14 @@
 </div>
 
 {{-- Bottom save bar --}}
+<div class="ws-bottom-bar">
+    <span class="ws-bottom-bar-info">
+        <i data-feather="info"></i> Changes will be applied to the live website immediately.
+    </span>
+    <button type="submit" class="ws-save-btn" form="wsForm">
+        <i data-feather="save"></i> Update Settings
+    </button>
+</div>
 
 </form>
 </div>{{-- /.ws-page --}}
