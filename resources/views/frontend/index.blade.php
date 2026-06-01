@@ -12,6 +12,7 @@
     <meta property="og:keywords" content="Varanasi tour packages booking, Book Varanasi tour packages online at best price, best travel company in varanasi, Day tour packages for varanasi, Things must to do in varanasi">
 @endsection
 
+
 {{-- ── Body class: activates homepage-specific CSS scoping ── --}}
 @section('body-class', 'vk-homepage')
 
