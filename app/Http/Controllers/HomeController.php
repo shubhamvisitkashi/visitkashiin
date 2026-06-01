@@ -32,7 +32,7 @@ class HomeController extends Controller
                     ->whereNotNull('images')
                     ->first();
                 if ($product && !empty($product->images)) {
-                    $result[$slug] = $product->images[0];
+                    $result[$slug] = reset($product->images);
                 }
             }
             return $result;

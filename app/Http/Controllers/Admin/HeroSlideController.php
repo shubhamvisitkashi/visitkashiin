@@ -31,7 +31,7 @@ class HeroSlideController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $name = Str::random(32) . '.' . $file->extension();
-            $file->move(public_path('backend/admin/hero_slides'), $name);
+            $file->move($this->uploadDir(), $name);
             $data['image'] = $name;
         }
 
@@ -52,12 +52,13 @@ class HeroSlideController extends Controller
         $data['sort_order'] = (int)($data['sort_order'] ?? 0);
 
         if ($request->hasFile('image')) {
-            if ($heroSlide->image && file_exists(public_path('backend/admin/hero_slides/' . $heroSlide->image))) {
-                @unlink(public_path('backend/admin/hero_slides/' . $heroSlide->image));
+            $dir = $this->uploadDir();
+            if ($heroSlide->image && file_exists($dir . '/' . $heroSlide->image)) {
+                @unlink($dir . '/' . $heroSlide->image);
             }
             $file = $request->file('image');
             $name = Str::random(32) . '.' . $file->extension();
-            $file->move(public_path('backend/admin/hero_slides'), $name);
+            $file->move($dir, $name);
             $data['image'] = $name;
         }
 
@@ -67,8 +68,9 @@ class HeroSlideController extends Controller
 
     public function destroy(HeroSlide $heroSlide)
     {
-        if ($heroSlide->image && file_exists(public_path('backend/admin/hero_slides/' . $heroSlide->image))) {
-            @unlink(public_path('backend/admin/hero_slides/' . $heroSlide->image));
+        $dir = public_path('backend/admin/hero_slides');
+        if ($heroSlide->image && file_exists($dir . '/' . $heroSlide->image)) {
+            @unlink($dir . '/' . $heroSlide->image);
         }
         $heroSlide->delete();
         return back()->with('success', 'Slide deleted.');
@@ -78,5 +80,16 @@ class HeroSlideController extends Controller
     {
         $heroSlide->update(['is_active' => !$heroSlide->is_active]);
         return back()->with('success', 'Status updated.');
+    }
+
+    private function uploadDir(): string
+    {
+        $dir = public_path('backend/admin/hero_slides');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        } elseif (!is_writable($dir)) {
+            @chmod($dir, 0775);
+        }
+        return $dir;
     }
 }
