@@ -14,7 +14,9 @@
       "Bash(php -l app/Models/HeroSlide.php)",
       "Bash(read f *)",
       "Bash(git filter-branch *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(chmod -R 777 /Applications/XAMPP/xamppfiles/htdocs/visitkashiin/storage)",
+      "Bash(chmod -R 777 /Applications/XAMPP/xamppfiles/htdocs/visitkashiin/bootstrap/cache)"
     ]
   }
 }
