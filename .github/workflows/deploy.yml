@@ -5,118 +5,15 @@ on:
     branches:
       - main
 
+# SSH deployment disabled — using Hostinger Git Auto-Deploy instead
+# See hPanel → Website → Git for webhook deployment setup
 jobs:
-  deploy:
-    name: Deploy to Hostinger Production
+  notify:
+    name: Deployment via Hostinger Git Auto-Deploy
     runs-on: ubuntu-latest
-
     steps:
-      # ── 1. Checkout ───────────────────────────────────────────────
-      - name: ✅ Checkout
-        uses: actions/checkout@v4
-
-      # ── 2. Deploy via SSH ─────────────────────────────────────────
-      - name: 🚀 SSH Deploy to Hostinger
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host:     ${{ secrets.SSH_HOST }}       # 72.61.252.4
-          username: ${{ secrets.SSH_USERNAME }}   # u697499711
-          password: ${{ secrets.SSH_PASSWORD }}   # hPanel password
-          port:     ${{ secrets.SSH_PORT }}       # 65002
-          timeout:  120s
-          script_stop: true
-          script: |
-
-            echo "=========================================="
-            echo " visitkashi.in — Hostinger Deployment"
-            echo "=========================================="
-            echo ""
-
-            # ── Detect PHP binary (Hostinger may use php8.1 / php8.2) ──
-            if command -v php8.2 &>/dev/null; then PHP=php8.2
-            elif command -v php8.1 &>/dev/null; then PHP=php8.1
-            elif command -v php8.0 &>/dev/null; then PHP=php8.0
-            elif command -v php   &>/dev/null; then PHP=php
-            else echo "❌ PHP not found"; exit 1; fi
-            echo "✅ PHP binary: $PHP ($($PHP -v | head -1))"
-
-            # ── Detect Composer ──────────────────────────────────────
-            if command -v composer &>/dev/null; then
-              COMPOSER="composer"
-            elif [ -f ~/composer.phar ]; then
-              COMPOSER="$PHP ~/composer.phar"
-            elif [ -f /usr/local/bin/composer ]; then
-              COMPOSER="/usr/local/bin/composer"
-            else
-              echo "❌ Composer not found"; exit 1
-            fi
-            echo "✅ Composer: $COMPOSER"
-
-            # ── Navigate to project ──────────────────────────────────
-            PROJECT="${{ secrets.PROJECT_PATH }}"
-            echo "📁 Project path: $PROJECT"
-            cd "$PROJECT" || { echo "❌ Cannot find: $PROJECT"; exit 1; }
-            echo "✅ In directory: $(pwd)"
-
-            # ── Verify .env exists ───────────────────────────────────
-            if [ ! -f .env ]; then
-              echo "❌ .env file missing!"
-              echo "   Run on server: cp .env.example .env && nano .env"
-              exit 1
-            fi
-            echo "✅ .env found"
-
-            # ── Git pull ─────────────────────────────────────────────
-            echo ""
-            echo "⬇️  Pulling latest code from GitHub..."
-            git config --global --add safe.directory "$PROJECT"
-            git fetch origin main
-            git reset --hard origin/main
-            echo "✅ Code updated to: $(git log --oneline -1)"
-
-            # ── Composer install ─────────────────────────────────────
-            echo ""
-            echo "📦 Installing Composer dependencies..."
-            $COMPOSER install --no-dev --optimize-autoloader --no-interaction --quiet
-            echo "✅ Composer done"
-
-            # ── Clear caches ─────────────────────────────────────────
-            echo ""
-            echo "🧹 Clearing all caches..."
-            $PHP artisan optimize:clear
-            echo "✅ Caches cleared"
-
-            # ── Storage symlink ──────────────────────────────────────
-            echo "🔗 Storage symlink..."
-            $PHP artisan storage:link 2>/dev/null || echo "   (symlink already exists)"
-
-            # ── Permissions ──────────────────────────────────────────
-            echo "🔐 Fixing permissions..."
-            find storage -type d -exec chmod 775 {} \; 2>/dev/null
-            find storage -type f -exec chmod 664 {} \; 2>/dev/null
-            chmod 775 bootstrap/cache
-            echo "✅ Permissions set"
-
-            # ── Rebuild caches ───────────────────────────────────────
-            echo ""
-            echo "⚡ Rebuilding config and view cache..."
-            $PHP artisan config:cache
-            $PHP artisan view:cache
-            echo "✅ Cache rebuilt"
-
-            # ── Assets ───────────────────────────────────────────────
-            echo ""
-            echo "📦 Minifying CSS/JS..."
-            $PHP artisan assets:minify 2>/dev/null && echo "✅ Assets minified" || echo "⚠️  assets:minify skipped"
-
-            echo "🖼️  Converting images to WebP..."
-            $PHP artisan images:webp --quality=82 2>/dev/null && echo "✅ Images converted" || echo "⚠️  images:webp skipped"
-
-            # ── Cleanup ──────────────────────────────────────────────
-            rm -rf storage/debugbar/* 2>/dev/null || true
-
-            echo ""
-            echo "=========================================="
-            echo " ✅ Deployment complete!"
-            echo " 🌐 visitkashi.in"
-            echo "=========================================="
+      - name: ✅ Code pushed to main
+        run: |
+          echo "✅ Code pushed to GitHub main branch"
+          echo "🔄 Hostinger Git Auto-Deploy will handle deployment automatically"
+          echo "📌 Setup: hPanel → visitkashi.in → Website → Git"
