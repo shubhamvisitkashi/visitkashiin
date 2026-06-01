@@ -110,3 +110,4 @@ https://visitkashi.in/admin
 - **Run `php artisan route:clear`** after deployment — wildcard routes (`/{slug}`) are incompatible with `route:cache`
 - **Images are gitignored** — upload via Admin Panel after deployment
 - **Minified assets** are gitignored — run `php artisan assets:minify` after CSS changes
+# Deployment test Tue Jun  2 02:04:13 IST 2026
