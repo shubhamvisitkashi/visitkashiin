@@ -457,7 +457,7 @@ $svcData = [
                            class="vk-card">
 
                             <div class="vk-card__img-wrap">
-                                <img src="{{ asset(!empty($on_home_category_product->images) ? 'backend/admin/product_images/' . reset($on_home_category_product->images) : 'backend/assets/images/placeholder.jpg') }}"
+                                <img src="{{ asset(!empty($on_home_category_product->images) ? 'backend/admin/product_images/' . array_values($on_home_category_product->images)[0] : 'backend/assets/images/placeholder.jpg') }}"
                                      alt="{{ $on_home_category_product->name }}"
                                      class="vk-card__img"
                                      loading="lazy" />
@@ -545,7 +545,7 @@ $svcData = [
                        class="vk-pkg-card">
 
                         <div class="vk-pkg-card__img-wrap package-image">
-                            <img src="{{ asset(!empty($on_home_product->images) ? 'backend/admin/product_images/' . reset($on_home_product->images) : 'backend/assets/images/placeholder.jpg') }}"
+                            <img src="{{ asset(!empty($on_home_product->images) ? 'backend/admin/product_images/' . array_values($on_home_product->images)[0] : 'backend/assets/images/placeholder.jpg') }}"
                                  alt="{{ $on_home_product->name }}"
                                  class="vk-pkg-card__img"
                                  loading="lazy" />
