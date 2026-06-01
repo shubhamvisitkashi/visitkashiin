@@ -53,3 +53,5 @@ desktop.ini
 /public/js/app.js
 /public/css/app.css
 mix-manifest.json
+public/backend/admin.zip
+public/backend/*.zip
