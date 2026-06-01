@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\CPU\CategoryManager;
 use Illuminate\Http\Request;
 use App\Models\Admin\Product;
+use App\Models\HeroSlide;
 use Illuminate\Support\Facades\Http;
 
 class HomeController extends Controller
@@ -54,6 +55,12 @@ class HomeController extends Controller
             }
         });
 
-        return view('frontend.index', compact('on_home_categories','on_home_products','search_list','weather','service_images'));
+        try {
+            $hero_slides = HeroSlide::active()->get();
+        } catch (\Exception $e) {
+            $hero_slides = collect();
+        }
+
+        return view('frontend.index', compact('on_home_categories','on_home_products','search_list','weather','service_images','hero_slides'));
     }
 }

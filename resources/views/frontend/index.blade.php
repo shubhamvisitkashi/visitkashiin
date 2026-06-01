@@ -41,11 +41,9 @@
      Dynamic: banner, banner_title, banner_description
      ════════════════════════════════════════════ --}}
 @php
-// Dynamic Hero Slider — pulls from DB, falls back to web setup banner
-$dbSlides = \App\Models\HeroSlide::active()->get();
-
-if ($dbSlides->isNotEmpty()) {
-    $sliderSlides = $dbSlides->map(fn($s) => [
+// Dynamic Hero Slider — pulls from DB (via controller), falls back to web setup banner
+if ($hero_slides->isNotEmpty()) {
+    $sliderSlides = $hero_slides->map(fn($s) => [
         'img'    => $s->image_url,
         'badge'  => $s->badge  ?: "Varanasi's #1 Spiritual Platform",
         'title'  => $s->title,
