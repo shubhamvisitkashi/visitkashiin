@@ -727,39 +727,39 @@ body.vk-homepage .navigation .nav.navbar-nav li ul li a:hover {
   margin-top: 2px;
 }
 
-/* ---------- 9. Section Layout ---------- */
-.vk-section { padding: 48px 0; }
-.vk-section--alt { background: #ffffff; }
-.vk-section--alt:nth-of-type(even) { background: var(--vk-bg-soft); }
+/* ---------- 9. Section Layout — Airbnb style ---------- */
+.vk-section { padding: 48px 0; background: #fff; }
+.vk-section--alt { background: #fff; }
+.vk-section--alt:nth-of-type(even) { background: #fff; }
 
 .vk-section__header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
-  gap: 16px;
-  flex-wrap: wrap;
+  margin-bottom: 24px;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 .vk-section__header--center {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
-.vk-section__label { display: none; } /* Airbnb doesn't use colored label chips */
+.vk-section__label { display: none !important; }
 .vk-section__title {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(20px, 3vw, 28px);
-  font-weight: 800;
-  color: var(--vk-text);
-  margin: 0 0 6px;
-  line-height: 1.18;
-  letter-spacing: -0.02em;
+  font-size: clamp(18px, 2.2vw, 22px);
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 .vk-section__subtitle {
   font-size: 14px;
-  color: var(--vk-muted);
-  margin: 0;
+  color: #717171;
+  margin: 4px 0 0;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -794,23 +794,34 @@ body.vk-homepage .navigation .nav.navbar-nav li ul li a:hover {
 }
 .vk-btn--outline {
   background: transparent;
-  color: var(--vk-text) !important;
-  border-color: var(--vk-text);
+  color: #222 !important;
+  border: none !important;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color .2s ease;
 }
 .vk-btn--outline:hover {
-  background: var(--vk-text);
-  color: var(--vk-white) !important;
+  background: transparent !important;
+  color: #555 !important;
+  box-shadow: none;
+  transform: none;
 }
 
-/* ---------- 11. Category Cards (sale-slider) — Airbnb style ---------- */
+/* ---------- 11. Category Cards — Airbnb listing card style ---------- */
 body.vk-homepage .sale-slider .package-item,
 .vk-card {
-  background: var(--vk-white);
-  border-radius: var(--vk-radius);
+  background: #fff;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: none;
   border: none;
-  transition: box-shadow var(--vk-transition), transform var(--vk-transition);
+  transition: transform 0.2s ease;
   cursor: pointer;
   height: 100%;
   display: flex;
@@ -819,195 +830,167 @@ body.vk-homepage .sale-slider .package-item,
   text-decoration: none !important;
 }
 body.vk-homepage .sale-slider .package-item:hover,
-.vk-card:hover {
-  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
-  transform: translateY(-4px);
-}
+.vk-card:hover { transform: translateY(-2px); }
+
 .vk-card__img-wrap,
 body.vk-homepage .sale-slider .package-image {
   position: relative;
   overflow: hidden;
-  height: 210px;
-  border-radius: var(--vk-radius);
+  border-radius: 12px;
+  aspect-ratio: 1 / 1;
   flex-shrink: 0;
+  background: #f0f0f0;
 }
 body.vk-homepage .sale-slider .package-image img,
 .vk-card__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s var(--vk-ease);
+  transition: transform 0.4s ease;
   display: block;
 }
 body.vk-homepage .sale-slider .package-item:hover .package-image img,
-.vk-card:hover .vk-card__img { transform: scale(1.06); }
+.vk-card:hover .vk-card__img { transform: scale(1.04); }
 
-.vk-card__badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: var(--vk-white);
-  color: var(--vk-text);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-}
 .vk-rupee { font-family: system-ui, sans-serif; margin-right: 1px; }
 .vk-card__body {
-  padding: 14px 4px 8px;
+  padding: 12px 2px 6px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
-/* .vk-card__link removed — <a> is now the .vk-card wrapper itself */
 .vk-card__title {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14.5px;
-  font-weight: 700;
-  color: var(--vk-text);
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
   margin: 0;
-  line-height: 1.3;
-  transition: none;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .vk-card__price {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 13.5px;
-  color: var(--vk-muted);
+  font-size: 13px;
+  color: #717171;
   margin: 0;
 }
 .vk-card__price strong {
-  color: #d50000;
-  font-size: 14px;
-  font-weight: 700;
+  color: #222;
+  font-weight: 600;
+  font-size: 13px;
 }
-.vk-card__price small { font-size: 12px; color: var(--vk-muted); }
+.vk-card__price small { font-size: 12px; color: #717171; }
 
-/* ---------- 12. Package Cards (package-slider) ---------- */
+/* ---------- 12. Package Cards — Airbnb experience card style ---------- */
 body.vk-homepage .package-slider .package-item a,
 .vk-pkg-card {
-  display: block;
-  border-radius: var(--vk-radius);
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
   overflow: hidden;
-  position: relative;
   text-decoration: none !important;
   box-shadow: none;
-  transition: box-shadow var(--vk-transition), transform var(--vk-transition);
-  background: #1a1a1a;
-  height: 300px;
   border: none;
+  background: #fff;
+  transition: transform 0.2s ease;
+  cursor: pointer;
 }
 body.vk-homepage .package-slider .package-item a:hover,
-.vk-pkg-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 44px rgba(0,0,0,0.18);
-}
+.vk-pkg-card:hover { transform: translateY(-2px); }
+
 body.vk-homepage .package-slider .package-image,
 .vk-pkg-card__img-wrap {
-  position: absolute;
-  inset: 0;
+  position: relative;
   overflow: hidden;
+  border-radius: 12px;
+  aspect-ratio: 4 / 3;
+  flex-shrink: 0;
+  background: #e8e8e8;
 }
 body.vk-homepage .package-slider .package-image img,
 .vk-pkg-card__img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.55s var(--vk-ease);
+  transition: transform 0.4s ease;
   display: block;
 }
 body.vk-homepage .package-slider .package-item a:hover img,
-.vk-pkg-card:hover .vk-pkg-card__img { transform: scale(1.07); }
+.vk-pkg-card:hover .vk-pkg-card__img { transform: scale(1.04); }
 
 .vk-pkg-card__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.20) 55%, transparent 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.28) 0%, transparent 55%);
 }
 body.vk-homepage .package-slider .package-content,
 .vk-pkg-card__body {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 18px;
-  z-index: 1;
+  padding: 12px 2px 6px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 body.vk-homepage .package-slider .package-content h3,
 .vk-pkg-card__title {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  color: var(--vk-white) !important;
-  font-size: 15.5px;
-  font-weight: 800;
-  margin: 0 0 5px;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  color: #222 !important;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 body.vk-homepage .package-slider .package-content p,
 .vk-pkg-card__price {
-  color: rgba(255,255,255,0.78) !important;
+  color: #717171 !important;
   font-size: 13px;
-  margin: 0 0 10px;
+  margin: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 400;
 }
-body.vk-homepage .package-slider .package-content p b,
-.vk-pkg-card__price strong { color: #FFFFFF; font-weight: 700; }
+.vk-pkg-card__price strong {
+  color: #222 !important;
+  font-weight: 600;
+  font-size: 13px;
+}
+.vk-pkg-card__per { font-size: 12px; color: #717171; margin-left: 2px; }
 
-.vk-pkg-card__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.30);
-  color: var(--vk-white);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 50px;
-  backdrop-filter: blur(6px);
-  transition: background var(--vk-transition), border-color var(--vk-transition);
-}
-.vk-pkg-card:hover .vk-pkg-card__btn {
-  background: var(--vk-primary);
-  border-color: var(--vk-primary);
-}
-
-/* Slick arrow overrides */
+/* Slick arrows — Airbnb exact style */
 body.vk-homepage .slider-button .slick-prev,
 body.vk-homepage .slider-button .slick-next {
-  width: 40px;
-  height: 40px;
-  background: var(--vk-white);
+  width: 32px;
+  height: 32px;
+  background: #fff;
   border-radius: 50%;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.16);
-  border: 1px solid var(--vk-border);
+  box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+  border: 1px solid #ddd;
   z-index: 10;
-  transition: box-shadow var(--vk-transition), transform var(--vk-transition);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  top: -48px;
 }
+body.vk-homepage .slider-button .slick-prev { right: 48px; left: auto; }
+body.vk-homepage .slider-button .slick-next { right: 8px; }
 body.vk-homepage .slider-button .slick-prev:hover,
 body.vk-homepage .slider-button .slick-next:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.22);
-  transform: scale(1.06);
+  box-shadow: 0 2px 4px rgba(0,0,0,.18);
+  transform: scale(1.04);
 }
 body.vk-homepage .slider-button .slick-prev:before,
-body.vk-homepage .slider-button .slick-next:before {
-  color: var(--vk-text);
-  font-size: 14px;
-}
-body.vk-homepage .slider-button .slick-dots li button:before {
-  color: var(--vk-text);
-  font-size: 8px;
-  opacity: 0.25;
-}
-body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opacity: 0.85; }
+body.vk-homepage .slider-button .slick-next:before { color: #222; font-size: 12px; }
+body.vk-homepage .slider-button .slick-dots li button:before { color: #222; font-size: 6px; opacity: 0.3; }
+body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opacity: 0.9; }
 
 /* ---------- 13. Why Choose Us ---------- */
 /* Popular Packages — soft gray to alternate after categories */
-#vk-packages { background: var(--vk-bg-soft); }
+#vk-packages { background: #fff; }
 
 .vk-why {
   padding: 60px 0;
@@ -1278,6 +1261,8 @@ body.vk-homepage #back-to-top a::after {
   .vk-hero__right { align-items: center; }
   .vk-hero__review { align-self: center; }
   .vk-hero__scroll { display: none; }
+  .vk-section { padding: 28px 0; }
+  .vk-section__header { margin-bottom: 16px; }
 }
 
 @media (max-width: 767px) {
@@ -1304,14 +1289,56 @@ body.vk-homepage #back-to-top a::after {
   .vk-trust__item:nth-child(2),
   .vk-trust__item:nth-child(3),
   .vk-trust__item:nth-child(4) { border-right: none; }
-  .vk-why__grid { grid-template-columns: 1fr; gap: 14px; }
-  .vk-section { padding: 36px 0; }
-  .vk-section__header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  /* ── vk-why: compact horizontal cards on mobile ── */
+  .vk-why { padding: 32px 0; }
+  .vk-why .vk-section__header--center { margin-bottom: 20px; }
+  .vk-why__grid { grid-template-columns: 1fr; gap: 10px; }
+  .vk-why__card {
+    padding: 16px 18px;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border-radius: 12px;
+  }
+  .vk-why__icon {
+    font-size: 28px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    margin-top: 2px;
+    line-height: 1;
+  }
+  .vk-why__card-body { flex: 1; min-width: 0; }
+  .vk-why__card h3 { font-size: 14px; margin-bottom: 4px; }
+  .vk-why__card p  { font-size: 12.5px; line-height: 1.55; }
+
+  /* ── Airbnb-style tight section spacing on mobile ── */
+  .vk-section { padding: 20px 0; }
+
+  /* Section header */
+  .vk-section__header { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: nowrap; }
+  .vk-section__header--center { margin-bottom: 14px; }
+  .vk-section__header .vk-btn--outline { margin-left: auto; flex-shrink: 0; }
+
+  /* Hide label chip — Airbnb keeps it super clean */
+  .vk-section__label { display: none !important; }
+
+  /* Remove underline decoration padding — too much space on mobile */
+  .vk-section__header .vk-section__title,
+  .vk-section__header--center .vk-section__title { padding-bottom: 0; }
+  .vk-section__header .vk-section__title::after,
+  .vk-section__header--center .vk-section__title::after { display: none; }
+
+  /* Tighter title */
+  .vk-section__title { font-size: clamp(17px, 5vw, 22px); margin-bottom: 0; }
+
   .vk-cta-strip__inner { flex-direction: column; text-align: center; }
 }
 
 @media (max-width: 480px) {
   .vk-search__inner .ec-search-group-form { padding: 4px 4px 4px 16px; }
+  .vk-section { padding: 16px 0; }
+  .vk-section__header { margin-bottom: 10px; }
   .vk-trust__item {
     min-width: 100%;
     border-right: none;
@@ -1559,13 +1586,23 @@ body.vk-homepage #back-to-top a::after {
 }
 .vk-btn--outline {
   background: transparent;
-  border: 2px solid currentColor;
-  color: var(--mc-orange) !important;
+  color: #222 !important;
+  border: none !important;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color .2s ease;
 }
 .vk-btn--outline:hover {
-  background: var(--mc-orange) !important;
-  color: #fff !important;
-  border-color: var(--mc-orange) !important;
+  background: transparent !important;
+  color: #555 !important;
+  box-shadow: none;
+  transform: none;
 }
 
 /* ── Section Labels — shown + colorful chips ── */
@@ -1586,22 +1623,11 @@ body.vk-homepage #back-to-top a::after {
 }
 .vk-section__label::before { content: '✦'; font-size: 7px; }
 
-/* ── Section Title — gradient underline ── */
+/* ── Section Title — NO underline (Airbnb style) ── */
 .vk-section__header .vk-section__title,
-.vk-section__header--center .vk-section__title {
-  position: relative;
-  padding-bottom: 14px;
-}
+.vk-section__header--center .vk-section__title { position: static; padding-bottom: 0; }
 .vk-section__header .vk-section__title::after,
-.vk-section__header--center .vk-section__title::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0;
-  width: 52px; height: 4px;
-  border-radius: 4px;
-  background: linear-gradient(to right, #FF6B00, #7C3AED);
-}
-.vk-section__header--center .vk-section__title::after { left: 50%; transform: translateX(-50%); }
+.vk-section__header--center .vk-section__title::after { display: none !important; }
 
 /* ── Services Section — colorful bg + per-card theming ── */
 .vk-services {
@@ -1654,57 +1680,15 @@ body.vk-homepage #back-to-top a::after {
 .vk-svc-card:nth-child(4):hover { box-shadow: 0 14px 44px rgba(245,158,11,0.26); }
 .vk-svc-img { height: 210px; } /* slightly taller */
 
-/* ── Category Sections — alternating accent colors ── */
-#vk-categories .deals-on-sale:nth-child(4n+1) { background: #fffaf5; }
-#vk-categories .deals-on-sale:nth-child(4n+2) { background: #f9f7ff; }
-#vk-categories .deals-on-sale:nth-child(4n+3) { background: #f3fdf8; }
-#vk-categories .deals-on-sale:nth-child(4n+4) { background: #fffdf2; }
+/* ── Category Sections — all white, clean Airbnb style ── */
+#vk-categories .deals-on-sale { background: #fff !important; }
+#vk-categories .deals-on-sale .vk-section__label { display: none !important; }
+#vk-categories .deals-on-sale .vk-section__title::after { display: none !important; }
+#vk-categories .deals-on-sale .vk-btn { background: transparent !important; box-shadow: none !important; color: #222 !important; border: none !important; }
+#vk-categories .deals-on-sale .vk-card:hover { box-shadow: none; }
 
-/* Section label colors */
-#vk-categories .deals-on-sale:nth-child(4n+1) .vk-section__label { background:rgba(255,107,0,0.10); color:#FF6B00; border-color:rgba(255,107,0,0.22); }
-#vk-categories .deals-on-sale:nth-child(4n+2) .vk-section__label { background:rgba(124,58,237,0.10); color:#7C3AED; border-color:rgba(124,58,237,0.22); }
-#vk-categories .deals-on-sale:nth-child(4n+3) .vk-section__label { background:rgba(5,150,105,0.10);  color:#059669; border-color:rgba(5,150,105,0.22); }
-#vk-categories .deals-on-sale:nth-child(4n+4) .vk-section__label { background:rgba(245,158,11,0.12); color:#92400e; border-color:rgba(245,158,11,0.30); }
-
-/* Title underline per section */
-#vk-categories .deals-on-sale:nth-child(4n+1) .vk-section__title::after { background: linear-gradient(to right,#FF6B00,#FF8C00); }
-#vk-categories .deals-on-sale:nth-child(4n+2) .vk-section__title::after { background: linear-gradient(to right,#7C3AED,#A78BFA); }
-#vk-categories .deals-on-sale:nth-child(4n+3) .vk-section__title::after { background: linear-gradient(to right,#059669,#34D399); }
-#vk-categories .deals-on-sale:nth-child(4n+4) .vk-section__title::after { background: linear-gradient(to right,#F59E0B,#FCD34D); }
-
-/* View All buttons per section */
-#vk-categories .deals-on-sale:nth-child(4n+1) .vk-btn { background:linear-gradient(135deg,#FF6B00,#FF8C00)!important; color:#fff!important; border:none; box-shadow:0 4px 16px rgba(255,107,0,.28); }
-#vk-categories .deals-on-sale:nth-child(4n+2) .vk-btn { background:linear-gradient(135deg,#7C3AED,#A78BFA)!important; color:#fff!important; border:none; box-shadow:0 4px 16px rgba(124,58,237,.28); }
-#vk-categories .deals-on-sale:nth-child(4n+3) .vk-btn { background:linear-gradient(135deg,#059669,#34D399)!important; color:#fff!important; border:none; box-shadow:0 4px 16px rgba(5,150,105,.28); }
-#vk-categories .deals-on-sale:nth-child(4n+4) .vk-btn { background:linear-gradient(135deg,#F59E0B,#FCD34D)!important; color:#3d1d00!important; border:none; box-shadow:0 4px 16px rgba(245,158,11,.28); }
-#vk-categories .deals-on-sale .vk-btn:hover { transform: translateY(-2px) !important; filter: brightness(1.08); }
-
-/* Card badge colors per section */
-.vk-card__badge {
-  font-size: 12px;
-  font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 10px;
-  letter-spacing: -0.01em;
-}
-#vk-categories .deals-on-sale:nth-child(4n+1) .vk-card__badge { background:#FF6B00; color:#fff; box-shadow:0 2px 8px rgba(255,107,0,.35); }
-#vk-categories .deals-on-sale:nth-child(4n+2) .vk-card__badge { background:#7C3AED; color:#fff; box-shadow:0 2px 8px rgba(124,58,237,.35); }
-#vk-categories .deals-on-sale:nth-child(4n+3) .vk-card__badge { background:#059669; color:#fff; box-shadow:0 2px 8px rgba(5,150,105,.35); }
-#vk-categories .deals-on-sale:nth-child(4n+4) .vk-card__badge { background:#F59E0B; color:#1a1200; box-shadow:0 2px 8px rgba(245,158,11,.35); }
-
-/* Card hover color ring per section */
-#vk-categories .deals-on-sale:nth-child(4n+1) .vk-card:hover { box-shadow:0 8px 32px rgba(255,107,0,0.16); }
-#vk-categories .deals-on-sale:nth-child(4n+2) .vk-card:hover { box-shadow:0 8px 32px rgba(124,58,237,0.16); }
-#vk-categories .deals-on-sale:nth-child(4n+3) .vk-card:hover { box-shadow:0 8px 32px rgba(5,150,105,0.16); }
-#vk-categories .deals-on-sale:nth-child(4n+4) .vk-card:hover { box-shadow:0 8px 32px rgba(245,158,11,0.16); }
-
-/* ── Popular Packages — dark immersive section ── */
-#vk-packages {
-  background: linear-gradient(135deg, #0d1420 0%, #16213e 60%, #0f3460 100%) !important;
-  padding: 60px 0;
-  position: relative;
-  overflow: hidden;
-}
+/* ── Popular Packages — white, clean ── */
+#vk-packages { background: #fff !important; padding: 48px 0; }
 #vk-packages::before {
   content: '';
   position: absolute;
@@ -1723,12 +1707,9 @@ body.vk-homepage #back-to-top a::after {
   border-radius: 50%;
   pointer-events: none;
 }
-#vk-packages .vk-section__title  { color:#fff !important; }
-#vk-packages .vk-section__subtitle { color:rgba(255,255,255,0.52) !important; }
-#vk-packages .vk-section__label  { background:rgba(255,107,0,0.18); color:#FF8C00; border-color:rgba(255,107,0,0.35); }
-#vk-packages .vk-section__title::after { background:linear-gradient(to right, #FF6B00, #F59E0B, #059669); width:60px; }
-#vk-packages .vk-btn { background:rgba(255,255,255,0.10) !important; border:1.5px solid rgba(255,255,255,0.30) !important; color:#fff !important; }
-#vk-packages .vk-btn:hover { background:rgba(255,255,255,0.20) !important; color:#fff !important; transform:translateY(-2px) !important; }
+#vk-packages .vk-section__title  { color: #222 !important; }
+#vk-packages .vk-section__label  { display: none !important; }
+#vk-packages .vk-btn { background: transparent !important; border: none !important; color: #222 !important; box-shadow: none !important; }
 
 /* Package card "Book Now" button — multicolor per card */
 .vk-pkg-card__btn {

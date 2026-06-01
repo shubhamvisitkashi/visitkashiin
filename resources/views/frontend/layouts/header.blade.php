@@ -18,11 +18,17 @@
                     {{-- Logo --}}
                     <div class="logo pull-left">
                         <a href="{{ route('index') }}">
+                            @if(websiteSetupValue('logo'))
                             <img alt="{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}"
                                  src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
                                  fetchpriority="high"
                                  width="160" height="48"
-                                 decoding="async" />
+                                 decoding="async"
+                                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                            @endif
+                            <span class="vk-logo-text" style="display:{{ websiteSetupValue('logo') ? 'none' : 'flex' }};align-items:center;color:#fff;font-weight:800;font-size:1.25rem;letter-spacing:-.02em;font-family:'Plus Jakarta Sans',sans-serif;">
+                                Visit Kashi
+                            </span>
                         </a>
                     </div>
 
@@ -102,9 +108,15 @@
     {{-- Drawer header --}}
     <div class="vk-drawer__head">
         <a href="{{ route('index') }}" class="vk-drawer__logo">
+            @if(websiteSetupValue('logo'))
             <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
                  alt="{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}"
-                 height="38" />
+                 height="38"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+            @endif
+            <span style="display:{{ websiteSetupValue('logo') ? 'none' : 'block' }};color:#fff;font-weight:800;font-size:1.1rem;font-family:'Plus Jakarta Sans',sans-serif;">
+                Visit Kashi
+            </span>
         </a>
         <button class="vk-drawer__close" id="vkDrawerClose" aria-label="Close navigation">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">

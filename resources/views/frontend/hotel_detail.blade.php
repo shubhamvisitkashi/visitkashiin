@@ -424,9 +424,14 @@
     <div class="oh-inner">
         <div class="oh-header">
             <h2 class="oh-heading">Other Hotels &amp; Stays in Varanasi</h2>
-            <div class="oh-arrows">
-                <button class="oh-arrow" id="ohPrev" aria-label="Previous">&#8592;</button>
-                <button class="oh-arrow" id="ohNext" aria-label="Next">&#8594;</button>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <a href="{{ route('product.list', ['hotels']) }}" class="oh-see-all" aria-label="See all hotels">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <div class="oh-arrows">
+                    <button class="oh-arrow" id="ohPrev" aria-label="Previous">&#8592;</button>
+                    <button class="oh-arrow" id="ohNext" aria-label="Next">&#8594;</button>
+                </div>
             </div>
         </div>
         <div class="oh-track-wrap">
@@ -442,22 +447,28 @@
                     optional($rh->subCategory)->slug ?? 'varanasi',
                     $rh->slug
                 ]);
+                $rhPrice  = ($rh->discounted_price ?? 0) > 0 ? $rh->discounted_price : ($rh->base_price ?? 0);
             @endphp
             <a href="{{ $rhUrl }}" class="oh-card">
                 <div class="oh-img">
-                    <img loading="lazy" src="{{ $rhThumb }}" alt="{{ $rh->name }}" loading="lazy">
+                    <span class="oh-badge">Guest favourite</span>
+                    <button class="oh-heart" onclick="event.preventDefault();" aria-label="Save">
+                        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 28C16 28 4 20.5 4 12a7 7 0 0 1 12-4.9A7 7 0 0 1 28 12c0 8.5-12 16-12 16z"/></svg>
+                    </button>
+                    <img loading="lazy" src="{{ $rhThumb }}" alt="{{ $rh->name }}">
                 </div>
                 <div class="oh-info">
-                    <div class="oh-name">{{ $rh->name }}</div>
-                    @if(optional($rh->subCategory)->name)
-                    <div class="oh-loc">&#128205; {{ $rh->subCategory->name }}</div>
-                    @endif
-                    @if(($rh->discounted_price ?? 0) > 0)
-                    <div class="oh-price">₹{{ number_format($rh->discounted_price) }} <span>/ night</span></div>
-                    @elseif(($rh->base_price ?? 0) > 0)
-                    <div class="oh-price">₹{{ number_format($rh->base_price) }} <span>/ night</span></div>
-                    @endif
-                    <span class="oh-book-btn">View Details &rarr;</span>
+                    <div class="oh-name">{{ optional($rh->category)->name ?? 'Stay' }} in {{ optional($rh->subCategory)->name ?? 'Varanasi' }}</div>
+                    <div class="oh-loc">{{ $rh->name }}</div>
+                    <div class="oh-price-row">
+                        @if($rhPrice > 0)
+                        <span class="oh-price">₹{{ number_format($rhPrice) }} <span>/ night</span></span>
+                        @endif
+                        <span class="oh-rating">
+                            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            4.8
+                        </span>
+                    </div>
                 </div>
             </a>
             @endforeach
