@@ -75,6 +75,8 @@ if ($hero_slides->isNotEmpty()) {
     @foreach($sliderSlides as $i => $slide)
     <div class="vkp-slide {{ $i===0 ? 'is-active' : '' }}" data-slide="{{ $i }}"
          aria-hidden="{{ $i!==0 ? 'true' : 'false' }}">
+
+        {{-- Image (hidden if broken) --}}
         @if(!empty($slide['cta1']['url']))
         <a href="{{ $slide['cta1']['url'] }}" style="display:block;text-decoration:none;">
             <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
@@ -82,7 +84,7 @@ if ($hero_slides->isNotEmpty()) {
                  loading="{{ $i===0 ? 'eager' : 'lazy' }}"
                  {{ $i===0 ? 'fetchpriority="high"' : '' }}
                  decoding="{{ $i===0 ? 'sync' : 'async' }}"
-                 onerror="this.style.display='none'">
+                 onerror="this.parentElement.style.display='none'">
         </a>
         @else
         <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
@@ -92,6 +94,24 @@ if ($hero_slides->isNotEmpty()) {
              decoding="{{ $i===0 ? 'sync' : 'async' }}"
              onerror="this.style.display='none'">
         @endif
+
+        {{-- Text overlay — always visible, looks great even without image --}}
+        <div class="vkp-text-overlay">
+            @if(!empty($slide['badge']))
+            <div class="vkp-badge">{{ $slide['badge'] }}</div>
+            @endif
+            <h2 class="vkp-title">{{ $slide['title'] ?? 'Most Trusted Travel Company' }}</h2>
+            @if(!empty($slide['tagline']))
+            <p class="vkp-tagline">{{ $slide['tagline'] }}</p>
+            @endif
+            @if(!empty($slide['cta1']['url']))
+            <a href="{{ $slide['cta1']['url'] }}" class="vkp-cta-btn">
+                {{ $slide['cta1']['label'] ?? 'Explore Tours' }}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            @endif
+        </div>
+
     </div>
     @endforeach
     </div>
@@ -113,8 +133,39 @@ if ($hero_slides->isNotEmpty()) {
 
 </section>
 <style>
-.vkp-hero  { position:relative; width:100%; overflow:hidden; background:#000; margin-top:5px; }
-.vkp-track { position:relative; overflow:hidden; }
+.vkp-hero  { position:relative; width:100%; overflow:hidden; background:linear-gradient(135deg,#0d1420 0%,#1a2b4c 50%,#0f3460 100%); margin-top:5px; min-height:320px; }
+.vkp-track { position:relative; overflow:hidden; min-height:320px; }
+
+/* Text overlay — shows on all slides (with or without image) */
+.vkp-text-overlay {
+    position:absolute; bottom:0; left:0; right:0; z-index:5;
+    padding:40px 5% 48px;
+    background:linear-gradient(to top, rgba(5,10,24,0.92) 0%, rgba(5,10,24,0.55) 55%, transparent 100%);
+    pointer-events:none;
+}
+.vkp-text-overlay a, .vkp-text-overlay .vkp-cta-btn { pointer-events:auto; }
+.vkp-badge {
+    display:inline-block; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+    color:rgba(255,255,255,.9); font-size:.72rem; font-weight:700; letter-spacing:.07em;
+    text-transform:uppercase; padding:5px 14px; border-radius:50px; margin-bottom:12px;
+}
+.vkp-title {
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.4rem,4vw,2.8rem);
+    font-weight:800; color:#fff; margin:0 0 10px; line-height:1.15; letter-spacing:-.02em;
+    text-shadow:0 2px 12px rgba(0,0,0,.4);
+}
+.vkp-tagline {
+    font-size:clamp(.82rem,1.6vw,1rem); color:rgba(255,255,255,.72);
+    margin:0 0 20px; line-height:1.55; max-width:540px;
+}
+.vkp-cta-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg,#D94F2B,#FF6B35); color:#fff;
+    font-size:.88rem; font-weight:700; padding:12px 24px; border-radius:50px;
+    text-decoration:none !important; box-shadow:0 4px 18px rgba(217,79,43,.38);
+    transition:transform .2s, box-shadow .2s;
+}
+.vkp-cta-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(217,79,43,.5); color:#fff; }
 
 /* ── Slide base: hidden by default ── */
 .vkp-slide {
