@@ -117,8 +117,8 @@
 @endsection
 
 @push('styles')
-<link rel="preload" href="{{ asset('frontend/css/boat-listing.css') }}?v={{ filemtime(public_path('frontend/css/boat-listing.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-listing.css') }}?v={{ filemtime(public_path('frontend/css/boat-listing.css')) }}"></noscript>
+<link rel="preload" href="{{ asset('frontend/css/boat-listing.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-listing.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-listing.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-listing.min.css')) }}"></noscript>
 <style>
 /* ── Breadcrumb ── */
 .bl-breadcrumb{background:#f6f8fc;border-bottom:1px solid #ebebeb;padding:10px 0;}

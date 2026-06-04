@@ -175,8 +175,8 @@
 @endsection
 
 @push('styles')
-<link rel="preload" href="{{ asset('frontend/css/boat-detail.css') }}?v={{ filemtime(public_path('frontend/css/boat-detail.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-detail.css') }}?v={{ filemtime(public_path('frontend/css/boat-detail.css')) }}"></noscript>
+<link rel="preload" href="{{ asset('frontend/css/boat-detail.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-detail.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-detail.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-detail.min.css')) }}"></noscript>
 <style>
 /* ── page-specific overrides only ── */
 </style>

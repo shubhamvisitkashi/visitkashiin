@@ -23,8 +23,8 @@
 @endsection
 
 @push('styles')
-<link rel="preload" href="{{ asset('frontend/css/hotel-detail.css') }}?v={{ filemtime(public_path('frontend/css/hotel-detail.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-<noscript><link rel="stylesheet" href="{{ asset('frontend/css/hotel-detail.css') }}?v={{ filemtime(public_path('frontend/css/hotel-detail.css')) }}"></noscript>
+<link rel="preload" href="{{ asset('frontend/css/hotel-detail.min.css') }}?v={{ filemtime(public_path('frontend/css/hotel-detail.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="{{ asset('frontend/css/hotel-detail.min.css') }}?v={{ filemtime(public_path('frontend/css/hotel-detail.min.css')) }}"></noscript>
 @endpush
 
 @section('content')

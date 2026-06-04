@@ -23,10 +23,10 @@ yarn-error.log
 # ─── Debugbar storage (can grow to GB) ──────────────────
 /storage/debugbar/
 
-# ─── WebP converted images (generated, not source) ──────
+# ─── WebP converted images (backend only — generated, not source) ──
 /public/backend/admin/hero_slides/*.webp
 /public/backend/admin/website_setup/*.webp
-/public/frontend/images/*.webp
+# Note: /public/frontend/images/*.webp is now TRACKED (static assets needed on live)
 
 # ─── Minified CSS/JS — tracked so live server gets updates ─
 # (we manually sync .css → .min.css before each deploy)
