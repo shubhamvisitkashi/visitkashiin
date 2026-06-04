@@ -1586,10 +1586,7 @@
               {{-- HOTEL --}}
               <div class="tp-svc-block" id="tp-hotel-block">
                 <div class="tp-svc-header">
-                  <label class="tp-svc-toggle">
-                    <input type="checkbox" id="tp-hotel-on" onchange="tpToggle('hotel')" checked>
-                    <span class="tp-svc-dot" style="background:#10B981;"></span>
-                  </label>
+                  <span class="tp-svc-dot" style="background:#10B981;border:none;"></span>
                   <span class="tp-svc-icon">🏨</span>
                   <span class="tp-svc-name">Hotel / Stay</span>
                   <span class="tp-svc-cost" id="tp-hotel-cost-badge">₹0</span>
@@ -1612,10 +1609,7 @@
               {{-- CAB --}}
               <div class="tp-svc-block" id="tp-cab-block">
                 <div class="tp-svc-header">
-                  <label class="tp-svc-toggle">
-                    <input type="checkbox" id="tp-cab-on" onchange="tpToggle('cab')" checked>
-                    <span class="tp-svc-dot" style="background:#F59E0B;"></span>
-                  </label>
+                  <span class="tp-svc-dot" style="background:#F59E0B;border:none;"></span>
                   <span class="tp-svc-icon">🚕</span>
                   <span class="tp-svc-name">Cab / Transport</span>
                   <span class="tp-svc-cost" id="tp-cab-cost-badge">₹0</span>
@@ -1647,10 +1641,7 @@
               {{-- BOAT --}}
               <div class="tp-svc-block" id="tp-boat-block">
                 <div class="tp-svc-header">
-                  <label class="tp-svc-toggle">
-                    <input type="checkbox" id="tp-boat-on" onchange="tpToggle('boat')" checked>
-                    <span class="tp-svc-dot" style="background:#0EA5E9;"></span>
-                  </label>
+                  <span class="tp-svc-dot" style="background:#0EA5E9;border:none;"></span>
                   <span class="tp-svc-icon">⛵</span>
                   <span class="tp-svc-name">Boat / River Ride</span>
                   <span class="tp-svc-cost" id="tp-boat-cost-badge">₹0</span>
@@ -1690,10 +1681,7 @@
               {{-- GUIDE --}}
               <div class="tp-svc-block" id="tp-guide-block">
                 <div class="tp-svc-header">
-                  <label class="tp-svc-toggle">
-                    <input type="checkbox" id="tp-guide-on" onchange="tpToggle('guide')" checked>
-                    <span class="tp-svc-dot" style="background:#8B5CF6;"></span>
-                  </label>
+                  <span class="tp-svc-dot" style="background:#8B5CF6;border:none;"></span>
                   <span class="tp-svc-icon">🧭</span>
                   <span class="tp-svc-name">Guide</span>
                   <span class="tp-svc-cost" id="tp-guide-cost-badge">₹0</span>
@@ -2469,13 +2457,6 @@ function buildCabPlan() {
 
 /* ── TOUR PACKAGE FUNCTIONS ── */
 
-function tpToggle(svc) {
-  const on   = document.getElementById('tp-' + svc + '-on').checked;
-  const body = document.getElementById('tp-' + svc + '-body');
-  if (body) body.classList.toggle('disabled', !on);
-  calcTourMargin();
-}
-
 function tpCalcHotel() {
   const from = document.getElementById('tp_hotel_from').value;
   const to   = document.getElementById('tp_hotel_to').value;
@@ -2486,14 +2467,14 @@ function tpCalcHotel() {
 }
 
 function calcTourMargin() {
-  const on = id => document.getElementById('tp-' + id + '-on')?.checked !== false;
   const val = id => parseFloat(document.getElementById(id)?.value || 0);
   const fmt = v => '₹' + Math.max(0, v).toLocaleString('en-IN');
 
-  const hotel = on('hotel') ? val('tp_hotel_cost')  : 0;
-  const cab   = on('cab')   ? val('tp_cab_cost')    : 0;
-  const boat  = on('boat')  ? val('tp_boat_cost')   : 0;
-  const guide = on('guide') ? val('tp_guide_cost')  : 0;
+  // Always include all 4 services (use 0 if not filled)
+  const hotel = val('tp_hotel_cost');
+  const cab   = val('tp_cab_cost');
+  const boat  = val('tp_boat_cost');
+  const guide = val('tp_guide_cost');
   const totalExp = hotel + cab + boat + guide;
 
   /* update individual badges */
