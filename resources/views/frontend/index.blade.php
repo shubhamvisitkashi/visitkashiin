@@ -95,22 +95,7 @@ if ($hero_slides->isNotEmpty()) {
                  onerror="this.closest('.vkp-slide').style.background='linear-gradient(135deg,#0d1420,#0f3460)'">
             @endif
 
-            {{-- Text overlay — bottom-left like Visit Dubai --}}
-            <div class="vkp-text-overlay">
-                @if(!empty($slide['badge']))
-                <div class="vkp-badge">{{ $slide['badge'] }}</div>
-                @endif
-                <h2 class="vkp-title">{{ $slide['title'] ?? 'Visit Kashi' }}</h2>
-                @if(!empty($slide['tagline']))
-                <p class="vkp-tagline">{{ $slide['tagline'] }}</p>
-                @endif
-                @if(!empty($slide['cta1']['url']))
-                <a href="{{ $slide['cta1']['url'] }}" class="vkp-cta-btn">
-                    {{ $slide['cta1']['label'] ?? 'Explore' }}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </a>
-                @endif
-            </div>
+            {{-- Text overlay removed (title, tagline, CTA hidden) --}}
 
         </div>
         @endforeach
