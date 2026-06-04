@@ -272,33 +272,59 @@
             @if($heroSlides->isNotEmpty())
             <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
                 @foreach($heroSlides as $slide)
-                <div style="display:flex;align-items:center;gap:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 14px;">
-                    <div style="width:52px;height:36px;border-radius:7px;overflow:hidden;flex-shrink:0;background:#E2E8F0;">
-                        @if($slide->image)
-                        <img src="{{ $slide->image_url }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
-                        @else
-                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.9rem;">🖼</div>
-                        @endif
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:.83rem;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $slide->title }}</div>
-                        <div style="font-size:.7rem;color:#94A3B8;">{{ $slide->cta_label }} · Order {{ $slide->sort_order }}</div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                        <form action="{{ route('hero-slides.toggle', $slide->id) }}" method="POST">
-                            @csrf
-                            <button type="submit" style="border:none;background:{{ $slide->is_active ? '#ECFDF5' : '#F1F5F9' }};color:{{ $slide->is_active ? '#065F46' : '#64748B' }};border:1px solid {{ $slide->is_active ? '#A7F3D0' : '#E2E8F0' }};border-radius:20px;padding:3px 10px;font-size:.67rem;font-weight:700;cursor:pointer;">
-                                {{ $slide->is_active ? '● Active' : '○ Off' }}
+
+                {{-- Slide row --}}
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;">
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;">
+                        {{-- Thumb --}}
+                        <div style="width:52px;height:36px;border-radius:7px;overflow:hidden;flex-shrink:0;background:#E2E8F0;">
+                            @if($slide->image)
+                            <img src="{{ $slide->image_url }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+                            @else
+                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.9rem;">🖼</div>
+                            @endif
+                        </div>
+                        {{-- Info --}}
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:.83rem;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $slide->title }}</div>
+                            <div style="font-size:.7rem;color:#94A3B8;">{{ $slide->cta_label }} · Order {{ $slide->sort_order }}</div>
+                        </div>
+                        {{-- Actions --}}
+                        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                            {{-- Toggle --}}
+                            <form action="{{ route('hero-slides.toggle', $slide->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" style="border:none;background:{{ $slide->is_active ? '#ECFDF5' : '#F1F5F9' }};color:{{ $slide->is_active ? '#065F46' : '#64748B' }};border:1px solid {{ $slide->is_active ? '#A7F3D0' : '#E2E8F0' }};border-radius:20px;padding:3px 10px;font-size:.67rem;font-weight:700;cursor:pointer;">
+                                    {{ $slide->is_active ? '● Active' : '○ Off' }}
+                                </button>
+                            </form>
+                            {{-- Edit --}}
+                            <button type="button"
+                                onclick="wsSlideEdit(
+                                    {{ $slide->id }},
+                                    '{{ addslashes($slide->title) }}',
+                                    '{{ addslashes($slide->badge ?? '') }}',
+                                    '{{ addslashes($slide->tagline ?? '') }}',
+                                    '{{ addslashes($slide->cta_label ?? '') }}',
+                                    '{{ addslashes($slide->cta_url ?? '') }}',
+                                    {{ $slide->sort_order }},
+                                    '{{ $slide->image_url }}'
+                                )"
+                                style="border:none;background:#EEF2FF;color:#4338CA;border-radius:7px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                                title="Edit slide">
+                                <i data-feather="edit-2" style="width:12px;height:12px;stroke:#4338CA;"></i>
                             </button>
-                        </form>
-                        <form action="{{ route('hero-slides.destroy', $slide->id) }}" method="POST" onsubmit="return confirm('Delete slide?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" style="border:none;background:#FEF2F2;color:#DC2626;border-radius:7px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-                                <i data-feather="trash-2" style="width:12px;height:12px;stroke:#DC2626;"></i>
-                            </button>
-                        </form>
+                            {{-- Delete --}}
+                            <form action="{{ route('hero-slides.destroy', $slide->id) }}" method="POST" onsubmit="return confirm('Delete this slide?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" style="border:none;background:#FEF2F2;color:#DC2626;border-radius:7px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Delete slide">
+                                    <i data-feather="trash-2" style="width:12px;height:12px;stroke:#DC2626;"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
+
                 @endforeach
             </div>
             @else
@@ -308,7 +334,62 @@
             </div>
             @endif
 
-            {{-- Quick Add Slide Form (standalone — not nested inside any other form) --}}
+            {{-- ── Inline Edit Form (hidden, shown when edit clicked) ── --}}
+            <div id="ws-slide-edit-wrap" style="display:none;background:#EEF2FF;border:1.5px solid #C7D2FE;border-radius:12px;padding:16px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                    <div style="font-size:.72rem;font-weight:800;color:#4338CA;text-transform:uppercase;letter-spacing:.06em;">✏️ Edit Slide</div>
+                    <button type="button" onclick="wsSlideEditCancel()" style="background:transparent;border:none;color:#94A3B8;cursor:pointer;font-size:.75rem;font-weight:600;">✕ Cancel</button>
+                </div>
+                <form id="form-hero-edit" action="" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    {{-- Current image preview --}}
+                    <div id="ws-edit-img-preview" style="display:none;margin-bottom:10px;background:#E0E7FF;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px;">
+                        <img id="ws-edit-img-el" src="" alt="" style="height:40px;width:60px;object-fit:cover;border-radius:6px;border:1px solid #C7D2FE;">
+                        <span style="font-size:.72rem;color:#4338CA;font-weight:600;">Current image — upload new to replace</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                        <div>
+                            <label class="ws-label">New Image <span style="font-weight:400;color:#94A3B8;text-transform:none;">(leave blank to keep)</span></label>
+                            <input type="file" name="image" class="ws-file" accept="image/*" style="padding:4px 10px;cursor:pointer;font-size:.78rem;">
+                        </div>
+                        <div>
+                            <label class="ws-label">Badge Text</label>
+                            <input type="text" name="badge" id="ws-edit-badge" class="ws-input" style="font-size:.8rem;" placeholder="e.g. #1 Platform">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label class="ws-label">Title <span style="color:#EF4444;">*</span></label>
+                        <input type="text" name="title" id="ws-edit-title" class="ws-input" required style="font-size:.8rem;" placeholder="Slide title">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label class="ws-label">Tagline</label>
+                        <input type="text" name="tagline" id="ws-edit-tagline" class="ws-input" style="font-size:.8rem;" placeholder="Short subtitle">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:8px;margin-bottom:12px;">
+                        <div>
+                            <label class="ws-label">Button Label</label>
+                            <input type="text" name="cta_label" id="ws-edit-cta-label" class="ws-input" style="font-size:.8rem;">
+                        </div>
+                        <div>
+                            <label class="ws-label">Button URL</label>
+                            <input type="text" name="cta_url" id="ws-edit-cta-url" class="ws-input" style="font-size:.8rem;">
+                        </div>
+                        <div>
+                            <label class="ws-label">Order</label>
+                            <input type="number" name="sort_order" id="ws-edit-order" class="ws-input" style="font-size:.8rem;" min="0">
+                        </div>
+                    </div>
+                    <input type="hidden" name="is_active" value="1">
+                    <div class="ws-card-save-row" style="border-top:none;padding-top:0;margin-top:0;">
+                        <button type="submit" class="ws-save-btn" style="background:linear-gradient(135deg,#4338CA,#6366F1);">
+                            <i data-feather="save"></i> Update Slide
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Quick Add Slide Form --}}
             <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:16px;margin-bottom:20px;">
                 <div style="font-size:.72rem;font-weight:800;color:#EA580C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">➕ Add New Slide</div>
                 <form id="form-hero-add" action="{{ route('hero-slides.store') }}" method="POST" enctype="multipart/form-data">
@@ -468,5 +549,42 @@ if (promoToggle && promoLbl) {
 }
 
 document.addEventListener('DOMContentLoaded', function(){ feather.replace(); });
+
+/* ── Hero Slide Inline Edit ── */
+function wsSlideEdit(id, title, badge, tagline, ctaLabel, ctaUrl, order, imgUrl) {
+    var wrap = document.getElementById('ws-slide-edit-wrap');
+    var form = document.getElementById('form-hero-edit');
+
+    // Set form action to the update route
+    form.action = '{{ url("admin/hero-slides") }}/' + id;
+
+    // Populate fields
+    document.getElementById('ws-edit-title').value     = title;
+    document.getElementById('ws-edit-badge').value     = badge;
+    document.getElementById('ws-edit-tagline').value   = tagline;
+    document.getElementById('ws-edit-cta-label').value = ctaLabel;
+    document.getElementById('ws-edit-cta-url').value   = ctaUrl;
+    document.getElementById('ws-edit-order').value     = order;
+
+    // Show current image if exists
+    var preview = document.getElementById('ws-edit-img-preview');
+    var imgEl   = document.getElementById('ws-edit-img-el');
+    if (imgUrl && imgUrl.indexOf('placeholder') === -1) {
+        imgEl.src            = imgUrl;
+        preview.style.display = 'flex';
+    } else {
+        preview.style.display = 'none';
+    }
+
+    // Show the edit panel and scroll to it
+    wrap.style.display = 'block';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    feather.replace();
+}
+
+function wsSlideEditCancel() {
+    document.getElementById('ws-slide-edit-wrap').style.display = 'none';
+    document.getElementById('form-hero-edit').reset();
+}
 </script>
 @endsection
