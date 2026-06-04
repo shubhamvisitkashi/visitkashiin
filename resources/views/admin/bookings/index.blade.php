@@ -928,9 +928,27 @@
                   <div style="font-size:.73rem;color:#6B7280;margin-top:2px;">{{ $booking->lead->contact ?? '–' }}</div>
                 </td>
 
-                {{-- TYPE --}}
+                {{-- TYPE / PACKAGE --}}
                 <td data-label="Type">
                   <span class="bkt-type bkt-type-{{ $typeKey }}">{{ $typeEmoji }} {{ $typeLabel }}</span>
+                  @if($typeKey === 'tour')
+                    @php
+                      $pkgName = $booking->quotation?->items?->first()?->serviceTemplate?->name
+                              ?? ($booking->lead?->short_plan ? Str::limit(strip_tags($booking->lead->short_plan), 40) : null);
+                    @endphp
+                    @if($pkgName)
+                      <div style="font-size:.7rem;color:#6D28D9;font-weight:600;margin-top:3px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $pkgName }}">📦 {{ $pkgName }}</div>
+                    @endif
+                    @php
+                      $tdays = null;
+                      if($booking->lead?->booking_start_date && $booking->lead?->booking_end_date) {
+                          $tdays = \Carbon\Carbon::parse($booking->lead->booking_start_date)->diffInDays(\Carbon\Carbon::parse($booking->lead->booking_end_date)) + 1;
+                      }
+                    @endphp
+                    @if($tdays)
+                      <div style="font-size:.68rem;color:#9CA3AF;margin-top:1px;">{{ $tdays }}D/{{ $tdays-1 }}N</div>
+                    @endif
+                  @endif
                 </td>
 
                 {{-- TRAVEL DATE --}}

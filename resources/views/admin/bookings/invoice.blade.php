@@ -1,604 +1,431 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Confirmation #{{ $booking->booking_number }} | {{ config('app.name') }}</title>
+    <title>Booking Confirmation #{{ $booking->booking_number }} | Visit Kashi</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',Arial,sans-serif; color:#0f172a; background:#f1f5f9; font-size:13px; line-height:1.5; }
 
-        body {
-            font-family: Arial, sans-serif;
-            color: #000;
-            background: #fff;
-            padding: 10px;
-            font-size: 12px;
-            line-height: 1.3;
-        }
+        .page-wrap { max-width:820px; margin:24px auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 32px rgba(0,0,0,.12); }
 
-        .invoice-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border: 1px solid #000;
-        }
+        /* ── Header ── */
+        .inv-header { background:linear-gradient(135deg,#0f3460 0%,#1a5276 60%,#2980b9 100%); padding:28px 32px; position:relative; overflow:hidden; }
+        .inv-header::after { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; background:rgba(255,255,255,.06); border-radius:50%; }
+        .inv-header::before { content:''; position:absolute; bottom:-40px; left:40%; width:150px; height:150px; background:rgba(255,255,255,.04); border-radius:50%; }
+        .inv-header-inner { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; position:relative; z-index:1; }
+        .inv-logo img { height:52px; width:auto; object-fit:contain; filter:brightness(0) invert(1); }
+        .inv-logo-fallback { font-size:1.4rem; font-weight:800; color:#fff; letter-spacing:-.02em; }
+        .inv-title-block { text-align:right; }
+        .inv-title { font-size:1.6rem; font-weight:800; color:#fff; letter-spacing:-.02em; line-height:1; }
+        .inv-subtitle { font-size:.72rem; font-weight:600; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.1em; margin-top:3px; }
+        .inv-badge { display:inline-block; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; font-size:.72rem; font-weight:700; padding:4px 12px; border-radius:20px; margin-top:8px; }
+        .inv-num { font-size:1rem; font-weight:700; color:rgba(255,255,255,.9); margin-top:4px; }
 
-        /* Header Section */
-        .invoice-header {
-            padding: 15px;
-            border-bottom: 2px solid #000;
-        }
+        /* ── Confirmed banner ── */
+        .inv-confirmed { background:#059669; padding:10px 32px; display:flex; align-items:center; gap:8px; }
+        .inv-confirmed-icon { width:20px; height:20px; background:#fff; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:.7rem; color:#059669; font-weight:800; flex-shrink:0; }
+        .inv-confirmed-text { font-size:.82rem; font-weight:700; color:#fff; }
+        .inv-confirmed-date { margin-left:auto; font-size:.75rem; color:rgba(255,255,255,.8); }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-        }
+        /* ── Info grid ── */
+        .inv-info { display:grid; grid-template-columns:1fr 1fr; gap:0; border-bottom:1px solid #e2e8f0; }
+        .inv-info-col { padding:20px 32px; }
+        .inv-info-col:first-child { border-right:1px solid #e2e8f0; }
+        .inv-info-label { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#94a3b8; margin-bottom:10px; }
+        .inv-info-row { display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; border-bottom:1px dashed #f1f5f9; }
+        .inv-info-row:last-child { border-bottom:none; }
+        .inv-info-key { font-size:.78rem; color:#64748b; font-weight:500; }
+        .inv-info-val { font-size:.82rem; color:#0f172a; font-weight:600; text-align:right; }
+        .inv-info-val.highlight { color:#0f3460; font-weight:700; }
 
-        .company-info {
-            flex: 1;
-        }
+        /* ── Package section ── */
+        .inv-section { padding:20px 32px; border-bottom:1px solid #e2e8f0; }
+        .inv-section-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#94a3b8; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+        .inv-section-title::before { content:''; display:inline-block; width:3px; height:14px; background:linear-gradient(to bottom,#0f3460,#2980b9); border-radius:2px; }
 
-        .company-logo {
-            max-width: 120px;
-            height: auto;
-            margin-bottom: 8px;
-        }
+        .inv-pkg-card { background:linear-gradient(135deg,#EFF6FF,#DBEAFE); border:1px solid #BFDBFE; border-radius:12px; padding:16px 20px; }
+        .inv-pkg-name { font-size:1rem; font-weight:800; color:#1e3a8a; margin-bottom:4px; }
+        .inv-pkg-sub { font-size:.78rem; color:#3b82f6; font-weight:500; }
+        .inv-pkg-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+        .inv-pkg-tag { display:inline-flex; align-items:center; gap:4px; background:#fff; border:1px solid #BFDBFE; border-radius:6px; padding:3px 10px; font-size:.72rem; color:#1e40af; font-weight:600; }
 
-        .company-details {
-            font-size: 11px;
-            line-height: 1.4;
-        }
+        /* Services table */
+        .inv-table { width:100%; border-collapse:collapse; margin-top:12px; }
+        .inv-table thead th { background:#f8fafc; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#94a3b8; padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; }
+        .inv-table thead th:last-child { text-align:right; }
+        .inv-table tbody td { padding:10px 12px; border-bottom:1px solid #f1f5f9; font-size:.82rem; color:#334155; vertical-align:top; }
+        .inv-table tbody td:last-child { text-align:right; font-weight:600; color:#0f172a; }
+        .inv-table tbody tr:last-child td { border-bottom:none; }
+        .inv-svc-name { font-weight:600; color:#0f172a; }
+        .inv-svc-sub { font-size:.72rem; color:#94a3b8; margin-top:1px; }
 
-        .company-details p {
-            margin: 2px 0;
-        }
+        /* Tour plan */
+        .inv-tour-plan { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px 18px; font-size:.82rem; line-height:1.6; color:#334155; }
+        .inv-tour-plan h3 { font-size:.84rem; font-weight:700; color:#0f172a; margin-top:10px; margin-bottom:4px; padding-bottom:3px; border-bottom:1px solid #e2e8f0; }
+        .inv-tour-plan h3:first-child { margin-top:0; }
+        .inv-tour-plan p { margin-bottom:6px; }
+        .inv-tour-plan ul,.inv-tour-plan ol { margin-left:16px; margin-bottom:6px; }
+        .inv-tour-plan li { margin-bottom:3px; }
 
-        .invoice-title-section {
-            text-align: right;
-            flex: 1;
-        }
+        /* ── PAYMENT SUMMARY — Hero section ── */
+        .inv-payment { background:#0f172a; padding:24px 32px; }
+        .inv-payment-title { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.5); margin-bottom:16px; }
+        .inv-pay-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+        .inv-pay-card { border-radius:12px; padding:16px 18px; }
+        .inv-pay-card.total { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); }
+        .inv-pay-card.paid  { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3); }
+        .inv-pay-card.due   { background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3); }
+        .inv-pay-card.due.zero { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3); }
+        .inv-pay-label { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px; }
+        .inv-pay-card.total .inv-pay-label { color:rgba(255,255,255,.55); }
+        .inv-pay-card.paid  .inv-pay-label { color:#6ee7b7; }
+        .inv-pay-card.due   .inv-pay-label { color:#fca5a5; }
+        .inv-pay-card.due.zero .inv-pay-label { color:#6ee7b7; }
+        .inv-pay-amount { font-size:1.3rem; font-weight:800; line-height:1; }
+        .inv-pay-card.total .inv-pay-amount { color:#fff; }
+        .inv-pay-card.paid  .inv-pay-amount { color:#10b981; }
+        .inv-pay-card.due   .inv-pay-amount { color:#ef4444; }
+        .inv-pay-card.due.zero .inv-pay-amount { color:#10b981; }
+        .inv-pay-sub { font-size:.68rem; margin-top:4px; }
+        .inv-pay-card.total .inv-pay-sub { color:rgba(255,255,255,.4); }
+        .inv-pay-card.paid  .inv-pay-sub { color:rgba(110,231,183,.7); }
+        .inv-pay-card.due   .inv-pay-sub { color:rgba(252,165,165,.7); }
+        .inv-pay-card.due.zero .inv-pay-sub { color:rgba(110,231,183,.7); }
 
-        .invoice-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
+        /* Payment history */
+        .inv-pay-history { margin-top:16px; }
+        .inv-pay-history-title { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.4); margin-bottom:8px; }
+        .inv-pay-row { display:flex; justify-content:space-between; align-items:center; padding:7px 12px; background:rgba(255,255,255,.05); border-radius:8px; margin-bottom:4px; }
+        .inv-pay-row-left { display:flex; flex-direction:column; gap:1px; }
+        .inv-pay-row-date { font-size:.72rem; color:rgba(255,255,255,.6); }
+        .inv-pay-row-method { font-size:.68rem; color:rgba(255,255,255,.35); }
+        .inv-pay-row-amt { font-size:.88rem; font-weight:700; color:#10b981; }
 
-        .invoice-number {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
+        /* ── Terms ── */
+        .inv-terms { padding:20px 32px; border-bottom:1px solid #e2e8f0; }
+        .inv-terms-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        .inv-term-item { display:flex; gap:8px; }
+        .inv-term-icon { font-size:.9rem; flex-shrink:0; margin-top:1px; }
+        .inv-term-text strong { font-size:.78rem; font-weight:700; color:#0f172a; display:block; margin-bottom:2px; }
+        .inv-term-text span { font-size:.73rem; color:#64748b; line-height:1.4; }
 
-        .invoice-date {
-            font-size: 11px;
-        }
+        /* ── Footer ── */
+        .inv-footer { background:#f8fafc; padding:18px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px; border-top:1px solid #e2e8f0; }
+        .inv-footer-left { font-size:.75rem; color:#64748b; line-height:1.5; }
+        .inv-footer-left strong { color:#0f172a; font-weight:700; display:block; margin-bottom:2px; }
+        .inv-footer-right { text-align:right; }
+        .inv-footer-site { font-size:.85rem; font-weight:800; color:#0f3460; }
+        .inv-footer-tag { font-size:.7rem; color:#94a3b8; margin-top:2px; }
+        .inv-seal { display:inline-flex; align-items:center; gap:5px; background:#DCFCE7; border:1px solid #BBF7D0; border-radius:20px; padding:4px 12px; font-size:.7rem; font-weight:700; color:#166534; margin-top:6px; }
 
-        .tour-package-box {
-            margin-top: 8px;
-            padding: 8px;
-            border: 1px solid #000;
-            text-align: left;
-        }
+        /* ── Print button ── */
+        .print-bar { position:fixed; bottom:20px; right:20px; display:flex; gap:8px; z-index:999; }
+        .btn-print { background:#0f3460; color:#fff; border:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 14px rgba(15,52,96,.35); transition:opacity .2s; }
+        .btn-print:hover { opacity:.88; }
+        .btn-wa { background:#25d366; color:#fff; border:none; padding:12px 20px; border-radius:10px; font-weight:700; font-size:.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 14px rgba(37,211,102,.35); transition:opacity .2s; text-decoration:none; }
+        .btn-wa:hover { opacity:.88; color:#fff; }
 
-        .tour-package-label {
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .tour-package-name {
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        /* Customer & Booking Info */
-        .info-section {
-            padding: 12px 15px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            border-bottom: 1px solid #000;
-        }
-
-        .info-card h3 {
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-bottom: 6px;
-            border-bottom: 1px solid #000;
-            padding-bottom: 3px;
-        }
-
-        .info-item {
-            margin-bottom: 4px;
-            font-size: 11px;
-        }
-
-        .info-label {
-            font-weight: bold;
-            display: inline-block;
-            min-width: 110px;
-        }
-
-        .info-value {
-            display: inline;
-        }
-
-        /* Services Table */
-        .services-section {
-            padding: 12px 15px;
-        }
-
-        .section-title {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid #000;
-        }
-
-        .services-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
-        }
-
-        .services-table thead {
-            background: #000;
-            color: #fff;
-        }
-
-        .services-table thead th {
-            padding: 6px 8px;
-            text-align: left;
-            font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
-            border: 1px solid #000;
-        }
-
-        .services-table thead th:last-child {
-            text-align: right;
-        }
-
-        .services-table tbody td {
-            padding: 6px 8px;
-            border: 1px solid #000;
-            font-size: 11px;
-        }
-
-        .service-name {
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-
-        .service-type {
-            font-size: 10px;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        /* Totals Section */
-        .totals-section {
-            padding: 10px 15px;
-            border-top: 1px solid #000;
-        }
-
-        .totals-table {
-            width: 100%;
-            max-width: 350px;
-            margin-left: auto;
-            border-collapse: collapse;
-        }
-
-        .totals-table td {
-            padding: 4px 0;
-            font-size: 11px;
-        }
-
-        .totals-table td:last-child {
-            text-align: right;
-            font-weight: bold;
-        }
-
-        .total-row {
-            font-size: 13px !important;
-            font-weight: bold !important;
-            border-top: 2px solid #000;
-            padding-top: 6px !important;
-        }
-
-        .paid-row {
-            font-weight: bold;
-        }
-
-        .due-row {
-            font-size: 12px !important;
-            font-weight: bold !important;
-            border-top: 1px solid #000;
-            padding-top: 6px !important;
-        }
-
-        /* Terms & Conditions */
-        .terms-section {
-            padding: 12px 15px;
-            border-top: 1px solid #000;
-        }
-
-        .terms-section h3 {
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 6px;
-            border-bottom: 1px solid #000;
-            padding-bottom: 3px;
-        }
-
-        .terms-content {
-            font-size: 10px;
-            line-height: 1.4;
-        }
-
-        .terms-content ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .terms-content li {
-            padding: 3px 0;
-            padding-left: 15px;
-            position: relative;
-        }
-
-        .terms-content li::before {
-            content: '•';
-            position: absolute;
-            left: 0;
-            font-weight: bold;
-        }
-
-        /* Footer */
-        .invoice-footer {
-            background: #000;
-            padding: 10px 15px;
-            color: #fff;
-            text-align: center;
-            border-top: 2px solid #000;
-        }
-
-        .footer-content {
-            font-size: 10px;
-        }
-
-        .footer-content p {
-            margin: 2px 0;
-        }
-
-        .footer-website {
-            font-size: 11px;
-            font-weight: bold;
-            margin-top: 4px;
-        }
-
-        /* Print Button */
-        .print-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #000;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 12px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .print-button:hover {
-            background: #333;
-        }
-
-        /* Print Styles */
         @media print {
-            body {
-                padding: 0;
-            }
-
-            .invoice-container {
-                border: none;
-            }
-
-            .print-button {
-                display: none;
-            }
-        }
-
-        /* Day-wise Itinerary Styling */
-        .tour-plan-content h3 {
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 8px;
-            margin-bottom: 4px;
-            padding-bottom: 3px;
-            border-bottom: 1px solid #000;
-        }
-
-        .tour-plan-content h3:first-child {
-            margin-top: 0;
-        }
-
-        .tour-plan-content p {
-            font-size: 11px;
-            line-height: 1.4;
-            margin-bottom: 6px;
-        }
-
-        .tour-plan-content ul,
-        .tour-plan-content ol {
-            margin-left: 15px;
-            margin-bottom: 6px;
-        }
-
-        .tour-plan-content li {
-            font-size: 11px;
-            line-height: 1.3;
-            margin-bottom: 3px;
+            body { background:#fff; }
+            .page-wrap { box-shadow:none; border-radius:0; margin:0; max-width:100%; }
+            .print-bar { display:none; }
         }
     </style>
 </head>
-
 <body>
-    <div class="invoice-container">
-        <!-- Header -->
-        <div class="invoice-header">
-            <div class="header-content">
-                <div class="company-info">
-                    @if (websiteSetupValue('logo'))
-                        <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
-                            alt="Company Logo" class="company-logo">
-                    @else
-                        <img src="{{ asset('backend/logo.jpeg') }}" alt="Company Logo" class="company-logo">
-                    @endif
-                    <div class="company-details">
-                        <p><strong>{{ websiteSetupValue('site_title') ?? config('app.name') }}</strong></p>
-                        <p>{{ websiteSetupValue('address') }}</p>
-                        <p>Phone: {{ websiteSetupValue('contact_number') }}</p>
-                        <p>WhatsApp: {{ websiteSetupValue('whats_app_number') }}</p>
-                        <p>Email: {{ websiteSetupValue('email') }}</p>
-                    </div>
-                </div>
-                <div class="invoice-title-section">
-                    <h1 class="invoice-title">BOOKING CONFIRMATION</h1>
-                    <div class="invoice-number">#{{ $booking->booking_number }}</div>
-                    <div class="invoice-date">Date: {{ $booking->booking_date->format('d M, Y') }}</div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Customer & Booking Info -->
-        <div class="info-section">
-            <div class="info-card">
-                <h3>Guest Information</h3>
-                <div class="info-item">
-                    <span class="info-label">Guest Name:</span>
-                    <span class="info-value">{{ $booking->lead->guest_name }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Contact Number:</span>
-                    <span class="info-value">{{ $booking->lead->contact }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Number of Persons:</span>
-                    <span class="info-value">{{ $booking->lead->pax ?? 'N/A' }}</span>
-                </div>
-            </div>
+@php
+    $paidAmt = $booking->payments_sum_amount ?? $booking->paid_amount ?? 0;
+    $totalAmt = $booking->total_amount ?? 0;
+    $dueAmt = max(0, $totalAmt - $paidAmt);
+    $isFullyPaid = $dueAmt <= 0;
 
-            <div class="info-card">
-                <h3>Booking Details</h3>
-                <div class="info-item">
-                    <span class="info-label">Booking ID:</span>
-                    <span class="info-value"><strong>{{ $booking->booking_number }}</strong></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Booking Date:</span>
-                    <span class="info-value">
-                        @if ($booking->lead && $booking->lead->booking_start_date)
-                            <strong>
-                                {{ \Carbon\Carbon::parse($booking->lead->booking_start_date)->format('d M, Y') }}
-                                @if ($booking->lead->booking_end_date && $booking->lead->booking_start_date != $booking->lead->booking_end_date)
-                                    - {{ \Carbon\Carbon::parse($booking->lead->booking_end_date)->format('d M, Y') }}
-                                @endif
-                            </strong>
-                        @else
-                            {{ $booking->booking_date->format('d M, Y') }}
-                        @endif
-                    </span>
-                </div>
-                @if ($booking->lead && $booking->lead->short_plan)
-                    <div class="info-item" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;">
-                        <span class="info-label" style="display: block; margin-bottom: 4px;">Tour Package:</span>
-                        <span class="info-value"
-                            style="display: block; font-weight: bold;">{!! $booking->lead->short_plan !!}</span>
-                    </div>
-                @endif
-            </div>
-        </div>
+    // Get package/service name from quotation items or short_plan
+    $packageName = null;
+    $serviceItems = collect();
+    if ($booking->quotation && $booking->quotation->items && $booking->quotation->items->count() > 0) {
+        $serviceItems = $booking->quotation->items;
+        $packageName = $serviceItems->first()->serviceTemplate->name ?? null;
+    }
+    if (!$packageName && $booking->lead && $booking->lead->short_plan) {
+        $packageName = strip_tags($booking->lead->short_plan);
+        $packageName = Str::limit($packageName, 80);
+    }
+    if (!$packageName) $packageName = 'Tour Package';
 
-        <!-- Package/Service Details -->
-        <div class="services-section">
-            <h2 class="section-title">Package/Service Details</h2>
-            <table class="services-table">
-                <thead>
-                    <tr>
-                        <th>Tour Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="tour-plan-content">
-                                @if ($booking->lead && $booking->lead->plan_detail)
-                                    {!! $booking->lead->plan_detail !!}
-                                @elseif($booking->quotation && $booking->quotation->itinerary)
-                                    {!! $booking->quotation->itinerary !!}
-                                @elseif($booking->lead && $booking->lead->short_plan)
-                                    <div><strong>{!! $booking->lead->short_plan !!}</strong></div>
-                                @else
-                                    <p>Complete tour package as per booking</p>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    // Guest details
+    $guestName = $booking->lead->guest_name ?? 'Guest';
+    $contact   = $booking->lead->contact ?? $booking->lead->phone ?? '—';
+    $pax       = $booking->lead->pax ?? $booking->lead->no_of_person ?? '—';
+    $startDate = $booking->lead->booking_start_date ? \Carbon\Carbon::parse($booking->lead->booking_start_date)->format('d M Y') : $booking->booking_date->format('d M Y');
+    $endDate   = ($booking->lead->booking_end_date && $booking->lead->booking_end_date != $booking->lead->booking_start_date)
+                    ? \Carbon\Carbon::parse($booking->lead->booking_end_date)->format('d M Y') : null;
 
-        <!-- Services Breakdown (hidden as per requirement) -->
-        {{-- @if ($booking->quotation && $booking->quotation->items && $booking->quotation->items->count() > 0)
-            <div class="services-section">
-                <h2 class="section-title">Services Included</h2>
-                <table class="services-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align: left;">Service</th>
-                            <th style="text-align: center; width: 80px;">Quantity</th>
-                            <th style="text-align: right; width: 100px;">Price</th>
-                            <th style="text-align: right; width: 100px;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($booking->quotation->items as $item)
-                            <tr>
-                                <td>{{ $item->serviceTemplate->name ?? 'Service' }}</td>
-                                <td style="text-align: center;">{{ $item->quantity }}</td>
-                                <td style="text-align: right;">₹{{ number_format($item->unit_price, 2) }}</td>
-                                <td style="text-align: right;">
-                                    <strong>₹{{ number_format($item->total_price, 2) }}</strong>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif --}}
+    $cPhone = preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917');
+@endphp
 
-        <!-- Totals -->
-        <div class="totals-section">
-            <table class="totals-table">
-                <tr class="total-row">
-                    <td><strong>Total Amount:</strong></td>
-                    <td><strong>₹{{ number_format($booking->total_amount, 2) }}</strong></td>
-                </tr>
-                @if (($booking->payments_sum_amount ?? 0) > 0)
-                    <tr class="paid-row">
-                        <td>Amount Paid:</td>
-                        <td>₹{{ number_format($booking->payments_sum_amount ?? 0, 2) }}</td>
-                    </tr>
-                    <tr class="due-row">
-                        <td><strong>Balance Due:</strong></td>
-                        <td><strong>₹{{ number_format($booking->total_amount - ($booking->payments_sum_amount ?? 0), 2) }}</strong>
-                        </td>
-                    </tr>
-                @endif
-            </table>
-        </div>
+<div class="page-wrap">
 
-        <!-- Terms & Conditions -->
-        <div class="terms-section">
-            <h3>Terms & Conditions</h3>
-            <div class="terms-content">
-                @php
-                    // Collect unique service type terms from booking
-                    $serviceTypeTerms = collect();
-                    if ($booking->quotation && $booking->quotation->items) {
-                        $serviceTypeIds = $booking->quotation->items
-                            ->pluck('serviceTemplate.service_type_id')
-                            ->filter()
-                            ->unique();
-
-                        $serviceTypeTerms = \App\Models\ServiceType::whereIn('id', $serviceTypeIds)
-                            ->whereNotNull('terms_conditions')
-                            ->where('terms_conditions', '!=', '')
-                            ->get();
-                    }
-                @endphp
-
-                @if ($serviceTypeTerms->count() > 0)
-                    {{-- Display category-specific terms --}}
-                    @foreach ($serviceTypeTerms as $serviceType)
-                        <div style="margin-bottom: 15px;">
-                            <h4
-                                style="font-size: 11px; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                                {{ $serviceType->name }} - Terms & Conditions
-                            </h4>
-                            <div style="font-size: 10px;">
-                                {!! $serviceType->terms_conditions !!}
-                            </div>
-                        </div>
-                    @endforeach
-
-                    {{-- Also show quotation terms if available --}}
-                    @if ($booking->quotation && $booking->quotation->terms_conditions)
-                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #000;">
-                            <h4 style="font-size: 11px; font-weight: bold; margin-bottom: 6px;">General Terms &
-                                Conditions</h4>
-                            <div style="font-size: 10px;">
-                                {!! $booking->quotation->terms_conditions !!}
-                            </div>
-                        </div>
-                    @endif
-                @elseif ($booking->quotation && $booking->quotation->terms_conditions)
-                    {{-- Show quotation terms if no category-specific terms --}}
-                    {!! $booking->quotation->terms_conditions !!}
+    {{-- ── Header ── --}}
+    <div class="inv-header">
+        <div class="inv-header-inner">
+            <div class="inv-logo">
+                @if(websiteSetupValue('logo'))
+                    <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('logo')) }}" alt="Visit Kashi">
                 @else
-                    {{-- Default terms --}}
-                    <ul>
-                        <li><strong>Payment Terms:</strong> Full payment or an agreed deposit must be made at the time
-                            of booking. The remaining balance must be settled before the start of the journey.</li>
-                        <li><strong>Cancellation Policy:</strong> Cancellations made 7 days or more before the scheduled
-                            date are eligible for a refund as per our cancellation policy. Cancellations made within 48
-                            hours are non-refundable.</li>
-                        <li><strong>Service Delivery:</strong> All services will be provided as per the agreed schedule.
-                            Any changes must be communicated at least 24 hours in advance.</li>
-                        <li><strong>Liability:</strong> {{ config('app.name') }} will not be liable for any loss or
-                            damage to personal property during the journey. Travel insurance is recommended.</li>
-                        <li><strong>Force Majeure:</strong> We are not responsible for delays or cancellations due to
-                            circumstances beyond our control, including but not limited to natural disasters, strikes,
-                            or government restrictions.</li>
-                        <li><strong>Modifications:</strong> We reserve the right to modify these terms and conditions at
-                            any time. Customers will be notified of any significant changes.</li>
-                        <li><strong>Dispute Resolution:</strong> Any disputes arising from this booking will be subject
-                            to the jurisdiction of local courts.</li>
-                    </ul>
+                    <div class="inv-logo-fallback">visitKashi</div>
                 @endif
             </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="invoice-footer">
-            <div class="footer-content">
-                <p>Thank you for choosing {{ config('app.name') }} for your travel needs!</p>
-                <p>For any queries, please contact us at {{ websiteSetupValue('email') }} or
-                    {{ websiteSetupValue('contact_number') }}</p>
+            <div class="inv-title-block">
+                <div class="inv-title">Booking Confirmation</div>
+                <div class="inv-subtitle">Official Document</div>
+                <div class="inv-num">#{{ $booking->booking_number }}</div>
+                <div class="inv-badge">🗺️ Tour Package</div>
             </div>
-            <div class="footer-website">www.visitkashi.com</div>
         </div>
     </div>
 
-    <!-- Print Button -->
-    <button class="print-button" onclick="window.print()">
-        Print / Download PDF
-    </button>
-</body>
+    {{-- ── Confirmed banner ── --}}
+    <div class="inv-confirmed">
+        <span class="inv-confirmed-icon">✓</span>
+        <span class="inv-confirmed-text">Booking Confirmed — Thank you for choosing Visit Kashi!</span>
+        <span class="inv-confirmed-date">Issued: {{ $booking->booking_date->format('d M Y') }}</span>
+    </div>
 
+    {{-- ── Guest & Booking Info ── --}}
+    <div class="inv-info">
+        <div class="inv-info-col">
+            <div class="inv-info-label">Guest Information</div>
+            <div class="inv-info-row">
+                <span class="inv-info-key">Full Name</span>
+                <span class="inv-info-val highlight">{{ $guestName }}</span>
+            </div>
+            <div class="inv-info-row">
+                <span class="inv-info-key">Contact</span>
+                <span class="inv-info-val">{{ $contact }}</span>
+            </div>
+            @if($booking->lead && $booking->lead->email)
+            <div class="inv-info-row">
+                <span class="inv-info-key">Email</span>
+                <span class="inv-info-val">{{ $booking->lead->email }}</span>
+            </div>
+            @endif
+            <div class="inv-info-row">
+                <span class="inv-info-key">No. of Persons</span>
+                <span class="inv-info-val">{{ $pax }}</span>
+            </div>
+        </div>
+        <div class="inv-info-col">
+            <div class="inv-info-label">Booking Details</div>
+            <div class="inv-info-row">
+                <span class="inv-info-key">Booking ID</span>
+                <span class="inv-info-val highlight">#{{ $booking->booking_number }}</span>
+            </div>
+            <div class="inv-info-row">
+                <span class="inv-info-key">Travel Date</span>
+                <span class="inv-info-val">{{ $startDate }}{{ $endDate ? ' – '.$endDate : '' }}</span>
+            </div>
+            <div class="inv-info-row">
+                <span class="inv-info-key">Booked On</span>
+                <span class="inv-info-val">{{ $booking->booking_date->format('d M Y') }}</span>
+            </div>
+            <div class="inv-info-row">
+                <span class="inv-info-key">Status</span>
+                <span class="inv-info-val" style="color:#059669;">✓ Confirmed</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Package Details ── --}}
+    <div class="inv-section">
+        <div class="inv-section-title">Package Details</div>
+        <div class="inv-pkg-card">
+            <div class="inv-pkg-name">{{ $packageName }}</div>
+            <div class="inv-pkg-sub">Tour Package · Visit Kashi</div>
+            <div class="inv-pkg-meta">
+                @if($startDate)
+                <span class="inv-pkg-tag">📅 {{ $startDate }}{{ $endDate ? ' – '.$endDate : '' }}</span>
+                @endif
+                @if($pax && $pax !== '—')
+                <span class="inv-pkg-tag">👥 {{ $pax }} Persons</span>
+                @endif
+                @if($booking->lead && $booking->lead->source)
+                <span class="inv-pkg-tag">📌 {{ $booking->lead->source }}</span>
+                @endif
+                <span class="inv-pkg-tag">✓ Confirmed</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Services (if available) ── --}}
+    @if($serviceItems->count() > 0)
+    <div class="inv-section">
+        <div class="inv-section-title">Services Included</div>
+        <table class="inv-table">
+            <thead>
+                <tr>
+                    <th style="width:50%">Service / Item</th>
+                    <th style="text-align:center;">Type</th>
+                    <th style="text-align:center;">Qty</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($serviceItems as $item)
+                <tr>
+                    <td>
+                        <div class="inv-svc-name">{{ $item->serviceTemplate->name ?? 'Service' }}</div>
+                        @if($item->notes)
+                        <div class="inv-svc-sub">{{ $item->notes }}</div>
+                        @endif
+                    </td>
+                    <td style="text-align:center;font-size:.74rem;color:#64748b;">{{ $item->serviceTemplate->serviceType->name ?? '—' }}</td>
+                    <td style="text-align:center;">{{ $item->quantity }}</td>
+                    <td>₹{{ number_format($item->selling_price * $item->quantity, 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- ── Tour Plan / Itinerary ── --}}
+    @if($booking->lead && ($booking->lead->plan_detail || $booking->lead->short_plan))
+    <div class="inv-section">
+        <div class="inv-section-title">Tour Plan / Itinerary</div>
+        <div class="inv-tour-plan">
+            @if($booking->lead->plan_detail)
+                {!! $booking->lead->plan_detail !!}
+            @elseif($booking->lead->short_plan)
+                {!! $booking->lead->short_plan !!}
+            @endif
+        </div>
+    </div>
+    @elseif($booking->quotation && $booking->quotation->itinerary)
+    <div class="inv-section">
+        <div class="inv-section-title">Tour Plan / Itinerary</div>
+        <div class="inv-tour-plan">{!! $booking->quotation->itinerary !!}</div>
+    </div>
+    @endif
+
+    {{-- ── PAYMENT SUMMARY ── --}}
+    <div class="inv-payment">
+        <div class="inv-payment-title">Payment Summary</div>
+        <div class="inv-pay-grid">
+            <div class="inv-pay-card total">
+                <div class="inv-pay-label">Package Amount</div>
+                <div class="inv-pay-amount">₹{{ number_format($totalAmt, 2) }}</div>
+                <div class="inv-pay-sub">Total booking value</div>
+            </div>
+            <div class="inv-pay-card paid">
+                <div class="inv-pay-label">Amount Paid</div>
+                <div class="inv-pay-amount">₹{{ number_format($paidAmt, 2) }}</div>
+                <div class="inv-pay-sub">Received from guest</div>
+            </div>
+            <div class="inv-pay-card due {{ $isFullyPaid ? 'zero' : '' }}">
+                <div class="inv-pay-label">{{ $isFullyPaid ? 'Balance' : 'Due Amount' }}</div>
+                <div class="inv-pay-amount">₹{{ number_format($dueAmt, 2) }}</div>
+                <div class="inv-pay-sub">{{ $isFullyPaid ? '✓ Fully Paid' : 'Pending payment' }}</div>
+            </div>
+        </div>
+
+        {{-- Payment history --}}
+        @if($booking->payments && $booking->payments->count() > 0)
+        <div class="inv-pay-history">
+            <div class="inv-pay-history-title">Payment History</div>
+            @foreach($booking->payments as $pay)
+            <div class="inv-pay-row">
+                <div class="inv-pay-row-left">
+                    <span class="inv-pay-row-date">{{ \Carbon\Carbon::parse($pay->payment_date)->format('d M Y') }}</span>
+                    <span class="inv-pay-row-method">{{ $pay->payment_method ?? $pay->paymentAccount->name ?? 'Cash' }}</span>
+                </div>
+                <span class="inv-pay-row-amt">+ ₹{{ number_format($pay->amount, 2) }}</span>
+            </div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+
+    {{-- ── Terms & Conditions ── --}}
+    <div class="inv-terms">
+        <div class="inv-section-title" style="margin-bottom:14px;">Terms & Conditions</div>
+        @php
+            $serviceTypeTerms = collect();
+            if ($booking->quotation && $booking->quotation->items) {
+                $stIds = $booking->quotation->items->pluck('serviceTemplate.service_type_id')->filter()->unique();
+                $serviceTypeTerms = \App\Models\ServiceType::whereIn('id',$stIds)->whereNotNull('terms_conditions')->where('terms_conditions','!=','')->get();
+            }
+        @endphp
+        @if($serviceTypeTerms->count() > 0)
+            @foreach($serviceTypeTerms as $st)
+            <div style="margin-bottom:12px;font-size:.78rem;color:#334155;">{!! $st->terms_conditions !!}</div>
+            @endforeach
+        @elseif($booking->quotation && $booking->quotation->terms_conditions)
+            <div style="font-size:.78rem;color:#334155;">{!! $booking->quotation->terms_conditions !!}</div>
+        @else
+        <div class="inv-terms-grid">
+            <div class="inv-term-item">
+                <span class="inv-term-icon">💳</span>
+                <div class="inv-term-text">
+                    <strong>Payment Terms</strong>
+                    <span>Balance must be settled before journey begins. Advance confirms reservation.</span>
+                </div>
+            </div>
+            <div class="inv-term-item">
+                <span class="inv-term-icon">🔄</span>
+                <div class="inv-term-text">
+                    <strong>Cancellation Policy</strong>
+                    <span>7+ days: refundable. Within 48 hours: non-refundable as per policy.</span>
+                </div>
+            </div>
+            <div class="inv-term-item">
+                <span class="inv-term-icon">🛡️</span>
+                <div class="inv-term-text">
+                    <strong>Liability</strong>
+                    <span>Visit Kashi is not liable for loss of personal property. Travel insurance recommended.</span>
+                </div>
+            </div>
+            <div class="inv-term-item">
+                <span class="inv-term-icon">⚠️</span>
+                <div class="inv-term-text">
+                    <strong>Force Majeure</strong>
+                    <span>Not responsible for delays due to natural disasters, govt. restrictions, or strikes.</span>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    {{-- ── Footer ── --}}
+    <div class="inv-footer">
+        <div class="inv-footer-left">
+            <strong>{{ websiteSetupValue('site_title') ?? 'Visit Kashi' }}</strong>
+            {{ websiteSetupValue('address') ?? 'Varanasi, Uttar Pradesh' }}<br>
+            📞 {{ websiteSetupValue('contact_number') ?? '7080109917' }} &nbsp;|&nbsp;
+            ✉️ {{ websiteSetupValue('email') ?? 'info@visitkashi.in' }}
+        </div>
+        <div class="inv-footer-right">
+            <div class="inv-footer-site">www.visitkashi.in</div>
+            <div class="inv-footer-tag">Most Trusted Travel Company Since 2018</div>
+            <div class="inv-seal">✓ Verified Booking</div>
+        </div>
+    </div>
+
+</div>
+
+{{-- ── Action Buttons ── --}}
+<div class="print-bar">
+    <a href="https://wa.me/91{{ $cPhone }}?text={{ urlencode('Hi, sharing Booking Confirmation #'.$booking->booking_number.' for '.$guestName.'. Total: ₹'.number_format($totalAmt).' | Paid: ₹'.number_format($paidAmt).' | Due: ₹'.number_format($dueAmt)) }}"
+       target="_blank" class="btn-wa">
+        💬 WhatsApp
+    </a>
+    <button class="btn-print" onclick="window.print()">
+        🖨️ Print / PDF
+    </button>
+</div>
+
+</body>
 </html>
