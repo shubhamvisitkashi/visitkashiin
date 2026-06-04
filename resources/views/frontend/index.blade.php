@@ -140,16 +140,20 @@ if ($hero_slides->isNotEmpty()) {
 .vkp-hero {
     padding: 12px 20px 0;
     background: #f7f7f7;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden; /* prevent right-side bleed */
 }
 .vkp-wrap {
     position: relative;
     border-radius: 20px;
     overflow: hidden;
     background: #0d1420;
-    /* 85vh on desktop, auto on mobile */
     height: 85vh;
     max-height: 680px;
     min-height: 320px;
+    width: 100%;
+    box-sizing: border-box;
 }
 .vkp-track {
     position: relative;
