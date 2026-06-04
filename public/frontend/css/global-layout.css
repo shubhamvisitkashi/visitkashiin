@@ -14,6 +14,19 @@
   --vk-transition: 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* Prevent horizontal scroll globally */
+html, body { overflow-x: hidden; max-width: 100%; }
+
+/* ── Override old style.css hero ID that kills Visit Dubai design ── */
+#home_banner_video {
+    height: auto !important;
+    padding: 12px 20px 0 !important;
+    overflow: hidden !important;
+    background: #f7f7f7 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
 /* Bootstrap 5 sets a{text-decoration:underline} — override globally */
 a { text-decoration: none !important; }
 
