@@ -70,152 +70,221 @@ if ($hero_slides->isNotEmpty()) {
 @endpush
 
 <section id="home_banner_video" class="vkp-hero">
+    <div class="vkp-wrap">
+        <div class="vkp-track" id="vkpSlides">
+        @foreach($sliderSlides as $i => $slide)
+        <div class="vkp-slide {{ $i===0 ? 'is-active' : '' }}" data-slide="{{ $i }}"
+             aria-hidden="{{ $i!==0 ? 'true' : 'false' }}">
 
-    <div class="vkp-track" id="vkpSlides">
-    @foreach($sliderSlides as $i => $slide)
-    <div class="vkp-slide {{ $i===0 ? 'is-active' : '' }}" data-slide="{{ $i }}"
-         aria-hidden="{{ $i!==0 ? 'true' : 'false' }}">
-
-        {{-- Image (hidden if broken) --}}
-        @if(!empty($slide['cta1']['url']))
-        <a href="{{ $slide['cta1']['url'] }}" style="display:block;text-decoration:none;">
+            {{-- Full-bleed background image --}}
+            @if(!empty($slide['cta1']['url']))
+            <a href="{{ $slide['cta1']['url'] }}" class="vkp-img-link">
+                <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
+                     class="vkp-img"
+                     loading="{{ $i===0 ? 'eager' : 'lazy' }}"
+                     {{ $i===0 ? 'fetchpriority="high"' : '' }}
+                     decoding="{{ $i===0 ? 'sync' : 'async' }}"
+                     onerror="this.closest('.vkp-slide').style.background='linear-gradient(135deg,#0d1420,#0f3460)'">
+            </a>
+            @else
             <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
                  class="vkp-img"
                  loading="{{ $i===0 ? 'eager' : 'lazy' }}"
                  {{ $i===0 ? 'fetchpriority="high"' : '' }}
                  decoding="{{ $i===0 ? 'sync' : 'async' }}"
-                 onerror="this.parentElement.style.display='none'">
-        </a>
-        @else
-        <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
-             class="vkp-img"
-             loading="{{ $i===0 ? 'eager' : 'lazy' }}"
-             {{ $i===0 ? 'fetchpriority="high"' : '' }}
-             decoding="{{ $i===0 ? 'sync' : 'async' }}"
-             onerror="this.style.display='none'">
-        @endif
+                 onerror="this.closest('.vkp-slide').style.background='linear-gradient(135deg,#0d1420,#0f3460)'">
+            @endif
 
-        {{-- Text overlay — always visible, looks great even without image --}}
-        <div class="vkp-text-overlay">
-            @if(!empty($slide['badge']))
-            <div class="vkp-badge">{{ $slide['badge'] }}</div>
-            @endif
-            <h2 class="vkp-title">{{ $slide['title'] ?? 'Most Trusted Travel Company' }}</h2>
-            @if(!empty($slide['tagline']))
-            <p class="vkp-tagline">{{ $slide['tagline'] }}</p>
-            @endif
-            @if(!empty($slide['cta1']['url']))
-            <a href="{{ $slide['cta1']['url'] }}" class="vkp-cta-btn">
-                {{ $slide['cta1']['label'] ?? 'Explore Tours' }}
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </a>
-            @endif
+            {{-- Text overlay — bottom-left like Visit Dubai --}}
+            <div class="vkp-text-overlay">
+                @if(!empty($slide['badge']))
+                <div class="vkp-badge">{{ $slide['badge'] }}</div>
+                @endif
+                <h2 class="vkp-title">{{ $slide['title'] ?? 'Visit Kashi' }}</h2>
+                @if(!empty($slide['tagline']))
+                <p class="vkp-tagline">{{ $slide['tagline'] }}</p>
+                @endif
+                @if(!empty($slide['cta1']['url']))
+                <a href="{{ $slide['cta1']['url'] }}" class="vkp-cta-btn">
+                    {{ $slide['cta1']['label'] ?? 'Explore' }}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+                @endif
+            </div>
+
+        </div>
+        @endforeach
         </div>
 
+        @if(count($sliderSlides) > 1)
+        {{-- Arrows --}}
+        <button class="vkp-arrow vkp-prev" id="vkpPrev" aria-label="Previous">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="vkp-arrow vkp-next" id="vkpNext" aria-label="Next">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        {{-- Dots --}}
+        <div class="vkp-dots">
+            @foreach($sliderSlides as $i => $s)
+            <button class="vkp-dot {{ $i===0 ? 'active' : '' }}"
+                    onclick="vkhsGoTo({{ $i }})" aria-label="Slide {{ $i+1 }}"></button>
+            @endforeach
+        </div>
+        @endif
     </div>
-    @endforeach
-    </div>
-
-    @if(count($sliderSlides) > 1)
-    <button class="vkp-arrow vkp-prev" id="vkpPrev" aria-label="Previous">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <button class="vkp-arrow vkp-next" id="vkpNext" aria-label="Next">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-    <div class="vkp-dots">
-        @foreach($sliderSlides as $i => $s)
-        <button class="vkp-dot {{ $i===0 ? 'active' : '' }}"
-                onclick="vkhsGoTo({{ $i }})" aria-label="Slide {{ $i+1 }}"></button>
-        @endforeach
-    </div>
-    @endif
-
 </section>
+
 <style>
-.vkp-hero  { position:relative; width:100%; overflow:hidden; background:linear-gradient(135deg,#0d1420 0%,#1a2b4c 50%,#0f3460 100%); margin-top:5px; min-height:320px; }
-.vkp-track { position:relative; overflow:hidden; min-height:320px; }
+/* ── Visit Dubai–style Hero ─────────────────────────────── */
+.vkp-hero {
+    padding: 12px 20px 0;
+    background: #f7f7f7;
+}
+.vkp-wrap {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0d1420;
+    /* 85vh on desktop, auto on mobile */
+    height: 85vh;
+    max-height: 680px;
+    min-height: 320px;
+}
+.vkp-track {
+    position: relative;
+    width: 100%; height: 100%;
+}
 
-/* Text overlay — shows on all slides (with or without image) */
-.vkp-text-overlay {
-    position:absolute; bottom:0; left:0; right:0; z-index:5;
-    padding:40px 5% 48px;
-    background:linear-gradient(to top, rgba(5,10,24,0.92) 0%, rgba(5,10,24,0.55) 55%, transparent 100%);
-    pointer-events:none;
-}
-.vkp-text-overlay a, .vkp-text-overlay .vkp-cta-btn { pointer-events:auto; }
-.vkp-badge {
-    display:inline-block; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
-    color:rgba(255,255,255,.9); font-size:.72rem; font-weight:700; letter-spacing:.07em;
-    text-transform:uppercase; padding:5px 14px; border-radius:50px; margin-bottom:12px;
-}
-.vkp-title {
-    font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.4rem,4vw,2.8rem);
-    font-weight:800; color:#fff; margin:0 0 10px; line-height:1.15; letter-spacing:-.02em;
-    text-shadow:0 2px 12px rgba(0,0,0,.4);
-}
-.vkp-tagline {
-    font-size:clamp(.82rem,1.6vw,1rem); color:rgba(255,255,255,.72);
-    margin:0 0 20px; line-height:1.55; max-width:540px;
-}
-.vkp-cta-btn {
-    display:inline-flex; align-items:center; gap:8px;
-    background:linear-gradient(135deg,#D94F2B,#FF6B35); color:#fff;
-    font-size:.88rem; font-weight:700; padding:12px 24px; border-radius:50px;
-    text-decoration:none !important; box-shadow:0 4px 18px rgba(217,79,43,.38);
-    transition:transform .2s, box-shadow .2s;
-}
-.vkp-cta-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(217,79,43,.5); color:#fff; }
-
-/* ── Slide base: hidden by default ── */
+/* Slides */
 .vkp-slide {
-    display:none;
-    opacity:0;
+    display: none; opacity: 0;
+    position: absolute; inset: 0;
 }
-
-/* ── Incoming: fade in ── */
 .vkp-slide.is-active {
-    display:block;
-    animation: vkpFadeIn 0.85s ease-in-out forwards;
+    display: block; z-index: 1;
+    animation: vkpFadeIn 0.7s ease forwards;
 }
-
-/* ── Outgoing: fade out, stay in place so layout holds ── */
 .vkp-slide.is-leaving {
-    display:block;
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:0;
-    animation: vkpFadeOut 0.85s ease-in-out forwards;
+    display: block; z-index: 0; pointer-events: none;
+    animation: vkpFadeOut 0.7s ease forwards;
+}
+@keyframes vkpFadeIn  { from{opacity:0;} to{opacity:1;} }
+@keyframes vkpFadeOut { from{opacity:1;} to{opacity:0;} }
+
+/* Full-bleed image */
+.vkp-img-link { display:block; width:100%; height:100%; }
+.vkp-img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    display: block;
 }
 
-/* ── Active always on top ── */
-.vkp-slide.is-active { z-index:1; position:relative; }
+/* Gradient overlay */
+.vkp-text-overlay {
+    position: absolute; inset: 0; z-index: 5;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 7% 52px;
+    background: linear-gradient(
+        to top,
+        rgba(0,0,0,0.75) 0%,
+        rgba(0,0,0,0.30) 45%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+.vkp-text-overlay a, .vkp-text-overlay .vkp-cta-btn { pointer-events: auto; }
 
-@keyframes vkpFadeIn  { from { opacity:0; } to { opacity:1; } }
-@keyframes vkpFadeOut { from { opacity:1; } to { opacity:0; } }
+/* Badge */
+.vkp-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.30);
+    color: rgba(255,255,255,.92);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; padding: 5px 14px;
+    border-radius: 50px; margin-bottom: 14px;
+    width: fit-content;
+}
 
-.vkp-img { width:100%; height:auto; display:block; object-fit:cover; }
+/* Title — Visit Dubai style: large, white, bold */
+.vkp-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(1.8rem, 4.5vw, 3.4rem);
+    font-weight: 800; color: #fff; margin: 0 0 12px;
+    line-height: 1.1; letter-spacing: -.03em;
+    text-shadow: 0 2px 16px rgba(0,0,0,.35);
+    max-width: 620px;
+}
+
+/* Tagline */
+.vkp-tagline {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(.88rem, 1.6vw, 1.05rem);
+    color: rgba(255,255,255,.80);
+    margin: 0 0 24px; line-height: 1.6; max-width: 480px;
+}
+
+/* CTA button */
+.vkp-cta-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #D94F2B, #FF6B35); color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .9rem; font-weight: 700; padding: 13px 26px;
+    border-radius: 50px; text-decoration: none !important;
+    box-shadow: 0 4px 20px rgba(217,79,43,.40);
+    transition: transform .2s, box-shadow .2s;
+    width: fit-content;
+}
+.vkp-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(217,79,43,.55); color: #fff; }
+
+/* Arrows — inside the rounded card */
 .vkp-arrow {
-    position:absolute; top:50%; transform:translateY(-50%); z-index:10;
-    width:44px; height:44px; border-radius:50%;
-    background:rgba(0,0,0,.45); border:1.5px solid rgba(255,255,255,.35);
-    color:#fff; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:background .2s;
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255,255,255,.35);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background .2s;
 }
-.vkp-arrow:hover { background:rgba(0,0,0,.70); }
-.vkp-prev { left:14px; }
-.vkp-next { right:14px; }
+.vkp-arrow:hover { background: rgba(255,255,255,.32); }
+.vkp-prev { left: 16px; }
+.vkp-next { right: 16px; }
+
+/* Dots — bottom center */
 .vkp-dots {
-    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
-    display:flex; gap:7px; align-items:center; z-index:10;
+    position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; align-items: center; z-index: 10;
 }
 .vkp-dot {
-    width:8px; height:8px; border-radius:50%;
-    background:rgba(255,255,255,.45); border:none; cursor:pointer; padding:0;
-    transition:background .25s, width .25s, border-radius .25s;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,.40); border: none; cursor: pointer; padding: 0;
+    transition: background .25s, width .25s, border-radius .25s;
 }
-.vkp-dot.active { background:#fff; width:24px; border-radius:4px; }
+.vkp-dot.active { background: #fff; width: 22px; border-radius: 4px; }
+
+/* Responsive */
+@media (max-width: 991px) {
+    .vkp-hero { padding: 8px 12px 0; }
+    .vkp-wrap { height: 72vw; max-height: 520px; border-radius: 16px; }
+    .vkp-text-overlay { padding: 0 6% 36px; }
+}
+@media (max-width: 600px) {
+    .vkp-hero { padding: 6px 8px 0; }
+    .vkp-wrap { height: 80vw; max-height: 440px; border-radius: 14px; }
+    .vkp-text-overlay { padding: 0 5% 28px; }
+    .vkp-title { font-size: clamp(1.3rem, 6vw, 1.9rem); margin-bottom: 8px; }
+    .vkp-tagline { font-size: .82rem; margin-bottom: 16px; }
+    .vkp-cta-btn { font-size: .82rem; padding: 10px 20px; }
+    .vkp-arrow { width: 34px; height: 34px; }
+    .vkp-prev { left: 10px; }
+    .vkp-next { right: 10px; }
+}
+@media (max-width: 400px) {
+    .vkp-wrap { height: 88vw; border-radius: 12px; }
+}
 </style>
 <script>
 (function(){
