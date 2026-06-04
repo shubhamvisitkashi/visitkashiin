@@ -375,6 +375,29 @@
 .hotel-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px;}
 @media(max-width:600px){.hotel-cards-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
 @media(max-width:360px){.hotel-cards-grid{grid-template-columns:1fr;gap:6px;}}
+
+/* ══ Tour Package Service Blocks ══════════════════════════════ */
+.tp-svc-block{padding:14px 0;}
+.tp-svc-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;}
+.tp-svc-toggle{display:flex;align-items:center;cursor:pointer;margin:0;}
+.tp-svc-toggle input[type=checkbox]{display:none;}
+.tp-svc-dot{width:14px;height:14px;border-radius:50%;border:2px solid #E2E8F0;transition:all .2s;flex-shrink:0;}
+.tp-svc-toggle input:checked + .tp-svc-dot{border-color:transparent;box-shadow:0 0 0 3px rgba(16,185,129,.2);}
+.tp-svc-icon{font-size:1.1rem;line-height:1;}
+.tp-svc-name{font-size:.85rem;font-weight:700;color:#0F172A;flex:1;}
+.tp-svc-cost{font-size:.82rem;font-weight:700;color:#7C3AED;background:#EDE9FE;padding:2px 10px;border-radius:20px;}
+.tp-svc-body{background:#FAFBFF;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 16px;transition:all .2s;}
+.tp-svc-body.disabled{opacity:.4;pointer-events:none;}
+.tp-divider{height:1px;background:#F1F5F9;margin:4px 0;}
+
+/* Expense total bar */
+.tp-expense-total{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:12px;padding:12px 16px;margin-top:16px;}
+.tp-exp-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.7rem;color:#92400E;}
+.tp-exp-item span:first-child{font-size:.85rem;}
+.tp-exp-item strong{font-size:.88rem;font-weight:800;color:#78350F;}
+.tp-exp-total strong{font-size:1rem;color:#1E40AF;}
+.tp-exp-total{background:rgba(255,255,255,.6);border-radius:8px;padding:4px 10px;}
+.tp-exp-plus{font-size:.9rem;font-weight:700;color:#D97706;}
 </style>
 
 <div class="cb-page">
@@ -1501,90 +1524,368 @@
     <div class="cb-form-section" id="form-tour">
       <form action="{{ route('bookings.store-direct') }}" method="POST" id="form-tour-submit">
         @csrf
-        <div class="fs-card">
-          <div class="fs-head"><div class="fs-icon" style="--fi-color:#7C3AED;"><i data-feather="user"></i></div><div class="fs-title">Customer Information</div></div>
-          <div class="fs-body">
-            <div class="row g-3">
-              <div class="col-md-3"><label class="f-label">Guest Name <span class="req">*</span></label><input type="text" name="guest_name" class="form-control f-ctrl" required placeholder="Full name"></div>
-              <div class="col-md-3"><label class="f-label">Phone <span class="req">*</span></label><input type="tel" name="phone" class="form-control f-ctrl" required placeholder="Mobile number"></div>
-              <div class="col-md-3"><label class="f-label">Email</label><input type="email" name="email" class="form-control f-ctrl" placeholder="Email address"></div>
-              <div class="col-md-3"><label class="f-label">Lead Source <span class="req">*</span></label>
-                <select name="lead_source_id" class="form-select f-ctrl" required>
-                  <option value="">Select source</option>
-                  @foreach($leadSources as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach
-                </select></div>
+
+        <div class="nb-layout">
+
+        {{-- ══════ LEFT COLUMN ══════ --}}
+        <div class="nb-main">
+
+          {{-- 1. Customer --}}
+          <div class="nb-card">
+            <div class="nb-card-head">
+              <div class="nb-card-icon" style="background:#EDE9FE;color:#7C3AED;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="nb-card-title">Customer Information</div>
+            </div>
+            <div class="nb-card-body">
+              <div class="row g-3">
+                <div class="col-md-3"><label class="nb-label">Guest Name <span class="nb-req">*</span></label><input type="text" name="guest_name" class="form-control nb-input" required placeholder="Full name"></div>
+                <div class="col-md-3"><label class="nb-label">Phone <span class="nb-req">*</span></label>
+                  <div class="nb-phone-wrap"><span class="nb-phone-prefix">+91</span><input type="tel" name="phone" class="form-control nb-input nb-input-phone" required placeholder="Mobile" maxlength="10"></div>
+                </div>
+                <div class="col-md-3"><label class="nb-label">Email</label><input type="email" name="email" class="form-control nb-input" placeholder="email@example.com"></div>
+                <div class="col-md-3"><label class="nb-label">Lead Source <span class="nb-req">*</span></label>
+                  <select name="lead_source_id" class="form-select nb-input" required>
+                    <option value="">Select…</option>
+                    @foreach($leadSources as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="fs-card">
-          <div class="fs-head"><div class="fs-icon" style="--fi-color:#7C3AED;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg></div><div class="fs-title">Tour Details</div></div>
-          <div class="fs-body">
-            <div class="row g-3">
-              <div class="col-md-3"><label class="f-label">Start Date <span class="req">*</span></label><input type="date" id="tour_start" class="form-control f-ctrl" required onchange="buildTourPlan()"></div>
-              <div class="col-md-3"><label class="f-label">End Date</label><input type="date" id="tour_end" class="form-control f-ctrl" onchange="buildTourPlan()"></div>
-              <div class="col-md-2"><label class="f-label">Adults</label><input type="number" id="tour_adults" class="form-control f-ctrl" min="1" value="2" onchange="buildTourPlan()"></div>
-              <div class="col-md-2"><label class="f-label">Children</label><input type="number" id="tour_children" class="form-control f-ctrl" min="0" value="0" onchange="buildTourPlan()"></div>
-              <div class="col-md-2"><label class="f-label">Infants</label><input type="number" id="tour_infants" class="form-control f-ctrl" min="0" value="0" onchange="buildTourPlan()"></div>
-              <div class="col-md-6"><label class="f-label">Package Name / Destination</label><input type="text" id="tour_name" class="form-control f-ctrl" placeholder="e.g. Kashi Darshan 3D/2N" onkeyup="buildTourPlan()"></div>
-              <div class="col-md-6"><label class="f-label">Inclusions</label><input type="text" id="tour_inclusions" class="form-control f-ctrl" placeholder="e.g. Hotel, Cab, Boat, Meals" onkeyup="buildTourPlan()"></div>
+
+          {{-- 2. Tour Info --}}
+          <div class="nb-card">
+            <div class="nb-card-head">
+              <div class="nb-card-icon" style="background:#EDE9FE;color:#7C3AED;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="nb-card-title">Tour Package Info</div>
+            </div>
+            <div class="nb-card-body">
+              <div class="row g-3">
+                <div class="col-md-5"><label class="nb-label">Package Name <span class="nb-req">*</span></label><input type="text" id="tour_name" class="form-control nb-input" placeholder="e.g. Kashi Darshan 3D/2N" oninput="buildTourPlan()"></div>
+                <div class="col-md-2"><label class="nb-label">Adults</label><input type="number" id="tour_adults" class="form-control nb-input" min="1" value="2" oninput="buildTourPlan()"></div>
+                <div class="col-md-2"><label class="nb-label">Children</label><input type="number" id="tour_children" class="form-control nb-input" min="0" value="0" oninput="buildTourPlan()"></div>
+                <div class="col-md-3"><label class="nb-label">Booking Date <span class="nb-req">*</span></label><input type="date" id="tour_start" class="form-control nb-input" required oninput="buildTourPlan()"></div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="fs-card">
-          <div class="fs-head"><div class="fs-icon" style="--fi-color:#7C3AED;"><i data-feather="file-text"></i></div><div class="fs-title">Trip Summary <span style="font-size:.72rem;font-weight:400;color:var(--h-muted);">(auto-filled, editable)</span></div></div>
-          <div class="fs-body"><textarea name="short_plan" id="tour-short-plan" class="form-control f-ctrl" rows="3" required placeholder="Brief summary of the tour plan…"></textarea></div>
-        </div>
-        <div class="fs-card">
-          <div class="fs-head">
-            <div class="fs-icon" style="--fi-color:#7C3AED;"><i data-feather="list"></i></div>
-            <div class="fs-title">Services Included</div>
-            <button type="button" onclick="addTourService()" style="margin-left:auto;background:var(--h-violet);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer;">+ Add Service</button>
+
+          {{-- 3. B2B Expense Breakdown — date range wise --}}
+          <div class="nb-card">
+            <div class="nb-card-head">
+              <div class="nb-card-icon" style="background:#FFF7ED;color:#F59E0B;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </div>
+              <div class="nb-card-title">B2B Expense Breakdown <span style="font-size:.7rem;font-weight:400;color:#94A3B8;">(Vendor / Actual Cost)</span></div>
+            </div>
+            <div class="nb-card-body" style="padding-bottom:8px;">
+
+              {{-- HOTEL --}}
+              <div class="tp-svc-block" id="tp-hotel-block">
+                <div class="tp-svc-header">
+                  <label class="tp-svc-toggle">
+                    <input type="checkbox" id="tp-hotel-on" onchange="tpToggle('hotel')" checked>
+                    <span class="tp-svc-dot" style="background:#10B981;"></span>
+                  </label>
+                  <span class="tp-svc-icon">🏨</span>
+                  <span class="tp-svc-name">Hotel / Stay</span>
+                  <span class="tp-svc-cost" id="tp-hotel-cost-badge">₹0</span>
+                </div>
+                <div class="tp-svc-body" id="tp-hotel-body">
+                  <div class="row g-2">
+                    <div class="col-md-4"><label class="nb-label">Hotel Name</label><input type="text" id="tp_hotel_name" class="form-control nb-input" placeholder="e.g. Ganges View Hotel"></div>
+                    <div class="col-md-2"><label class="nb-label">Check-in</label><input type="date" id="tp_hotel_from" class="form-control nb-input" oninput="tpCalcHotel()"></div>
+                    <div class="col-md-2"><label class="nb-label">Check-out</label><input type="date" id="tp_hotel_to" class="form-control nb-input" oninput="tpCalcHotel()"></div>
+                    <div class="col-md-2"><label class="nb-label">Nights</label><input type="number" id="tp_hotel_nights" class="form-control nb-input" min="1" value="1" readonly style="background:#F8FAFC !important;color:#64748B !important;"></div>
+                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_hotel_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tp-divider"></div>
+
+              {{-- CAB --}}
+              <div class="tp-svc-block" id="tp-cab-block">
+                <div class="tp-svc-header">
+                  <label class="tp-svc-toggle">
+                    <input type="checkbox" id="tp-cab-on" onchange="tpToggle('cab')" checked>
+                    <span class="tp-svc-dot" style="background:#F59E0B;"></span>
+                  </label>
+                  <span class="tp-svc-icon">🚕</span>
+                  <span class="tp-svc-name">Cab / Transport</span>
+                  <span class="tp-svc-cost" id="tp-cab-cost-badge">₹0</span>
+                </div>
+                <div class="tp-svc-body" id="tp-cab-body">
+                  <div class="row g-2">
+                    <div class="col-md-3"><label class="nb-label">Vehicle Type</label>
+                      <select id="tp_cab_type" class="form-select nb-input">
+                        <option>Sedan / Swift Dzire</option>
+                        <option>SUV / Innova</option>
+                        <option>Tempo Traveller (12 Seat)</option>
+                        <option>Tempo Traveller (20 Seat)</option>
+                        <option>Bus (26+ Seat)</option>
+                        <option>Other</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3"><label class="nb-label">Route / Destination</label><input type="text" id="tp_cab_route" class="form-control nb-input" placeholder="e.g. Airport to Hotel"></div>
+                    <div class="col-md-2"><label class="nb-label">From Date</label><input type="date" id="tp_cab_from" class="form-control nb-input"></div>
+                    <div class="col-md-2"><label class="nb-label">To Date</label><input type="date" id="tp_cab_to" class="form-control nb-input"></div>
+                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_cab_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tp-divider"></div>
+
+              {{-- BOAT --}}
+              <div class="tp-svc-block" id="tp-boat-block">
+                <div class="tp-svc-header">
+                  <label class="tp-svc-toggle">
+                    <input type="checkbox" id="tp-boat-on" onchange="tpToggle('boat')" checked>
+                    <span class="tp-svc-dot" style="background:#0EA5E9;"></span>
+                  </label>
+                  <span class="tp-svc-icon">⛵</span>
+                  <span class="tp-svc-name">Boat / River Ride</span>
+                  <span class="tp-svc-cost" id="tp-boat-cost-badge">₹0</span>
+                </div>
+                <div class="tp-svc-body" id="tp-boat-body">
+                  <div class="row g-2">
+                    <div class="col-md-3"><label class="nb-label">Boat Type</label>
+                      <select id="tp_boat_type" class="form-select nb-input">
+                        <option>Normal Motor Boat</option>
+                        <option>Light Motor Boat</option>
+                        <option>Premium Motor Boat</option>
+                        <option>Luxury Yacht</option>
+                        <option>Bajra Boat</option>
+                        <option>Cruise</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3"><label class="nb-label">Ride Type</label>
+                      <select id="tp_boat_ride" class="form-select nb-input">
+                        <option>Morning Boat Ride</option>
+                        <option>Evening Boat Ride</option>
+                        <option>Ganga Aarti Evening</option>
+                        <option>Sunrise Ride</option>
+                        <option>Full Day</option>
+                      </select>
+                    </div>
+                    <div class="col-md-2"><label class="nb-label">Date</label><input type="date" id="tp_boat_date" class="form-control nb-input"></div>
+                    <div class="col-md-2"><label class="nb-label">Time</label><input type="time" id="tp_boat_time" class="form-control nb-input"></div>
+                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_boat_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tp-divider"></div>
+
+              {{-- GUIDE --}}
+              <div class="tp-svc-block" id="tp-guide-block">
+                <div class="tp-svc-header">
+                  <label class="tp-svc-toggle">
+                    <input type="checkbox" id="tp-guide-on" onchange="tpToggle('guide')" checked>
+                    <span class="tp-svc-dot" style="background:#8B5CF6;"></span>
+                  </label>
+                  <span class="tp-svc-icon">🧭</span>
+                  <span class="tp-svc-name">Guide</span>
+                  <span class="tp-svc-cost" id="tp-guide-cost-badge">₹0</span>
+                </div>
+                <div class="tp-svc-body" id="tp-guide-body">
+                  <div class="row g-2">
+                    <div class="col-md-4"><label class="nb-label">Guide Name</label><input type="text" id="tp_guide_name" class="form-control nb-input" placeholder="e.g. Ramesh Kumar"></div>
+                    <div class="col-md-2"><label class="nb-label">From Date</label><input type="date" id="tp_guide_from" class="form-control nb-input"></div>
+                    <div class="col-md-2"><label class="nb-label">To Date</label><input type="date" id="tp_guide_to" class="form-control nb-input"></div>
+                    <div class="col-md-2"><label class="nb-label">Language</label>
+                      <select id="tp_guide_lang" class="form-select nb-input">
+                        <option>Hindi</option><option>English</option><option>Hindi + English</option><option>Foreign Language</option>
+                      </select>
+                    </div>
+                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_guide_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {{-- Expense Total bar --}}
+              <div class="tp-expense-total">
+                <div class="tp-exp-item">
+                  <span>🏨</span><span id="tp-hotel-exp-lbl">Hotel</span><strong id="tp-hotel-exp-val">₹0</strong>
+                </div>
+                <span class="tp-exp-plus">+</span>
+                <div class="tp-exp-item">
+                  <span>🚕</span><span>Cab</span><strong id="tp-cab-exp-val">₹0</strong>
+                </div>
+                <span class="tp-exp-plus">+</span>
+                <div class="tp-exp-item">
+                  <span>⛵</span><span>Boat</span><strong id="tp-boat-exp-val">₹0</strong>
+                </div>
+                <span class="tp-exp-plus">+</span>
+                <div class="tp-exp-item">
+                  <span>🧭</span><span>Guide</span><strong id="tp-guide-exp-val">₹0</strong>
+                </div>
+                <span class="tp-exp-plus">=</span>
+                <div class="tp-exp-item tp-exp-total">
+                  <span>Total</span><strong id="tp-total-exp-val">₹0</strong>
+                </div>
+              </div>
+
+              <input type="hidden" name="vendor_cost" id="tp-vendor-cost-hidden" value="0">
+            </div>
           </div>
-          <div class="fs-body" id="tour-services-container"></div>
-          <div class="price-bar mx-4 mb-4" id="tour-summary">
-            <div class="price-bar-item"><div class="pbi-label">Services</div><div class="pbi-val" id="tour-svc-count">0</div></div>
-            <div class="price-bar-item"><div class="pbi-label">Total Amount</div><div class="pbi-val" id="tour-total">₹0</div></div>
-            <div class="price-bar-item" style="flex:1;"><div class="pbi-label">Amount in Words</div><div style="font-size:.82rem;font-weight:600;color:#065F46;" id="tour-words">Zero Rupees Only</div></div>
+
+          {{-- 4. Trip Summary --}}
+          <div class="nb-card">
+            <div class="nb-card-head">
+              <div class="nb-card-icon" style="background:#EDE9FE;color:#7C3AED;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="nb-card-title">Trip Summary <span style="font-size:.7rem;font-weight:400;color:#94A3B8;">(auto-filled, editable)</span></div>
+            </div>
+            <div class="nb-card-body">
+              <textarea name="short_plan" id="tour-short-plan" class="form-control nb-input" rows="3" required placeholder="Auto-filled from services above…" style="resize:none;"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="fs-card">
-          <div class="fs-head"><div class="fs-icon" style="--fi-color:#7C3AED;"><i data-feather="map"></i></div><div class="fs-title">Itinerary (Optional)</div></div>
-          <div class="fs-body"><textarea name="tour_plan" id="tour_itinerary" class="form-control f-ctrl" rows="5" placeholder="Day-by-day itinerary…"></textarea></div>
-        </div>
-        <div class="fs-card">
-          <div class="fs-head"><div class="fs-icon"><i data-feather="message-square"></i></div><div class="fs-title">Internal Notes (Optional)</div></div>
-          <div class="fs-body"><textarea name="internal_notes" class="form-control f-ctrl" rows="2" placeholder="Any special instructions…"></textarea></div>
-        </div>
-        <div class="d-flex justify-content-end">
-          <button type="submit" class="btn-submit" style="--h-indigo:#7C3AED;--h-violet:#5B21B6;"><i data-feather="check-circle"></i> Confirm Tour Booking</button>
-        </div>
+
+          {{-- 5. Itinerary --}}
+          <div class="nb-card">
+            <div class="nb-card-head">
+              <div class="nb-card-icon" style="background:#EDE9FE;color:#7C3AED;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7"/></svg>
+              </div>
+              <div class="nb-card-title">Itinerary <span style="font-size:.7rem;font-weight:400;color:#94A3B8;">(optional)</span></div>
+            </div>
+            <div class="nb-card-body">
+              <textarea name="tour_plan" id="tour_itinerary" class="form-control nb-input" rows="4" placeholder="Day-by-day itinerary…" style="resize:vertical;"></textarea>
+            </div>
+          </div>
+
+          <div class="nb-card">
+            <div class="nb-card-body" style="padding:14px 20px;">
+              <textarea name="internal_notes" class="form-control nb-input" rows="2" placeholder="Internal notes (staff only)…" style="resize:none;"></textarea>
+            </div>
+          </div>
+
+        </div>{{-- /nb-main --}}
+
+        {{-- ══════ RIGHT SIDEBAR ══════ --}}
+        <div class="nb-sidebar">
+
+          {{-- Booking Amount --}}
+          <div class="nb-sidebar-card">
+            <div class="nb-sidebar-head">
+              <div class="nb-card-icon" style="background:#EDE9FE;color:#7C3AED;width:28px;height:28px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </div>
+              <div class="nb-card-title" style="font-size:.9rem;">Booking Amount</div>
+            </div>
+
+            <div class="nb-amount-row">
+              <label class="nb-label">Total Booking Amount (₹) <span class="nb-req">*</span></label>
+              <div class="nb-rupee-wrap">
+                <span class="nb-rupee">₹</span>
+                <input type="number" name="services[0][unit_price]" id="tour-booking-amount"
+                       class="form-control nb-input nb-rupee-input"
+                       placeholder="Total charged to client" min="0" step="1" required
+                       style="font-size:1.1rem !important;font-weight:700 !important;"
+                       oninput="calcTourMargin();calcTourBalance()">
+              </div>
+            </div>
+
+            <div class="nb-amount-row">
+              <label class="nb-label">Discount (₹)</label>
+              <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span>
+                <input type="number" name="discount" id="tour-discount" class="form-control nb-input nb-rupee-input" value="0" min="0" oninput="calcTourBalance();calcTourMargin()">
+              </div>
+            </div>
+
+            <div class="nb-amount-row">
+              <label class="nb-label">Advance Paid (₹)</label>
+              <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span>
+                <input type="number" name="advance_paid" id="tour-advance" class="form-control nb-input nb-rupee-input" value="0" min="0" oninput="calcTourBalance()">
+              </div>
+            </div>
+
+            <div class="nb-balance-box">
+              <div class="nb-balance-label">Balance Due</div>
+              <div class="nb-balance-row">
+                <div class="nb-balance-amount" id="tour-balance">₹0</div>
+                <span class="nb-balance-badge due" id="tour-pay-badge">DUE</span>
+              </div>
+            </div>
+
+            <div class="nb-amount-row">
+              <label class="nb-label">Payment Status</label>
+              <select name="payment_status" id="tour-pay-status" class="form-select nb-input" onchange="updateTourPayBadge()">
+                <option value="due">Due</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+            <div class="nb-amount-row" style="margin-bottom:0;">
+              <label class="nb-label">Payment Method</label>
+              <select name="payment_method" class="form-select nb-input">
+                <option value="">Select…</option>
+                <option value="cash">Cash</option>
+                <option value="upi">UPI / GPay / PhonePe</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="cheque">Cheque</option>
+              </select>
+            </div>
+          </div>
+
+          {{-- Marginal Profit box --}}
+          <div class="nb-sidebar-card" style="padding:16px;">
+            <div style="font-size:.7rem;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">💰 Marginal Profit</div>
+
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#475569;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
+              <span>Booking Amount</span><span id="tp-summary-booking" style="font-weight:600;color:#222;">₹0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#475569;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
+              <span>Total Expense (B2B)</span><span id="tp-summary-expense" style="font-weight:600;color:#EF4444;">₹0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;padding:8px 0 0;font-weight:700;">
+              <span style="color:#065F46;">Marginal Profit</span>
+              <span id="tp-summary-profit" style="color:#065F46;font-size:1.1rem;">₹0</span>
+            </div>
+            <div style="text-align:right;margin-top:2px;">
+              <span id="tp-summary-pct" style="font-size:.75rem;font-weight:700;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:20px;">0%</span>
+            </div>
+            <div style="font-size:.68rem;color:#94A3B8;margin-top:8px;text-align:center;">Booking − Expenses = Profit</div>
+          </div>
+
+          {{-- Status --}}
+          <div class="nb-sidebar-card" style="padding:14px 16px;">
+            <label class="nb-label">Booking Status</label>
+            <input type="text" class="form-control nb-input" value="✅ Confirmed" readonly style="background:#F0FDF4 !important;color:#15803D !important;font-weight:600;">
+            <input type="hidden" name="booking_status" value="confirmed">
+          </div>
+
+          <button type="submit" form="form-tour-submit" class="btn-submit" style="width:100%;justify-content:center;background:linear-gradient(135deg,#7C3AED,#5B21B6);">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" width="17" height="17" stroke="white" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm Tour Booking
+          </button>
+
+        </div>{{-- /nb-sidebar --}}
+        </div>{{-- /nb-layout --}}
+
+        {{-- Hidden backend fields --}}
+        <input type="hidden" name="services[0][service_template_id]" value="{{ optional($serviceTypes->first()?->serviceTemplates->first())->id }}">
+        <input type="hidden" name="services[0][quantity]" value="1">
+        <input type="hidden" name="services[0][service_date]" id="tour-svc-date">
+
       </form>
     </div>
 
   </div>{{-- /cb-forms --}}
 </div>
-
-<template id="tour-svc-tpl">
-  <div class="svc-pick-row mb-3" data-tsvc="IDX">
-    <div class="row g-2 align-items-end">
-      <div class="col-md-2"><label class="f-label">Date</label><input type="date" name="services[IDX][service_date]" class="form-control f-ctrl"></div>
-      <div class="col-md-3"><label class="f-label">Service Type</label>
-        <select class="form-select f-ctrl svc-type-sel" onchange="loadTemplates(this,'tour-svc-sel-IDX','tour-price-IDX')">
-          <option value="">Select type</option>
-          @foreach($serviceTypes as $t)<option value="{{ $t->id }}" data-templates="{{ json_encode($t->serviceTemplates) }}">{{ $t->name }}</option>@endforeach
-        </select></div>
-      <div class="col-md-3"><label class="f-label">Service</label>
-        <select name="services[IDX][service_template_id]" id="tour-svc-sel-IDX" class="form-select f-ctrl" required disabled onchange="pickPrice(this,'tour-price-IDX')">
-          <option value="">Select type first</option>
-        </select>
-        <input type="hidden" name="services[IDX][quantity]" value="1"></div>
-      <div class="col-md-2"><label class="f-label">Price (₹)</label>
-        <input type="number" name="services[IDX][unit_price]" id="tour-price-IDX" class="form-control f-ctrl" min="0" step="0.01" placeholder="0.00" oninput="calcTourTotal()"></div>
-      <div class="col-md-2"><label class="f-label">&nbsp;</label>
-        <button type="button" onclick="removeTourSvc(IDX)" style="width:100%;background:#FEE2E2;color:#EF4444;border:1.5px solid #FECACA;border-radius:9px;padding:9px;cursor:pointer;font-size:.78rem;font-weight:600;">Remove</button></div>
-    </div>
-  </div>
-</template>
 
 <script>
 /* ── Type selection ── */
@@ -2166,43 +2467,119 @@ function buildCabPlan() {
   document.getElementById('cab-short-plan').value = plan;
 }
 
-function buildTourPlan() {
-  const s   = document.getElementById('tour_start').value;
-  const e   = document.getElementById('tour_end').value;
-  const a   = document.getElementById('tour_adults').value;
-  const c   = document.getElementById('tour_children').value;
-  const n   = document.getElementById('tour_name').value;
-  const inc = document.getElementById('tour_inclusions').value;
-  let plan = n || 'Tour Package';
-  if (s)   plan += ' | Start: ' + formatDate(s);
-  if (e)   plan += ', End: ' + formatDate(e);
-  plan += ' | Adults: ' + (a||1);
-  if (parseInt(c) > 0) plan += ', Children: ' + c;
-  if (inc) plan += ' | Incl: ' + inc;
-  document.getElementById('tour-short-plan').value = plan;
+/* ── TOUR PACKAGE FUNCTIONS ── */
+
+function tpToggle(svc) {
+  const on   = document.getElementById('tp-' + svc + '-on').checked;
+  const body = document.getElementById('tp-' + svc + '-body');
+  if (body) body.classList.toggle('disabled', !on);
+  calcTourMargin();
 }
 
+function tpCalcHotel() {
+  const from = document.getElementById('tp_hotel_from').value;
+  const to   = document.getElementById('tp_hotel_to').value;
+  if (from && to) {
+    const d = Math.max(0, Math.round((new Date(to) - new Date(from)) / 86400000));
+    document.getElementById('tp_hotel_nights').value = d || 1;
+  }
+}
+
+function calcTourMargin() {
+  const on = id => document.getElementById('tp-' + id + '-on')?.checked !== false;
+  const val = id => parseFloat(document.getElementById(id)?.value || 0);
+  const fmt = v => '₹' + Math.max(0, v).toLocaleString('en-IN');
+
+  const hotel = on('hotel') ? val('tp_hotel_cost')  : 0;
+  const cab   = on('cab')   ? val('tp_cab_cost')    : 0;
+  const boat  = on('boat')  ? val('tp_boat_cost')   : 0;
+  const guide = on('guide') ? val('tp_guide_cost')  : 0;
+  const totalExp = hotel + cab + boat + guide;
+
+  /* update individual badges */
+  document.getElementById('tp-hotel-cost-badge').textContent = fmt(hotel);
+  document.getElementById('tp-cab-cost-badge').textContent   = fmt(cab);
+  document.getElementById('tp-boat-cost-badge').textContent  = fmt(boat);
+  document.getElementById('tp-guide-cost-badge').textContent = fmt(guide);
+
+  /* update expense bar */
+  document.getElementById('tp-hotel-exp-val').textContent = fmt(hotel);
+  document.getElementById('tp-cab-exp-val').textContent   = fmt(cab);
+  document.getElementById('tp-boat-exp-val').textContent  = fmt(boat);
+  document.getElementById('tp-guide-exp-val').textContent = fmt(guide);
+  document.getElementById('tp-total-exp-val').textContent = fmt(totalExp);
+
+  /* profit */
+  const booking  = val('tour-booking-amount');
+  const discount = val('tour-discount');
+  const net      = booking - discount;
+  const profit   = net - totalExp;
+  const pct      = net > 0 ? Math.round((profit / net) * 100) : 0;
+
+  document.getElementById('tp-summary-booking').textContent = fmt(net);
+  document.getElementById('tp-summary-expense').textContent = fmt(totalExp);
+  const profEl = document.getElementById('tp-summary-profit');
+  const pctEl  = document.getElementById('tp-summary-pct');
+  if (profEl) { profEl.textContent = fmt(profit); profEl.style.color = profit >= 0 ? '#065F46' : '#EF4444'; }
+  if (pctEl)  {
+    pctEl.textContent = Math.max(0, pct) + '%';
+    pctEl.style.background = pct >= 0 ? '#D1FAE5' : '#FEE2E2';
+    pctEl.style.color      = pct >= 0 ? '#065F46' : '#EF4444';
+  }
+
+  /* save vendor_cost */
+  document.getElementById('tp-vendor-cost-hidden').value = totalExp;
+}
+
+function calcTourBalance() {
+  const total   = parseFloat(document.getElementById('tour-booking-amount')?.value || 0);
+  const discount= parseFloat(document.getElementById('tour-discount')?.value || 0);
+  const advance = parseFloat(document.getElementById('tour-advance')?.value || 0);
+  const balance = Math.max(0, total - discount - advance);
+  const fmt = v => '₹' + v.toLocaleString('en-IN');
+  const balEl = document.getElementById('tour-balance');
+  if (balEl) balEl.textContent = fmt(balance);
+  updateTourPayBadge();
+}
+
+function updateTourPayBadge() {
+  const s = document.getElementById('tour-pay-status')?.value;
+  const b = document.getElementById('tour-pay-badge');
+  if (!b) return;
+  b.textContent = s === 'paid' ? 'PAID' : 'DUE';
+  b.className   = 'nb-balance-badge ' + (s || 'due');
+}
+
+function buildTourPlan() {
+  const n = document.getElementById('tour_name')?.value;
+  const s = document.getElementById('tour_start')?.value;
+  const a = document.getElementById('tour_adults')?.value;
+  const c = document.getElementById('tour_children')?.value;
+  if (document.getElementById('tour-svc-date') && s) document.getElementById('tour-svc-date').value = s;
+  let parts = [];
+  if (n) parts.push(n);
+  if (s) parts.push('From: ' + formatDate(s));
+  if (parseInt(a) > 0) parts.push('Adults: ' + a);
+  if (parseInt(c) > 0) parts.push('Children: ' + c);
+  /* add service summaries */
+  if (document.getElementById('tp-hotel-on')?.checked && document.getElementById('tp_hotel_name')?.value)
+    parts.push('Hotel: ' + document.getElementById('tp_hotel_name').value);
+  if (document.getElementById('tp-boat-on')?.checked)
+    parts.push('Boat: ' + (document.getElementById('tp_boat_type')?.value || ''));
+  if (document.getElementById('tp-cab-on')?.checked)
+    parts.push('Cab: ' + (document.getElementById('tp_cab_type')?.value || ''));
+  if (document.getElementById('tp-guide-on')?.checked && document.getElementById('tp_guide_name')?.value)
+    parts.push('Guide: ' + document.getElementById('tp_guide_name').value);
+  const plan = parts.join(' | ') || 'Tour Package';
+  const el = document.getElementById('tour-short-plan');
+  if (el) el.value = plan;
+}
+
+/* Legacy stubs */
 let tourSvcIdx = 0;
-function addTourService() {
-  const tpl = document.getElementById('tour-svc-tpl').innerHTML.replace(/IDX/g, tourSvcIdx);
-  document.getElementById('tour-services-container').insertAdjacentHTML('beforeend', tpl);
-  tourSvcIdx++;
-  feather.replace();
-}
-function removeTourSvc(idx) {
-  const row = document.querySelector(`[data-tsvc="${idx}"]`);
-  if (row) { row.remove(); calcTourTotal(); }
-}
-function calcTourTotal() {
-  let total = 0, count = 0;
-  document.querySelectorAll('#tour-services-container input[type=number]').forEach(inp => {
-    const v = parseFloat(inp.value || 0);
-    if (v > 0) { total += v; count++; }
-  });
-  document.getElementById('tour-svc-count').textContent = count;
-  document.getElementById('tour-total').textContent = '₹' + total.toLocaleString('en-IN');
-  document.getElementById('tour-words').textContent = numberToWords(Math.floor(total));
-}
+function addTourService() {}
+function removeTourSvc() {}
+function calcTourTotal() {}
 
 function formatDate(d) {
   if (!d) return '';
