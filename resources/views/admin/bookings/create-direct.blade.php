@@ -1597,8 +1597,8 @@
                     <div class="col-md-2"><label class="nb-label">Check-in</label><input type="date" id="tp_hotel_from" class="form-control nb-input" oninput="tpCalcHotel()"></div>
                     <div class="col-md-2"><label class="nb-label">Check-out</label><input type="date" id="tp_hotel_to" class="form-control nb-input" oninput="tpCalcHotel()"></div>
                     <div class="col-md-2"><label class="nb-label">Nights</label><input type="number" id="tp_hotel_nights" class="form-control nb-input" min="1" value="1" readonly style="background:#F8FAFC !important;color:#64748B !important;"></div>
-                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
-                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_hotel_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    <div class="col-md-2"><label class="nb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_hotel_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()" style="border-color:#FDE68A !important;background:#FFFBEB !important;"></div>
                     </div>
                   </div>
                 </div>
@@ -1629,8 +1629,8 @@
                     <div class="col-md-3"><label class="nb-label">Route / Destination</label><input type="text" id="tp_cab_route" class="form-control nb-input" placeholder="e.g. Airport to Hotel"></div>
                     <div class="col-md-2"><label class="nb-label">From Date</label><input type="date" id="tp_cab_from" class="form-control nb-input"></div>
                     <div class="col-md-2"><label class="nb-label">To Date</label><input type="date" id="tp_cab_to" class="form-control nb-input"></div>
-                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
-                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_cab_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    <div class="col-md-2"><label class="nb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_cab_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()" style="border-color:#FDE68A !important;background:#FFFBEB !important;"></div>
                     </div>
                   </div>
                 </div>
@@ -1669,8 +1669,8 @@
                     </div>
                     <div class="col-md-2"><label class="nb-label">Date</label><input type="date" id="tp_boat_date" class="form-control nb-input"></div>
                     <div class="col-md-2"><label class="nb-label">Time</label><input type="time" id="tp_boat_time" class="form-control nb-input"></div>
-                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
-                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_boat_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    <div class="col-md-2"><label class="nb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_boat_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()" style="border-color:#FDE68A !important;background:#FFFBEB !important;"></div>
                     </div>
                   </div>
                 </div>
@@ -1696,8 +1696,8 @@
                         <option>Hindi</option><option>English</option><option>Hindi + English</option><option>Foreign Language</option>
                       </select>
                     </div>
-                    <div class="col-md-2"><label class="nb-label">Cost (₹) <span class="nb-req">*</span></label>
-                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_guide_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()"></div>
+                    <div class="col-md-2"><label class="nb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
+                      <div class="nb-rupee-wrap"><span class="nb-rupee">₹</span><input type="number" id="tp_guide_cost" class="form-control nb-input nb-rupee-input" min="0" value="0" oninput="calcTourMargin()" style="border-color:#FDE68A !important;background:#FFFBEB !important;"></div>
                     </div>
                   </div>
                 </div>
