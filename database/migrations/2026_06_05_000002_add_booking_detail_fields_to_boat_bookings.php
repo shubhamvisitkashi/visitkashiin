@@ -8,6 +8,7 @@ class AddBookingDetailFieldsToBoatBookings extends Migration
 {
     public function up()
     {
+        if (!Schema::hasTable('boat_bookings')) return;
         Schema::table('boat_bookings', function (Blueprint $table) {
             $table->integer('adults')->default(1)->after('no_of_person');
             $table->integer('children')->default(0)->after('adults');

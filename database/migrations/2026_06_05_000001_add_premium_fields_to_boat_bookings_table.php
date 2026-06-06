@@ -8,6 +8,7 @@ class AddPremiumFieldsToBoatBookingsTable extends Migration
 {
     public function up()
     {
+        if (!Schema::hasTable('boat_bookings')) return;
         Schema::table('boat_bookings', function (Blueprint $table) {
             $table->string('boarding_ghat')->nullable()->after('seat_number');
             $table->string('drop_ghat')->nullable()->after('boarding_ghat');

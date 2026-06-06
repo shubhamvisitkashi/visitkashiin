@@ -13,6 +13,7 @@ class AddVendorCostToCabBookings extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('cab_bookings')) return;
         Schema::table('cab_bookings', function (Blueprint $table) {
             $table->decimal('vendor_cost', 10, 2)->nullable()->default(null)->after('discount');
         });

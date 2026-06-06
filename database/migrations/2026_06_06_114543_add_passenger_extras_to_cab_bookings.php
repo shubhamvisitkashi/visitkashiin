@@ -13,6 +13,7 @@ class AddPassengerExtrasToCabBookings extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('cab_bookings')) return;
         Schema::table('cab_bookings', function (Blueprint $table) {
             $table->unsignedTinyInteger('no_of_adults')->default(1)->after('seating_capacity');
             $table->unsignedTinyInteger('no_of_children')->default(0)->after('no_of_adults');

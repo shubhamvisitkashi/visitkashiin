@@ -9,11 +9,15 @@ class ChangeTripTypeToStringInCabBookings extends Migration
 {
     public function up()
     {
+        if (!Schema::hasTable('cab_bookings')) return;
+
         DB::statement("ALTER TABLE cab_bookings MODIFY trip_type VARCHAR(100) NOT NULL DEFAULT 'one_way'");
     }
 
     public function down()
     {
+        if (!Schema::hasTable('cab_bookings')) return;
+
         DB::statement("ALTER TABLE cab_bookings MODIFY trip_type ENUM('one_way','round_trip','multi_city','airport_transfer','local_rental') NOT NULL DEFAULT 'one_way'");
     }
 }

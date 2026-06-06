@@ -13,6 +13,7 @@ class AddSeatNumberToBoatBookingsTable extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('boat_bookings')) return;
         Schema::table('boat_bookings', function (Blueprint $table) {
             $table->string('seat_number')->nullable()->after('booking_date');
         });
