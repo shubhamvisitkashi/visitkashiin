@@ -19,9 +19,11 @@ class CabBooking extends Model
         'trip_type', 'pickup_date', 'pickup_time',
         'return_date', 'total_days', 'total_km',
         'vehicle_id', 'vehicle_name', 'vehicle_number', 'seating_capacity',
+        'no_of_adults', 'no_of_children', 'carrier_on_roof', 'child_seat',
+        'wheelchair_accessible', 'ac_required', 'luggage_details', 'flight_train_number',
         'base_fare', 'driver_allowance', 'toll_tax', 'parking',
         'state_tax', 'night_charges', 'extra_km_charges',
-        'discount', 'total_amount', 'advance_paid', 'pending_amount',
+        'vendor_cost', 'discount', 'total_amount', 'advance_paid', 'pending_amount',
         'booking_status', 'payment_status',
         'lead_source_id', 'created_by', 'notes',
     ];

@@ -1,580 +1,543 @@
 @extends('admin.layouts.app')
 @section('content')
-    <div class="page-content">
-        <!-- Header Section -->
-        <div class="d-flex justify-content-between align-items-center mb-4 row">
-            <div class="col-12">
-                @if(auth()->guard('admin')->user()->id === 1)
-                    <h2 class="fw-bold text-primary mb-1">🚢 {{$page_title}} Management</h2>
-                    <p class="text-muted mb-0">Manage your boat bookings efficiently</p>
-                    <div class="mt-2">
-                        <span class="badge bg-primary fs-6 px-3 py-2 mb-2">
-                            <i class="fas fa-rupee-sign me-1"></i>
-                            Total Amount: ₹{{ number_format($total_amount, 2) }}
-                        </span>
-                        <span class="badge bg-info fs-6 px-3 py-2 mb-2">
-                            <i class="fas fa-rupee-sign me-1"></i>
-                            Total Discount: ₹{{ number_format($total_discount_amount, 2) }}
-                        </span>
-                        <span class="badge bg-success fs-6 px-3 py-2 mb-2">
-                            <i class="fas fa-rupee-sign me-1"></i>
-                            Total Payment: ₹{{ number_format($total_final_amount, 2) }}
-                        </span>
-                        <span class="badge bg-warning fs-6 px-3 py-2 mb-2">
-                            <i class="fas fa-rupee-sign me-1"></i>
-                            Total Collection: ₹{{ number_format($total_payments, 2) }}
-                        </span>
-                        <span class="badge bg-danger fs-6 px-3 py-2 mb-2">
-                            <i class="fas fa-rupee-sign me-1"></i>
-                            Total Due: ₹{{ number_format(($total_final_amount - $total_payments), 2) }}
-                        </span>
-                    </div>
-                @endif
-            </div>
-            <div class="col-12 text-end">
-                <a href="{{route('boat-booking.create')}}" class="btn btn-primary btn-lg">
-                    <i data-feather="plus"></i>New Booking
-                </a>
-            </div>
-        </div>
 
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3 mb-2">
-                <div class="card border-0 shadow-sm stat-card">
-                    <div class="card-body text-center">
-                        <div class="text-primary mb-2">
-                            <i class="fas fa-ship fa-2x"></i>
-                        </div>
-                        <h4 class="text-primary mb-0">{{ $total_persons }}</h4>
-                        <small class="text-muted" style="font-size: 20px;">Total Bookings</small>
-                    </div>
-                </div>
-            </div>
-            @foreach ($boat_type_stats as $boat_type_stat)
-                <div class="col-md-3 mb-2">
-                    <div class="card border-0 shadow-sm stat-card">
-                        <div class="card-body text-center">
-                            <div class="text-primary mb-2">
-                                <i class="fas fa-ship fa-2x"></i>
-                            </div>
-                            <h4 class="text-primary mb-0">Seat {{ $boat_type_stat[0]['total_persons'] }} Booked </h4>
-                            <h4 class="text-primary mb-0">Seat {{ ($boat_type_stat[0]['boat']['total_available_boat'] *  $boat_type_stat[0]['boat']['no_of_seat']) - $boat_type_stat[0]['total_persons'] }} Available </h4>
-                            <h4 class="text-primary mb-0">Seat {{ ($boat_type_stat[0]['boat']['total_available_boat'] *  $boat_type_stat[0]['boat']['no_of_seat']) }} Total </h4>
-                            <small class="text-muted" style="font-size: 20px;">{{$boat_type_stat[0]['boat']['event_type']}} {{$boat_type_stat[0]['boat']->boatType?->name}}</small>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
+<style>
+/* ══════════════════════════════════════════════
+   VISITKASHI — Boat Bookings Index
+   Premium SaaS Design
+══════════════════════════════════════════════ */
+:root {
+  --bb-bg:     #EFF6FF;
+  --bb-card:   #fff;
+  --bb-border: #BFDBFE;
+  --bb-shadow: 0 1px 3px rgba(0,0,0,.04), 0 2px 12px rgba(14,165,233,.06);
+  --bb-text:   #0F172A;
+  --bb-sub:    #475569;
+  --bb-muted:  #94A3B8;
+  --bb-blue:   #0EA5E9;
+  --bb-dk:     #0C4A6E;
+  --bb-navy:   #075985;
+  --bb-green:  #10B981;
+  --bb-amber:  #F59E0B;
+  --bb-red:    #EF4444;
+  --bb-indigo: #4F46E5;
+}
 
+.bb-page { background:var(--bb-bg); min-height:100vh; padding:20px 22px 50px; }
 
-        <!-- Main Data Table -->
-        <div class="row g-4">
-            <div class="col-lg-12">
-                <div class="card border-0 shadow">
-                    <!-- Search Header -->
-                    <div class="card-header bg-gradient-primary text-white border-0">
-                        <h6 class="mb-3 text-white"><i class="fas fa-filter me-2"></i>Search & Filter</h6>
-                        <form action="{{route('boat-booking.index')}}" method="GET">
-                            <div class="row g-2">
-                                <div class="col-md-2">
-                                    <select name="search_boat_type" class="form-select form-select-sm">
-                                        <option value="">All Boat Types</option>
-                                        @foreach($boat_types as $boat_type)
-                                            <option value="{{$boat_type->id}}" @if($search_boat_type == $boat_type->id) selected @endif>
-                                                {{$boat_type->name}}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select name="search_event_type" class="form-select form-select-sm">
-                                        <option value="">All Event Types</option>
-                                        @foreach($event_types as $event_type)
-                                            <option value="{{$event_type}}" @if($search_event_type == $event_type) selected @endif>{{$event_type}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="text" name="search_date" placeholder="Select Date..." value="{{ $search_date }}" class="form-control form-control-sm daterange" id="daterangePicker">
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="text" name="search_user" class="form-control form-control-sm" placeholder="Name, phone, email..." value="{{ $search_user }}">
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="text" name="search_booking_id" class="form-control form-control-sm" placeholder="Booking ID..." value="{{ $search_booking_id }}">
-                                </div>
-                                <div class="col-md-2">
-                                    <select name="search_payment_status" class="form-select form-select-sm">
-                                        <option value="">All</option>
-                                        <option value="paid" @if($search_payment_status === 'paid') selected @endif>Paid</option>
-                                        <option value="partial" @if($search_payment_status === 'partial') selected @endif>Due</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="btn-group w-100" role="group">
-                                        <button type="submit" class="btn btn-light btn-sm">
-                                            <i data-feather="search"></i>
-                                        </button>
-                                        <a href="{{route('boat-booking.index')}}" class="btn btn-outline-light btn-sm">
-                                            <i data-feather="x-circle"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+/* ── Header ───────────────────────────── */
+.bb-hero {
+  background: linear-gradient(135deg, #0C4A6E 0%, #075985 40%, #0EA5E9 100%);
+  border-radius: 18px;
+  padding: 22px 28px;
+  margin-bottom: 22px;
+  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.bb-hero::before {
+  content:'';
+  position:absolute; top:-60px; right:-60px;
+  width:220px; height:220px; border-radius:50%;
+  background:rgba(255,255,255,.05);
+}
+.bb-hero::after {
+  content:'';
+  position:absolute; bottom:-70px; left:40px;
+  width:160px; height:160px; border-radius:50%;
+  background:rgba(14,165,233,.1);
+}
+.bb-hero-left { position:relative; z-index:1; }
+.bb-hero h1 { color:#fff; font-size:1.3rem; font-weight:800; margin:0 0 3px; letter-spacing:-.01em; }
+.bb-hero p  { color:rgba(255,255,255,.65); font-size:.78rem; margin:0; }
+.bb-hero-actions { position:relative; z-index:1; display:flex; gap:8px; flex-wrap:wrap; }
+.bb-btn-new {
+  display:inline-flex; align-items:center; gap:7px;
+  background:rgba(255,255,255,.92); color:#0C4A6E;
+  border:none; border-radius:11px;
+  padding:10px 20px; font-size:.82rem; font-weight:800;
+  text-decoration:none; transition:.18s; white-space:nowrap;
+}
+.bb-btn-new:hover { background:#fff; color:#0C4A6E; transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,.15); }
+.bb-btn-ghost {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.14); border:1.5px solid rgba(255,255,255,.25);
+  color:#fff; border-radius:10px; padding:9px 16px;
+  font-size:.78rem; font-weight:700; text-decoration:none; transition:.18s;
+}
+.bb-btn-ghost:hover { background:rgba(255,255,255,.24); color:#fff; }
 
-                        @if(auth()->guard('admin')->user()->id === 1)
-                            <div class="row mt-3">
-                                <div class="col-md-12">
-                                    <div class="d-flex gap-2 align-items-center">
-                                        <button type="button" id="exportSelectedBtn" class="btn btn-success btn-sm" disabled>
-                                            <i data-feather="file-text"></i> Export Selected
-                                        </button>
-                                        <button type="button" id="exportAllBtn" class="btn btn-warning btn-sm">
-                                            <i data-feather="download"></i> Export All
-                                        </button>
-                                        <button type="button" id="clearSelectionBtn" class="btn btn-secondary btn-sm">
-                                            <i data-feather="x"></i> Clear Selection
-                                        </button>
-                                        <span class="badge bg-light text-dark" id="selectedCount">0 selected</span>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
+/* ── KPI cards ────────────────────────── */
+.bb-kpi { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:20px; }
+@media(max-width:1100px){ .bb-kpi{grid-template-columns:repeat(3,1fr);} }
+@media(max-width:640px)  { .bb-kpi{grid-template-columns:repeat(2,1fr);} }
 
-                    <!-- Table Content -->
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 modern-table">
-                                <thead class="table-light">
-                                    <tr>
-                                        @if(auth()->guard('admin')->user()->id === 1)
-                                            <th class="text-center fw-semibold border-0">
-                                                <input type="checkbox" id="selectAll" class="form-check-input">
-                                            </th>
-                                        @endif
-                                        <th class="text-center fw-semibold border-0">#</th>
-                                        <th class="fw-semibold border-0"><i class="fas fa-id-card text-primary me-1"></i>Booking Details</th>
-                                        <th class="fw-semibold border-0"><i class="fas fa-ship text-success me-1"></i>Boat & Event</th>
-                                        <th class="fw-semibold border-0"><i class="fas fa-user text-info me-1"></i>Customer Info</th>
-                                        <th class="fw-semibold border-0"><i class="fas fa-rupee-sign text-warning me-1"></i>Payment Details</th>
-                                        <th class="text-center fw-semibold border-0"><i class="fas fa-info-circle text-secondary me-1"></i>Status</th>
-                                        <th class="text-center fw-semibold border-0"><i class="fas fa-cogs text-dark me-1"></i>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($boat_bookings as $boat_booking)
-                                        <tr class="border-bottom-light">
-                                            @if(auth()->guard('admin')->user()->id === 1)
-                                                <td class="text-center">
-                                                    <input type="checkbox" name="booking_ids[]" value="{{ $boat_booking->booking_id }}" class="form-check-input booking-checkbox" data-booking-id="{{ $boat_booking->booking_id }}">
-                                                </td>
-                                            @endif
-                                            <td class="text-center">
-                                                <span class="badge bg-primary text-white rounded-pill">{{ $boat_bookings->firstItem() + $loop->index }}</span>
-                                            </td>
+.bb-kpi-card {
+  background:var(--bb-card); border-radius:14px;
+  border:1px solid var(--bb-border); box-shadow:var(--bb-shadow);
+  padding:16px 18px; border-left:4px solid var(--kc, var(--bb-blue));
+}
+.bb-kpi-lbl { font-size:.65rem; font-weight:700; color:var(--bb-muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+.bb-kpi-val { font-size:1.45rem; font-weight:900; color:var(--bb-text); line-height:1.1; }
+.bb-kpi-sub { font-size:.68rem; color:var(--bb-muted); margin-top:3px; }
 
-                                            <!-- Booking Details -->
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <div class="fw-bold text-primary mb-1">{{$boat_booking->booking_id}}</div>
-                                                    <div class="small text-muted">
-                                                        <i class="fas fa-calendar-plus me-1"></i>
-                                                        Created: {{$boat_booking->created_at->format('d M, Y')}}
-                                                    </div>
-                                                    <div class="small text-muted">
-                                                        <i class="fas fa-calendar-check me-1"></i>
-                                                        Event: {{$boat_booking->booking_date}}
-                                                    </div>
-                                                </div>
-                                            </td>
+/* ── Filters bar ──────────────────────── */
+.bb-filters {
+  background:var(--bb-card); border:1px solid var(--bb-border);
+  border-radius:14px; padding:14px 18px; margin-bottom:18px;
+  box-shadow:var(--bb-shadow);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.bb-search-wrap { position:relative; flex:1; min-width:200px; }
+.bb-search-wrap svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; stroke:#94A3B8; }
+.bb-search { border:1.5px solid #BAE6FD !important; border-radius:10px !important; padding:8px 12px 8px 36px !important; font-size:.82rem !important; color:#0F172A !important; background:#F0F9FF !important; width:100%; }
+.bb-search:focus { border-color:#0EA5E9 !important; outline:none !important; background:#fff !important; }
+.bb-filter-sel { border:1.5px solid #BAE6FD !important; border-radius:10px !important; padding:8px 12px !important; font-size:.82rem !important; color:#0F172A !important; background:#F0F9FF !important; }
+.bb-filter-sel:focus { border-color:#0EA5E9 !important; outline:none !important; }
+.bb-filter-btn { background:var(--bb-navy); color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:.8rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:.18s; }
+.bb-filter-btn:hover { background:var(--bb-dk); }
+.bb-filter-clear { color:var(--bb-muted); font-size:.78rem; font-weight:600; text-decoration:none; padding:9px 12px; border-radius:10px; border:1.5px solid var(--bb-border); background:transparent; transition:.18s; }
+.bb-filter-clear:hover { background:#F1F5F9; color:var(--bb-sub); }
 
-                                            <!-- Boat & Event -->
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <div class="fw-semibold text-success mb-1">
-                                                        <i class="fas fa-ship me-1"></i>{{$boat_booking->boat?->boatType?->name}}
-                                                    </div>
-                                                    <div class="fw-semibold text-warning mb-1">
-                                                        <i class="fas fa-ship me-1"></i>{{$boat_booking->boat?->event_type}}
-                                                    </div>
-                                                    @if($boat_booking->seat_number)
-                                                        <div class="fw-semibold text-info mb-1">
-                                                            <i class="fas fa-chair me-1"></i>Seat No: {{$boat_booking->seat_number}}
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </td>
+/* ── Quick filter tabs ────────────────── */
+.bb-tabs { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+.bb-tab {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 16px; border-radius:20px; font-size:.75rem; font-weight:700;
+  border:1.5px solid var(--bb-border); background:#fff; color:var(--bb-sub);
+  text-decoration:none; transition:.18s; cursor:pointer; white-space:nowrap;
+}
+.bb-tab:hover { border-color:#0EA5E9; color:#0EA5E9; background:#EFF6FF; }
+.bb-tab.active { background:#0EA5E9; color:#fff; border-color:#0EA5E9; }
+.bb-tab-count { background:rgba(255,255,255,.25); padding:1px 7px; border-radius:20px; font-size:.65rem; }
+.bb-tab.active .bb-tab-count { background:rgba(255,255,255,.3); }
 
-                                            <!-- Customer Info -->
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar-circle bg-primary text-white me-2">
-                                                        {{ substr($boat_booking->name, 0, 1) }}
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold text-dark mb-1">{{$boat_booking->name}}</div>
-                                                        <div class="small text-muted mb-1">
-                                                            <i class="fas fa-users me-1"></i>{{$boat_booking->no_of_person}} persons
-                                                        </div>
-                                                        <div class="small text-muted">
-                                                            <i class="fas fa-phone me-1"></i>{{$boat_booking->phone}}
-                                                        </div>
-                                                        <div class="small text-muted">
-                                                            <i class="fas fa-phone me-1"></i>{{$boat_booking->email}}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
+/* ── Table card ───────────────────────── */
+.bb-table-card {
+  background:var(--bb-card); border-radius:16px;
+  border:1px solid var(--bb-border); box-shadow:var(--bb-shadow);
+  overflow:hidden;
+}
+.bb-table-head {
+  padding:14px 20px; border-bottom:1px solid #EFF6FF;
+  display:flex; align-items:center; justify-content:space-between;
+  background:#F0F9FF; flex-wrap:wrap; gap:10px;
+}
+.bb-table-title { font-size:.88rem; font-weight:700; color:var(--bb-text); }
+.bb-table-meta  { font-size:.72rem; color:var(--bb-muted); }
 
-                                            <!-- Payment Details -->
-                                            <td>
-                                                <div class="payment-info">
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span class="text-primary small">Total:</span>
-                                                        <span class="fw-bold text-primary">₹{{number_format($boat_booking->total_amount, 2)}}</span>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span class="text-info small">Discount:</span>
-                                                        <span class="fw-bold text-info">₹{{number_format($boat_booking->total_discount, 2)}}</span>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span class="text-success small">Final:</span>
-                                                        <span class="fw-bold text-success">₹{{number_format($boat_booking->final_amount, 2)}}</span>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span class="text-warning small">Paid:</span>
-                                                        <span class="text-warning fw-semibold">₹{{number_format($boat_booking->payments_sum_amount ?? 0, 2)}}</span>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between">
-                                                        <span class="text-danger small">Due:</span>
-                                                        <span class="text-{{($boat_booking->final_amount - ($boat_booking->payments_sum_amount ?? 0)) > 0 ? 'danger' : 'success'}} fw-semibold">
-                                                            ₹{{number_format($boat_booking->final_amount - ($boat_booking->payments_sum_amount ?? 0), 2)}}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </td>
+table.bb-tbl { width:100%; border-collapse:collapse; }
+.bb-tbl th {
+  background:#F8FBFF; color:var(--bb-muted); font-size:.67rem;
+  font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:10px 16px; text-align:left; border-bottom:1.5px solid #DBEAFE;
+  white-space:nowrap;
+}
+.bb-tbl td {
+  padding:12px 16px; border-bottom:1px solid #F0F9FF;
+  font-size:.81rem; color:var(--bb-text); vertical-align:middle;
+}
+.bb-tbl tr:last-child td { border-bottom:none; }
+.bb-tbl tr:hover td { background:#F8FBFF; }
 
-                                            <!-- Status -->
-                                            <td class="text-center">
-                                                <div class="mb-2">
-                                                    <span class="badge bg-{{$boat_booking->booking_status == 'confirmed' ? 'success' : 'warning'}} status-badge">
-                                                        {{ucfirst($boat_booking->booking_status)}}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span class="badge bg-{{$boat_booking->payment_status == 'paid' ? 'success' : ($boat_booking->payment_status == 'partial' ? 'warning' : 'danger')}} status-badge">
-                                                        @if($boat_booking->payment_status === 'partial') Due @else {{ucfirst($boat_booking->payment_status)}} @endif
-                                                    </span>
-                                                </div>
-                                            </td>
+/* ── Guest cell ───────────────────────── */
+.bb-guest { display:flex; align-items:center; gap:10px; }
+.bb-avatar {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg, #0EA5E9, #0284C7);
+  color:#fff; display:flex; align-items:center; justify-content:center;
+  font-size:.82rem; font-weight:800;
+}
+.bb-guest-name { font-weight:600; color:var(--bb-text); font-size:.82rem; line-height:1.2; }
+.bb-guest-phone { font-size:.7rem; color:var(--bb-muted); margin-top:1px; }
 
-                                            <!-- Actions -->
-                                            <td class="text-center">
-                                                <div class="btn-group" role="group">
-                                                    <a class="btn btn-outline-primary btn-sm" href="{{route('boat-booking.edit', $boat_booking->booking_id)}}" title="Edit Booking">
-                                                        <i data-feather="edit"></i>
-                                                    </a>
-                                                    <a class="btn btn-outline-primary btn-sm" href="{{route('send.booking.mail', $boat_booking->booking_id)}}" title="Send Mail">
-                                                        <i data-feather="mail"></i>
-                                                    </a>
-                                                    <a class="btn btn-outline-success btn-sm" href="{{route('boat-booking.payment', $boat_booking->booking_id)}}" title="Payments">
-                                                        <i data-feather="credit-card"></i>
-                                                    </a>
-                                                    <form action="{{ route('boat-booking.destroy', $boat_booking->booking_id) }}" method="POST" style="display:inline">
-                                                        @method('Delete')
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm deleteBtn" title="Delete"><i data-feather="trash-2"></i></button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="text-center py-5">
-                                                <div class="d-flex flex-column align-items-center">
-                                                    <i class="fas fa-ship text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
-                                                    <h5 class="text-muted mb-2">No Bookings Found</h5>
-                                                    <p class="text-muted mb-3">There are no boat bookings matching your criteria.</p>
-                                                    <a href="{{route('boat-booking.create')}}" class="btn btn-primary">
-                                                        <i class="fas fa-plus me-2"></i>Create First Booking
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+/* ── Booking ID badge ─────────────────── */
+.bb-bid { font-size:.72rem; font-weight:800; color:#0369A1; background:#E0F2FE; padding:3px 9px; border-radius:6px; font-family:monospace; }
 
-                        <!-- Pagination -->
-                        @if($boat_bookings->hasPages())
-                            <div class="card-footer bg-light border-top-0">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="text-muted small">
-                                        Showing {{ $boat_bookings->firstItem() }} to {{ $boat_bookings->lastItem() }} of {{ $boat_bookings->total() }} results
-                                    </div>
-                                    <div>
-                                        {{ $boat_bookings->appends(request()->query())->links() }}
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
+/* ── Boat chip ────────────────────────── */
+.bb-boat-chip { display:inline-flex; align-items:center; gap:5px; background:#EFF6FF; border:1px solid #BAE6FD; border-radius:20px; padding:3px 10px; font-size:.7rem; font-weight:700; color:#0369A1; white-space:nowrap; }
+
+/* ── Booking type ─────────────────────── */
+.bb-btype { font-size:.7rem; font-weight:700; color:#0C4A6E; }
+.bb-ghat  { font-size:.67rem; color:var(--bb-muted); margin-top:2px; }
+
+/* ── PAX ──────────────────────────────── */
+.bb-pax { display:flex; align-items:center; gap:6px; }
+.bb-pax-circle { width:28px; height:28px; border-radius:50%; background:#EFF6FF; color:#0369A1; font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; border:1.5px solid #BAE6FD; }
+
+/* ── Amount ───────────────────────────── */
+.bb-amt-main { font-weight:800; color:var(--bb-text); font-size:.85rem; }
+.bb-amt-paid { font-size:.68rem; color:var(--bb-green); font-weight:600; }
+.bb-amt-due  { font-size:.68rem; color:var(--bb-red); font-weight:600; }
+
+/* ── Status badges ────────────────────── */
+.bs {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:.63rem; font-weight:700; padding:3px 9px;
+  border-radius:20px; text-transform:uppercase; letter-spacing:.03em;
+  white-space:nowrap;
+}
+.bs-confirmed  { background:#DBEAFE; color:#1E40AF; }
+.bs-completed  { background:#D1FAE5; color:#065F46; }
+.bs-cancelled  { background:#FEE2E2; color:#991B1B; }
+.bs-pending    { background:#FEF3C7; color:#92400E; }
+.bs-paid       { background:#D1FAE5; color:#065F46; }
+.bs-partial    { background:#DBEAFE; color:#1E40AF; }
+.bs-unpaid     { background:#FEE2E2; color:#DC2626; }
+
+/* ── Action buttons ───────────────────── */
+.bb-actions { display:flex; gap:6px; align-items:center; }
+.bb-act {
+  width:30px; height:30px; border-radius:8px; display:flex;
+  align-items:center; justify-content:center; border:none; cursor:pointer;
+  transition:.18s; text-decoration:none; flex-shrink:0;
+}
+.bb-act-view  { background:#EFF6FF; color:#0369A1; }
+.bb-act-edit  { background:#FEF3C7; color:#92400E; }
+.bb-act-pay   { background:#D1FAE5; color:#065F46; }
+.bb-act-del   { background:#FEE2E2; color:#991B1B; }
+.bb-act:hover { filter:brightness(.9); transform:scale(1.08); }
+.bb-act svg   { width:13px; height:13px; stroke:currentColor; }
+
+/* ── Empty state ──────────────────────── */
+.bb-empty { padding:60px 20px; text-align:center; }
+.bb-empty-icon { font-size:3.5rem; margin-bottom:14px; opacity:.4; }
+.bb-empty-title { font-size:1rem; font-weight:700; color:var(--bb-sub); margin-bottom:6px; }
+.bb-empty-sub   { font-size:.8rem; color:var(--bb-muted); }
+
+/* ── Pagination ───────────────────────── */
+.bb-pagination { padding:16px 20px; border-top:1px solid #EFF6FF; }
+.bb-pagination .pagination { margin:0; }
+
+/* ── Responsive ───────────────────────── */
+@media(max-width:768px){
+  .bb-page { padding:12px 12px 40px; }
+  .bb-hero { padding:16px 18px; }
+  .bb-hero h1 { font-size:1.05rem; }
+  .bb-tbl th, .bb-tbl td { padding:9px 10px; font-size:.75rem; }
+  .hide-mobile { display:none !important; }
+}
+</style>
+
+<div class="bb-page">
+
+{{-- Flash --}}
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show mb-3" style="border-radius:12px;border:none;background:#D1FAE5;color:#065F46;font-size:.82rem;font-weight:600;">
+  ✓ {{ session('success') }}<button class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show mb-3" style="border-radius:12px;border:none;background:#FEE2E2;color:#991B1B;font-size:.82rem;font-weight:600;">
+  ✗ {{ session('error') }}<button class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
+{{-- ── HERO ──────────────────────────────────────────── --}}
+<div class="bb-hero">
+  <div class="bb-hero-left">
+    <h1>⛵ Boat Bookings</h1>
+    <p>Manage all Ganga boat rides · Ganga Aarti · Celebrations · Private Events</p>
+  </div>
+  <div class="bb-hero-actions">
+    <a href="{{ route('boat-booking.create') }}" class="bb-btn-new">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Boat Booking
+    </a>
+    <a href="{{ route('admin.dashboard') }}" class="bb-btn-ghost">← Dashboard</a>
+  </div>
+</div>
+
+{{-- ── KPI CARDS ──────────────────────────────────────── --}}
+@php
+  $totalBookings = $boat_bookings->total();
+  $dueAmount     = $total_final_amount - $total_payments;
+@endphp
+<div class="bb-kpi">
+  <div class="bb-kpi-card" style="--kc:#0EA5E9;">
+    <div class="bb-kpi-lbl">Total Bookings</div>
+    <div class="bb-kpi-val">{{ number_format($totalBookings) }}</div>
+    <div class="bb-kpi-sub">All time</div>
+  </div>
+  <div class="bb-kpi-card" style="--kc:#10B981;">
+    <div class="bb-kpi-lbl">Total Revenue</div>
+    <div class="bb-kpi-val">₹{{ number_format($total_final_amount) }}</div>
+    <div class="bb-kpi-sub">After discounts</div>
+  </div>
+  <div class="bb-kpi-card" style="--kc:#4F46E5;">
+    <div class="bb-kpi-lbl">Collected</div>
+    <div class="bb-kpi-val">₹{{ number_format($total_payments) }}</div>
+    <div class="bb-kpi-sub">Payments received</div>
+  </div>
+  <div class="bb-kpi-card" style="--kc:#EF4444;">
+    <div class="bb-kpi-lbl">Balance Due</div>
+    <div class="bb-kpi-val">₹{{ number_format(max(0, $dueAmount)) }}</div>
+    <div class="bb-kpi-sub">Pending collection</div>
+  </div>
+  <div class="bb-kpi-card" style="--kc:#F59E0B;">
+    <div class="bb-kpi-lbl">Total Persons</div>
+    <div class="bb-kpi-val">{{ number_format($total_persons) }}</div>
+    <div class="bb-kpi-sub">Guests served</div>
+  </div>
+</div>
+
+{{-- ── FILTERS ─────────────────────────────────────────── --}}
+<form method="GET" action="{{ route('boat-booking.index') }}" id="filterForm">
+<div class="bb-filters">
+  {{-- Search --}}
+  <div class="bb-search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" name="search_user" value="{{ $search_user }}"
+           class="bb-search" placeholder="Search name, phone, booking ID…">
+  </div>
+
+  {{-- Booking type --}}
+  <select name="search_booking_type" class="bb-filter-sel">
+    <option value="">All Types</option>
+    <option value="Morning Boat Ride"                {{ request('search_booking_type')=='Morning Boat Ride'                ?'selected':'' }}>🌅 Morning Ride</option>
+    <option value="Evening Boat Ride"                {{ request('search_booking_type')=='Evening Boat Ride'                ?'selected':'' }}>🌇 Evening Ride</option>
+    <option value="Evening Boat Ride with Ganga Aarti" {{ request('search_booking_type')=='Evening Boat Ride with Ganga Aarti'?'selected':'' }}>🪔 Ganga Aarti</option>
+  </select>
+
+  {{-- Boat type --}}
+  <select name="search_boat_type" class="bb-filter-sel">
+    <option value="">All Boats</option>
+    @foreach($boat_types as $bt)
+    <option value="{{ $bt->id }}" {{ $search_boat_type == $bt->id ? 'selected':'' }}>{{ $bt->name }}</option>
+    @endforeach
+  </select>
+
+  {{-- Payment status --}}
+  <select name="search_payment_status" class="bb-filter-sel">
+    <option value="">All Payments</option>
+    <option value="paid"    {{ $search_payment_status=='paid'    ?'selected':'' }}>✅ Paid</option>
+    <option value="partial" {{ $search_payment_status=='partial' ?'selected':'' }}>🔵 Partial</option>
+    <option value="unpaid"  {{ $search_payment_status=='unpaid'  ?'selected':'' }}>🔴 Unpaid</option>
+  </select>
+
+  {{-- Date --}}
+  <input type="date" name="search_date_from" value="{{ request('search_date_from') }}"
+         class="bb-filter-sel" placeholder="From date" style="width:140px;">
+  <input type="date" name="search_date_to" value="{{ request('search_date_to') }}"
+         class="bb-filter-sel" placeholder="To date" style="width:140px;">
+
+  <button type="submit" class="bb-filter-btn">Filter</button>
+  @if($search_user || $search_boat_type || $search_payment_status || request('search_booking_type') || request('search_date_from'))
+  <a href="{{ route('boat-booking.index') }}" class="bb-filter-clear">✕ Clear</a>
+  @endif
+</div>
+</form>
+
+{{-- ── QUICK TABS ───────────────────────────────────────── --}}
+@php
+  $allCount     = \App\Models\BoatBooking::count();
+  $morningCount = \App\Models\BoatBooking::where('booking_type','Morning Boat Ride')->count();
+  $eveningCount = \App\Models\BoatBooking::where('booking_type','Evening Boat Ride')->count();
+  $aaartiCount  = \App\Models\BoatBooking::where('booking_type','Evening Boat Ride with Ganga Aarti')->count();
+  $todayCount   = \App\Models\BoatBooking::whereDate('booking_date', today())->count();
+@endphp
+<div class="bb-tabs">
+  <a href="{{ route('boat-booking.index') }}"
+     class="bb-tab {{ !request('search_booking_type') && !request()->anyFilled(['search_boat_type','search_payment_status','search_user']) ? 'active' : '' }}">
+    ⛵ All Bookings <span class="bb-tab-count">{{ $allCount }}</span>
+  </a>
+  <a href="{{ route('boat-booking.index') }}?search_booking_type=Morning+Boat+Ride"
+     class="bb-tab {{ request('search_booking_type')=='Morning Boat Ride' ? 'active':'' }}">
+    🌅 Morning <span class="bb-tab-count">{{ $morningCount }}</span>
+  </a>
+  <a href="{{ route('boat-booking.index') }}?search_booking_type=Evening+Boat+Ride"
+     class="bb-tab {{ request('search_booking_type')=='Evening Boat Ride' ? 'active':'' }}">
+    🌇 Evening <span class="bb-tab-count">{{ $eveningCount }}</span>
+  </a>
+  <a href="{{ route('boat-booking.index') }}?search_booking_type=Evening+Boat+Ride+with+Ganga+Aarti"
+     class="bb-tab {{ request('search_booking_type')=='Evening Boat Ride with Ganga Aarti' ? 'active':'' }}">
+    🪔 Ganga Aarti <span class="bb-tab-count">{{ $aaartiCount }}</span>
+  </a>
+  <a href="{{ route('boat-booking.index') }}?search_date_from={{ today()->format('Y-m-d') }}&search_date_to={{ today()->format('Y-m-d') }}"
+     class="bb-tab">
+    📅 Today <span class="bb-tab-count">{{ $todayCount }}</span>
+  </a>
+  <a href="{{ route('boat-booking.index') }}?search_payment_status=unpaid"
+     class="bb-tab {{ request('search_payment_status')=='unpaid' ? 'active':'' }}" style="color:#EF4444;">
+    ⚠ Due Payment <span class="bb-tab-count">{{ \App\Models\BoatBooking::where('payment_status','unpaid')->count() }}</span>
+  </a>
+</div>
+
+{{-- ── BOOKINGS TABLE ───────────────────────────────────── --}}
+<div class="bb-table-card">
+  <div class="bb-table-head">
+    <div class="bb-table-title">Boat Bookings</div>
+    <div class="bb-table-meta">
+      Showing {{ $boat_bookings->firstItem() ?? 0 }}–{{ $boat_bookings->lastItem() ?? 0 }}
+      of {{ $boat_bookings->total() }} bookings
     </div>
+  </div>
 
-    <!-- Hidden form for PDF export -->
-    <form id="exportForm" action="{{ route('boat-booking.index') }}" method="GET" style="display: none;">
-        <input type="hidden" name="export" value="pdf">
-        <input type="hidden" name="search_boat_type" value="{{ $search_boat_type }}">
-        <input type="hidden" name="search_event_type" value="{{ $search_event_type }}">
-        <input type="hidden" name="search_booking_id" value="{{ $search_booking_id }}">
-        <input type="hidden" name="search_user" value="{{ $search_user }}">
-        <input type="hidden" name="search_date" value="{{ $search_date }}">
-        <input type="hidden" name="search_payment_status" value="{{ $search_payment_status }}">
-        <div id="exportBookingIds"></div>
-    </form>
+  <div style="overflow-x:auto;">
+    <table class="bb-tbl">
+      <thead>
+        <tr>
+          <th>Booking ID</th>
+          <th>Guest</th>
+          <th>Boat</th>
+          <th>Type / Ghat</th>
+          <th class="hide-mobile">Date</th>
+          <th>PAX</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @forelse($boat_bookings as $bk)
+        @php
+          $paidAmt = (float)($bk->payments_sum_amount ?? 0);
+          $dueAmt  = max(0, (float)$bk->final_amount - $paidAmt);
+          $payStatus = $bk->payment_status ?? ($dueAmt <= 0 ? 'paid' : ($paidAmt > 0 ? 'partial' : 'unpaid'));
+          $bkStatus  = $bk->booking_status ?? 'confirmed';
+          $initials  = strtoupper(substr($bk->name ?? 'G', 0, 1));
+          $boatName  = $bk->boat?->boatType?->name ?? 'Boat';
 
-    <style>
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+          $boatEmojis = ['Normal Motor Boat'=>'🚤','Light Motor Boat'=>'⛵','Premium Light Motor Boat'=>'⚡','Luxury Mini Yacht'=>'🛥','Bajra Boat'=>'🛶','Cruise'=>'🚢'];
+          $boatEmoji  = $boatEmojis[$boatName] ?? '⛵';
+        @endphp
+        <tr>
+          {{-- Booking ID --}}
+          <td>
+            <span class="bb-bid">{{ $bk->booking_id }}</span>
+            <div style="font-size:.62rem;color:var(--bb-muted);margin-top:3px;">
+              {{ $bk->created_at ? \Carbon\Carbon::parse($bk->created_at)->format('d M') : '' }}
+            </div>
+          </td>
 
-        .stat-card {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-        }
+          {{-- Guest --}}
+          <td>
+            <div class="bb-guest">
+              <div class="bb-avatar">{{ $initials }}</div>
+              <div>
+                <div class="bb-guest-name">{{ $bk->name }}</div>
+                <div class="bb-guest-phone">📞 {{ $bk->phone }}</div>
+              </div>
+            </div>
+          </td>
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
+          {{-- Boat --}}
+          <td>
+            <span class="bb-boat-chip">{{ $boatEmoji }} {{ $boatName }}</span>
+          </td>
 
-        .modern-table tbody tr {
-            transition: all 0.2s ease;
-        }
+          {{-- Booking Type / Ghat --}}
+          <td>
+            <div class="bb-btype">{{ $bk->booking_type ?? '—' }}</div>
+            @if($bk->boarding_ghat)
+            <div class="bb-ghat">📍 {{ $bk->boarding_ghat }}</div>
+            @endif
+            @if($bk->pickup_time)
+            <div class="bb-ghat">🕐 {{ \Carbon\Carbon::parse($bk->pickup_time)->format('h:i A') }}</div>
+            @endif
+          </td>
 
-        .modern-table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: translateX(2px);
-        }
+          {{-- Date --}}
+          <td class="hide-mobile">
+            <div style="font-weight:600;color:var(--bb-text);font-size:.8rem;">
+              {{ $bk->booking_date ? \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') : '—' }}
+            </div>
+          </td>
 
-        .avatar-circle {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
+          {{-- PAX --}}
+          <td>
+            <div class="bb-pax">
+              <div class="bb-pax-circle">{{ $bk->no_of_person }}</div>
+              <div>
+                <div style="font-size:.68rem;color:var(--bb-muted);">{{ $bk->adults ?? $bk->no_of_person }} adults</div>
+                @if(($bk->children ?? 0) > 0)
+                <div style="font-size:.62rem;color:#059669;">{{ $bk->children }} child free</div>
+                @endif
+              </div>
+            </div>
+          </td>
 
-        .payment-info {
-            background: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border-left: 3px solid #28a745;
-        }
+          {{-- Amount --}}
+          <td>
+            <div class="bb-amt-main">₹{{ number_format($bk->final_amount) }}</div>
+            <div class="bb-amt-paid">✓ ₹{{ number_format($paidAmt) }}</div>
+            @if($dueAmt > 0)
+            <div class="bb-amt-due">⚠ ₹{{ number_format($dueAmt) }} due</div>
+            @endif
+          </td>
 
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
+          {{-- Status --}}
+          <td>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span class="bs bs-{{ $bkStatus }}">{{ ucfirst($bkStatus) }}</span>
+              <span class="bs bs-{{ $payStatus }}">{{ ucfirst($payStatus) }}</span>
+            </div>
+          </td>
 
-        .border-bottom-light {
-            border-bottom: 1px solid #e9ecef !important;
-        }
+          {{-- Actions --}}
+          <td>
+            <div class="bb-actions">
+              <a href="{{ route('boat-booking.show', $bk->booking_id) }}"
+                 class="bb-act bb-act-view" title="View">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </a>
+              <a href="{{ route('boat-booking.edit', $bk->booking_id) }}"
+                 class="bb-act bb-act-edit" title="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </a>
+              <a href="{{ route('boat-booking.payment', $bk->booking_id) }}"
+                 class="bb-act bb-act-pay" title="Add Payment">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </a>
+              <form action="{{ route('boat-booking.destroy', $bk->booking_id) }}" method="POST"
+                    onsubmit="return confirm('Delete this booking?')" style="margin:0;">
+                @csrf @method('DELETE')
+                <button type="submit" class="bb-act bb-act-del" title="Delete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        @empty
+        <tr>
+          <td colspan="9">
+            <div class="bb-empty">
+              <div class="bb-empty-icon">⛵</div>
+              <div class="bb-empty-title">No boat bookings found</div>
+              <div class="bb-empty-sub">
+                @if($search_user || $search_boat_type || $search_payment_status)
+                  Try adjusting your filters or
+                  <a href="{{ route('boat-booking.index') }}" style="color:#0EA5E9;">clear all filters</a>
+                @else
+                  Get started by creating your first boat booking
+                @endif
+              </div>
+              <a href="{{ route('boat-booking.create') }}"
+                 style="display:inline-flex;align-items:center;gap:6px;margin-top:14px;background:#0EA5E9;color:#fff;border-radius:10px;padding:10px 22px;font-size:.82rem;font-weight:700;text-decoration:none;">
+                ＋ New Boat Booking
+              </a>
+            </div>
+          </td>
+        </tr>
+        @endforelse
+      </tbody>
+    </table>
+  </div>
 
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+  {{-- Pagination --}}
+  @if($boat_bookings->hasPages())
+  <div class="bb-pagination">
+    {{ $boat_bookings->appends(request()->query())->links() }}
+  </div>
+  @endif
+</div>
 
-        .btn-group .btn {
-            margin-right: 2px;
-            border-radius: 6px;
-        }
+</div>{{-- /bb-page --}}
 
-        .table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: #495057;
-            padding: 15px 12px;
-        }
-
-        .table td {
-            padding: 15px 12px;
-            vertical-align: middle;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectAllCheckbox = document.getElementById('selectAll');
-            const bookingCheckboxes = document.querySelectorAll('.booking-checkbox');
-            const exportSelectedBtn = document.getElementById('exportSelectedBtn');
-            const exportAllBtn = document.getElementById('exportAllBtn');
-            const clearSelectionBtn = document.getElementById('clearSelectionBtn');
-            const selectedCountSpan = document.getElementById('selectedCount');
-            const exportForm = document.getElementById('exportForm');
-            const exportBookingIds = document.getElementById('exportBookingIds');
-
-            // Store selected booking IDs in localStorage
-            const STORAGE_KEY = 'selected_booking_ids';
-
-            // Get selected bookings from localStorage
-            function getSelectedBookings() {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                return stored ? JSON.parse(stored) : [];
-            }
-
-            // Save selected bookings to localStorage
-            function saveSelectedBookings(bookingIds) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(bookingIds));
-            }
-
-            // Initialize checkboxes based on stored selections
-            function initializeCheckboxes() {
-                const selectedBookings = getSelectedBookings();
-
-                bookingCheckboxes.forEach(checkbox => {
-                    const bookingId = checkbox.getAttribute('data-booking-id');
-                    if (selectedBookings.includes(bookingId)) {
-                        checkbox.checked = true;
-                    }
-                });
-
-                updateSelectAllState();
-                updateExportButtons();
-            }
-
-            // Update select all checkbox state
-            function updateSelectAllState() {
-                const totalCheckboxes = bookingCheckboxes.length;
-                const checkedCheckboxes = document.querySelectorAll('.booking-checkbox:checked').length;
-
-                if (checkedCheckboxes === 0) {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = false;
-                } else if (checkedCheckboxes === totalCheckboxes) {
-                    selectAllCheckbox.checked = true;
-                    selectAllCheckbox.indeterminate = false;
-                } else {
-                    selectAllCheckbox.checked = false;
-                    selectAllCheckbox.indeterminate = true;
-                }
-            }
-
-            // Update export buttons and counter
-            function updateExportButtons() {
-                const selectedBookings = getSelectedBookings();
-                const count = selectedBookings.length;
-
-                selectedCountSpan.textContent = `${count} selected`;
-                exportSelectedBtn.disabled = count === 0;
-            }
-
-            // Handle select all functionality
-            selectAllCheckbox.addEventListener('change', function() {
-                const selectedBookings = getSelectedBookings();
-
-                bookingCheckboxes.forEach(checkbox => {
-                    const bookingId = checkbox.getAttribute('data-booking-id');
-
-                    if (this.checked) {
-                        checkbox.checked = true;
-                        if (!selectedBookings.includes(bookingId)) {
-                            selectedBookings.push(bookingId);
-                        }
-                    } else {
-                        checkbox.checked = false;
-                        const index = selectedBookings.indexOf(bookingId);
-                        if (index > -1) {
-                            selectedBookings.splice(index, 1);
-                        }
-                    }
-                });
-
-                saveSelectedBookings(selectedBookings);
-                updateExportButtons();
-            });
-
-            // Handle individual checkbox changes
-            bookingCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const bookingId = this.getAttribute('data-booking-id');
-                    const selectedBookings = getSelectedBookings();
-
-                    if (this.checked) {
-                        if (!selectedBookings.includes(bookingId)) {
-                            selectedBookings.push(bookingId);
-                        }
-                    } else {
-                        const index = selectedBookings.indexOf(bookingId);
-                        if (index > -1) {
-                            selectedBookings.splice(index, 1);
-                        }
-                    }
-
-                    saveSelectedBookings(selectedBookings);
-                    updateSelectAllState();
-                    updateExportButtons();
-                });
-            });
-
-            // Clear selection functionality
-            clearSelectionBtn.addEventListener('click', function() {
-                localStorage.removeItem(STORAGE_KEY);
-                bookingCheckboxes.forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                selectAllCheckbox.checked = false;
-                selectAllCheckbox.indeterminate = false;
-                updateExportButtons();
-            });
-
-            // Export Selected functionality
-            exportSelectedBtn.addEventListener('click', function() {
-                const selectedBookings = getSelectedBookings();
-
-                if (selectedBookings.length === 0) {
-                    alert('Please select at least one booking to export.');
-                    return;
-                }
-
-                // Clear previous booking IDs
-                exportBookingIds.innerHTML = '';
-
-                // Add selected booking IDs to form
-                selectedBookings.forEach(bookingId => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'selected_bookings[]';
-                    input.value = bookingId;
-                    exportBookingIds.appendChild(input);
-                });
-
-                // Submit form
-                exportForm.submit();
-            });
-
-            // Export All functionality
-            exportAllBtn.addEventListener('click', function() {
-                // Remove selected bookings filter for export all
-                exportBookingIds.innerHTML = '';
-                exportForm.submit();
-            });
-
-            // Initialize checkboxes on page load
-            initializeCheckboxes();
-        });
-    </script>
 @endsection

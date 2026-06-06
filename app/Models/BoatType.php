@@ -24,4 +24,9 @@ class BoatType extends Model
         return $value ? asset('storage/'.$value) : asset('forefront/assets/images/no-image.png');
     }
 
+    public function boats()
+    {
+        return $this->hasMany(Boat::class, 'boat_type_id');
+    }
+
 }

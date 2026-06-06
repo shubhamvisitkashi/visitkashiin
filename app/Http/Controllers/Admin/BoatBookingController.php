@@ -17,44 +17,43 @@ class BoatBookingController extends Controller
 {
 
     public function index(Request $request) {
-        $search_boat_type = $request->search_boat_type;
-        $search_event_type = $request->search_event_type;
-        $search_booking_id = $request->search_booking_id;
-        $search_user = $request->search_user;
-        $search_date = $request->search_date;
+        $search_boat_type      = $request->search_boat_type;
+        $search_event_type     = $request->search_event_type;
+        $search_booking_id     = $request->search_booking_id;
+        $search_user           = $request->search_user;
+        $search_date           = $request->search_date;
         $search_payment_status = $request->search_payment_status;
+        $search_booking_type   = $request->search_booking_type;
+        $search_date_from      = $request->search_date_from;
+        $search_date_to        = $request->search_date_to;
 
-        $boat_types = BoatType::oldest('name')->get();
+        $boat_types  = BoatType::orderBy('sort_order')->get();
         $event_types = ['Festival', 'Regular'];
 
         $boat_bookings = BoatBooking::when($search_boat_type, function($query) use ($search_boat_type) {
-                                $query->whereHas('boat', function($quer) use ($search_boat_type) {
-                                    $quer->where('boat_type_id', ($search_boat_type));
+                                $query->whereHas('boat', function($q) use ($search_boat_type) {
+                                    $q->where('boat_type_id', $search_boat_type);
                                 });
-                            })->when($search_event_type, function($query) use ($search_event_type) {
-                                $query->where('event_type', $search_event_type);
-                            })->when($search_booking_id, function($query) use ($search_booking_id) {
-                                $query->where('booking_id', $search_booking_id);
-                            })->when($search_user, function($query) use ($search_user) {
+                            })
+                            ->when($search_user, function($query) use ($search_user) {
                                 $query->where(function($q) use ($search_user) {
                                     $q->where('name', 'like', '%' . $search_user . '%')
-                                      ->orWhere('phone', $search_user)
-                                      ->orWhere('email', $search_user);
+                                      ->orWhere('phone', 'like', '%' . $search_user . '%')
+                                      ->orWhere('booking_id', 'like', '%' . $search_user . '%');
                                 });
-                            })->when($search_payment_status, function($query) use ($search_payment_status) {
-                                $query->where('payment_status', $search_payment_status);
-                            })->when($search_date,function($query) use ($search_date){
-                                $dates=explode('-',$search_date);
-                                $d1=strtotime($dates[0]);
-                                $d2=strtotime($dates[1]);
-                                $da1=date('Y-m-d',$d1);
-                                $da2=date('Y-m-d',$d2);
-                                $startDate = Carbon::createFromFormat('Y-m-d', $da1)->startOfDay();
-                                $endDate = Carbon::createFromFormat('Y-m-d', $da2)->endOfDay();
-
-                                $query->where(function($qu) use ($startDate,$endDate){
-                                    $qu->whereBetween('created_at', [$startDate, $endDate]);
-                                });
+                            })
+                            ->when($search_payment_status, fn($q) => $q->where('payment_status', $search_payment_status))
+                            ->when($search_booking_type,   fn($q) => $q->where('booking_type', $search_booking_type))
+                            ->when($search_date_from,      fn($q) => $q->whereDate('booking_date', '>=', $search_date_from))
+                            ->when($search_date_to,        fn($q) => $q->whereDate('booking_date', '<=', $search_date_to))
+                            ->when($search_date, function($query) use ($search_date) {
+                                $dates = explode('-', $search_date);
+                                if (count($dates) >= 2) {
+                                    $query->whereBetween('created_at', [
+                                        Carbon::parse(trim($dates[0]))->startOfDay(),
+                                        Carbon::parse(trim($dates[1]))->endOfDay(),
+                                    ]);
+                                }
                             });
 
         $total_persons = $boat_bookings->sum('no_of_person');
@@ -185,15 +184,58 @@ class BoatBookingController extends Controller
     }
 
     public function create(Request $request) {
-        $booking_request_id = $request->booking_request_id;
+        $booking_request_id   = $request->booking_request_id;
         $boat_booking_request = BoatBookingRequest::where('booking_request_id', $booking_request_id)->first();
-        $boat_types = BoatType::oldest('name')->get();
+        // Load boat types with their boats (pricing per event_type)
+        $boat_types = BoatType::with(['boats' => function($q) {
+            $q->where('is_active', 1);
+        }])->where('is_active', 1)->orderBy('sort_order')->get();
 
-        return view('admin.boat_booking.create', compact('boat_types', 'boat_booking_request'), ['page_title' => 'Add Boat Booking']);
+        $leadSources     = \App\Models\LeadSource::orderBy('name')->get();
+        $paymentAccounts = \App\Models\PaymentAccount::where('is_active', 1)->orderBy('account_name')->get();
+        $boatmen         = \App\Models\Boatman::active()->orderBy('name')->get();
+
+        return view('admin.boat_booking.create', compact(
+            'boat_types', 'boat_booking_request', 'leadSources', 'paymentAccounts', 'boatmen'
+        ), ['page_title' => 'New Boat Booking']);
+    }
+
+    public function voucher($booking_id) {
+        $booking = BoatBooking::where('booking_id', $booking_id)
+            ->with(['boat.boatType', 'payments'])
+            ->withSum('payments', 'amount')
+            ->firstOrFail();
+
+        $boatman = $booking->boatman_id
+            ? \App\Models\Boatman::find($booking->boatman_id)
+            : null;
+
+        $createdBy = $booking->created_by
+            ? \App\Models\Admin\Admin::find($booking->created_by)
+            : null;
+
+        return view('admin.boat_booking.voucher', compact('booking', 'boatman', 'createdBy'), [
+            'page_title' => 'Voucher — ' . $booking->booking_id,
+        ]);
+    }
+
+    public function show($booking_id) {
+        $booking = BoatBooking::where('booking_id', $booking_id)
+            ->with(['boat.boatType', 'payments'])
+            ->withSum('payments', 'amount')
+            ->firstOrFail();
+
+        $boatman = $booking->boatman_id
+            ? \App\Models\Boatman::find($booking->boatman_id)
+            : null;
+
+        return view('admin.boat_booking.show', compact('booking', 'boatman'), [
+            'page_title' => 'Boat Booking — ' . $booking->booking_id,
+        ]);
     }
 
     public function edit($booking_id) {
-        $boat_types = BoatType::oldest('name')->get();
+        $boat_types = BoatType::orderBy('sort_order')->get();
         $booking = BoatBooking::where('booking_id', $booking_id)->with('boat.boatType')->withSum('payments', 'amount')->first();
 
         return view('admin.boat_booking.edit', compact('boat_types', 'booking'), ['page_title' => 'Edit Boat Booking']);
@@ -201,20 +243,27 @@ class BoatBookingController extends Controller
 
     public function update(Request $request, $booking_id) {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|max:255',
+            'phone'         => 'required|string|max:20',
+            'no_of_person'  => 'required|integer|min:1',
+            'boarding_ghat' => 'nullable|string|max:255',
+            'drop_ghat'     => 'nullable|string|max:255',
+            'guest_notes'   => 'nullable|string|max:1000',
         ]);
 
         $boat_booking = BoatBooking::where('booking_id', $booking_id)->first();
         if(!$boat_booking) {
             return redirect()->back()->with('error', 'No booking found.');
-
         }
 
-        $boat_booking->name = $request->name;
-        $boat_booking->email = $request->email;
-        $boat_booking->phone = $request->phone;
+        $boat_booking->name          = $request->name;
+        $boat_booking->email         = $request->email;
+        $boat_booking->phone         = $request->phone;
+        $boat_booking->no_of_person  = $request->no_of_person;
+        $boat_booking->boarding_ghat = $request->boarding_ghat;
+        $boat_booking->drop_ghat     = $request->drop_ghat;
+        $boat_booking->guest_notes   = $request->guest_notes;
         $boat_booking->save();
 
         return redirect()->route('boat-booking.index')->with('success', 'Booking updated successfully.');
@@ -222,16 +271,20 @@ class BoatBookingController extends Controller
 
     public function store(Request $request) {
         // return $request->seat_number;
+        $maxDisc = max(0, (float)$request->total_amount);
+        $maxPaid = max(0, (float)$request->final_amount ?: (float)$request->total_amount);
         $request->validate([
-            'boat_type' => 'required|exists:boat_types,id',
-            'event_type' => 'required|in:Festival,Regular',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
-            'no_of_person' => 'required|integer|min:1',
-            'event_date' => 'required|date|after_or_equal:today',
-            'discount_amount'   => 'required|numeric|min:0|max:' .$request->total_amount,
-            'paid_amount'   => 'required|numeric|min:0|max:' .$request->final_amount,
+            'boat_type'        => 'required|exists:boat_types,id',
+            'event_type'       => 'required|in:Festival,Regular',
+            'name'             => 'required|string|max:255',
+            'email'            => 'nullable|email|max:255',
+            'phone'            => 'required|string|max:20',
+            'adults'           => 'required|integer|min:1',
+            'no_of_person'     => 'nullable|integer|min:1',
+            'event_date'       => 'required|date',
+            'total_amount'     => 'required|numeric|min:0',
+            'discount_amount'  => 'nullable|numeric|min:0|max:' . $maxDisc,
+            'paid_amount'      => 'nullable|numeric|min:0|max:' . $maxPaid,
         ]);
 
         $boat = Boat::where('boat_type_id', $request->boat_type)->where('event_type', $request->event_type)->first();
@@ -259,10 +312,12 @@ class BoatBookingController extends Controller
         $boat_booking->booking_id = generateBookingId();
         $boat_booking->booked_by = auth()->guard('admin')->user()->id;
         $boat_booking->boat_id = $boat->id;
-        $boat_booking->name = $request->name;
-        $boat_booking->email = $request->email;
-        $boat_booking->phone = $request->phone;
-        $boat_booking->no_of_person = $request->no_of_person;
+        $boat_booking->name         = $request->name;
+        $boat_booking->email        = $request->email;
+        $boat_booking->phone        = $request->phone;
+        $boat_booking->adults       = (int)($request->adults ?? 1);
+        $boat_booking->children     = (int)($request->children ?? 0);
+        $boat_booking->no_of_person = (int)($request->adults ?? 1) + (int)($request->children ?? 0);
         if($request->event_type === 'Festival') {
             $boat_booking->total_amount = $boat->price * $request->no_of_person;
             $boat_booking->total_discount = $request->discount_amount;
@@ -272,11 +327,53 @@ class BoatBookingController extends Controller
         if($request->seat_number) {
             $boat_booking->seat_number = implode(', ', range(($total_boat_booking + 1), (($total_boat_booking ? $total_boat_booking + 1 : $total_boat_booking) + ($total_boat_booking ? $request->no_of_person - 1 : $request->no_of_person))));
         }
+        // For Regular bookings use form amounts
+        if ($request->event_type !== 'Festival') {
+            $boat_booking->total_amount   = $request->total_amount;
+            $boat_booking->total_discount = $request->discount_amount ?? 0;
+            $boat_booking->final_amount   = $request->final_amount ?? max(0, $request->total_amount - ($request->discount_amount ?? 0));
+        }
+        // Route & timing
+        $boat_booking->boarding_ghat = $request->pickup_ghat ?? $request->boarding_ghat;
+        $boat_booking->drop_ghat     = $request->drop_ghat;
+        $boat_booking->boat_timing   = $request->booking_type;
+        $boat_booking->pickup_time   = $request->pickup_time;
+        $boat_booking->drop_time     = $request->drop_time;
+        // Event type
+        $boat_booking->booking_type    = $request->booking_type;
+        $boat_booking->event_on_boat   = $request->event_on_boat;
+        $boat_booking->celebration_type= $request->event_on_boat;
+        // Add-ons
+        $boat_booking->decoration    = $request->has('decoration')   ? 1 : 0;
+        $boat_booking->photographer  = $request->has('photographer') ? 1 : 0;
+        $boat_booking->live_music    = $request->has('live_music')   ? 1 : 0;
+        $boat_booking->priest        = $request->has('priest')       ? 1 : 0;
+        $boat_booking->flowers       = $request->has('flowers')      ? 1 : 0;
+        $boat_booking->fireworks     = $request->has('fireworks')    ? 1 : 0;
+        // Notes & meta
+        $boat_booking->guest_notes    = $request->guest_notes;
+        $boat_booking->special_requests = $request->internal_notes;
+        $boat_booking->lead_source_id = $request->lead_source_id;
+        $boat_booking->payment_method     = $request->payment_method;
+        $boat_booking->payment_account_id = $request->payment_account_id ?: null;
+        // B2B / staff
+        $boat_booking->vendor_cost    = (float)($request->vendor_cost ?? 0);
+        $boat_booking->boatman_id     = $request->boatman_id;
+        $boat_booking->created_by     = auth()->guard('admin')->id();
+        // Extra per person & base pax
+        $boat_booking->extra_per_person_rate = (float)($request->extra_per_person_rate ?? 0);
+        $boat_booking->base_pax       = (int)($request->base_pax ?? 0);
+        $margin = (float)($request->final_amount ?? 0) - (float)($request->vendor_cost ?? 0);
+        $boat_booking->margin_amount  = $margin;
+
         $boat_booking->booking_status = 'confirmed';
-        if($boat_booking->final_amount != $request->paid_amount) {
-            $boat_booking->payment_status = 'partial';
-        }else{
+        $paidAmt = (float)($request->paid_amount ?? 0);
+        if ($boat_booking->final_amount <= 0 || $paidAmt >= $boat_booking->final_amount) {
             $boat_booking->payment_status = 'paid';
+        } elseif ($paidAmt > 0) {
+            $boat_booking->payment_status = 'partial';
+        } else {
+            $boat_booking->payment_status = 'unpaid';
         }
         $boat_booking->save();
 

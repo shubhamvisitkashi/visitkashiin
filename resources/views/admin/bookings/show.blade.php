@@ -727,13 +727,6 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
 {{-- ─────────────── PAGE ─────────────── --}}
 <div class="pk-page" id="pkPage">
 
-{{-- Hidden edit form (inputs live inside the page; this form submits them) --}}
-<form id="editBookingForm" action="{{ route('bookings.update', $booking->id) }}" method="POST" style="display:none">
-    @csrf
-    @method('PUT')
-    <input type="hidden" name="booking_date" value="{{ $booking->booking_date->format('Y-m-d') }}">
-    <input type="hidden" name="short_plan"   id="editShortPlan" value="{{ optional($lead)->short_plan }}">
-</form>
 
 <div class="pk-wrap">
 
@@ -831,52 +824,6 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
         </div>
     </div>
 
-    {{-- ── Action Bar ── --}}
-    <div class="pk-action-bar">
-        <div class="pk-action-group">
-            <a href="#" class="pk-btn pk-btn-ghost pk-view-actions" onclick="enterEditMode();return false;">
-                <i data-feather="edit-2"></i> Edit
-            </a>
-            <div class="pk-edit-actions">
-                <button type="button" class="pk-btn pk-btn-ghost" onclick="exitEditMode()">
-                    <i data-feather="x"></i> Cancel
-                </button>
-                <button type="button" class="pk-btn" style="background:#10B981;color:#fff;gap:6px;" onclick="submitEdit()">
-                    <i data-feather="check" style="width:14px;height:14px;"></i> Update
-                </button>
-            </div>
-            <button type="button" class="pk-btn pk-btn-wa" onclick="shareWA()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
-                WhatsApp
-            </button>
-            <button type="button" class="pk-btn pk-btn-ghost" onclick="window.open('{{ route('booking.report.view', $booking->id) }}','_blank')">
-                <i data-feather="printer"></i> Print / PDF
-            </button>
-        </div>
-
-        <div class="pk-action-group">
-            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--pk-muted)">Status:</span>
-            <button type="button" class="pk-stt-btn pending {{ $st === 'pending' ? 'active' : '' }}" onclick="updateStatus('pending')">Pending</button>
-            <button type="button" class="pk-stt-btn in_progress {{ $st === 'in_progress' ? 'active' : '' }}" onclick="updateStatus('in_progress')">Ongoing</button>
-            <button type="button" class="pk-stt-btn completed {{ $st === 'completed' ? 'active' : '' }}" onclick="updateStatus('completed')">Completed</button>
-            <button type="button" class="pk-stt-btn cancelled {{ $st === 'cancelled' ? 'active' : '' }}" onclick="updateStatus('cancelled')">Cancelled</button>
-            <form id="statusForm" action="{{ route('bookings.update-status', $booking->id) }}" method="POST" class="d-none">
-                @csrf
-                <input type="hidden" name="status" id="statusVal">
-            </form>
-            <div class="pk-action-sep"></div>
-            @can('booking-delete')
-            <form action="{{ route('bookings.destroy', $booking->id) }}" method="POST" class="d-inline" id="deleteBookingForm">
-                @csrf
-                @method('DELETE')
-                <button type="button" class="pk-btn pk-btn-rose" style="padding:6px 12px;font-size:.8rem" onclick="confirmDeleteBooking()">
-                    <i data-feather="trash-2" style="width:13px;height:13px"></i> Delete
-                </button>
-            </form>
-            @endcan
-        </div>
-    </div>
-
     {{-- ── Two-Column Grid ── --}}
     <div class="pk-grid">
 
@@ -967,116 +914,118 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                 </div>
                 <div class="pk-card-body">
 
-                    {{-- Property highlight strip --}}
-                    <div class="pk-view-field" style="background:linear-gradient(135deg,#f0fdfa,#ecfdf5);border:1.5px solid #99f6e4;border-radius:14px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px;">
-                        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#0d9488,#059669);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🏨</div>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:.68rem;font-weight:700;color:#0f766e;text-transform:uppercase;letter-spacing:.5px;">Property / Hotel</div>
-                            <div style="font-size:1.15rem;font-weight:800;color:#0f172a;line-height:1.2;margin-top:2px;">{{ $stayProperty }}</div>
-                            @if($stayRooms !== '—')<div style="font-size:.78rem;font-weight:600;color:#0d9488;margin-top:3px;">{{ $stayRooms }}</div>@endif
-                        </div>
-                        <div style="text-align:right;flex-shrink:0;">
-                            <div style="font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;">Duration</div>
-                            <div style="font-size:1.4rem;font-weight:800;color:#0f766e;line-height:1;">{{ explode(' ', $stayNights)[0] ?? '—' }}</div>
-                            <div style="font-size:.7rem;color:#64748b;font-weight:600;">night(s)</div>
-                        </div>
-                    </div>
-                    {{-- Edit: Property + Dates --}}
-                    <div class="pk-edit-field" style="margin-bottom:14px;">
-                        <div class="pk-info-label" style="margin-bottom:4px;">Property / Hotel</div>
-                        <input class="pk-edit-input" form="editBookingForm" name="stay_property" value="{{ $editProperty }}" placeholder="Property name">
-                        <div class="pk-edit-row" style="margin-top:8px;">
-                            <div>
-                                <div class="pk-info-label" style="margin-bottom:3px;">Check-in Date</div>
-                                <input class="pk-edit-input" form="editBookingForm" type="date" name="booking_start_date" value="{{ $editCheckinDate }}">
+                    {{-- ── Property Banner ── --}}
+                    <div style="background:linear-gradient(135deg,#0d9488 0%,#059669 100%);border-radius:16px;padding:20px 22px;margin-bottom:18px;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden;">
+                        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
+                        <div style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;">🏨</div>
+                        <div style="flex:1;min-width:0;position:relative;z-index:1;">
+                            <div style="font-size:.65rem;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.6px;">Property / Hotel</div>
+                            <div style="font-size:1.18rem;font-weight:900;color:#fff;line-height:1.2;margin-top:3px;">{{ $stayProperty }}</div>
+                            @if($stayRooms !== '—')
+                            <div style="margin-top:6px;">
+                                <span style="background:rgba(255,255,255,.2);color:#fff;border-radius:20px;padding:3px 11px;font-size:.74rem;font-weight:700;border:1px solid rgba(255,255,255,.3);">🚪 {{ $stayRooms }}</span>
                             </div>
-                            <div>
-                                <div class="pk-info-label" style="margin-bottom:3px;">Check-out Date</div>
-                                <input class="pk-edit-input" form="editBookingForm" type="date" name="booking_end_date" value="{{ $editCheckoutDate }}">
-                            </div>
+                            @endif
+                        </div>
+                        <div style="text-align:center;flex-shrink:0;background:rgba(255,255,255,.15);border-radius:12px;padding:10px 16px;border:1px solid rgba(255,255,255,.25);position:relative;z-index:1;">
+                            <div style="font-size:.6rem;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px;">Duration</div>
+                            <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1;margin:3px 0;">{{ explode(' ', $stayNights)[0] ?? '—' }}</div>
+                            <div style="font-size:.68rem;color:rgba(255,255,255,.8);font-weight:600;">night(s)</div>
                         </div>
                     </div>
 
-                    {{-- Check-in / Check-out timeline --}}
-                    <div class="pk-view-field" style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:18px;align-items:center;">
-                        <div style="background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:14px;padding:14px 16px;text-align:center;">
-                            <div style="font-size:.62rem;font-weight:800;color:#0d9488;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">✈ Check-in</div>
-                            <div style="font-size:.92rem;font-weight:800;color:#0f172a;line-height:1.3;">{{ $stayCheckinFull }}</div>
+                    {{-- ── Check-in / Check-out ── --}}
+                    <div style="display:grid;grid-template-columns:1fr 36px 1fr;gap:0;margin-bottom:20px;align-items:center;">
+                        <div style="background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:14px;padding:16px 18px;">
+                            <div style="font-size:.6rem;font-weight:800;color:#0d9488;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;display:flex;align-items:center;gap:4px;">
+                                <span style="width:6px;height:6px;background:#0d9488;border-radius:50%;display:inline-block;"></span> Check-in
+                            </div>
+                            <div style="font-size:1rem;font-weight:800;color:#0f172a;line-height:1.3;">{{ $stayCheckinFull }}</div>
                         </div>
-                        <div style="text-align:center;padding:0 10px;color:#0d9488;font-size:1.2rem;">→</div>
-                        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:14px 16px;text-align:center;">
-                            <div style="font-size:.62rem;font-weight:800;color:#ea580c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">✈ Check-out</div>
-                            <div style="font-size:.92rem;font-weight:800;color:#0f172a;line-height:1.3;">{{ $stayCheckoutFull }}</div>
+                        <div style="text-align:center;">
+                            <div style="width:28px;height:28px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:.8rem;color:#64748b;">→</div>
+                        </div>
+                        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:16px 18px;">
+                            <div style="font-size:.6rem;font-weight:800;color:#ea580c;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;display:flex;align-items:center;gap:4px;">
+                                <span style="width:6px;height:6px;background:#ea580c;border-radius:50%;display:inline-block;"></span> Check-out
+                            </div>
+                            <div style="font-size:1rem;font-weight:800;color:#0f172a;line-height:1.3;">{{ $stayCheckoutFull }}</div>
                         </div>
                     </div>
 
-                    {{-- Stay info grid --}}
-                    <div class="pk-info-grid">
-                        <div>
-                            <div class="pk-info-label">Booking Date</div>
-                            <div class="pk-info-val">{{ $booking->booking_date->format('d M Y') }}</div>
-                        </div>
-                        <div>
-                            <div class="pk-info-label">Duration</div>
-                            <div class="pk-info-val pk-view-field">{{ $stayNights }}</div>
-                            <div class="pk-edit-field" style="font-size:.78rem;color:#94A3B8;margin-top:4px;">Auto from dates</div>
-                        </div>
-                        <div>
-                            <div class="pk-info-label">Rooms</div>
-                            <div class="pk-info-val pk-view-field {{ $stayRooms === '—' ? 'empty' : '' }}">{{ $stayRooms }}</div>
-                            <div class="pk-edit-field pk-edit-row">
-                                <input class="pk-edit-input" form="editBookingForm" type="number" name="stay_rooms" value="{{ $editRoomsCount }}" min="1" placeholder="1" style="width:70px">
-                                <input class="pk-edit-input" form="editBookingForm" name="stay_room_type" value="{{ $editRoomType }}" placeholder="Room type">
+                    {{-- ── Info Blocks ── --}}
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+
+                        {{-- Booking Date --}}
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:12px 13px;">
+                            <div style="width:26px;height:26px;background:#EEF2FF;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:7px;">
+                                <i data-feather="calendar" style="width:13px;height:13px;color:#6366f1;"></i>
                             </div>
+                            <div style="font-size:.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Booking Date</div>
+                            <div style="font-size:.86rem;font-weight:700;color:#0f172a;">{{ $booking->booking_date->format('d M Y') }}</div>
                         </div>
-                        <div>
-                            <div class="pk-info-label">Guests</div>
-                            <div class="pk-info-val pk-view-field {{ $stayGuests === '—' ? 'empty' : '' }}">{{ $stayGuests }}</div>
-                            <div class="pk-edit-field pk-edit-row">
-                                <div>
-                                    <div style="font-size:.65rem;color:#94A3B8;margin-bottom:2px;">Adults</div>
-                                    <input class="pk-edit-input" form="editBookingForm" type="number" name="stay_adults" value="{{ $editAdults }}" min="0" placeholder="0">
-                                </div>
-                                <div>
-                                    <div style="font-size:.65rem;color:#94A3B8;margin-bottom:2px;">Children</div>
-                                    <input class="pk-edit-input" form="editBookingForm" type="number" name="stay_children" value="{{ $editChildren }}" min="0" placeholder="0">
-                                </div>
+
+                        {{-- Duration --}}
+                        <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:11px;padding:12px 13px;">
+                            <div style="width:26px;height:26px;background:#ccfbf1;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:7px;">
+                                <i data-feather="moon" style="width:13px;height:13px;color:#0d9488;"></i>
                             </div>
+                            <div style="font-size:.63rem;font-weight:700;color:#0d9488;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Duration</div>
+                            <div style="font-size:.86rem;font-weight:700;color:#0f172a;">{{ $stayNights }}</div>
                         </div>
-                        <div>
-                            <div class="pk-info-label">Meal Plan</div>
-                            <div class="pk-info-val pk-view-field {{ $stayMeal === '—' ? 'empty' : '' }}">
+
+                        {{-- Rooms (display only) --}}
+                        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:11px;padding:12px 13px;">
+                            <div style="width:26px;height:26px;background:#dbeafe;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:7px;">
+                                <i data-feather="grid" style="width:13px;height:13px;color:#3b82f6;"></i>
+                            </div>
+                            <div style="font-size:.63rem;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Rooms</div>
+                            <div style="font-size:.86rem;font-weight:700;color:#0f172a;">{{ $stayRooms !== '—' ? $stayRooms : '—' }}</div>
+                        </div>
+
+                        {{-- Guests (display only) --}}
+                        <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:11px;padding:12px 13px;">
+                            <div style="width:26px;height:26px;background:#ede9fe;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:7px;">
+                                <i data-feather="users" style="width:13px;height:13px;color:#7c3aed;"></i>
+                            </div>
+                            <div style="font-size:.63rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Guests</div>
+                            <div style="font-size:.86rem;font-weight:700;color:#0f172a;">{{ $stayGuests !== '—' ? $stayGuests : '—' }}</div>
+                        </div>
+
+                    </div>
+
+                    {{-- ── Meal Plan + Special Requests ── --}}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:12px;">
+                            <div style="width:36px;height:36px;background:#fef3c7;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🍽</div>
+                            <div>
+                                <div style="font-size:.63rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Meal Plan</div>
                                 @if($stayMeal !== '—')
-                                    <span style="display:inline-flex;align-items:center;gap:5px;background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:.76rem;font-weight:700;">🍽 {{ $stayMeal }}</span>
-                                @else —
+                                    <span style="font-size:.86rem;font-weight:800;color:#92400e;">{{ $stayMeal }}</span>
+                                @else
+                                    <span style="font-size:.84rem;color:#94a3b8;font-style:italic;">Not set</span>
                                 @endif
                             </div>
-                            <select class="pk-edit-field pk-edit-input pk-edit-select" form="editBookingForm" name="stay_meal">
-                                <option value="">— None —</option>
-                                @foreach(['EP','CP','MAP','AP','All Inclusive'] as $mp)
-                                    <option value="{{ $mp }}" {{ $editMeal === $mp ? 'selected' : '' }}>{{ $mp }}</option>
-                                @endforeach
-                            </select>
                         </div>
-                        <div>
-                            <div class="pk-info-label">Special Requests</div>
-                            <div class="pk-info-val pk-view-field {{ $stayRequests === '—' ? 'empty' : '' }}">{{ $stayRequests }}</div>
-                            <input class="pk-edit-field pk-edit-input" form="editBookingForm" name="stay_requests" value="{{ $editRequests }}" placeholder="—">
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:12px;">
+                            <div style="width:36px;height:36px;background:#EEF2FF;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i data-feather="message-square" style="width:16px;height:16px;color:#6366f1;"></i>
+                            </div>
+                            <div style="min-width:0;">
+                                <div style="font-size:.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Special Requests</div>
+                                <div style="font-size:.86rem;font-weight:600;color:#0f172a;word-break:break-word;">{{ $stayRequests !== '—' ? $stayRequests : '—' }}</div>
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Total Amount (edit mode) --}}
-                    <div class="pk-edit-field" style="margin-top:14px;padding-top:14px;border-top:1px dashed #E2E8F0;">
-                        <div class="pk-info-label" style="margin-bottom:4px;">Total Amount (₹)</div>
-                        <input class="pk-edit-input" form="editBookingForm" type="number" name="total_amount" id="editTotalAmount" value="{{ $editTotal }}" min="0" step="0.01" required style="font-size:1rem;font-weight:800;">
+                    {{-- ── Internal Notes ── --}}
+                    @if($booking->notes)
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:12px 14px;border-left:3px solid #6366f1;">
+                        <div style="font-size:.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Internal Notes</div>
+                        <div style="font-size:.86rem;color:#334155;line-height:1.6;white-space:pre-wrap;">{{ $booking->notes }}</div>
                     </div>
+                    @endif
 
-                    <div class="pk-sep"></div>
-                    <div>
-                        <div class="pk-info-label" style="margin-bottom:4px;">Internal Notes</div>
-                        <div class="pk-info-val pk-view-field" style="white-space:pre-wrap;">{{ $booking->notes ?: '—' }}</div>
-                        <textarea class="pk-edit-field pk-edit-input" form="editBookingForm" name="notes" rows="2" placeholder="Internal notes…" style="resize:vertical;">{{ $booking->notes }}</textarea>
-                    </div>
                 </div>
             </div>
 
@@ -1138,27 +1087,33 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             </div>
             @endif
 
-            {{-- WhatsApp Share --}}
+            {{-- WhatsApp Share (collapsible) --}}
             <div class="pk-card">
-                <div class="pk-card-head">
+                <div class="pk-card-head" style="cursor:pointer;" onclick="document.getElementById('waCollapse').classList.toggle('d-none')">
                     <h6 class="pk-card-title">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
                         WhatsApp Share
                     </h6>
-                    <button type="button" class="pk-btn pk-btn-ghost" style="padding:5px 10px;font-size:.76rem" onclick="copyWA()">
-                        <i data-feather="copy" style="width:12px;height:12px"></i> Copy
-                    </button>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <button type="button" class="pk-btn pk-btn-wa" style="padding:5px 12px;font-size:.76rem;" onclick="event.stopPropagation();shareWA()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
+                            Send
+                        </button>
+                        <i data-feather="chevron-down" style="width:14px;height:14px;color:var(--pk-muted);"></i>
+                    </div>
                 </div>
-                <div class="pk-card-body">
-                    <textarea class="pk-wa-box" id="waBox">{{ $waMsg }}</textarea>
-                    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-                        <button type="button" class="pk-btn pk-btn-wa" onclick="shareWA()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
-                            Share on WhatsApp
-                        </button>
-                        <button type="button" class="pk-btn pk-btn-ghost" onclick="copyWA()">
-                            <i data-feather="copy"></i> Copy Text
-                        </button>
+                <div id="waCollapse" class="d-none">
+                    <div class="pk-card-body">
+                        <textarea class="pk-wa-box" id="waBox">{{ $waMsg }}</textarea>
+                        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                            <button type="button" class="pk-btn pk-btn-wa" onclick="shareWA()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
+                                Share on WhatsApp
+                            </button>
+                            <button type="button" class="pk-btn pk-btn-ghost" onclick="copyWA()">
+                                <i data-feather="copy"></i> Copy Text
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1260,6 +1215,10 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                         <i data-feather="pie-chart" style="width:14px;height:14px;opacity:.8"></i>
                         Payment Summary
                     </div>
+                    <button type="button" class="pk-pay-add"
+                        data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                        <i data-feather="plus" style="width:12px;height:12px;"></i> Add
+                    </button>
                 </div>
                 <div class="pk-pay-body">
                     <div class="pk-pay-row">
@@ -1293,7 +1252,7 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                     </div>
                 </div>
                 <div class="pk-pay-footer">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
                         @if($pendAmt <= 0)
                             <span class="pk-badge pk-b-green-lg"><i data-feather="check-circle"></i> Fully Paid</span>
                         @else
@@ -1305,7 +1264,7 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                         </span>
                         @endif
                     </div>
-                    <div class="pk-pay-progress-wrap">
+                    <div class="pk-pay-progress-wrap" style="margin-bottom:12px;">
                         <div class="pk-pay-progress-label">
                             <span>Payment Progress</span>
                             <span style="color:var(--pk-emerald)">{{ number_format($paidPct, 0) }}%</span>
@@ -1314,6 +1273,14 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                             <div class="pk-pay-bar-fill" style="width:{{ $paidPct }}%"></div>
                         </div>
                     </div>
+                    {{-- Prominent Add Payment CTA --}}
+                    <button type="button"
+                        class="pk-btn pk-btn-emerald"
+                        data-bs-toggle="modal" data-bs-target="#addPaymentModal"
+                        style="width:100%;justify-content:center;padding:10px;font-size:.86rem;border-radius:10px;font-weight:700;">
+                        <i data-feather="plus-circle" style="width:15px;height:15px;"></i>
+                        + Add Payment
+                    </button>
                 </div>
             </div>
 
@@ -1372,10 +1339,6 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                         <i data-feather="file-text"></i> Regular Invoice
                     </a>
                     @endif
-                    <a href="{{ route('booking.report.view', $booking->id) }}" target="_blank"
-                        class="pk-btn pk-btn-purple" style="justify-content:center">
-                        <i data-feather="printer"></i> Print Report
-                    </a>
                 </div>
             </div>
 
@@ -1406,12 +1369,6 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
         <i data-feather="edit-2" style="width:20px;height:20px;stroke:#fff;"></i>
         Edit
     </a>
-    {{-- Print --}}
-    <button type="button" onclick="window.open('{{ route('booking.report.view', $booking->id) }}','_blank')"
-        style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#e0e7ff;border:none;border-radius:14px;color:#4338ca;padding:10px 6px;cursor:pointer;font-size:.7rem;font-weight:700;">
-        <i data-feather="printer" style="width:20px;height:20px;"></i>
-        Print
-    </button>
 </div>
 
 {{-- Toast --}}

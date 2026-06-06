@@ -10,13 +10,17 @@ class Boat extends Model
     use HasFactory;
 
     protected $fillable = [
-        'boat_type_id',
-        'event_type',
-        'total_available_boat',
-        'no_of_seat',
-        'price',
-        'discounted_price',
-        'is_active',
+        'boat_type_id', 'event_type',
+        'total_available_boat', 'no_of_seat',
+        'base_pax', 'max_capacity', 'extra_per_person_rate',
+        'price', 'discounted_price', 'is_active',
+    ];
+
+    protected $casts = [
+        'base_pax'             => 'integer',
+        'max_capacity'         => 'integer',
+        'extra_per_person_rate'=> 'decimal:2',
+        'price'                => 'decimal:2',
     ];
 
     public function boatType() {

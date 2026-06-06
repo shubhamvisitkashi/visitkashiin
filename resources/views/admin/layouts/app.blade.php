@@ -56,6 +56,17 @@
     <style>
         .ck-editor__editable {
             min-height: 200px;
+            color: #0F172A !important;
+            background: #fff !important;
+        }
+        /* Remove number input spinner arrows globally */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
     </style>
 
@@ -146,6 +157,15 @@
             })
             return false;
         }
+    </script>
+
+    <script>
+    /* Prevent mouse-wheel from changing number input values while scrolling the page */
+    document.addEventListener('wheel', function () {
+        if (document.activeElement && document.activeElement.type === 'number') {
+            document.activeElement.blur();
+        }
+    }, { passive: true });
     </script>
 </body>
 

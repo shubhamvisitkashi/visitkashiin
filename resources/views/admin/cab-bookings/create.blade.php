@@ -144,6 +144,11 @@
     box-shadow: none !important;
     transition: border-color .2s, box-shadow .2s !important;
 }
+/* ── Fix rupee prefix padding — must beat .cn-page .form-control specificity ── */
+.cn-page .form-control.cn-rupee-input,
+.cn-page input.cn-rupee-input {
+    padding-left: 26px !important;
+}
 .cn-page .form-control:focus,
 .cn-page select.form-control:focus,
 .cn-page textarea.form-control:focus {
@@ -429,6 +434,80 @@
         </div>
       </div>
 
+      {{-- Passengers & Extras --}}
+      <div class="cn-card">
+        <div class="cn-card-head">
+          <div class="cn-card-icon" style="background:#FEF3C7;color:#B45309;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="cn-card-title">Passengers & Extras</div>
+          <span class="cn-step ms-auto" style="background:#B45309;">3</span>
+        </div>
+        <div class="cn-card-body">
+
+          {{-- Persons row --}}
+          <div class="row g-3" style="margin-bottom:16px;">
+            <div class="col-6 col-md-3">
+              <label class="cn-label">Adults <span class="cn-req">*</span></label>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
+                <button type="button" onclick="adjCount('no_of_adults',-1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+                <span id="no_of_adults_dis" style="font-size:1.3rem;font-weight:800;color:#4F46E5;min-width:28px;text-align:center;">1</span>
+                <button type="button" onclick="adjCount('no_of_adults',1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #4F46E5;background:#4F46E5;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+              </div>
+              <input type="hidden" name="no_of_adults" id="no_of_adults" value="{{ old('no_of_adults', 1) }}">
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="cn-label">Children</label>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
+                <button type="button" onclick="adjCount('no_of_children',-1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+                <span id="no_of_children_dis" style="font-size:1.3rem;font-weight:800;color:#7C3AED;min-width:28px;text-align:center;">0</span>
+                <button type="button" onclick="adjCount('no_of_children',1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #7C3AED;background:#7C3AED;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+              </div>
+              <input type="hidden" name="no_of_children" id="no_of_children" value="{{ old('no_of_children', 0) }}">
+            </div>
+            <div class="col-md-3">
+              <label class="cn-label">Flight / Train No.</label>
+              <input type="text" name="flight_train_number" class="form-control cn-input"
+                     placeholder="e.g. AI-202, 12345" value="{{ old('flight_train_number') }}">
+              <div class="cn-hint">For airport / station transfers</div>
+            </div>
+            <div class="col-md-3">
+              <label class="cn-label">Luggage Details</label>
+              <input type="text" name="luggage_details" class="form-control cn-input"
+                     placeholder="e.g. 2 large bags, 1 stroller" value="{{ old('luggage_details') }}">
+            </div>
+          </div>
+
+          {{-- Add-on toggles --}}
+          <label class="cn-label" style="margin-bottom:10px;">Add-ons & Special Requirements</label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+
+            @foreach([
+              'carrier_on_roof'       => ['🚗', 'Carrier on Roof',    'Roof luggage carrier needed'],
+              'child_seat'            => ['👶', 'Child Seat',          'Baby / child safety seat'],
+              'wheelchair_accessible' => ['♿', 'Wheelchair Access',   'Accessible vehicle needed'],
+              'ac_required'           => ['❄️', 'AC Required',         'Air-conditioned cab'],
+            ] as $field => [$icon, $label, $hint])
+            <label style="display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #E2E8F0;border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .18s;background:#fff;user-select:none;"
+                   id="addon-lbl-{{ $field }}"
+                   onclick="toggleAddon('{{ $field }}', this)">
+              <span style="font-size:1.5rem;line-height:1;">{{ $icon }}</span>
+              <span style="font-size:.76rem;font-weight:700;color:#374151;">{{ $label }}</span>
+              <span style="font-size:.65rem;color:#94A3B8;line-height:1.3;">{{ $hint }}</span>
+              <input type="hidden" name="{{ $field }}" id="addon-{{ $field }}"
+                     value="{{ old($field, $field === 'ac_required' ? '1' : '0') }}">
+            </label>
+            @endforeach
+
+          </div>
+
+        </div>
+      </div>
+
       {{-- Vehicle Selection --}}
       <div class="cn-card">
         <div class="cn-card-head">
@@ -436,7 +515,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           </div>
           <div class="cn-card-title">Vehicle Selection <span style="font-size:.72rem;font-weight:400;color:#EF4444;">* required</span></div>
-          <span class="cn-step ms-auto" style="background:#059669;">3</span>
+          <span class="cn-step ms-auto" style="background:#059669;">4</span>
         </div>
         <div class="cn-card-body">
           <div class="veh-grid" id="veh-cards-grid">
@@ -535,7 +614,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           </div>
           <div class="cn-card-title">Pricing Breakdown</div>
-          <span class="cn-step ms-auto" style="background:#3B82F6;">4</span>
+          <span class="cn-step ms-auto" style="background:#3B82F6;">5</span>
         </div>
         <div class="cn-card-body">
           <div class="price-22-grid">
@@ -631,19 +710,70 @@
         </div>
 
         {{-- Payment Method --}}
-        <div style="margin-bottom:4px;">
+        <div style="margin-bottom:12px;">
           <label class="cn-label">Payment Method</label>
           <select name="payment_method" class="form-select cn-input">
-            @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer','card'=>'💳 Card'] as $v=>$l)
+            @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer','card'=>'💳 Card','cheque'=>'📝 Cheque'] as $v=>$l)
               <option value="{{ $v }}" {{ old('payment_method','cash')==$v ? 'selected' : '' }}>{{ $l }}</option>
             @endforeach
           </select>
+        </div>
+
+        {{-- Bank Account --}}
+        <div style="margin-bottom:4px;">
+          <label class="cn-label">Bank Account <span style="font-size:.65rem;color:#94A3B8;font-weight:400;text-transform:none;">(where advance received)</span></label>
+          <select name="payment_account_id" class="form-select cn-input">
+            <option value="">— Select account —</option>
+            @foreach($paymentAccounts as $acc)
+              <option value="{{ $acc->id }}" {{ old('payment_account_id') == $acc->id ? 'selected' : '' }}>
+                {{ $acc->account_name }}@if($acc->bank_name) — {{ $acc->bank_name }}@endif
+              </option>
+            @endforeach
+          </select>
+          <div class="cn-hint">Required only if advance payment is collected</div>
         </div>
       </div>
 
       {{-- Booking Status & Notes --}}
       <div class="cn-sidebar-card">
         <div class="cn-scard-title"><i data-feather="sliders"></i> Booking Options</div>
+
+        {{-- B2B Vendor Cost --}}
+        <div style="margin-bottom:14px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;padding:12px 14px;">
+          <label class="cn-label" style="color:#92400E;">
+            🏷 B2B Vendor Cost
+            <span style="font-size:.6rem;font-weight:600;color:#B45309;text-transform:none;letter-spacing:0;margin-left:4px;">(Internal — not on invoice)</span>
+          </label>
+          <div class="cn-rupee-wrap">
+            <span class="cn-rupee" style="color:#B45309;">₹</span>
+            <input type="number" name="vendor_cost" id="vendor_cost"
+                   class="form-control cn-input cn-rupee-input"
+                   min="0" step="0.01" placeholder="0.00" value="{{ old('vendor_cost') }}"
+                   style="border-color:#FDE68A !important;background:#FFFBEB !important;"
+                   oninput="recalcFare()">
+          </div>
+          <div class="cn-hint" style="color:#B45309;">What it costs Visit Kashi to provide this cab.</div>
+
+          {{-- Live Profit Display --}}
+          <div id="profit-box" style="display:none;margin-top:10px;border-top:1px dashed #FDE68A;padding-top:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:.74rem;color:#92400E;margin-bottom:4px;">
+              <span>Total Fare</span>
+              <span id="profit-fare" style="font-weight:700;">₹0.00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.74rem;color:#B45309;margin-bottom:6px;">
+              <span>B2B Vendor Cost</span>
+              <span id="profit-cost" style="font-weight:700;">− ₹0.00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;padding:7px 10px;border:1px solid #FDE68A;">
+              <span style="font-size:.78rem;font-weight:700;color:#065F46;">💰 Profit</span>
+              <div style="text-align:right;">
+                <div id="profit-amt" style="font-size:1rem;font-weight:900;color:#059669;">₹0.00</div>
+                <div id="profit-pct" style="font-size:.65rem;font-weight:700;color:#6B7280;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div style="margin-bottom:14px;">
           <label class="cn-label">Booking Status</label>
           <select name="booking_status" class="form-select cn-input">
@@ -831,7 +961,67 @@ function recalcFare() {
   if (advance)  parts.push(`Advance: ${fmt(advance)}`);
   parts.push(`Due: ${fmt(balance)}`);
   document.getElementById('fare-preview-text').textContent = parts.join(' · ');
+
+  // ── Profit calculation ──────────────────────────────────────────
+  const vendorCost = parseFloat(document.getElementById('vendor_cost')?.value) || 0;
+  const profitBox  = document.getElementById('profit-box');
+  if (profitBox) {
+    if (vendorCost > 0 || total > 0) {
+      const profit    = total - vendorCost;
+      const profitPct = total > 0 ? ((profit / total) * 100).toFixed(1) : 0;
+      profitBox.style.display = '';
+      document.getElementById('profit-fare').textContent = fmt(total);
+      document.getElementById('profit-cost').textContent = '− ' + fmt(vendorCost);
+      const amtEl = document.getElementById('profit-amt');
+      const pctEl = document.getElementById('profit-pct');
+      amtEl.textContent = fmt(profit);
+      amtEl.style.color = profit >= 0 ? '#059669' : '#DC2626';
+      pctEl.textContent = (profit >= 0 ? '▲ ' : '▼ ') + Math.abs(profitPct) + '% margin';
+      pctEl.style.color = profit >= 0 ? '#6B7280' : '#DC2626';
+    } else {
+      profitBox.style.display = 'none';
+    }
+  }
 }
+
+// ── Passenger counters ────────────────────────────────────────────
+function adjCount(field, delta) {
+  const hidden = document.getElementById(field);
+  const disp   = document.getElementById(field + '_dis');
+  const min    = field === 'no_of_adults' ? 1 : 0;
+  const val    = Math.max(min, (parseInt(hidden.value) || 0) + delta);
+  hidden.value = val;
+  if (disp) disp.textContent = val;
+}
+
+// ── Add-on toggles ────────────────────────────────────────────────
+function toggleAddon(field, lbl) {
+  const inp = document.getElementById('addon-' + field);
+  const active = inp.value === '1';
+  inp.value = active ? '0' : '1';
+  lbl.style.borderColor  = active ? '#E2E8F0'  : '#4F46E5';
+  lbl.style.background   = active ? '#fff'     : '#EEF2FF';
+  lbl.style.boxShadow    = active ? 'none'     : '0 0 0 3px rgba(79,70,229,.15)';
+  lbl.querySelector('span:nth-child(2)').style.color = active ? '#374151' : '#4F46E5';
+}
+
+// Init: highlight AC (default on) on load
+document.addEventListener('DOMContentLoaded', () => {
+  const acLbl = document.getElementById('addon-lbl-ac_required');
+  if (acLbl && document.getElementById('addon-ac_required').value === '1') {
+    acLbl.style.borderColor = '#4F46E5';
+    acLbl.style.background  = '#EEF2FF';
+    acLbl.style.boxShadow   = '0 0 0 3px rgba(79,70,229,.15)';
+    acLbl.querySelector('span:nth-child(2)').style.color = '#4F46E5';
+  }
+  // Init adult counter display
+  const adultHidden = document.getElementById('no_of_adults');
+  const adultDis    = document.getElementById('no_of_adults_dis');
+  if (adultHidden && adultDis) adultDis.textContent = adultHidden.value || '1';
+  const kidHidden = document.getElementById('no_of_children');
+  const kidDis    = document.getElementById('no_of_children_dis');
+  if (kidHidden && kidDis) kidDis.textContent = kidHidden.value || '0';
+});
 
 // ── Form submit validation ────────────────────────────────────────
 document.getElementById('cabForm').addEventListener('submit', function(e) {

@@ -18,7 +18,8 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
 .s-btn-print{background:#fff;color:#1C1C1E;}
 
 /* ── Wrapper ── */
-.wrap{max-width:800px;margin:24px auto 40px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.07);}
+.wrap{max-width:800px;margin:24px auto 40px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.07);display:flex;flex-direction:column;}
+.body{flex:1;}
 
 /* ── Brand Header ── */
 .bh{padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:linear-gradient(135deg,#1A2B4C 0%,#2D3A8C 100%);border-bottom:none;}
@@ -117,6 +118,13 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
 .pmt-dt{color:#6B7280;}
 .pmt-am{font-weight:700;color:#15803D;}
 
+/* ── Preference Pills ── */
+.pref-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+.pref-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:.73rem;font-weight:700;border:1px solid;}
+.pref-on {background:#F0FDF4;color:#166534;border-color:#86EFAC;}
+.pref-off{background:#F9FAFB;color:#9CA3AF;border-color:#E5E7EB;text-decoration:line-through;opacity:.6;}
+.pref-detail{font-size:.75rem;color:#374151;background:#F3F4F6;border-radius:8px;padding:6px 11px;display:flex;align-items:center;gap:6px;margin-top:6px;}
+
 /* ── Terms ── */
 .terms{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:13px 16px;margin-bottom:12px;}
 .terms-ttl{font-size:.68rem;font-weight:700;color:#92400E;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
@@ -133,12 +141,109 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
 .watermark{text-align:center;padding:10px;font-size:.65rem;color:#C4C4C4;background:#F9FAFB;}
 
 @media print{
-  .screen-bar{display:none!important;}
-  body{background:#fff;}
-  .wrap{border-radius:0;box-shadow:none;margin:0;max-width:100%;}
-  .body{background:#F5F5F7;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .confirm,.bh,.trip-bar,.pb,.terms,.card-head,.paid-full{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .card{break-inside:avoid;}
+
+  /* ══ PAGE SETUP — A4 with balanced margins ══ */
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm 12mm 12mm;   /* top right bottom left */
+  }
+
+  /* ── Base reset ── */
+  *  { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  html,body { background:#fff !important; font-size:11.5px; }
+
+  /* ── Hide screen chrome ── */
+  .screen-bar { display:none !important; }
+
+  /* ── Wrapper fills page content area ── */
+  .wrap {
+    width:100%;
+    max-width:100%;
+    margin:0;
+    border-radius:0;
+    box-shadow:none;
+    background:#fff;
+  }
+
+  /* ── Brand header ── */
+  .bh { padding:12px 16px; }
+  .bh-logo { height:36px; }
+  .bh-unit { font-size:.68rem; margin-top:4px; }
+  .bh-brand-name { font-size:.86rem; }
+  .bh-contact-line { font-size:.68rem; margin-bottom:2px; }
+  .bh-addr { font-size:.64rem; margin-bottom:4px; }
+
+  /* ── Confirmation strip ── */
+  .confirm { padding:9px 16px; gap:10px; }
+  .confirm-icon { width:28px; height:28px; font-size:.85rem; }
+  .confirm-title { font-size:.88rem; }
+  .confirm-sub { font-size:.64rem; }
+  .confirm-ref-lbl { font-size:.56rem; }
+  .confirm-ref-val { font-size:.9rem; }
+  .confirm-meta { font-size:.62rem; margin-top:3px; }
+  .status-pill { font-size:.6rem; padding:2px 8px; }
+
+  /* ── Journey section ── */
+  .journey { padding:10px 16px; }
+  .journey-label { font-size:.58rem; margin-bottom:10px; }
+  .jp-city { font-size:.84rem; }
+  .jp-addr { font-size:.66rem; }
+  .jp-dt,.jp-return { font-size:.66rem; margin-top:4px; }
+  .jm { padding:4px 14px; }
+  .jm-badge { font-size:.6rem; padding:2px 7px; }
+  .jm-km { font-size:.6rem; }
+  .jm-line { height:14px; }
+
+  /* ── Trip info bar ── */
+  .trip-bar { padding:7px 16px; gap:16px; }
+  .tb-lbl { font-size:.56rem; margin-bottom:1px; }
+  .tb-val { font-size:.74rem; }
+
+  /* ── Body / main ── */
+  .body { background:#F5F5F7 !important; padding:0; }
+  .main { padding:10px 14px; }
+
+  /* ── Cards ── */
+  .card { margin-bottom:7px; break-inside:avoid; page-break-inside:avoid; border-radius:7px; }
+  .card-head { padding:6px 12px; }
+  .card-head-ico { font-size:.82rem; }
+  .card-head-title { font-size:.62rem; letter-spacing:.04em; }
+  .card-body { padding:9px 12px; }
+
+  /* ── Detail grid ── */
+  .dg { gap:7px 10px; }
+  .di-lbl { font-size:.56rem; margin-bottom:2px; }
+  .di-val { font-size:.74rem; }
+
+  /* ── Fare table ── */
+  .ft td { padding:4px 0; font-size:.72rem; }
+  .ft .ftot td { font-size:.8rem; padding-top:7px; }
+
+  /* ── Payment boxes ── */
+  .pay-boxes { gap:6px; margin-bottom:7px; }
+  .pb { padding:8px 10px; border-radius:6px; }
+  .pb-lbl { font-size:.54rem; margin-bottom:3px; }
+  .pb-val { font-size:.9rem; }
+
+  /* ── Preferences ── */
+  .pref-grid { gap:5px; }
+  .pref-pill { font-size:.62rem; padding:3px 8px; }
+  .pref-detail { font-size:.66rem; padding:5px 9px; margin-top:5px; }
+
+  /* ── Terms ── */
+  .terms { padding:9px 12px; margin-bottom:7px; break-inside:avoid; }
+  .terms-ttl { font-size:.64rem; margin-bottom:5px; }
+  .terms li { font-size:.64rem; margin-bottom:2px; line-height:1.45; }
+
+  /* ── Footer ── */
+  .inv-footer { padding:9px 16px; }
+  .footer-logo { height:20px; }
+  .footer-brand { font-size:.68rem; }
+  .footer-right { font-size:.6rem; line-height:1.6; }
+
+  /* ── Watermark ── */
+  .watermark { font-size:.56rem; padding:5px; }
+
 }
 @media(max-width:620px){
   .main{padding:12px 16px;}
@@ -221,6 +326,10 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
 
   {{-- Journey --}}
   <div class="journey">
+    {{-- Trip Name --}}
+    @if($booking->trip_type)
+    <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:4px;letter-spacing:-.01em;">{{ $booking->trip_type }}</div>
+    @endif
     <div class="journey-label">Trip Route</div>
     <div class="journey-row">
       <div class="jp">
@@ -257,6 +366,20 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
     <div class="tb-item">
       <div class="tb-lbl">Capacity</div>
       <div class="tb-val">{{ $booking->seating_capacity }} Seats</div>
+    </div>
+    @endif
+    @php
+      $adults   = $booking->no_of_adults   ?? 0;
+      $children = $booking->no_of_children ?? 0;
+    @endphp
+    @if($adults || $children)
+    <div class="tb-item">
+      <div class="tb-lbl">Passengers</div>
+      <div class="tb-val">
+        {{ $adults ? $adults . ' Adult' . ($adults != 1 ? 's' : '') : '' }}
+        {{ ($adults && $children) ? ' + ' : '' }}
+        {{ $children ? $children . ' Child' . ($children != 1 ? 'ren' : '') : '' }}
+      </div>
     </div>
     @endif
     <div class="tb-item">
@@ -302,6 +425,12 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
               <div class="di-val">{{ $booking->customer_email }}</div>
             </div>
             @endif
+            @if($booking->flight_train_number)
+            <div>
+              <div class="di-lbl">Flight / Train No.</div>
+              <div class="di-val accent">{{ $booking->flight_train_number }}</div>
+            </div>
+            @endif
             @if($booking->gst_number)
             <div>
               <div class="di-lbl">GST Number</div>
@@ -311,6 +440,44 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
           </div>
         </div>
       </div>
+
+      {{-- Preferences & Extras --}}
+      @php
+        $prefs = [
+          ['🚗', 'Carrier on Roof',  $booking->carrier_on_roof       ?? false],
+          ['👶', 'Child Seat',        $booking->child_seat             ?? false],
+          ['♿', 'Wheelchair Access', $booking->wheelchair_accessible  ?? false],
+          ['❄️', 'AC Required',       $booking->ac_required            ?? true],
+        ];
+        $activePrefs = array_filter($prefs, fn($p) => $p[2]);
+        $hasExtras   = count($activePrefs) > 0
+                    || !empty($booking->luggage_details)
+                    || !empty($booking->notes);
+      @endphp
+      @if($hasExtras)
+      <div class="card">
+        <div class="card-head"><span class="card-head-ico">⚙️</span><span class="card-head-title">Preferences & Special Requirements</span></div>
+        <div class="card-body">
+          @if(count($activePrefs) > 0)
+          <div class="pref-grid">
+            @foreach($activePrefs as [$icon, $label, $active])
+            <span class="pref-pill pref-on">{{ $icon }} {{ $label }}</span>
+            @endforeach
+          </div>
+          @endif
+          @if(!empty($booking->luggage_details))
+          <div class="pref-detail" style="margin-top:{{ count($activePrefs) > 0 ? '8px' : '0' }};">
+            <span>🧳</span> <strong>Luggage:</strong> {{ $booking->luggage_details }}
+          </div>
+          @endif
+          @if(!empty($booking->notes))
+          <div class="pref-detail" style="margin-top:6px;">
+            <span>📝</span> <strong>Notes:</strong> {{ $booking->notes }}
+          </div>
+          @endif
+        </div>
+      </div>
+      @endif
 
       {{-- Fare Breakdown --}}
       <div class="card">
@@ -374,7 +541,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#EA
           <li>Please be ready 10 minutes before the scheduled pickup time.</li>
           <li>This voucher must be presented to the driver at the time of pickup.</li>
           <li>Toll taxes, parking, and state entry fees are included as per the fare breakdown.</li>
-          <li>Cancellations must be made at least 4 hours before the pickup time.</li>
+          <li>Cancellations within <strong>24 hours</strong> of pickup are <strong>Non-Refundable</strong>.</li>
           <li>Visit Kashi is not responsible for delays due to traffic, weather, or unforeseen circumstances.</li>
         </ul>
       </div>

@@ -335,6 +335,46 @@
         </div>
       </div>
 
+      {{-- B2B Vendor Cost --}}
+      <div style="margin-bottom:14px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;padding:12px 14px;">
+        <label class="cn-label" style="color:#92400E;">
+          🏷 B2B Vendor Cost
+          <span style="font-size:.6rem;font-weight:600;color:#B45309;text-transform:none;letter-spacing:0;margin-left:4px;">(Internal — not on invoice)</span>
+        </label>
+        <div class="cn-rupee-wrap">
+          <span class="cn-rupee" style="color:#B45309;">₹</span>
+          <input type="number" name="vendor_cost" id="vendor_cost"
+                 class="form-control cn-input cn-rupee-input"
+                 min="0" step="0.01" placeholder="0.00"
+                 value="{{ old('vendor_cost', $booking->vendor_cost) }}"
+                 style="border-color:#FDE68A !important;background:#FFFBEB !important;"
+                 oninput="recalcFare()">
+        </div>
+
+        {{-- Live Profit Display --}}
+        <div id="profit-box" style="{{ $booking->vendor_cost > 0 || $booking->total_amount > 0 ? '' : 'display:none;' }};margin-top:10px;border-top:1px dashed #FDE68A;padding-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:.74rem;color:#92400E;margin-bottom:4px;">
+            <span>Total Fare</span>
+            <span id="profit-fare" style="font-weight:700;">₹{{ number_format($booking->total_amount, 2) }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.74rem;color:#B45309;margin-bottom:6px;">
+            <span>B2B Vendor Cost</span>
+            <span id="profit-cost" style="font-weight:700;">− ₹{{ number_format($booking->vendor_cost ?? 0, 2) }}</span>
+          </div>
+          @php
+            $profit    = $booking->total_amount - ($booking->vendor_cost ?? 0);
+            $profitPct = $booking->total_amount > 0 ? round(($profit / $booking->total_amount) * 100, 1) : 0;
+          @endphp
+          <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;padding:7px 10px;border:1px solid #FDE68A;">
+            <span style="font-size:.78rem;font-weight:700;color:#065F46;">💰 Profit</span>
+            <div style="text-align:right;">
+              <div id="profit-amt" style="font-size:1rem;font-weight:900;color:{{ $profit >= 0 ? '#059669' : '#DC2626' }};">₹{{ number_format($profit, 2) }}</div>
+              <div id="profit-pct" style="font-size:.65rem;font-weight:700;color:{{ $profit >= 0 ? '#6B7280' : '#DC2626' }};">{{ $profit >= 0 ? '▲' : '▼' }} {{ abs($profitPct) }}% margin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div style="margin-bottom:14px;">
         <label class="cn-label">Booking Status</label>
         <select name="booking_status" class="form-select cn-input">
@@ -435,6 +475,27 @@ function recalcFare() {
   const dd = document.getElementById('s-discount');
   if (disc > 0) { if(dd) dd.textContent='-'+fmt(disc); if(dr) dr.style.display=''; }
   else { if(dr) dr.style.display='none'; }
+
+  // ── Profit calculation ───────────────────────────────────────────
+  const vendorCost = parseFloat(document.getElementById('vendor_cost')?.value) || 0;
+  const profitBox  = document.getElementById('profit-box');
+  if (profitBox) {
+    if (vendorCost > 0 || total > 0) {
+      const profit    = total - vendorCost;
+      const profitPct = total > 0 ? ((profit / total) * 100).toFixed(1) : 0;
+      profitBox.style.display = '';
+      document.getElementById('profit-fare').textContent = fmt(total);
+      document.getElementById('profit-cost').textContent = '− ' + fmt(vendorCost);
+      const amtEl = document.getElementById('profit-amt');
+      const pctEl = document.getElementById('profit-pct');
+      amtEl.textContent = fmt(profit);
+      amtEl.style.color = profit >= 0 ? '#059669' : '#DC2626';
+      pctEl.textContent = (profit >= 0 ? '▲ ' : '▼ ') + Math.abs(profitPct) + '% margin';
+      pctEl.style.color = profit >= 0 ? '#6B7280' : '#DC2626';
+    } else {
+      profitBox.style.display = 'none';
+    }
+  }
 }
 </script>
 @endsection

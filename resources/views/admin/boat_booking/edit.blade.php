@@ -1,237 +1,432 @@
 @extends('admin.layouts.app')
 @section('content')
-    <div class="page-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold text-primary mb-1">Edit Boat Booking</h2>
-                <p class="text-muted mb-0">Edit boat booking to the system</p>
+
+@php
+  $paidAmt  = (float)($booking->payments_sum_amount ?? 0);
+  $finalAmt = (float)$booking->final_amount;
+  $totalAmt = (float)$booking->total_amount;
+  $discAmt  = (float)($booking->total_discount ?? 0);
+  $dueAmt   = max(0, $finalAmt - $paidAmt);
+  $payStatus = $booking->payment_status ?? ($dueAmt <= 0 ? 'paid' : ($paidAmt > 0 ? 'partial' : 'unpaid'));
+  $bkStatus  = $booking->booking_status ?? 'confirmed';
+
+  $payBadge = ['paid' => ['bg-success','Paid'], 'partial' => ['bg-warning text-dark','Partial'], 'unpaid' => ['bg-danger','Unpaid']];
+  $bkBadge  = ['confirmed' => ['bg-primary','Confirmed'], 'completed' => ['bg-success','Completed'], 'cancelled' => ['bg-danger','Cancelled'], 'in_progress' => ['bg-info','In Progress']];
+
+  $bkDate    = $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M, Y') : '—';
+  $boatName  = optional(optional($booking->boat)->boatType)->name ?? '—';
+  $boatEmojis = ['Normal Motor Boat'=>'🚤','Light Motor Boat'=>'⛵','Premium Light Motor Boat'=>'⚡','Luxury Mini Yacht'=>'🛥','Bajra Boat'=>'🛶','Cruise'=>'🚢'];
+  $boatEmoji  = $boatEmojis[$boatName] ?? '⛵';
+
+  $pickupTime = $booking->pickup_time  ? \Carbon\Carbon::parse($booking->pickup_time)->format('h:i A')  : '—';
+  $dropTime   = $booking->drop_time    ? \Carbon\Carbon::parse($booking->drop_time)->format('h:i A')    : '—';
+@endphp
+
+<style>
+:root {
+  --eb-primary: #0C4A6E;
+  --eb-accent:  #0EA5E9;
+  --eb-bg:      #EFF6FF;
+  --eb-card:    #fff;
+  --eb-border:  #BFDBFE;
+}
+.eb-page { background: var(--eb-bg); min-height: 100vh; padding: 24px 26px 60px; }
+
+/* ── Header card ── */
+.eb-header {
+  background: linear-gradient(135deg, #0C4A6E 0%, #075985 45%, #0369a1 100%);
+  border-radius: 16px;
+  padding: 22px 28px;
+  margin-bottom: 22px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.eb-header-left { display: flex; align-items: center; gap: 16px; }
+.eb-header-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(255,255,255,.15); border: 2px solid rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+}
+.eb-header-title { color: #fff; font-size: 20px; font-weight: 800; line-height: 1.2; }
+.eb-header-sub   { color: rgba(255,255,255,.6); font-size: 12px; margin-top: 3px; }
+.eb-header-id    { color: #bae6fd; font-size: 13px; font-weight: 700; font-family: monospace; margin-top: 2px; }
+.eb-badge {
+  display: inline-block; padding: 4px 14px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+}
+
+/* ── Stats strip ── */
+.eb-stats {
+  display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 22px;
+}
+.eb-stat-card {
+  background: #fff; border: 1px solid #BFDBFE; border-radius: 12px;
+  padding: 14px 16px; text-align: center;
+}
+.eb-stat-val   { font-size: 18px; font-weight: 800; line-height: 1.1; }
+.eb-stat-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+
+/* ── Section card ── */
+.eb-card {
+  background: #fff; border: 1px solid var(--eb-border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04), 0 2px 12px rgba(14,165,233,.05);
+}
+.eb-card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px; border-bottom: 1px solid #BFDBFE;
+}
+.eb-card-head-icon {
+  width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.eb-card-head-title { font-size: 12px; font-weight: 800; color: #0C4A6E; text-transform: uppercase; letter-spacing: .08em; }
+.eb-card-head-sub   { font-size: 10px; color: #64748b; margin-left: auto; }
+.eb-card-body { padding: 18px 20px; }
+
+/* ── Info fields (readonly display) ── */
+.eb-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.eb-info-grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+.eb-info-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.eb-info-item {}
+.eb-info-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
+.eb-info-value {
+  background: #F8FAFF; border: 1px solid #BFDBFE; border-radius: 8px;
+  padding: 9px 13px; font-size: 13px; font-weight: 600; color: #0F172A;
+  min-height: 40px; display: flex; align-items: center;
+}
+.eb-info-value.mono { font-family: monospace; color: #0C4A6E; font-weight: 700; }
+.eb-info-value.muted { color: #94a3b8; font-style: italic; }
+
+/* ── Editable fields ── */
+.eb-edit-card {
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  border: 2px solid #93C5FD; border-radius: 14px; overflow: hidden; margin-bottom: 18px;
+  box-shadow: 0 2px 16px rgba(14,165,233,.12);
+}
+.eb-edit-card-head {
+  background: linear-gradient(135deg, #0C4A6E, #075985);
+  padding: 13px 20px; display: flex; align-items: center; gap: 10px;
+}
+.eb-edit-card-head-title { color: #fff; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.eb-edit-card-head-note  { color: rgba(255,255,255,.55); font-size: 10.5px; margin-left: auto; }
+.eb-edit-card-body { padding: 20px; }
+
+.eb-field label { font-size: 11px; font-weight: 700; color: #0C4A6E; margin-bottom: 6px; display: block; }
+.eb-field .form-control {
+  border: 2px solid #93C5FD; border-radius: 9px; padding: 10px 14px;
+  font-size: 13px; font-weight: 500; background: #fff;
+  transition: border-color .2s, box-shadow .2s;
+}
+.eb-field .form-control:focus {
+  border-color: #0EA5E9; box-shadow: 0 0 0 3px rgba(14,165,233,.15); outline: none;
+}
+
+/* ── Payment receipt rows ── */
+.eb-pay-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid #EFF6FF;
+}
+.eb-pay-row:last-child { border-bottom: none; }
+.eb-pay-row-label { font-size: 12px; color: #475569; display: flex; align-items: center; gap: 6px; }
+.eb-pay-row-val   { font-size: 13px; font-weight: 700; }
+
+/* ── Action bar ── */
+.eb-actions {
+  background: #fff; border: 1px solid #BFDBFE; border-radius: 14px;
+  padding: 18px 22px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+
+@media (max-width:768px) {
+  .eb-stats { grid-template-columns: repeat(2,1fr); }
+  .eb-info-grid, .eb-info-grid-4 { grid-template-columns: 1fr 1fr; }
+  .eb-info-grid-2 { grid-template-columns: 1fr; }
+  .eb-header { flex-direction: column; align-items: flex-start; }
+}
+</style>
+
+<div class="eb-page">
+
+  {{-- ── HEADER ── --}}
+  <div class="eb-header">
+    <div class="eb-header-left">
+      <div class="eb-header-icon">⛵</div>
+      <div>
+        <div class="eb-header-title">Edit Boat Booking</div>
+        <div class="eb-header-sub">Update customer details, persons, ghats &amp; notes</div>
+        <div class="eb-header-id">{{ $booking->booking_id }}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      @php
+        [$payBg, $payTxt]  = $payBadge[$payStatus]  ?? ['bg-secondary','—'];
+        [$bkBg,  $bkTxt]   = $bkBadge[$bkStatus]    ?? ['bg-secondary','—'];
+      @endphp
+      <span class="eb-badge {{ $bkBg  }} text-white">{{ $bkTxt }}</span>
+      <span class="eb-badge {{ $payBg }}">{{ $payTxt }}</span>
+      <a href="{{ route('boat-booking.show', $booking->booking_id) }}"
+         class="btn btn-sm btn-light fw-semibold" style="border-radius:8px;">
+        <i class="fas fa-eye me-1"></i> View
+      </a>
+      <a href="{{ route('boat-booking.voucher', $booking->booking_id) }}"
+         class="btn btn-sm" target="_blank"
+         style="background:#0ea5e9;color:#fff;border-radius:8px;font-weight:600;">
+        <i class="fas fa-print me-1"></i> Voucher
+      </a>
+      <a href="{{ route('boat-booking.payment', $booking->booking_id) }}"
+         class="btn btn-sm btn-success fw-semibold" style="border-radius:8px;">
+        <i class="fas fa-rupee-sign me-1"></i> Payment
+      </a>
+    </div>
+  </div>
+
+  {{-- ── STATS STRIP ── --}}
+  <div class="eb-stats">
+    <div class="eb-stat-card">
+      <div class="eb-stat-val" style="color:#0369a1;">₹{{ number_format($totalAmt, 0) }}</div>
+      <div class="eb-stat-label">Total Amount</div>
+    </div>
+    <div class="eb-stat-card">
+      <div class="eb-stat-val" style="color:#d97706;">₹{{ number_format($discAmt, 0) }}</div>
+      <div class="eb-stat-label">Discount</div>
+    </div>
+    <div class="eb-stat-card">
+      <div class="eb-stat-val" style="color:#0C4A6E;">₹{{ number_format($finalAmt, 0) }}</div>
+      <div class="eb-stat-label">Final Amount</div>
+    </div>
+    <div class="eb-stat-card">
+      <div class="eb-stat-val" style="color:#059669;">₹{{ number_format($paidAmt, 0) }}</div>
+      <div class="eb-stat-label">Paid</div>
+    </div>
+    <div class="eb-stat-card">
+      <div class="eb-stat-val" style="color:{{ $dueAmt > 0 ? '#dc2626' : '#059669' }};">₹{{ number_format($dueAmt, 0) }}</div>
+      <div class="eb-stat-label">{{ $dueAmt > 0 ? 'Balance Due' : 'Fully Paid' }}</div>
+    </div>
+  </div>
+
+  <form id="boat_booking_form" method="POST" action="{{ route('boat-booking.update', $booking->booking_id) }}" enctype="multipart/form-data">
+    @method('PUT')
+    @csrf
+
+    <div class="row g-4">
+
+      {{-- LEFT COLUMN --}}
+      <div class="col-lg-8">
+
+        {{-- ── EDITABLE: Customer Info ── --}}
+        <div class="eb-edit-card">
+          <div class="eb-edit-card-head">
+            <i class="fas fa-user-edit" style="color:#7dd3fc;font-size:14px;"></i>
+            <div class="eb-edit-card-head-title">Edit Customer Information</div>
+            <div class="eb-edit-card-head-note"><i class="fas fa-pencil-alt me-1"></i>These fields are editable</div>
+          </div>
+          <div class="eb-edit-card-body">
+            <div class="row g-3">
+              {{-- Row 1: Name / Email / Phone --}}
+              <div class="col-md-4 eb-field">
+                <label for="name"><i class="fas fa-user text-primary me-1"></i>Full Name <span class="text-danger">*</span></label>
+                <input id="name" class="form-control" type="text" name="name"
+                       value="{{ old('name', $booking->name) }}" placeholder="Customer name" required>
+                @error('name')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+              </div>
+              <div class="col-md-4 eb-field">
+                <label for="email"><i class="fas fa-envelope text-primary me-1"></i>Email Address <span class="text-danger">*</span></label>
+                <input id="email" class="form-control" type="email" name="email"
+                       value="{{ old('email', $booking->email) }}" placeholder="Email address" required>
+                @error('email')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+              </div>
+              <div class="col-md-4 eb-field">
+                <label for="phone"><i class="fas fa-phone text-primary me-1"></i>Phone Number <span class="text-danger">*</span></label>
+                <input id="phone" class="form-control" type="tel" name="phone"
+                       value="{{ old('phone', $booking->phone) }}" placeholder="Phone number" required>
+                @error('phone')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+              </div>
+
+              {{-- Row 2: No. of Persons / Boarding Ghat / Drop Ghat --}}
+              <div class="col-md-4 eb-field">
+                <label for="no_of_person"><i class="fas fa-users text-primary me-1"></i>No. of Persons <span class="text-danger">*</span></label>
+                <input id="no_of_person" class="form-control" type="number" name="no_of_person" min="1"
+                       value="{{ old('no_of_person', $booking->no_of_person) }}" placeholder="Number of persons" required>
+                @error('no_of_person')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+              </div>
+              <div class="col-md-4 eb-field">
+                <label for="boarding_ghat"><i class="fas fa-map-marker-alt text-primary me-1"></i>Boarding Ghat</label>
+                <input id="boarding_ghat" class="form-control" type="text" name="boarding_ghat"
+                       value="{{ old('boarding_ghat', $booking->boarding_ghat) }}" placeholder="e.g. Dashashwamedh Ghat">
+                @error('boarding_ghat')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+              </div>
+              <div class="col-md-4 eb-field">
+                <label for="drop_ghat"><i class="fas fa-map-marker-alt text-danger me-1"></i>Drop Ghat</label>
+                <input id="drop_ghat" class="form-control" type="text" name="drop_ghat"
+                       value="{{ old('drop_ghat', $booking->drop_ghat) }}" placeholder="e.g. Ravidas Ghat">
+                @error('drop_ghat')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+              </div>
+
+              {{-- Row 3: Guest Notes --}}
+              <div class="col-12 eb-field">
+                <label for="guest_notes"><i class="fas fa-sticky-note text-primary me-1"></i>Guest Notes</label>
+                <textarea id="guest_notes" class="form-control" name="guest_notes" rows="2"
+                          placeholder="Any special requests or notes for this booking...">{{ old('guest_notes', $booking->guest_notes) }}</textarea>
+                @error('guest_notes')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+              </div>
             </div>
-            <div>
-                <a href="{{route('boat-booking.index')}}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
-            </div>
+          </div>
         </div>
 
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-gradient-primary text-white border-0">
-                        <h5 class="mb-0 fw-semibold"><i class="fas fa-ship me-2"></i>Boat Booking Information</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <form id="boat_booking_form" method="POST" action="{{route('boat-booking.update', $booking->booking_id)}}" enctype="multipart/form-data">
-                            @method('PUT')
-                            @csrf
-                            <div class="border rounded p-3 mb-4 bg-light">
-                                <h6 class="fw-semibold text-primary mb-3"><i class="fas fa-ship me-1"></i>Boat Details</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label for="boat_type" class="form-label fw-semibold"><i class="fas fa-ship text-primary me-1"></i>Boat Type <span class="text-danger">*</span></label>
-                                        <select id="boat_type" class="form-select form-select-lg border-2" name="boat_type" disabled>
-                                            <option value="">Select Boat Type</option>
-                                            @foreach($boat_types as $boat_type)
-                                                <option value="{{$boat_type->id}}" @if(old('boat_type', $booking->boat?->boatType?->id) == $boat_type->id) selected @endif>{{$boat_type->name}}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('boat_type')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
+        {{-- ── READ-ONLY: Booking Info ── --}}
+        <div class="eb-card">
+          <div class="eb-card-head">
+            <div class="eb-card-head-icon" style="background:#EFF6FF;color:#0C4A6E;">📋</div>
+            <div class="eb-card-head-title">Booking Information</div>
+            <span class="eb-card-head-sub"><i class="fas fa-lock me-1"></i>Read-only</span>
+          </div>
+          <div class="eb-card-body">
+            <div class="eb-info-grid-4">
+              <div class="eb-info-item">
+                <div class="eb-info-label">Booking ID</div>
+                <div class="eb-info-value mono">{{ $booking->booking_id }}</div>
+              </div>
+              <div class="eb-info-item">
+                <div class="eb-info-label">Booking Date</div>
+                <div class="eb-info-value">{{ $bkDate }}</div>
+              </div>
+              <div class="eb-info-item">
+                <div class="eb-info-label">Booking Type</div>
+                <div class="eb-info-value">{{ $booking->booking_type ?? '—' }}</div>
+              </div>
+              <div class="eb-info-item">
+                <div class="eb-info-label">Event on Boat</div>
+                <div class="eb-info-value">{{ $booking->event_on_boat ?? 'Regular Ride' }}</div>
+              </div>
+              <div class="eb-info-item">
+                <div class="eb-info-label">Pickup Time</div>
+                <div class="eb-info-value">{{ $pickupTime }}</div>
+              </div>
+              <div class="eb-info-item">
+                <div class="eb-info-label">Drop Time</div>
+                <div class="eb-info-value">{{ $dropTime }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                                    <div class="col-md-6">
-                                        <label for="event_type" class="form-label fw-semibold"><i class="fas fa-calendar text-primary me-1"></i>Event Type <span class="text-danger">*</span></label>
-                                        <select id="event_type" class="form-select form-select-lg border-2" name="event_type" disabled>
-                                            <option value="">Select Event Type</option>
-                                            <option value="Regular" @if(old('event_type', $booking->boat?->event_type) == 'Regular') selected @endif>Regular</option>
-                                            <option value="Festival" @if(old('event_type', $booking->boat?->event_type) == 'Festival') selected @endif>Festival</option>
-                                        </select>
-                                        @error('event_type')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Customer Information Section -->
-                            <div class="border rounded p-3 mb-4 bg-light">
-                                <h6 class="fw-semibold text-primary mb-3"><i class="fas fa-user me-1"></i>Customer Information</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label for="name" class="form-label fw-semibold"><i class="fas fa-user text-primary me-1"></i>Full Name <span class="text-danger">*</span></label>
-                                        <input id="name" class="form-control form-control-lg border-2" type="text" name="name" value="{{old('name', $booking->name)}}" placeholder="Enter customer name">
-                                        <small class="text-danger lbl_msg" id="error_name"></small>
-                                        @error('name')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label for="email" class="form-label fw-semibold"><i class="fas fa-envelope text-primary me-1"></i>Email Address <span class="text-danger">*</span></label>
-                                        <input id="email" class="form-control form-control-lg border-2" type="email" name="email" value="{{old('email', $booking->email)}}" placeholder="Enter email address">
-                                        @error('email')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label for="phone" class="form-label fw-semibold"><i class="fas fa-phone text-primary me-1"></i>Phone Number <span class="text-danger">*</span></label>
-                                        <input id="phone" class="form-control form-control-lg border-2" type="tel" name="phone" value="{{old('phone', $booking->phone)}}" placeholder="Enter phone number">
-                                        @error('phone')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Booking Details Section -->
-                            <div class="border rounded p-3 mb-4 bg-light">
-                                <h6 class="fw-semibold text-primary mb-3"><i class="fas fa-users me-1"></i>Booking Details</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label for="no_of_person" class="form-label fw-semibold"><i class="fas fa-users text-primary me-1"></i>Number of Persons <span class="text-danger">*</span></label>
-                                        <input id="no_of_person" class="form-control form-control-lg border-2" type="number" name="no_of_person" value="{{old('no_of_person', $booking->no_of_person)}}" placeholder="Enter number of persons" min="1" readonly>
-                                        @error('no_of_person')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label for="seat_number" class="form-label fw-semibold"><i class="fas fa-chair text-primary me-1"></i>Seat Number <span class="text-danger">*</span></label>
-                                        <div class="form-control form-control-lg border-2 d-flex align-items-center" style="height: auto; min-height: 48px;">
-                                            <div class="form-check">
-                                                {{$booking->seat_number ?? 'N/A'}}
-                                            </div>
-                                        </div>
-                                        @error('seat_number')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label for="event_date" class="form-label fw-semibold"><i class="fas fa-calendar-alt text-primary me-1"></i>Event Date <span class="text-danger">*</span></label>
-                                        <input id="event_date" class="form-control form-control-lg border-2" type="datetime-local" name="event_date" value="{{old('event_date', '2025-11-05T16:00')}}" readonly>
-                                        <small class="text-danger lbl_msg" id="error_event_date"></small>
-                                        @error('event_date')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Payment Information Section -->
-                            <div class="border rounded p-3 mb-4 bg-light">
-                                <h6 class="fw-semibold text-primary mb-3"><i class="fas fa-rupee-sign me-1"></i>Payment Information</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-3">
-                                        <label for="total_amount" class="form-label fw-semibold"><i class="fas fa-calculator text-primary me-1"></i>Total Amount <span class="text-danger">*</span></label>
-                                        <div class="input-group input-group-lg">
-                                            <span class="input-group-text bg-light">₹</span>
-                                            <input id="total_amount" class="form-control border-2 bg-light" type="number" name="total_amount" value="{{old('total_amount', $booking->total_amount)}}" placeholder="Enter total amount" min="0" step="0.01" readonly>
-                                        </div>
-                                        <small class="text-danger lbl_msg" id="error_total_amount"></small>
-                                        @error('total_amount')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label for="discount_amount" class="form-label fw-semibold"><i class="fas fa-tag text-success me-1"></i>Discount Amount <small class="text-muted">(Optional)</small></label>
-                                        <div class="input-group input-group-lg">
-                                            <span class="input-group-text bg-light">₹</span>
-                                            <input id="discount_amount" class="form-control border-2" type="number" name="discount_amount" value="{{old('discount_amount', $booking->total_discount)}}" placeholder="Enter discount amount" min="0" step="0.01" readonly>
-                                        </div>
-                                        <small class="text-danger lbl_msg" id="error_discount_amount"></small>
-                                        @error('discount_amount')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label for="final_amount" class="form-label fw-semibold"><i class="fas fa-money-bill text-success me-1"></i>Final Amount <span class="text-danger">*</span></label>
-                                        <div class="input-group input-group-lg">
-                                            <span class="input-group-text bg-light">₹</span>
-                                            <input id="final_amount" class="form-control border-2 bg-light" type="number" name="final_amount" value="{{old('final_amount', $booking->final_amount)}}" placeholder="Final amount" min="0" step="0.01" readonly>
-                                        </div>
-                                        <small class="text-danger lbl_msg" id="error_final_amount"></small>
-                                        @error('final_amount')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label for="paid_amount" class="form-label fw-semibold"><i class="fas fa-money-bill text-success me-1"></i>Paid Amount <span class="text-danger">*</span></label>
-                                        <div class="input-group input-group-lg">
-                                            <span class="input-group-text bg-light">₹</span>
-                                            <input id="paid_amount" class="form-control border-2" type="number" name="paid_amount" value="{{old('paid_amount', $booking->payments_sum_amount)}}" placeholder="Paid amount" min="0" step="0.01" readonly>
-                                        </div>
-                                        <small class="text-danger lbl_msg" id="error_paid_amount"></small>
-                                        @error('paid_amount')
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{$message}}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Final amount will be calculated automatically (Total Amount - Discount Amount)</small>
-                                </div>
-                            </div>
-
-                            <!-- Summary Card -->
-                            <div class="card bg-primary bg-opacity-10 border-primary">
-                                <div class="card-body">
-                                    <h6 class="fw-semibold text-primary mb-3 text-center"><i class="fas fa-receipt me-1"></i>Booking Summary</h6>
-                                    <div class="row text-center">
-                                        <div class="col-md-1"></div>
-                                        <div class="col-md-2">
-                                            <div class="border rounded p-2 bg-white">
-                                                <div class="h5 fw-bold text-primary mb-1" id="summary-total">₹{{$booking->total_amount}}</div>
-                                                <small class="text-muted">Total Amount</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="border rounded p-2 bg-white">
-                                                <div class="h5 fw-bold text-warning mb-1" id="summary-discount">₹{{$booking->total_discount}}</div>
-                                                <small class="text-muted">Discount</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="border rounded p-2 bg-white">
-                                                <div class="h5 fw-bold text-success mb-1" id="summary-final">₹{{$booking->final_amount}}</div>
-                                                <small class="text-muted">Final Amount</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="border rounded p-2 bg-white">
-                                                <div class="h5 fw-bold text-success mb-1" id="summary-due-amount">₹{{$booking->final_amount - $booking->payments_sum_amount}}</div>
-                                                <small class="text-muted">Due Amount</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="border rounded p-2 bg-white">
-                                                <div class="h5 fw-bold text-info mb-1" id="summary-persons">{{$booking->no_of_person}}</div>
-                                                <small class="text-muted">Persons</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-5 pt-4 border-top">
-                                <div class="d-flex gap-3 justify-content-center">
-                                    <button type="submit" class="btn btn-primary btn-lg px-5"><i class="fas fa-save me-2"></i>Save Booking</button>
-                                    <a href="{{route('boat-booking.index')}}" class="btn btn-outline-danger btn-lg px-4"><i class="fas fa-times me-2"></i>Cancel</a>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+        {{-- ── READ-ONLY: Boat Details ── --}}
+        <div class="eb-card">
+          <div class="eb-card-head">
+            <div class="eb-card-head-icon" style="background:#EFF6FF;color:#0C4A6E;">⛵</div>
+            <div class="eb-card-head-title">Boat Details</div>
+            <span class="eb-card-head-sub"><i class="fas fa-lock me-1"></i>Read-only</span>
+          </div>
+          <div class="eb-card-body">
+            <div style="display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1.5px solid #93C5FD;border-radius:10px;padding:14px 16px;">
+              <div style="font-size:2.4rem;line-height:1;">{{ $boatEmoji }}</div>
+              <div>
+                <div style="font-size:16px;font-weight:900;color:#0C4A6E;margin-bottom:5px;">{{ $boatName }}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <span style="background:#0369a1;color:#fff;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;">⛵ 84 Ghat Boat Ride</span>
+                  @if($booking->boat?->event_type)
+                  <span style="background:#EDE9FE;color:#6D28D9;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;">{{ $booking->boat->event_type }}</span>
+                  @endif
                 </div>
+              </div>
             </div>
+          </div>
         </div>
+
+      </div>{{-- /col-lg-8 --}}
+
+      {{-- RIGHT COLUMN --}}
+      <div class="col-lg-4">
+
+        {{-- ── Payment Summary ── --}}
+        <div class="eb-card">
+          <div class="eb-card-head">
+            <div class="eb-card-head-icon" style="background:#F0FDF4;color:#059669;">💳</div>
+            <div class="eb-card-head-title">Payment Summary</div>
+          </div>
+          <div>
+            <div class="eb-pay-row">
+              <div class="eb-pay-row-label"><span style="width:18px;height:18px;background:#DBEAFE;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">💰</span> Total Amount</div>
+              <div class="eb-pay-row-val" style="color:#0369a1;">₹{{ number_format($totalAmt, 2) }}</div>
+            </div>
+            @if($discAmt > 0)
+            <div class="eb-pay-row" style="background:#FFFBEB;">
+              <div class="eb-pay-row-label"><span style="width:18px;height:18px;background:#FEF3C7;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">🏷</span> Discount</div>
+              <div class="eb-pay-row-val" style="color:#d97706;">− ₹{{ number_format($discAmt, 2) }}</div>
+            </div>
+            @endif
+            <div class="eb-pay-row" style="background:#F8FAFC;border-top:1.5px solid #BFDBFE;">
+              <div class="eb-pay-row-label" style="font-weight:700;color:#0f172a;"><span style="width:18px;height:18px;background:#DBEAFE;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">📊</span> Final Amount</div>
+              <div class="eb-pay-row-val" style="color:#2563eb;font-size:14px;">₹{{ number_format($finalAmt, 2) }}</div>
+            </div>
+            <div class="eb-pay-row" style="background:#F0FDF4;">
+              <div class="eb-pay-row-label" style="color:#065f46;"><span style="width:18px;height:18px;background:#D1FAE5;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">✓</span> Amount Paid</div>
+              <div class="eb-pay-row-val" style="color:#059669;font-size:14px;">₹{{ number_format($paidAmt, 2) }}</div>
+            </div>
+            <div class="eb-pay-row" style="background:{{ $dueAmt > 0 ? '#FFF7ED' : '#F0FDF4' }};border-bottom:none;">
+              <div class="eb-pay-row-label" style="color:{{ $dueAmt > 0 ? '#92400e' : '#065f46' }};">
+                <span style="width:18px;height:18px;background:{{ $dueAmt > 0 ? '#FEF3C7' : '#D1FAE5' }};border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">{{ $dueAmt > 0 ? '⚠' : '✅' }}</span>
+                Balance Due
+              </div>
+              <div class="eb-pay-row-val" style="color:{{ $dueAmt > 0 ? '#d97706' : '#059669' }};font-size:14px;">₹{{ number_format($dueAmt, 2) }}</div>
+            </div>
+          </div>
+          @if($dueAmt > 0)
+          <div style="padding:12px 16px;border-top:1px solid #BFDBFE;">
+            <a href="{{ route('boat-booking.payment', $booking->booking_id) }}"
+               class="btn btn-success btn-sm w-100 fw-semibold">
+              <i class="fas fa-rupee-sign me-1"></i> Collect Payment
+            </a>
+          </div>
+          @endif
+        </div>
+
+        {{-- ── Quick Actions ── --}}
+        <div class="eb-card">
+          <div class="eb-card-head">
+            <div class="eb-card-head-icon" style="background:#F5F3FF;color:#7C3AED;">⚡</div>
+            <div class="eb-card-head-title">Quick Actions</div>
+          </div>
+          <div class="eb-card-body" style="display:flex;flex-direction:column;gap:8px;">
+            <a href="{{ route('boat-booking.show', $booking->booking_id) }}"
+               class="btn btn-outline-primary btn-sm fw-semibold" style="border-radius:8px;text-align:left;">
+              <i class="fas fa-eye me-2"></i>View Full Booking
+            </a>
+            <a href="{{ route('boat-booking.voucher', $booking->booking_id) }}" target="_blank"
+               class="btn btn-sm fw-semibold" style="background:#0C4A6E;color:#fff;border-radius:8px;text-align:left;">
+              <i class="fas fa-print me-2"></i>Print Voucher
+            </a>
+            <a href="{{ route('boat-booking.payment', $booking->booking_id) }}"
+               class="btn btn-outline-success btn-sm fw-semibold" style="border-radius:8px;text-align:left;">
+              <i class="fas fa-rupee-sign me-2"></i>Manage Payments
+            </a>
+            <a href="{{ route('boat-booking.index') }}"
+               class="btn btn-outline-secondary btn-sm fw-semibold" style="border-radius:8px;text-align:left;">
+              <i class="fas fa-list me-2"></i>All Bookings
+            </a>
+          </div>
+        </div>
+
+      </div>{{-- /col-lg-4 --}}
+    </div>{{-- /row --}}
+
+    {{-- ── ACTION BAR ── --}}
+    <div class="eb-actions mt-2">
+      <button type="submit" class="btn btn-primary fw-bold px-5" style="border-radius:10px;padding:10px 28px;">
+        <i class="fas fa-save me-2"></i>Save Changes
+      </button>
+      <a href="{{ route('boat-booking.show', $booking->booking_id) }}"
+         class="btn btn-outline-secondary fw-semibold" style="border-radius:10px;padding:10px 20px;">
+        <i class="fas fa-times me-2"></i>Cancel
+      </a>
+      <div class="ms-auto" style="font-size:11.5px;color:#64748b;">
+        <i class="fas fa-info-circle me-1 text-primary"></i>
+        Editable: <strong>Name, Email, Phone, Persons, Ghats &amp; Notes</strong>
+      </div>
     </div>
 
-    <style>
-        .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .form-control:focus, .form-select:focus { border-color: #667eea; box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25); }
-        .card { transition: all 0.3s ease; }
-        .is-invalid { border-color: #dc3545; }
-    </style>
+  </form>
+
+</div>
 @endsection

@@ -5,306 +5,200 @@ namespace App\Http\Controllers\Admin;
 use DB;
 use Carbon\Carbon;
 use App\Models\Lead;
+use App\Models\Booking;
+use App\Models\CabBooking;
+use App\Models\BoatBooking;
 use App\Models\Enquiry;
 use Illuminate\Http\Request;
-use App\Models\Admin\Category;
 use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $categories = Category::withCount('product')->with('subCategory',function($query){
-            $query->withCount('product');
-        })->get();
+        $today     = Carbon::today();
+        $thisMonth = Carbon::now();
+        $lastMonth = Carbon::now()->subMonth();
 
-        // Base query for user-specific filtering
-        $userFilter = function($query) {
-            if (auth()->id() != 1) {
-                $query->where('added_by', auth()->id());
-            }
-        };
+        $isAdmin = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+        $userId  = auth('admin')->id();
 
-        // Today's lead statistics
-        $total_complete = Lead::where('booking_status', 'complete')->when(auth()->id() != 1, $userFilter)->whereDate('booking_start_date',today())->count();
-        $total_confirm  = Lead::where('booking_status', 'confirm')->when(auth()->id() != 1, $userFilter)->whereDate('booking_start_date',today())->count();
-        $total_follow_up  = Lead::where('booking_status', 'follow up')->when(auth()->id() != 1, $userFilter)->whereDate('booking_start_date',today())->count();
-        $total_cancel   = Lead::where('booking_status', 'cancel')->when(auth()->id() != 1, $userFilter)->whereDate('booking_start_date',today())->count();
-        $total_lead     = Lead::when(auth()->id() != 1, $userFilter)->whereDate('booking_start_date',today())->count();
-        $total_enquiry = Enquiry::count();
+        // ── Stay Bookings ─────────────────────────────────────────
+        $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
-        // Calculate conversion rate (completed leads / total leads this month)
-        $monthly_total_leads = Lead::when(auth()->id() != 1, $userFilter)
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->count();
-        
-        $monthly_completed_leads = Lead::where('booking_status', 'complete')
-            ->when(auth()->id() != 1, $userFilter)
-            ->whereMonth('booking_start_date', Carbon::now()->month)
-            ->whereYear('booking_start_date', Carbon::now()->year)
-            ->count();
-        
-        $conversion_rate = $monthly_total_leads > 0 ? round(($monthly_completed_leads / $monthly_total_leads) * 100, 1) : 0;
+        $stayToday     = (clone $stayQ)->whereDate('booking_date', $today)->count();
+        $stayMonth     = (clone $stayQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->count();
+        $stayRevMonth  = (clone $stayQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->sum('total_amount');
+        $stayPending   = (clone $stayQ)->where('pending_amount', '>', 0)->sum('pending_amount');
+        $stayConfirmed = (clone $stayQ)->where('booking_status', 'confirmed')->count();
+        $stayCompleted = (clone $stayQ)->where('booking_status', 'completed')->count();
 
-        // Calculate average deal value
-        $total_revenue = Lead::where('booking_status', 'complete')
-            ->when(auth()->id() != 1, $userFilter)
-            ->whereMonth('booking_start_date', Carbon::now()->month)
-            ->whereYear('booking_start_date', Carbon::now()->year)
-            ->sum('total_amount');
-        
-        $avg_deal_value = $monthly_completed_leads > 0 ? round($total_revenue / $monthly_completed_leads, 2) : 0;
+        // ── Cab Bookings ──────────────────────────────────────────
+        $cabQ = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
-        // Calculate monthly growth percentage
-        $current_month_revenue = Lead::where('booking_status', 'complete')
-            ->when(auth()->id() != 1, $userFilter)
-            ->whereMonth('booking_start_date', Carbon::now()->month)
-            ->whereYear('booking_start_date', Carbon::now()->year)
-            ->sum('total_amount');
-        
-        $last_month_revenue = Lead::where('booking_status', 'complete')
-            ->when(auth()->id() != 1, $userFilter)
-            ->whereMonth('booking_start_date', Carbon::now()->subMonth()->month)
-            ->whereYear('booking_start_date', Carbon::now()->subMonth()->year)
-            ->sum('total_amount');
-        
-        $monthly_growth = $last_month_revenue > 0 ? round((($current_month_revenue - $last_month_revenue) / $last_month_revenue) * 100, 1) : 0;
+        $cabToday    = (clone $cabQ)->whereDate('created_at', $today)->count();
+        $cabMonth    = (clone $cabQ)->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)->count();
+        $cabRevMonth = (clone $cabQ)->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)->sum('total_amount');
+        $cabPending  = (clone $cabQ)->where('pending_amount', '>', 0)->sum('pending_amount');
 
-        // ── Dynamic 6-month range anchored to actual data ─────────
-        // Find the latest month that has completed bookings
-        $latestBooking = Lead::where('booking_status', 'complete')
-            ->whereNotNull('booking_start_date')
-            ->when(auth()->id() != 1, $userFilter)
-            ->max('booking_start_date');
+        // ── Boat Bookings ─────────────────────────────────────────
+        $boatQ = BoatBooking::query();
 
-        // If data exists use that as anchor, otherwise fall back to today
-        $anchor = $latestBooking ? Carbon::parse($latestBooking) : Carbon::now();
-        $startOfMonth = $anchor->copy()->subMonths(5)->startOfMonth();
-        $endOfMonth   = $anchor->copy()->endOfMonth();
+        $boatToday    = (clone $boatQ)->whereDate('booking_date', $today)->count();
+        $boatMonth    = (clone $boatQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->count();
+        $boatRevMonth = (clone $boatQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->sum('final_amount');
+        $boatPending  = (clone $boatQ)->where('payment_status', '!=', 'paid')->count();
 
-        $months = [];
-        for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addMonth()) {
-            $months[] = $date->format('Y-M');
+        // ── Grand totals ──────────────────────────────────────────
+        $totalBookingsToday = $stayToday + $cabToday + $boatToday;
+        $totalBookingsMonth = $stayMonth + $cabMonth + $boatMonth;
+        $totalRevenueMonth  = $stayRevMonth + $cabRevMonth + $boatRevMonth;
+        $totalPending       = $stayPending + $cabPending;
+        $pendingPaymentsCount = (clone $stayQ)->where('pending_amount', '>', 0)->count()
+            + (clone $cabQ)->where('pending_amount', '>', 0)->count();
+
+        // ── Revenue growth vs last month ──────────────────────────
+        $stayRevLast  = (clone $stayQ)->whereMonth('booking_date', $lastMonth->month)->whereYear('booking_date', $lastMonth->year)->sum('total_amount');
+        $cabRevLast   = (clone $cabQ)->whereMonth('created_at', $lastMonth->month)->whereYear('created_at', $lastMonth->year)->sum('total_amount');
+        $boatRevLast  = (clone $boatQ)->whereMonth('booking_date', $lastMonth->month)->whereYear('booking_date', $lastMonth->year)->sum('final_amount');
+        $totalRevLast = $stayRevLast + $cabRevLast + $boatRevLast;
+        $revenueGrowth = $totalRevLast > 0
+            ? round((($totalRevenueMonth - $totalRevLast) / $totalRevLast) * 100, 1)
+            : ($totalRevenueMonth > 0 ? 100 : 0);
+
+        // ── 6-month revenue trend ─────────────────────────────────
+        $monthLabels   = [];
+        $stayRevTrend  = [];
+        $cabRevTrend   = [];
+        $boatRevTrend  = [];
+        $totalRevTrend = [];
+        $bookingsTrend = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $m = Carbon::now()->subMonths($i);
+            $monthLabels[] = $m->format('M');
+
+            $sr = (clone $stayQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->sum('total_amount');
+            $cr = (clone $cabQ)->whereMonth('created_at', $m->month)->whereYear('created_at', $m->year)->sum('total_amount');
+            $br = (clone $boatQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->sum('final_amount');
+            $bc = (clone $stayQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->count()
+               + (clone $cabQ)->whereMonth('created_at', $m->month)->whereYear('created_at', $m->year)->count()
+               + (clone $boatQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->count();
+
+            $stayRevTrend[]  = round($sr);
+            $cabRevTrend[]   = round($cr);
+            $boatRevTrend[]  = round($br);
+            $totalRevTrend[] = round($sr + $cr + $br);
+            $bookingsTrend[] = $bc;
         }
 
-        $totalBusiness = [];
-        $totalExpense  = [];
-        $totalProfit   = [];
+        // ── All-time stats ────────────────────────────────────────
+        $allTimeRevenue  = (clone $stayQ)->sum('total_amount') + (clone $cabQ)->sum('total_amount') + (clone $boatQ)->sum('final_amount');
+        $allTimeBookings = (clone $stayQ)->count() + (clone $cabQ)->count() + (clone $boatQ)->count();
 
-        foreach ($months as $month) {
-            $m = Carbon::parse($month)->month;
-            $y = Carbon::parse($month)->year;
+        // ── Booking type distribution (donut) ─────────────────────
+        $typeLabels = ['Stay/Hotel', 'Cab', 'Boat'];
+        $typeData   = [(clone $stayQ)->count(), (clone $cabQ)->count(), (clone $boatQ)->count()];
 
-            $revenue = Lead::where('booking_status', 'complete')
-                ->when(auth()->id() != 1, $userFilter)
-                ->whereMonth('booking_start_date', $m)
-                ->whereYear('booking_start_date', $y)
-                ->sum('total_amount');
-
-            // Prefer total_expense if filled; fallback to services_cost; else estimate 30% of revenue
-            $expense = Lead::where('booking_status', 'complete')
-                ->when(auth()->id() != 1, $userFilter)
-                ->whereMonth('booking_start_date', $m)
-                ->whereYear('booking_start_date', $y)
-                ->whereNotNull('total_expense')
-                ->where('total_expense', '!=', '')
-                ->where('total_expense', '>', 0)
-                ->sum('total_expense');
-
-            if ($expense == 0) {
-                $expense = Lead::where('booking_status', 'complete')
-                    ->when(auth()->id() != 1, $userFilter)
-                    ->whereMonth('booking_start_date', $m)
-                    ->whereYear('booking_start_date', $y)
-                    ->sum('services_cost');
-            }
-            // If still zero, estimate 30% of revenue as operating cost
-            if ($expense == 0 && $revenue > 0) {
-                $expense = round($revenue * 0.30);
-            }
-
-            $totalBusiness[] = round($revenue);
-            $totalExpense[]  = round($expense);
-            $totalProfit[]   = round($revenue - $expense);
-        }
-
-        // Get today's enquiries and leads
-        $today_enquiries = Enquiry::whereDate('created_at', Carbon::today())
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $today_leads = Lead::whereDate('booking_start_date', Carbon::today())
-            ->when(auth()->id() != 1, $userFilter)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Recent activity - combine leads and enquiries
-        $recent_leads = Lead::when(auth()->id() != 1, $userFilter)
-            ->orderBy('created_at', 'desc')
-            ->limit(3)
-            ->get()
-            ->map(function($lead) {
-                return [
-                    'type' => 'lead',
-                    'title' => 'New Lead: ' . $lead->guest_name,
-                    'description' => 'Booking for ' . $lead->pax . ' pax',
-                    'time' => $lead->created_at,
-                    'status' => $lead->booking_status,
-                    'icon' => 'calendar'
-                ];
-            });
-
-        $recent_enquiries = Enquiry::orderBy('created_at', 'desc')
-            ->limit(2)
-            ->get()
-            ->map(function($enquiry) {
-                return [
-                    'type' => 'enquiry',
-                    'title' => 'New Enquiry: ' . $enquiry->name,
-                    'description' => \Str::limit($enquiry->message ?? 'No message', 50),
-                    'time' => $enquiry->created_at,
-                    'status' => 'new',
-                    'icon' => 'message-circle'
-                ];
-            });
-
-        $recent_activity = $recent_leads->concat($recent_enquiries)
-            ->sortByDesc('time')
-            ->take(5)
-            ->values();
-
-        // === COMPREHENSIVE ANALYTICS ===
-        
-        // Lead Source Analysis
-        $lead_sources = Lead::when(auth()->id() != 1, $userFilter)
-            ->select('lead_source_id', DB::raw('count(*) as count'))
-            ->whereNotNull('lead_source_id')
-            ->where('lead_source_id', '!=', '')
-            ->groupBy('lead_source_id')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->get();
-
-        $lead_source_labels = $lead_sources->pluck('lead_source_id')->map(function($id) {
-            return 'Source ' . $id;
-        })->toArray();
-        $lead_source_data = $lead_sources->pluck('count')->toArray();
-
-        // Booking Status Distribution (All Time)
-        $status_distribution = Lead::when(auth()->id() != 1, $userFilter)
-            ->select('booking_status', DB::raw('count(*) as count'))
-            ->groupBy('booking_status')
-            ->get();
-
-        $status_labels = $status_distribution->pluck('booking_status')->map(function($status) {
-            return ucfirst($status);
-        })->toArray();
-        $status_data = $status_distribution->pluck('count')->toArray();
-
-        // Monthly Booking Trends (Last 6 months)
-        $booking_trends = [];
-        foreach ($months as $month) {
-            $booking_trends[] = Lead::when(auth()->id() != 1, $userFilter)
-                ->whereMonth('booking_start_date', Carbon::parse($month)->month)
-                ->whereYear('booking_start_date', Carbon::parse($month)->year)
-                ->count();
-        }
-
-        // Top Cities by Bookings
-        $top_cities = Lead::when(auth()->id() != 1, $userFilter)
-            ->select('city', DB::raw('count(*) as count'))
-            ->whereNotNull('city')
-            ->where('city', '!=', '')
-            ->groupBy('city')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->get();
-
-        $city_labels = $top_cities->pluck('city')->toArray();
-        $city_data = $top_cities->pluck('count')->toArray();
-
-        // Payment Status Analysis
-        $payment_status = Lead::when(auth()->id() != 1, $userFilter)
-            ->select('payment_status', DB::raw('count(*) as count'))
-            ->whereNotNull('payment_status')
-            ->where('payment_status', '!=', '')
-            ->groupBy('payment_status')
-            ->get();
-
-        $payment_labels = $payment_status->pluck('payment_status')->map(function($status) {
-            return ucfirst($status);
-        })->toArray();
-        $payment_data = $payment_status->pluck('count')->toArray();
-
-        // Average PAX per booking
-        $avg_pax = Lead::when(auth()->id() != 1, $userFilter)
-            ->where('booking_status', 'complete')
-            ->whereNotNull('pax')
-            ->avg('pax');
-        $avg_pax = round($avg_pax ?? 0, 1);
-
-        // Total Revenue (All Time)
-        $total_revenue_all = Lead::when(auth()->id() != 1, $userFilter)
-            ->where('booking_status', 'complete')
-            ->sum('total_amount');
-
-        // Daily Booking Pattern (Last 7 days)
-        $daily_labels = [];
-        $daily_bookings = [];
+        // ── Daily revenue last 7 days ─────────────────────────────
+        $dailyLabels  = [];
+        $dailyRevenue = [];
         for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            $daily_labels[] = $date->format('D');
-            $daily_bookings[] = Lead::when(auth()->id() != 1, $userFilter)
-                ->whereDate('created_at', $date)
-                ->count();
+            $d = Carbon::today()->subDays($i);
+            $dailyLabels[]  = $d->format('D');
+            $dailyRevenue[] = round(
+                (clone $stayQ)->whereDate('booking_date', $d)->sum('total_amount') +
+                (clone $cabQ)->whereDate('created_at', $d)->sum('total_amount') +
+                (clone $boatQ)->whereDate('booking_date', $d)->sum('final_amount')
+            );
         }
 
-        return view('admin.dashboard',compact(
-            'categories',
-            'total_enquiry',
-            'total_complete',
-            'total_confirm',
-            'total_follow_up',
-            'total_cancel',
-            'total_lead',
-            'months',
-            'totalBusiness',
-            'totalExpense',
-            'totalProfit',
-            'today_enquiries', 
-            'today_leads',
-            'conversion_rate',
-            'avg_deal_value',
-            'monthly_growth',
-            'recent_activity',
-            // Analytics data
-            'lead_source_labels',
-            'lead_source_data',
-            'status_labels',
-            'status_data',
-            'booking_trends',
-            'city_labels',
-            'city_data',
-            'payment_labels',
-            'payment_data',
-            'avg_pax',
-            'total_revenue_all',
-            'daily_labels',
-            'daily_bookings'
-        ), ['page_title' => 'Admin Dashboard']);
+        // ── Recent bookings (all types merged) ────────────────────
+        $recentStay = (clone $stayQ)->with('lead')->latest()->limit(5)->get()->map(fn($b) => [
+            'type'   => 'stay', 'icon' => '🏨',
+            'number' => $b->booking_number,
+            'guest'  => $b->lead?->guest_name ?? '—',
+            'amount' => $b->total_amount,
+            'status' => $b->booking_status,
+            'date'   => $b->booking_date,
+            'url'    => route('bookings.show', $b->id),
+        ]);
+
+        $recentCab = (clone $cabQ)->latest()->limit(5)->get()->map(fn($b) => [
+            'type'   => 'cab', 'icon' => '🚗',
+            'number' => $b->booking_number,
+            'guest'  => $b->customer_name ?? '—',
+            'amount' => $b->total_amount,
+            'status' => $b->booking_status,
+            'date'   => $b->created_at,
+            'url'    => route('cab-bookings.show', $b->id),
+        ]);
+
+        $recentBoat = (clone $boatQ)->latest()->limit(5)->get()->map(fn($b) => [
+            'type'   => 'boat', 'icon' => '⛵',
+            'number' => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+            'guest'  => $b->name ?? '—',
+            'amount' => $b->final_amount,
+            'status' => $b->booking_status,
+            'date'   => $b->created_at,
+            'url'    => '#',
+        ]);
+
+        $recentBookings = $recentStay->concat($recentCab)->concat($recentBoat)
+            ->sortByDesc('date')->take(8)->values();
+
+        // ── Upcoming check-ins next 7 days ────────────────────────
+        $upcomingCheckins = Booking::with('lead')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
+            ->whereHas('lead', fn($q) => $q->whereBetween('booking_start_date', [$today, $today->copy()->addDays(7)]))
+            ->where('booking_status', '!=', 'cancelled')
+            ->orderBy('id')
+            ->limit(6)
+            ->get();
+
+        // ── Upcoming cab pickups ───────────────────────────────────
+        $upcomingCabs = (clone $cabQ)
+            ->whereBetween('pickup_date', [$today, $today->copy()->addDays(7)])
+            ->where('booking_status', '!=', 'cancelled')
+            ->orderBy('pickup_date')
+            ->limit(6)
+            ->get();
+
+        // ── Enquiries ─────────────────────────────────────────────
+        $enquiryCount = Enquiry::whereDate('created_at', $today)->count();
+
+        // ── Stay status breakdown ─────────────────────────────────
+        $stayStatuses = (clone $stayQ)
+            ->select('booking_status', DB::raw('count(*) as cnt'))
+            ->groupBy('booking_status')
+            ->pluck('cnt', 'booking_status');
+
+        return view('admin.dashboard', compact(
+            'totalBookingsToday', 'totalBookingsMonth', 'totalRevenueMonth',
+            'totalPending', 'revenueGrowth', 'allTimeRevenue', 'allTimeBookings',
+            'pendingPaymentsCount', 'enquiryCount',
+            'stayToday', 'cabToday', 'boatToday',
+            'stayMonth', 'cabMonth', 'boatMonth',
+            'stayRevMonth', 'cabRevMonth', 'boatRevMonth',
+            'stayConfirmed', 'stayCompleted', 'boatPending',
+            'monthLabels', 'stayRevTrend', 'cabRevTrend', 'boatRevTrend',
+            'totalRevTrend', 'bookingsTrend',
+            'typeLabels', 'typeData',
+            'dailyLabels', 'dailyRevenue',
+            'stayStatuses',
+            'recentBookings', 'upcomingCheckins', 'upcomingCabs'
+        ), ['page_title' => 'Dashboard']);
     }
 
     public function changeTheme(Request $request)
     {
-        if(isset($request->theme_change)){
+        if (isset($request->theme_change)) {
             session()->put('selected_theme', 'Dark');
-            $message = 'Dark Mode Apply !!';
-        }else{
+            $message = 'Dark Mode Applied!';
+        } else {
             session()->put('selected_theme', 'Light');
-            $message = 'Light Mode Apply !!';
+            $message = 'Light Mode Applied!';
         }
         return back()->with('success', $message);
     }
-
 }

@@ -11,19 +11,23 @@ class BoatBooking extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'booking_id',
-        'booked_by',
-        'boat_id',
-        'name',
-        'email',
-        'phone',
-        'no_of_person',
-        'total_amount',
-        'total_discount',
-        'final_amount',
-        'booking_date',
-        'booking_status',
-        'payment_status',
+        'booking_id', 'booked_by', 'boat_id',
+        'name', 'email', 'phone', 'no_of_person', 'adults', 'children',
+        'total_amount', 'total_discount', 'final_amount',
+        'booking_date', 'seat_number', 'booking_status', 'payment_status',
+        // Route & timing
+        'boarding_ghat', 'drop_ghat', 'boat_timing', 'pickup_time', 'drop_time',
+        // Event/booking type
+        'booking_type', 'event_on_boat', 'celebration_type',
+        // Add-ons
+        'decoration', 'photographer', 'live_music', 'priest', 'flowers', 'fireworks',
+        // Notes & source
+        'guest_notes', 'special_requests', 'lead_source_id',
+        // Pricing
+        'payment_method', 'payment_account_id', 'vendor_cost', 'margin_amount',
+        'extra_per_person_rate', 'base_pax', 'created_by',
+        // Staff
+        'boatman_id',
     ];
 
     public function boat() {

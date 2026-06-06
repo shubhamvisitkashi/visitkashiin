@@ -29,7 +29,33 @@ class DirectBookingController extends Controller
      * Show direct booking creation form
      * No lead required - everything in one page
      */
+    /** Hub — booking type selector */
     public function create()
+    {
+        return view('admin.bookings.create-direct', [], ['page_title' => 'New Booking']);
+    }
+
+    /** Dedicated Stay/Hotel booking form */
+    public function createStay()
+    {
+        $serviceTypes = ServiceType::with(['serviceTemplates' => function($query) {
+            $query->where('is_active', 1)->orderBy('name');
+        }])->get();
+
+        $stayServiceType = $serviceTypes->first(function($t) {
+            return str_contains(strtolower($t->name), 'hotel') || str_contains(strtolower($t->name), 'stay');
+        });
+        $stayTemplates   = $stayServiceType?->serviceTemplates ?? collect();
+        $paymentAccounts = PaymentAccount::where('is_active', 1)->orderBy('account_name')->get();
+        $leadSources     = LeadSource::orderBy('name')->get();
+
+        return view('admin.bookings.create-stay', compact('stayTemplates', 'paymentAccounts', 'leadSources'), [
+            'page_title' => 'New Stay Booking',
+        ]);
+    }
+
+    /** OLD unified create — kept for backward compat (redirects to hub) */
+    public function createOld()
     {
         // Get service types with templates for selection
         $serviceTypes = ServiceType::with(['serviceTemplates' => function($query) {
@@ -212,10 +238,12 @@ class DirectBookingController extends Controller
 
             // STEP 6: Create payment record for advance paid
             if ($advancePaid > 0) {
-                $defaultAccount = PaymentAccount::first();
+                $selectedAccountId = !empty($request->payment_account_id)
+                    ? $request->payment_account_id
+                    : PaymentAccount::first()?->id;
                 BookingPayment::create([
                     'booking_id'         => $booking->id,
-                    'payment_account_id' => $defaultAccount?->id,
+                    'payment_account_id' => $selectedAccountId,
                     'payment_date'       => now()->format('Y-m-d'),
                     'amount'             => $advancePaid,
                     'payment_method'     => $validated['payment_method'] ?? 'cash',

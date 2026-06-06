@@ -137,7 +137,7 @@ class BookingController extends Controller
 
     public function show($id)
     {
-        $booking = Booking::with(['lead', 'quotation.items.serviceTemplate', 'payments.paymentAccount', 'serviceAssignments'])
+        $booking = Booking::with(['lead', 'quotation.items.serviceTemplate.serviceType', 'quotation.items.serviceType', 'payments.paymentAccount', 'serviceAssignments'])
             ->withSum('payments', 'amount')
             ->findOrFail($id);
 
@@ -146,6 +146,17 @@ class BookingController extends Controller
             if ($booking->created_by !== auth('admin')->id()) {
                 abort(403, 'Unauthorized access. You can only view bookings you created.');
             }
+        }
+
+        // Redirect tour package bookings to the dedicated tour detail page
+        $firstItem = $booking->quotation?->items?->first();
+        $stName = strtolower(
+            optional($firstItem?->serviceTemplate?->serviceType)->name
+            ?? optional($firstItem?->serviceType)->name
+            ?? ''
+        );
+        if (str_contains($stName, 'tour') || str_contains($stName, 'package')) {
+            return redirect()->route('tour-booking.show', $id);
         }
 
         $paymentAccounts = \App\Models\PaymentAccount::active()->get();
@@ -171,8 +182,20 @@ class BookingController extends Controller
         $booking = Booking::with([
             'lead',
             'quotation.items.serviceTemplate.serviceType',
+            'quotation.items.serviceType',
             'payments.paymentAccount',
         ])->findOrFail($id);
+
+        // Redirect tour bookings to the dedicated tour detail/edit page
+        $firstItem = $booking->quotation?->items?->first();
+        $stName = strtolower(
+            optional($firstItem?->serviceTemplate?->serviceType)->name
+            ?? optional($firstItem?->serviceType)->name
+            ?? ''
+        );
+        if (str_contains($stName, 'tour') || str_contains($stName, 'package')) {
+            return redirect()->route('tour-booking.show', $id);
+        }
 
         // Role-based authorization: Staff can only edit their own bookings
         if (!auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager'])) {
@@ -682,6 +705,22 @@ class BookingController extends Controller
         }
 
         return back()->with('success', 'Service deleted successfully. Total amount updated.');
+    }
+
+    /**
+     * Premium booking voucher (printable HTML → PDF)
+     */
+    public function voucher($id)
+    {
+        $booking = Booking::with([
+            'lead',
+            'quotation.items.serviceTemplate.serviceType',
+            'quotation.items.serviceType',
+            'payments.paymentAccount',
+            'createdBy',
+        ])->withSum('payments', 'amount')->findOrFail($id);
+
+        return view('admin.bookings.voucher', compact('booking'), ['page_title' => 'Booking Voucher']);
     }
 
     /**

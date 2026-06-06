@@ -69,9 +69,22 @@ Route::group(['prefix' => 'admin'], function () {
 
             //Bookings
             // Direct Booking Routes (Must be BEFORE bookings/{id} to avoid conflicts)
+            // Hub — booking type selector
             Route::get('bookings/create-direct', 'DirectBookingController@create')->name('bookings.create-direct');
+            // Dedicated Stay booking
+            Route::get('bookings/create/stay', 'DirectBookingController@createStay')->name('bookings.create-stay');
             Route::post('bookings/store-direct', 'DirectBookingController@store')->name('bookings.store-direct');
             Route::post('bookings/save-draft', 'DirectBookingController@saveDraft')->name('bookings.save-draft');
+
+            // Fresh Tour Package Booking
+            Route::get('bookings/tour/create', 'TourBookingController@create')->name('tour-booking.create');
+            Route::post('bookings/tour/store', 'TourBookingController@store')->name('tour-booking.store');
+            Route::get('bookings/tour/{id}/view', 'TourBookingController@view')->name('tour-booking.view');
+            Route::post('bookings/tour/{id}/payment', 'TourBookingController@addPayment')->name('tour-booking.add-payment');
+            Route::get('bookings/tour/{id}', 'TourBookingController@show')->name('tour-booking.show');
+            Route::put('bookings/tour/{id}', 'TourBookingController@update')->name('tour-booking.update');
+            Route::get('bookings/tour/{id}/confirmation', 'TourBookingController@confirmation')->name('tour-booking.confirmation');
+            Route::get('bookings/tour/{id}/pdf', 'TourBookingController@downloadPdf')->name('tour-booking.pdf');
             
             Route::get('bookings', 'BookingController@index')->name('bookings.index');
             Route::get('bookings/trash/list', 'BookingController@trash')->name('bookings.trash');
@@ -91,7 +104,16 @@ Route::group(['prefix' => 'admin'], function () {
             Route::post('bookings/{id}/add-service', 'BookingController@addService')->name('bookings.add-service');
             Route::delete('bookings/{id}/delete-service/{itemId}', 'BookingController@deleteService')->name('bookings.delete-service');
             Route::get('booking-invoice/{id}', 'BookingController@invoice')->name('booking.invoice');
+            Route::get('booking-voucher/{id}', 'BookingController@voucher')->name('booking.voucher');
             Route::get('booking-gst-invoice/{id}', 'BookingController@gstInvoice')->name('booking.gst-invoice');
+            // Reports
+            Route::get('reports', 'ReportsController@index')->name('reports.index');
+            Route::get('reports/revenue', 'ReportsController@revenue')->name('reports.revenue');
+            Route::get('reports/bookings', 'ReportsController@bookings')->name('reports.bookings');
+            Route::get('reports/export', 'ReportsController@export')->name('reports.export');
+            // Customer CRM
+            Route::get('customers', 'CustomerCrmController@index')->name('customers.index');
+            Route::get('customers/{id}', 'CustomerCrmController@show')->name('customers.show');
             Route::get('booking-report/{id}/view', 'BookingController@viewReport')->name('booking.report.view');
             Route::get('booking-report/{id}', 'BookingController@downloadReport')->name('booking.report');
             Route::get('booking-report/{id}/export', 'BookingController@exportReport')->name('booking.report.export');            Route::post('bookings/{id}/update-gst', 'BookingController@updateGstDetails')->name('bookings.update-gst');
@@ -187,6 +209,7 @@ Route::group(['prefix' => 'admin'], function () {
 
             //Boat Booking
             Route::resource('boat-booking', BoatBookingController::class);
+            Route::get('boat-booking/{booking_id}/voucher', 'BoatBookingController@voucher')->name('boat-booking.voucher');
             Route::post('boat-booking/check-availability', 'BoatBookingController@checkAvailability')->name('boat-booking.check.availability');
             Route::get('send-booking-mail/{booking_id}', 'BoatBookingController@sendBookingMail')->name('send.booking.mail');
             Route::get('boat-booking-payment/{booking_id}', 'BoatBookingController@payment')->name('boat-booking.payment');

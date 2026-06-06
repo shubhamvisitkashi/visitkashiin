@@ -63,9 +63,14 @@
         $editNights = (int)\Carbon\Carbon::parse($editCheckin)->diffInDays(\Carbon\Carbon::parse($editCheckout));
     }
 
-    // Stay service templates
-    $stayTemplates    = $serviceTypes->firstWhere('name', 'Stay')?->serviceTemplates ?? collect();
-    $selectedTplId    = optional($items->first())->service_template_id;
+    // Stay service templates — match by the actual service type of the first booking item
+    $selectedTplId       = optional($items->first())->service_template_id;
+    $firstItemStypeId    = optional($items->first()?->serviceTemplate)->service_type_id
+                        ?? optional($items->first())->service_type_id;
+    $stayServiceType     = $firstItemStypeId
+        ? $serviceTypes->firstWhere('id', $firstItemStypeId)
+        : $serviceTypes->first(fn($t) => str_contains(strtolower($t->name), 'hotel') || str_contains(strtolower($t->name), 'stay'));
+    $stayTemplates       = $stayServiceType?->serviceTemplates ?? collect();
     $discountStored   = max(0, ($quotation->subtotal ?? $netTotal) - $netTotal);
 @endphp
 
@@ -82,7 +87,7 @@
 .cb-header{background:linear-gradient(135deg,#059669 0%,#047857 100%);
   border-radius:var(--h-r);padding:20px 26px;
   display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:24px;overflow:hidden;position:relative;}
+  margin-top:50px;margin-bottom:24px;overflow:hidden;position:relative;}
 .cb-header::before{content:'';position:absolute;top:-30px;right:-30px;width:150px;height:150px;background:rgba(255,255,255,.07);border-radius:50%;}
 .cb-header h1{color:#fff;font-size:1.25rem;font-weight:700;margin:0;position:relative;z-index:1;}
 .cb-header p{color:rgba(255,255,255,.75);font-size:.8rem;margin:.2rem 0 0;position:relative;z-index:1;}
@@ -639,21 +644,165 @@
           </div>
         </div>
 
-        {{-- Existing payments --}}
-        @if($payments->count() > 0)
-        <div style="margin-top:6px;">
-          <div style="font-size:.74rem;font-weight:700;color:#374151;margin-bottom:6px;">Payments Received</div>
-          @foreach($payments as $pmt)
-          <div class="pmt-item">
-            <div>
-              <div class="pmt-date">{{ \Carbon\Carbon::parse($pmt->payment_date)->format('d M Y') }}</div>
-              <div class="pmt-method">{{ ucwords(str_replace('_',' ',$pmt->payment_method ?? 'cash')) }}</div>
-            </div>
-            <div class="pmt-amt">+₹{{ number_format($pmt->amount, 2) }}</div>
+        {{-- ── PAYMENTS SECTION ── --}}
+        <div style="margin-top:10px;border-top:1px solid #F1F5F9;padding-top:12px;">
+
+          {{-- Section header --}}
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="font-size:.78rem;font-weight:700;color:#0F172A;">💳 Payments</div>
+            <button type="button" onclick="toggleAddPayment()"
+                    style="background:#EFF6FF;color:#2563eb;border:1px solid #BFDBFE;border-radius:7px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer;">
+              + Add Payment
+            </button>
           </div>
-          @endforeach
-        </div>
-        @endif
+
+          {{-- Add Payment Form --}}
+          <div id="add-payment-wrap" style="display:none;background:#F8FAFF;border:1.5px solid #BFDBFE;border-radius:12px;padding:14px;margin-bottom:10px;">
+            <form action="{{ route('bookings.add-payment', $booking->id) }}" method="POST" id="addPaymentForm">
+              @csrf
+              <div style="font-size:.68rem;font-weight:800;color:#1e40af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">New Payment</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                  <label class="nb-label">Amount (₹) <span class="nb-req">*</span></label>
+                  <div class="nb-rupee-wrap">
+                    <span class="nb-rupee">₹</span>
+                    <input type="number" name="amount" class="form-control nb-input nb-rupee-input"
+                           placeholder="0.00" min="0.01" step="0.01" required>
+                  </div>
+                </div>
+                <div>
+                  <label class="nb-label">Date <span class="nb-req">*</span></label>
+                  <input type="date" name="payment_date" class="form-control nb-input"
+                         value="{{ now()->format('Y-m-d') }}" required>
+                </div>
+                <div>
+                  <label class="nb-label">Method <span class="nb-req">*</span></label>
+                  <select name="payment_method" class="form-select nb-input" required>
+                    @foreach(['cash'=>'Cash','upi'=>'UPI','bank_transfer'=>'Bank Transfer','card'=>'Card','cheque'=>'Cheque','other'=>'Other'] as $v=>$l)
+                    <option value="{{ $v }}">{{ $l }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div>
+                  <label class="nb-label">Account <span class="nb-req">*</span></label>
+                  <select name="payment_account_id" class="form-select nb-input" required>
+                    <option value="">Select…</option>
+                    @foreach($paymentAccounts as $acc)
+                    <option value="{{ $acc->id }}">{{ $acc->account_name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <label class="nb-label">Reference No.</label>
+                <input type="text" name="reference_number" class="form-control nb-input"
+                       placeholder="UPI ID / Txn ref / Cheque no.">
+              </div>
+              <div style="display:flex;gap:6px;margin-top:10px;">
+                <button type="submit"
+                        style="flex:1;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:8px;padding:8px;font-size:.78rem;font-weight:700;cursor:pointer;">
+                  ✓ Save Payment
+                </button>
+                <button type="button" onclick="toggleAddPayment()"
+                        style="background:#F1F5F9;color:#64748b;border:1px solid #E2E8F0;border-radius:8px;padding:8px 12px;font-size:.78rem;font-weight:600;cursor:pointer;">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {{-- Existing payments list --}}
+          @if($payments->count() > 0)
+          <div id="payments-list">
+            @foreach($payments as $pmt)
+            <div class="pmt-item" id="pmt-row-{{ $pmt->id }}">
+              {{-- Display view --}}
+              <div id="pmt-view-{{ $pmt->id }}" style="width:100%;">
+                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+                  <div>
+                    <div class="pmt-date">{{ \Carbon\Carbon::parse($pmt->payment_date)->format('d M Y') }}</div>
+                    <div class="pmt-method">{{ ucwords(str_replace('_',' ',$pmt->payment_method ?? 'cash')) }}
+                      @if($pmt->reference_number) · <span style="color:#94a3b8;">{{ $pmt->reference_number }}</span>@endif
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <div class="pmt-amt">+₹{{ number_format($pmt->amount, 2) }}</div>
+                    <button type="button" onclick="toggleEditPayment({{ $pmt->id }})"
+                            style="background:#EFF6FF;color:#2563eb;border:1px solid #BFDBFE;border-radius:5px;padding:2px 7px;font-size:.65rem;font-weight:700;cursor:pointer;">Edit</button>
+                    <form action="{{ route('bookings.delete-payment', [$booking->id, $pmt->id]) }}" method="POST"
+                          onsubmit="return confirm('Delete this payment?')" style="margin:0;">
+                      @csrf @method('DELETE')
+                      <button type="submit"
+                              style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;border-radius:5px;padding:2px 7px;font-size:.65rem;font-weight:700;cursor:pointer;">✕</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              {{-- Inline edit form --}}
+              <div id="pmt-edit-{{ $pmt->id }}" style="display:none;width:100%;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;padding:12px;margin-top:6px;">
+                <form action="{{ route('bookings.update-payment', [$booking->id, $pmt->id]) }}" method="POST">
+                  @csrf @method('PUT')
+                  <div style="font-size:.65rem;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Edit Payment</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+                    <div>
+                      <label class="nb-label">Amount (₹)</label>
+                      <div class="nb-rupee-wrap">
+                        <span class="nb-rupee">₹</span>
+                        <input type="number" name="amount" class="form-control nb-input nb-rupee-input"
+                               value="{{ $pmt->amount }}" min="0.01" step="0.01" required>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="nb-label">Date</label>
+                      <input type="date" name="payment_date" class="form-control nb-input"
+                             value="{{ \Carbon\Carbon::parse($pmt->payment_date)->format('Y-m-d') }}" required>
+                    </div>
+                    <div>
+                      <label class="nb-label">Method</label>
+                      <select name="payment_method" class="form-select nb-input" required>
+                        @foreach(['cash'=>'Cash','upi'=>'UPI','bank_transfer'=>'Bank Transfer','card'=>'Card','cheque'=>'Cheque','other'=>'Other'] as $v=>$l)
+                        <option value="{{ $v }}" {{ $pmt->payment_method == $v ? 'selected':'' }}>{{ $l }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div>
+                      <label class="nb-label">Account</label>
+                      <select name="payment_account_id" class="form-select nb-input" required>
+                        <option value="">Select…</option>
+                        @foreach($paymentAccounts as $acc)
+                        <option value="{{ $acc->id }}" {{ $pmt->payment_account_id == $acc->id ? 'selected':'' }}>
+                          {{ $acc->account_name }}
+                        </option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div style="margin-top:7px;">
+                    <label class="nb-label">Reference No.</label>
+                    <input type="text" name="reference_number" class="form-control nb-input"
+                           value="{{ $pmt->reference_number }}" placeholder="Optional">
+                  </div>
+                  <div style="display:flex;gap:6px;margin-top:8px;">
+                    <button type="submit"
+                            style="flex:1;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border:none;border-radius:7px;padding:7px;font-size:.76rem;font-weight:700;cursor:pointer;">
+                      ✓ Update
+                    </button>
+                    <button type="button" onclick="toggleEditPayment({{ $pmt->id }})"
+                            style="background:#F1F5F9;color:#64748b;border:1px solid #E2E8F0;border-radius:7px;padding:7px 10px;font-size:.76rem;font-weight:600;cursor:pointer;">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div style="font-size:.76rem;color:#94a3b8;text-align:center;padding:10px 0;">No payments recorded yet.</div>
+          @endif
+
+        </div>{{-- /payments section --}}
 
         <button type="submit" class="btn-save">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -889,6 +1038,24 @@ function buildEditShortPlan() {
   // Update preview
   const pt = document.getElementById('stay-plan-text');
   if (pt) pt.textContent = sp || '—';
+}
+
+// ── Payment panel toggles ─────────────────────────────────────────
+function toggleAddPayment() {
+  const wrap = document.getElementById('add-payment-wrap');
+  if (!wrap) return;
+  const open = wrap.style.display === 'none' || wrap.style.display === '';
+  wrap.style.display = open ? 'block' : 'none';
+  if (open) wrap.querySelector('input[name="amount"]')?.focus();
+}
+
+function toggleEditPayment(id) {
+  const editDiv = document.getElementById('pmt-edit-' + id);
+  const viewDiv = document.getElementById('pmt-view-' + id);
+  if (!editDiv) return;
+  const open = editDiv.style.display === 'none' || editDiv.style.display === '';
+  editDiv.style.display = open ? 'block' : 'none';
+  if (viewDiv) viewDiv.style.opacity = open ? '.4' : '1';
 }
 
 // ── Pre-submit: ensure hidden price field is in sync ──────────────
