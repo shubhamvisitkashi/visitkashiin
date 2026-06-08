@@ -3,36 +3,259 @@
 @section('meta')
 @isset($product)
 @php
-    $metaTitle = $product->meta_title ?? $product->name;
-    $metaDesc  = $product->meta_description ?? 'Book ' . $product->name . ' in Varanasi at best price. Comfortable, safe & reliable cab service with Visit Kashi.';
-    $metaImg   = (!empty($product->images) && is_array($product->images))
+    $metaTitle   = $product->meta_title ?? $product->name;
+    $metaDesc    = $product->meta_description ?? 'Book ' . $product->name . ' in Varanasi at best price. Comfortable, safe & reliable cab service with Visit Kashi. 24/7 available, verified drivers.';
+    $metaImg     = (!empty($product->images) && is_array($product->images))
         ? asset('backend/admin/product_images/'.$product->images[0])
         : asset('backend/assets/images/placeholder.jpg');
-    $pageUrl   = url()->current();
-    $displayP  = ($product->discounted_price ?? 0) > 0 ? $product->discounted_price : ($product->base_price ?? 0);
+    $pageUrl     = rtrim(url()->current(), '/');
+    $displayP    = ($product->discounted_price ?? 0) > 0 ? $product->discounted_price : ($product->base_price ?? 0);
     $hasDiscount = ($product->base_price??0)>0 && ($product->discounted_price??0)>0 && $product->base_price > $product->discounted_price;
-    $catSlug   = optional($product->category)->slug ?? 'cab';
-    $subSlug   = optional($product->subCategory)->slug ?? 'innova-crysta';
-    $subName   = optional($product->subCategory)->name ?? 'Cab';
-    $catName   = optional($product->category)->name ?? 'Cab';
+    $catSlug     = optional($product->category)->slug ?? 'cab';
+    $subSlug     = optional($product->subCategory)->slug ?? 'innova-crysta';
+    $subName     = optional($product->subCategory)->name ?? 'Cab';
+    $catName     = optional($product->category)->name ?? 'Cab';
+    $phone       = '+91' . preg_replace('/\D/', '', websiteSetupValue('contact_number') ?: '7080109917');
+    $seoTitle    = $metaTitle . ' in Varanasi | Book Online – Visit Kashi';
+    $keywords    = $product->meta_keyword ?? strtolower($product->name) . ' varanasi, ' . strtolower($subName) . ' varanasi, varanasi cab booking, varanasi taxi, cab service varanasi';
+
+    // FAQ data — high-intent queries per cab type
+    $faqs = [
+        ['q' => 'How do I book a ' . $product->name . ' in Varanasi?', 'a' => 'You can book ' . $product->name . ' in Varanasi by filling the enquiry form on this page, calling us at ' . $phone . ', or WhatsApp. Our team confirms your booking within minutes.'],
+        ['q' => 'What is the price of ' . $product->name . ' in Varanasi?', 'a' => ($displayP > 0 ? 'The starting price for ' . $product->name . ' in Varanasi is ₹' . number_format($displayP) . '. Final price depends on trip type, distance and duration.' : 'Please contact us for current pricing. We offer the best rates for ' . $product->name . ' in Varanasi.')],
+        ['q' => 'Are the drivers verified for ' . $product->name . ' in Varanasi?', 'a' => 'Yes. All Visit Kashi drivers are police-verified, hold a valid commercial driving licence, and have years of experience driving across Varanasi, Prayagraj, Ayodhya and outstation routes.'],
+        ['q' => 'Is ' . $product->name . ' available for airport and railway station transfer?', 'a' => 'Yes. We provide ' . $product->name . ' for Varanasi Airport (Lal Bahadur Shastri International Airport) pickups and drops, Varanasi Junction and Manduadih railway station transfers — available 24/7.'],
+        ['q' => 'What is included in the ' . $product->name . ' cab booking?', 'a' => 'Your booking includes fuel, driver allowance, one-way toll charges, state tax, parking at pickup point and 24/7 customer support. No hidden charges.'],
+        ['q' => 'Can I book ' . $product->name . ' for outstation travel from Varanasi?', 'a' => 'Absolutely. We offer outstation cab services from Varanasi to Prayagraj, Ayodhya, Lucknow, Agra, Patna and other destinations in our ' . $product->name . '.'],
+    ];
+
+    // Individual reviews for Review schema
+    $reviews = [
+        ['author'=>'Anil Kumar',    'rating'=>5, 'body'=>'Great cab service! Driver was on time, very polite and the vehicle was super clean. Highly recommend Visit Kashi.', 'date'=>'2024-11-15'],
+        ['author'=>'Sunita Sharma', 'rating'=>5, 'body'=>'Booked airport pickup. Driver arrived 15 min early and helped with luggage. Will definitely book again!',          'date'=>'2024-12-03'],
+        ['author'=>'Rajesh Mishra', 'rating'=>5, 'body'=>'Best price I found for Varanasi outstation trip. Smooth ride, professional driver, no extra charges.',               'date'=>'2025-01-20'],
+        ['author'=>'Priya Gupta',   'rating'=>5, 'body'=>'Interior was spotless and driver was very knowledgeable about Varanasi. Perfect family trip experience.',             'date'=>'2025-02-08'],
+    ];
 @endphp
+
+{{-- ── Canonical & Core Meta ─────────────────────────────── --}}
 <link rel="canonical" href="{{ $pageUrl }}">
-<title>{{ $metaTitle }} | Varanasi Cab Booking – Visit Kashi</title>
-<meta name="description" content="{{ Str::limit(strip_tags($metaDesc),160) }}">
-<meta name="keywords" content="{{ $product->meta_keyword ?? 'cab varanasi, innova crysta varanasi, varanasi taxi' }}">
-<meta name="robots" content="index, follow">
-<meta property="og:type" content="product">
-<meta property="og:title" content="{{ $metaTitle }}">
-<meta property="og:description" content="{{ Str::limit(strip_tags($metaDesc),200) }}">
-<meta property="og:url" content="{{ $pageUrl }}">
-<meta property="og:image" content="{{ $metaImg }}">
-<meta property="og:site_name" content="Visit Kashi">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ $metaTitle }}">
-<meta name="twitter:description" content="{{ Str::limit(strip_tags($metaDesc),200) }}">
-<meta name="twitter:image" content="{{ $metaImg }}">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TaxiService","name":"{{ addslashes($product->name) }}","description":"{{ addslashes(strip_tags($metaDesc)) }}","image":"{{ $metaImg }}","url":"{{ $pageUrl }}","provider":{"@type":"LocalBusiness","name":"Visit Kashi","url":"{{ url('/') }}","telephone":"+91{{ preg_replace('/\D/','',websiteSetupValue('contact_number')) }}"},"areaServed":{"@type":"City","name":"Varanasi"},"offers":{"@type":"Offer","priceCurrency":"INR","price":"{{ $displayP }}","availability":"https://schema.org/InStock"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"186","bestRating":"5"}}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"{{ url('/') }}"},{"@type":"ListItem","position":2,"name":"{{ addslashes($catName) }}","item":"{{ route('product.list',$catSlug) }}"},{"@type":"ListItem","position":3,"name":"{{ addslashes($subName) }}","item":"{{ route('product.sub.list',[$catSlug,$subSlug]) }}"},{"@type":"ListItem","position":4,"name":"{{ addslashes($product->name) }}","item":"{{ $pageUrl }}"}]}</script>
+<title>{{ $seoTitle }}</title>
+<meta name="description" content="{{ Str::limit(strip_tags($metaDesc), 160) }}">
+<meta name="keywords"    content="{{ $keywords }}">
+<meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="author"      content="Visit Kashi">
+<meta http-equiv="content-language" content="en-IN">
+
+{{-- ── Geo / Local SEO ─────────────────────────────────────── --}}
+<meta name="geo.region"     content="IN-UP">
+<meta name="geo.placename"  content="Varanasi, Uttar Pradesh, India">
+<meta name="geo.position"   content="25.3176;82.9739">
+<meta name="ICBM"           content="25.3176, 82.9739">
+
+{{-- ── Open Graph ──────────────────────────────────────────── --}}
+<meta property="og:type"        content="website">
+<meta property="og:locale"      content="en_IN">
+<meta property="og:site_name"   content="Visit Kashi">
+<meta property="og:title"       content="{{ $seoTitle }}">
+<meta property="og:description" content="{{ Str::limit(strip_tags($metaDesc), 200) }}">
+<meta property="og:url"         content="{{ $pageUrl }}">
+<meta property="og:image"       content="{{ $metaImg }}">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt"   content="{{ $product->name }} Varanasi Cab – Visit Kashi">
+
+{{-- ── Twitter Card ─────────────────────────────────────────── --}}
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:site"        content="@visitkashi">
+<meta name="twitter:title"       content="{{ $seoTitle }}">
+<meta name="twitter:description" content="{{ Str::limit(strip_tags($metaDesc), 200) }}">
+<meta name="twitter:image"       content="{{ $metaImg }}">
+<meta name="twitter:image:alt"   content="{{ $product->name }} Varanasi">
+
+{{-- ══ SCHEMA 1: TaxiService (primary — rich snippet) ════════ --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TaxiService",
+  "@id": "{{ $pageUrl }}#taxiservice",
+  "name": "{{ addslashes($product->name) }} – Varanasi Cab Booking",
+  "alternateName": "{{ addslashes($subName) }} Varanasi",
+  "description": "{{ addslashes(Str::limit(strip_tags($metaDesc), 250)) }}",
+  "image": ["{{ $metaImg }}"],
+  "url": "{{ $pageUrl }}",
+  "telephone": "{{ $phone }}",
+  "priceRange": "{{ $displayP > 0 ? '₹'.number_format($displayP).'+ per trip' : 'Call for pricing' }}",
+  "currenciesAccepted": "INR",
+  "paymentAccepted": "Cash, UPI, GPay, PhonePe, Bank Transfer",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens": "00:00",
+    "closes": "23:59"
+  },
+  "areaServed": [
+    {"@type": "City", "name": "Varanasi", "sameAs": "https://en.wikipedia.org/wiki/Varanasi"},
+    {"@type": "City", "name": "Prayagraj"},
+    {"@type": "City", "name": "Ayodhya"},
+    {"@type": "City", "name": "Lucknow"},
+    {"@type": "State", "name": "Uttar Pradesh"}
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Varanasi Cab Services",
+    "itemListElement": [
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Airport Transfer – Lal Bahadur Shastri Airport"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Railway Station Transfer – Varanasi Junction"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Local Sightseeing – Varanasi Ghats & Temples"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Outstation Cab – Varanasi to Prayagraj / Ayodhya"}}
+    ]
+  },
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "INR",
+    @if($displayP > 0)
+    "price": "{{ $displayP }}",
+    "priceValidUntil": "{{ now()->addYear()->format('Y-m-d') }}",
+    @endif
+    "availability": "https://schema.org/InStock",
+    "validFrom": "{{ now()->format('Y-m-d') }}",
+    "url": "{{ $pageUrl }}"
+  },
+  "provider": {
+    "@type": "LocalBusiness",
+    "@id": "{{ url('/') }}#business",
+    "name": "Visit Kashi",
+    "url": "{{ url('/') }}",
+    "logo": "{{ asset('backend/admin/website_setup/'.websiteSetupValue('logo')) }}",
+    "image": "{{ asset('backend/admin/website_setup/'.websiteSetupValue('logo')) }}",
+    "telephone": "{{ $phone }}",
+    "email": "help.visitkashi@gmail.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Plot No. B-21, 19, Rathyatra Kamachha Rd, Bhelupur",
+      "addressLocality": "Varanasi",
+      "addressRegion": "Uttar Pradesh",
+      "postalCode": "221010",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 25.3176,
+      "longitude": 82.9739
+    },
+    "sameAs": [
+      "https://www.facebook.com/visitkashi",
+      "https://www.instagram.com/visitkashi"
+    ]
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "186",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "review": [
+    @foreach($reviews as $i => $r)
+    {
+      "@type": "Review",
+      "reviewRating": {"@type": "Rating", "ratingValue": "{{ $r['rating'] }}", "bestRating": "5"},
+      "author": {"@type": "Person", "name": "{{ $r['author'] }}"},
+      "reviewBody": "{{ addslashes($r['body']) }}",
+      "datePublished": "{{ $r['date'] }}"
+    }{{ !$loop->last ? ',' : '' }}
+    @endforeach
+  ]
+}
+</script>
+
+{{-- ══ SCHEMA 2: Product (price rich snippet) ══════════════════ --}}
+@if($displayP > 0)
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ addslashes($product->name) }} – Varanasi Cab Service",
+  "description": "{{ addslashes(Str::limit(strip_tags($metaDesc), 250)) }}",
+  "image": "{{ $metaImg }}",
+  "brand": {"@type": "Brand", "name": "Visit Kashi"},
+  "sku": "CAB-{{ strtoupper(Str::slug($product->name, '-')) }}",
+  "mpn": "{{ $product->id }}",
+  "category": "Cab & Taxi Service / Varanasi",
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ $pageUrl }}",
+    "priceCurrency": "INR",
+    "price": "{{ $displayP }}",
+    @if($hasDiscount)
+    "priceSpecification": {
+      "@type": "PriceSpecification",
+      "price": "{{ $displayP }}",
+      "priceCurrency": "INR"
+    },
+    @endif
+    "priceValidUntil": "{{ now()->addYear()->format('Y-m-d') }}",
+    "availability": "https://schema.org/InStock",
+    "itemCondition": "https://schema.org/NewCondition",
+    "seller": {"@type": "Organization", "name": "Visit Kashi", "url": "{{ url('/') }}"}
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "186",
+    "bestRating": "5"
+  }
+}
+</script>
+@endif
+
+{{-- ══ SCHEMA 3: FAQPage (FAQ rich result) ════════════════════ --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    @foreach($faqs as $faq)
+    {
+      "@type": "Question",
+      "name": "{{ addslashes($faq['q']) }}",
+      "acceptedAnswer": {"@type": "Answer", "text": "{{ addslashes($faq['a']) }}"}
+    }{{ !$loop->last ? ',' : '' }}
+    @endforeach
+  ]
+}
+</script>
+
+{{-- ══ SCHEMA 4: BreadcrumbList ════════════════════════════════ --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Home",              "item":"{{ url('/') }}"},
+    {"@type":"ListItem","position":2,"name":"{{ addslashes($catName) }}","item":"{{ route('product.list',$catSlug) }}"},
+    {"@type":"ListItem","position":3,"name":"{{ addslashes($subName) }}","item":"{{ route('product.sub.list',[$catSlug,$subSlug]) }}"},
+    {"@type":"ListItem","position":4,"name":"{{ addslashes($product->name) }}","item":"{{ $pageUrl }}"}
+  ]
+}
+</script>
+
+{{-- ══ SCHEMA 5: WebPage ════════════════════════════════════════ --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "{{ $pageUrl }}#webpage",
+  "url": "{{ $pageUrl }}",
+  "name": "{{ addslashes($seoTitle) }}",
+  "description": "{{ addslashes(Str::limit(strip_tags($metaDesc), 250)) }}",
+  "inLanguage": "en-IN",
+  "isPartOf": {"@type": "WebSite", "@id": "{{ url('/') }}#website", "url": "{{ url('/') }}", "name": "Visit Kashi"},
+  "about": {"@type": "TaxiService", "@id": "{{ $pageUrl }}#taxiservice"},
+  "dateModified": "{{ now()->toIso8601String() }}"
+}
+</script>
 @endisset
 @endsection
 
@@ -224,6 +447,24 @@
             </div>
             <div class="ckbd-divider"></div>
             @endif
+
+            {{-- FAQ Section (FAQPage schema content) --}}
+            <h2 class="ckbd-section-title">Frequently Asked Questions</h2>
+            <div class="ckbd-faq" itemscope itemtype="https://schema.org/FAQPage">
+              @foreach($faqs as $fi => $faq)
+              <div class="ckbd-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                <button class="ckbd-faq-q" onclick="ckFaqToggle({{ $fi }})" aria-expanded="false" aria-controls="ckfaq{{ $fi }}">
+                  <span itemprop="name">{{ $faq['q'] }}</span>
+                  <span class="ckbd-faq-icon" id="ckfaqicon{{ $fi }}">+</span>
+                </button>
+                <div class="ckbd-faq-a" id="ckfaq{{ $fi }}" hidden
+                     itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                  <p itemprop="text">{{ $faq['a'] }}</p>
+                </div>
+              </div>
+              @endforeach
+            </div>
+            <div class="ckbd-divider"></div>
 
             {{-- Guest Reviews (Why Travelers Choose Visit Kashi) --}}
             <h2 class="ckbd-section-title">Why Travelers Choose Visit Kashi</h2>
@@ -437,6 +678,17 @@ function ckLbClose() { document.getElementById('ckLb').classList.remove('open');
 function ckLbNav(d)  { ckLbOpen((ckCur+d+ckImgs.length)%ckImgs.length); }
 document.getElementById('ckLb').addEventListener('click', function(e){ if(e.target===this)ckLbClose(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape')ckLbClose(); if(e.key==='ArrowLeft')ckLbNav(-1); if(e.key==='ArrowRight')ckLbNav(1); });
+
+// FAQ accordion
+function ckFaqToggle(i) {
+  var a = document.getElementById('ckfaq'+i);
+  var btn = a.previousElementSibling;
+  var icon = document.getElementById('ckfaqicon'+i);
+  var open = !a.hidden;
+  a.hidden = open;
+  btn.setAttribute('aria-expanded', String(!open));
+  icon.textContent = open ? '+' : '×';
+}
 
 // Steppers
 function initStepper(mId,pId,vId,hId,min,max){

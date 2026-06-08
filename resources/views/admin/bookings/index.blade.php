@@ -1073,6 +1073,9 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               <th>Travel Date</th>
               <th>Status</th>
               <th>Amount</th>
+              @if($staffList->count())
+              <th>Added By</th>
+              @endif
               <th style="display:none;">Assigned</th>
               <th style="width:1%;white-space:nowrap;">Actions</th>
             </tr>
@@ -1196,6 +1199,23 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                     <div class="bkt-due-blink">Due ₹{{ number_format($booking->pending_amount, 0) }}</div>
                   @endif
                 </td>
+
+                {{-- ADDED BY (admin/manager only) --}}
+                @if($staffList->count())
+                <td data-label="Added By" onclick="event.stopPropagation()">
+                  @php $creator = $booking->createdBy; @endphp
+                  @if($creator)
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;">
+                      {{ strtoupper(substr($creator->name, 0, 1)) }}
+                    </div>
+                    <span style="font-size:.78rem;font-weight:600;color:#374151;white-space:nowrap;">{{ $creator->name }}</span>
+                  </div>
+                  @else
+                  <span style="font-size:.75rem;color:#9CA3AF;">—</span>
+                  @endif
+                </td>
+                @endif
 
                 {{-- ASSIGNED --}}
                 <td data-label="Assigned" style="display:none;">

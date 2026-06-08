@@ -43,7 +43,7 @@ class ContactController extends Controller
                 'checkout_time'=> 'N/A',
                 'enquiry'      => $enquiry,
             ], function ($message) {
-                $message->to('info.visitkashi@gmail.com');
+                $message->to('help.visitkashi@gmail.com');
                 $message->subject('New Contact Us Message — Visit Kashi');
             });
         } catch (\Throwable $th) {

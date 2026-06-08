@@ -66,7 +66,7 @@ class EnquiryController extends Controller
                 'enq_category'   => $enqCategory,
                 'enq_icon'       => $enqIcon,
             ], function($message) use ($request, $enqSubject){
-                $message->to('info.visitkashi@gmail.com');
+                $message->to('help.visitkashi@gmail.com');
                 $message->subject($enqSubject . ' — ' . $request->package_name . ' | Visit Kashi');
             });
         } catch (\Throwable $th) {

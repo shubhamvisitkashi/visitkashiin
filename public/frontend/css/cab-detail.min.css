@@ -107,3 +107,15 @@
 @media(max-width:600px){
   .ckbd-gallery { grid-template-rows:200px; }
 }
+
+/* ── FAQ accordion ── */
+.ckbd-faq { border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; margin-bottom:4px; }
+.ckbd-faq-item { border-bottom:1px solid #E2E8F0; }
+.ckbd-faq-item:last-child { border-bottom:none; }
+.ckbd-faq-q { width:100%; background:#fff; border:none; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; cursor:pointer; font-size:.88rem; font-weight:700; color:#111; text-align:left; transition:background .15s; }
+.ckbd-faq-q:hover { background:#F8FAFF; }
+.ckbd-faq-icon { font-size:1.2rem; font-weight:400; color:#6B7280; flex-shrink:0; transition:transform .2s; }
+.ckbd-faq-q[aria-expanded="true"] { background:#F0F4FF; color:#0f3460; }
+.ckbd-faq-q[aria-expanded="true"] .ckbd-faq-icon { transform:rotate(45deg); color:#0f3460; }
+.ckbd-faq-a { padding:0 18px 14px; background:#F8FAFF; }
+.ckbd-faq-a p { margin:0; font-size:.84rem; color:#4B5563; line-height:1.7; }
