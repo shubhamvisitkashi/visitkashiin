@@ -397,7 +397,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="chart-card">
       <div class="chart-head">
         <div>
-          <div class="chart-title">📈 Revenue Trend — Last 6 Months</div>
+          <div class="chart-title">📈 Revenue Trend — Last 3 Months</div>
           <div class="chart-sub">Stay · Cab · Boat breakdown</div>
         </div>
         <div class="chart-legend">

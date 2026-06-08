@@ -66,7 +66,7 @@ class DashboardController extends Controller
             ? round((($totalRevenueMonth - $totalRevLast) / $totalRevLast) * 100, 1)
             : ($totalRevenueMonth > 0 ? 100 : 0);
 
-        // ── 6-month revenue trend ─────────────────────────────────
+        // ── 3-month revenue trend ─────────────────────────────────
         $monthLabels   = [];
         $stayRevTrend  = [];
         $cabRevTrend   = [];
@@ -74,7 +74,7 @@ class DashboardController extends Controller
         $totalRevTrend = [];
         $bookingsTrend = [];
 
-        for ($i = 5; $i >= 0; $i--) {
+        for ($i = 2; $i >= 0; $i--) {
             $m = Carbon::now()->subMonths($i);
             $monthLabels[] = $m->format('M');
 
