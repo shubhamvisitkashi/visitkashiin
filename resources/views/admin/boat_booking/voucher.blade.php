@@ -128,6 +128,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#b8ccd8;color:#0f172a;fo
   @page{margin:0;size:A4 portrait;}
   .voucher{box-shadow:none;width:210mm;height:297mm;}
 }
+@media(max-width:700px){
+  body{background:#1e293b;}
+  .voucher{
+    width:100% !important;
+    height:auto !important;
+    min-height:unset !important;
+    transform-origin:top left;
+  }
+  .powered{font-size:8px;padding:8px 12px;}
+}
 </style>
 </head>
 <body>
@@ -182,10 +192,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#b8ccd8;color:#0f172a;fo
 @endphp
 
 {{-- Toolbar --}}
-<div class="no-print" style="background:#0c4a6e;padding:10px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:999;">
-  <button onclick="window.print()" style="background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;">🖨&nbsp; Print / Save PDF</button>
-  <a href="{{ route('boat-booking.show', $booking->booking_id) }}" style="color:rgba(255,255,255,.5);font-size:12px;text-decoration:none;">← Back to Booking</a>
-  <span style="margin-left:auto;color:rgba(255,255,255,.3);font-size:11px;font-family:monospace;">{{ $booking->booking_id }}</span>
+<div class="no-print" style="background:#0c4a6e;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;flex-wrap:wrap;">
+  <a href="{{ route('boat-booking.show', $booking->booking_id) }}" style="color:rgba(255,255,255,.6);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap;">← Back</a>
+  <span style="color:rgba(255,255,255,.25);font-size:11px;font-family:monospace;flex:1;text-align:center;">{{ $booking->booking_id }}</span>
+  <button onclick="window.print()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">🖨 Print</button>
+  <button id="downloadBtn" onclick="downloadVoucherPDF()" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:0 3px 12px rgba(14,165,233,.4);">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Download Voucher
+  </button>
 </div>
 
 <div class="voucher">
@@ -436,5 +450,55 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#b8ccd8;color:#0f172a;fo
 </div>
 
 </div>{{-- /voucher --}}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+async function downloadVoucherPDF() {
+  const btn = document.getElementById('downloadBtn');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Generating…';
+  btn.disabled = true;
+  btn.style.opacity = '.75';
+
+  try {
+    const voucher = document.querySelector('.voucher');
+
+    // Temporarily remove box-shadow for cleaner capture
+    const origShadow = voucher.style.boxShadow;
+    voucher.style.boxShadow = 'none';
+
+    const canvas = await html2canvas(voucher, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: voucher.offsetWidth,
+      height: voucher.offsetHeight,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      logging: false,
+    });
+
+    voucher.style.boxShadow = origShadow;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.97);
+    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+    pdf.save('VK-Voucher-{{ $booking->booking_id }}.pdf');
+
+  } catch (err) {
+    alert('Download failed. Please use Print → Save as PDF instead.');
+    console.error(err);
+  }
+
+  btn.innerHTML = origHTML;
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+</script>
+
 </body>
 </html>

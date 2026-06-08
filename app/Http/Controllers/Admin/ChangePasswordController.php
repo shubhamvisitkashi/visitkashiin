@@ -34,14 +34,18 @@ class ChangePasswordController extends Controller
 
         // Avatar upload
         if ($request->hasFile('avatar')) {
+            $avatarDir = public_path('uploads/avatars');
+            if (!is_dir($avatarDir)) {
+                mkdir($avatarDir, 0755, true);
+            }
             // Delete old avatar
             if ($user->avatar) {
-                $old = public_path('uploads/avatars/'.$user->avatar);
+                $old = $avatarDir . '/' . $user->avatar;
                 if (file_exists($old)) @unlink($old);
             }
             $file     = $request->file('avatar');
             $filename = 'avatar_'.$user->id.'_'.time().'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/avatars'), $filename);
+            $file->move($avatarDir, $filename);
             $data['avatar'] = $filename;
         }
 
