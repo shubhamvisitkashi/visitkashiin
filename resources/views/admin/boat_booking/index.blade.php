@@ -214,13 +214,75 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
 .bb-pagination { padding:16px 20px; border-top:1px solid #EFF6FF; }
 .bb-pagination .pagination { margin:0; }
 
+/* ── Mobile card layout ───────────────────── */
+.bb-mob-cards { display:none; }
+.bb-mob-card {
+  background:var(--bb-card); border:1px solid var(--bb-border);
+  border-radius:14px; margin-bottom:10px; overflow:hidden;
+  box-shadow:var(--bb-shadow);
+}
+.bb-mob-card-top {
+  padding:12px 14px; display:flex; align-items:center;
+  gap:10px; border-bottom:1px solid #EFF6FF; background:#F8FBFF;
+}
+.bb-mob-card-body { padding:12px 14px; }
+.bb-mob-row {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:7px; font-size:.78rem;
+}
+.bb-mob-row:last-child { margin-bottom:0; }
+.bb-mob-lbl { color:var(--bb-muted); font-weight:600; font-size:.68rem; text-transform:uppercase; letter-spacing:.04em; }
+.bb-mob-val { color:var(--bb-text); font-weight:600; text-align:right; }
+.bb-mob-card-foot {
+  padding:9px 14px; border-top:1px solid #EFF6FF;
+  display:flex; gap:7px; background:#F8FBFF;
+}
+.bb-mob-act {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:8px 4px; border-radius:9px; font-size:.72rem; font-weight:700;
+  text-decoration:none; border:1.5px solid; transition:.18s;
+}
+.bb-mob-act svg { width:13px; height:13px; stroke:currentColor; flex-shrink:0; }
+.bb-mob-act-view { background:#EFF6FF; color:#0369A1; border-color:#BAE6FD; }
+.bb-mob-act-edit { background:#FEF3C7; color:#92400E; border-color:#FDE68A; }
+.bb-mob-act-pay  { background:#D1FAE5; color:#065F46; border-color:#A7F3D0; }
+.bb-mob-act-del  { background:#FEE2E2; color:#991B1B; border-color:#FECACA; }
+
 /* ── Responsive ───────────────────────── */
 @media(max-width:768px){
-  .bb-page { padding:12px 12px 40px; }
-  .bb-hero { padding:16px 18px; }
-  .bb-hero h1 { font-size:1.05rem; }
-  .bb-tbl th, .bb-tbl td { padding:9px 10px; font-size:.75rem; }
+  .bb-page        { padding:10px 10px 70px; }
+  .bb-hero        { padding:13px 16px; margin-bottom:12px; margin-top:58px; border-radius:14px; }
+  .bb-hero h1     { font-size:.98rem; }
+  .bb-hero p      { font-size:.7rem; }
+  .bb-hero-actions{ gap:6px; }
+  .bb-btn-new, .bb-btn-ghost { padding:7px 11px; font-size:.72rem; }
+
+  .bb-kpi         { grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
+  .bb-kpi-card    { padding:12px 13px; }
+  .bb-kpi-val     { font-size:1.15rem; }
+  .bb-kpi-sub     { font-size:.6rem; }
+
+  .bb-filters     { flex-direction:column; padding:12px; gap:8px; }
+  .bb-search-wrap { min-width:0; width:100%; }
+  .bb-filter-sel  { width:100%; box-sizing:border-box; }
+  .bb-filter-btn  { width:100%; padding:10px; }
+  .bb-filter-clear{ width:100%; text-align:center; display:block; }
+
+  .bb-tabs        { flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; gap:5px; -webkit-overflow-scrolling:touch; }
+  .bb-tabs::-webkit-scrollbar { height:3px; }
+  .bb-tabs::-webkit-scrollbar-thumb { background:#BAE6FD; border-radius:3px; }
+  .bb-tab         { font-size:.7rem; padding:6px 12px; white-space:nowrap; }
+
+  /* Switch to card layout on mobile */
+  .bb-desktop-table { display:none !important; }
+  .bb-mob-cards     { display:block; padding:10px; }
+  .bb-table-head    { padding:12px 14px; }
+
   .hide-mobile { display:none !important; }
+}
+@media(max-width:400px){
+  .bb-kpi { grid-template-columns:1fr; }
+  .bb-hero h1 { font-size:.9rem; }
 }
 </style>
 
@@ -378,7 +440,8 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
     </div>
   </div>
 
-  <div style="overflow-x:auto;">
+  {{-- ── Desktop Table ── --}}
+  <div class="bb-desktop-table" style="overflow-x:auto;">
     <table class="bb-tbl">
       <thead>
         <tr>
@@ -528,6 +591,105 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
         @endforelse
       </tbody>
     </table>
+  </div>
+
+  {{-- ── Mobile Cards ── --}}
+  <div class="bb-mob-cards">
+    @forelse($boat_bookings as $bk)
+    @php
+      $paidAmt   = (float)($bk->payments_sum_amount ?? 0);
+      $dueAmt    = max(0, (float)$bk->final_amount - $paidAmt);
+      $payStatus = $bk->payment_status ?? ($dueAmt <= 0 ? 'paid' : ($paidAmt > 0 ? 'partial' : 'unpaid'));
+      $bkStatus  = $bk->booking_status ?? 'confirmed';
+      $initials  = strtoupper(substr($bk->name ?? 'G', 0, 1));
+      $boatName  = $bk->boat?->boatType?->name ?? 'Boat';
+      $boatEmojis= ['Normal Motor Boat'=>'🚤','Light Motor Boat'=>'⛵','Premium Light Motor Boat'=>'⚡','Luxury Mini Yacht'=>'🛥','Bajra Boat'=>'🛶','Cruise'=>'🚢'];
+      $boatEmoji = $boatEmojis[$boatName] ?? '⛵';
+    @endphp
+    <div class="bb-mob-card">
+      {{-- Card Top: ID + Guest + Status --}}
+      <div class="bb-mob-card-top">
+        <div class="bb-avatar" style="flex-shrink:0;">{{ $initials }}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;color:var(--bb-text);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $bk->name }}</div>
+          <div style="font-size:.7rem;color:var(--bb-muted);margin-top:1px;">📞 {{ $bk->phone }}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <span class="bb-bid" style="display:block;margin-bottom:4px;">{{ $bk->booking_id }}</span>
+          <span class="bs bs-{{ $payStatus }}">{{ ucfirst($payStatus) }}</span>
+        </div>
+      </div>
+
+      {{-- Card Body --}}
+      <div class="bb-mob-card-body">
+        <div class="bb-mob-row">
+          <span class="bb-mob-lbl">Boat</span>
+          <span class="bb-mob-val"><span class="bb-boat-chip">{{ $boatEmoji }} {{ $boatName }}</span></span>
+        </div>
+        <div class="bb-mob-row">
+          <span class="bb-mob-lbl">Booking Type</span>
+          <span class="bb-mob-val" style="font-size:.76rem;">{{ $bk->booking_type ?? '—' }}</span>
+        </div>
+        <div class="bb-mob-row">
+          <span class="bb-mob-lbl">Boarding Ghat</span>
+          <span class="bb-mob-val">{{ $bk->boarding_ghat ?? '—' }}</span>
+        </div>
+        <div class="bb-mob-row">
+          <span class="bb-mob-lbl">Date & Time</span>
+          <span class="bb-mob-val">
+            {{ $bk->booking_date ? \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') : '—' }}
+            @if($bk->pickup_time) · {{ \Carbon\Carbon::parse($bk->pickup_time)->format('h:i A') }} @endif
+          </span>
+        </div>
+        <div class="bb-mob-row">
+          <span class="bb-mob-lbl">Guests</span>
+          <span class="bb-mob-val">{{ $bk->no_of_person }} persons ({{ $bk->adults ?? $bk->no_of_person }} adults@if(($bk->children??0)>0), {{ $bk->children }} child free@endif)</span>
+        </div>
+        <div class="bb-mob-row" style="border-top:1px dashed #EFF6FF;padding-top:8px;margin-top:4px;">
+          <span class="bb-mob-lbl">Total Amount</span>
+          <span class="bb-mob-val" style="font-size:.88rem;font-weight:800;">₹{{ number_format($bk->final_amount) }}</span>
+        </div>
+        <div class="bb-mob-row">
+          <span class="bb-mob-lbl">Amount Paid</span>
+          <span class="bb-mob-val" style="color:#059669;font-weight:700;">✓ ₹{{ number_format($paidAmt) }}</span>
+        </div>
+        @if($dueAmt > 0)
+        <div class="bb-mob-row">
+          <span class="bb-mob-lbl">Balance Due</span>
+          <span class="bb-mob-val" style="color:#EF4444;font-weight:700;">⚠ ₹{{ number_format($dueAmt) }}</span>
+        </div>
+        @endif
+      </div>
+
+      {{-- Card Footer: Actions --}}
+      <div class="bb-mob-card-foot">
+        <a href="{{ route('boat-booking.show', $bk->booking_id) }}" class="bb-mob-act bb-mob-act-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View
+        </a>
+        <a href="{{ route('boat-booking.edit', $bk->booking_id) }}" class="bb-mob-act bb-mob-act-edit">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
+        </a>
+        <a href="{{ route('boat-booking.payment', $bk->booking_id) }}" class="bb-mob-act bb-mob-act-pay">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pay
+        </a>
+        <a href="{{ route('boat-booking.voucher', $bk->booking_id) }}" class="bb-mob-act" style="background:#F5F3FF;color:#7C3AED;border-color:#DDD6FE;">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF
+        </a>
+      </div>
+    </div>
+    @empty
+    <div class="bb-empty">
+      <div class="bb-empty-icon">⛵</div>
+      <div class="bb-empty-title">No boat bookings found</div>
+      <div class="bb-empty-sub">
+        @if($search_user || $search_boat_type || $search_payment_status)
+          <a href="{{ route('boat-booking.index') }}" style="color:#0EA5E9;">Clear filters</a>
+        @else
+          Get started by <a href="{{ route('boat-booking.create') }}" style="color:#0EA5E9;">creating a booking</a>
+        @endif
+      </div>
+    </div>
+    @endforelse
   </div>
 
   {{-- Pagination --}}

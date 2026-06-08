@@ -206,14 +206,16 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 .sb-boat  { background:#E0F2FE; color:#0369A1; }
 
 /* ── Quick Create ─────────────────────────── */
-.ql-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:16px; }
+.ql-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:16px; box-sizing:border-box; }
 .ql-btn {
-  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  display:flex; align-items:center; gap:9px; padding:11px 12px;
   background:#FAFBFF; border:1.5px solid var(--border); border-radius:12px;
-  text-decoration:none; transition:all var(--t); font-size:.82rem; font-weight:600; color:var(--text);
+  text-decoration:none; transition:all var(--t); font-size:.8rem; font-weight:600; color:var(--text);
+  min-width:0; overflow:hidden;
 }
+.ql-btn span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .ql-btn:hover { background:#EEF2FF; border-color:#A5B4FC; color:var(--indigo); transform:translateY(-2px); box-shadow:0 4px 14px rgba(79,70,229,.12); }
-.ql-btn-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0; }
+.ql-btn-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
 
 /* ── Upcoming ─────────────────────────────── */
 .upcoming-item {
@@ -236,14 +238,47 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 
 /* ── Mobile ───────────────────────────────── */
 @media(max-width:767px){
-  .dk-page   { padding:10px 12px 60px; }
-  .dk-hero   { padding:16px 18px; margin-top:58px; border-radius:16px; }
-  .dk-hero h1{ font-size:1.2rem; }
-  .kpi-value { font-size:1.4rem; }
-  .kpi-icon  { width:42px; height:42px; font-size:1.2rem; border-radius:11px; }
-  .kpi-card  { padding:14px 16px; gap:12px; }
-  .chart-body{ padding:12px 10px; }
-  .ql-grid   { padding:12px; gap:8px; }
+  .dk-page        { padding:10px 10px 70px; }
+  .dk-hero        { padding:16px 16px; margin-top:58px; border-radius:16px; }
+  .dk-hero h1     { font-size:1.15rem; }
+  .dk-hero p      { font-size:.78rem; }
+  .dk-hero-actions{ gap:6px; }
+  .dk-hero-btn    { padding:7px 12px; font-size:.74rem; }
+  .kpi-value      { font-size:1.4rem; }
+  .kpi-icon       { width:42px; height:42px; font-size:1.2rem; border-radius:11px; }
+  .kpi-card       { padding:14px 14px; gap:12px; }
+  .chart-body     { padding:10px 8px; }
+
+  /* Quick Create — full single column on mobile */
+  .ql-grid        { grid-template-columns:1fr; padding:12px; gap:8px; }
+  .ql-btn         { padding:12px 14px; font-size:.85rem; }
+  .ql-btn span    { white-space:normal; }
+
+  /* Recent Bookings — hide less critical columns on mobile */
+  .mob-hide       { display:none !important; }
+  .dk-table th, .dk-table td { padding:9px 10px; font-size:.78rem; }
+  .bk-link        { font-size:.76rem; }
+
+  /* Type cards — remove side-by-side stats, stack them */
+  .type-stat-row  { flex-wrap:wrap; gap:6px; }
+  .type-card      { padding:14px 14px; }
+
+  /* Booking mix — stack vertically on very small screens */
+  .mix-wrap       { flex-direction:column; align-items:center; gap:12px; }
+  .mix-donut      { width:100px; }
+
+  /* Upcoming items */
+  .upcoming-item  { padding:10px 14px; gap:10px; }
+  .upcoming-amt   { font-size:.76rem; }
+
+  /* Chart — reduce canvas height */
+  #revenueChart   { max-height:180px; }
+  #dailyChart     { max-height:150px; }
+}
+
+@media(max-width:400px){
+  .dk-hero h1     { font-size:1rem; }
+  .kpi-value      { font-size:1.2rem; }
 }
 </style>
 
@@ -382,38 +417,36 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         <div class="table-title">🕐 Recent Bookings</div>
         <a href="{{ route('bookings.index') }}" style="font-size:.75rem;color:var(--indigo);font-weight:700;text-decoration:none;">View All →</a>
       </div>
-      <div style="overflow-x:auto;">
-        <table class="dk-table">
-          <thead>
-            <tr>
-              <th>Booking #</th>
-              <th>Guest</th>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($recentBookings as $b)
-            <tr>
-              <td><a href="{{ $b['url'] }}" class="bk-link">{{ $b['number'] }}</a></td>
-              <td style="font-weight:600;">{{ $b['guest'] }}</td>
-              <td><span class="sb sb-{{ $b['type'] }}">{{ $b['icon'] }} {{ ucfirst($b['type']) }}</span></td>
-              <td style="font-weight:700;color:var(--emerald);">₹{{ number_format($b['amount']) }}</td>
-              <td><span class="sb sb-{{ $b['status'] }}">{{ ucwords(str_replace('_',' ',$b['status'] ?? 'pending')) }}</span></td>
-              <td style="color:var(--muted);font-size:.77rem;">{{ $b['date'] ? \Carbon\Carbon::parse($b['date'])->format('d M') : '—' }}</td>
-            </tr>
-            @empty
-            <tr>
-              <td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">
-                No bookings yet — <a href="{{ route('bookings.create-direct') }}" style="color:var(--indigo);font-weight:600;">create one</a>
-              </td>
-            </tr>
-            @endforelse
-          </tbody>
-        </table>
-      </div>
+      <table class="dk-table" style="width:100%;">
+        <thead>
+          <tr>
+            <th>Booking #</th>
+            <th>Guest</th>
+            <th class="mob-hide">Type</th>
+            <th>Amount</th>
+            <th class="mob-hide">Status</th>
+            <th class="mob-hide">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @forelse($recentBookings as $b)
+          <tr>
+            <td><a href="{{ $b['url'] }}" class="bk-link">{{ $b['number'] }}</a></td>
+            <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b['guest'] }}</td>
+            <td class="mob-hide"><span class="sb sb-{{ $b['type'] }}">{{ $b['icon'] }} {{ ucfirst($b['type']) }}</span></td>
+            <td style="font-weight:700;color:var(--emerald);white-space:nowrap;">₹{{ number_format($b['amount']) }}</td>
+            <td class="mob-hide"><span class="sb sb-{{ $b['status'] }}">{{ ucwords(str_replace('_',' ',$b['status'] ?? 'pending')) }}</span></td>
+            <td class="mob-hide" style="color:var(--muted);font-size:.77rem;">{{ $b['date'] ? \Carbon\Carbon::parse($b['date'])->format('d M') : '—' }}</td>
+          </tr>
+          @empty
+          <tr>
+            <td colspan="6" style="text-align:center;padding:28px;color:var(--muted);">
+              No bookings — <a href="{{ route('bookings.create-direct') }}" style="color:var(--indigo);font-weight:600;">create one</a>
+            </td>
+          </tr>
+          @endforelse
+        </tbody>
+      </table>
     </div>
 
     {{-- Daily Revenue --}}
@@ -441,22 +474,22 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       </div>
       <div class="ql-grid">
         <a href="{{ route('bookings.create-stay') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#EEF2FF;">🏨</div>Stay Booking
+          <div class="ql-btn-icon" style="background:#EEF2FF;">🏨</div><span>Stay Booking</span>
         </a>
         <a href="{{ route('cab-bookings.create') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#FEF3C7;">🚗</div>Cab Booking
+          <div class="ql-btn-icon" style="background:#FEF3C7;">🚗</div><span>Cab Booking</span>
         </a>
         <a href="{{ route('tour-booking.create') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#EDE9FE;">🗺️</div>Tour Package
+          <div class="ql-btn-icon" style="background:#EDE9FE;">🗺️</div><span>Tour Package</span>
         </a>
         <a href="{{ route('boat-booking.create') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#E0F2FE;">⛵</div>Boat Ride
+          <div class="ql-btn-icon" style="background:#E0F2FE;">⛵</div><span>Boat Ride</span>
         </a>
         <a href="{{ route('bookings.calendar') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#D1FAE5;">📅</div>Calendar
+          <div class="ql-btn-icon" style="background:#D1FAE5;">📅</div><span>Calendar</span>
         </a>
         <a href="{{ route('bookings.index') }}?has_due=1" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#FEE2E2;">⚠️</div>Due Payments
+          <div class="ql-btn-icon" style="background:#FEE2E2;">⚠️</div><span>Due Payments</span>
         </a>
       </div>
     </div>
@@ -467,8 +500,8 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         <div class="chart-title">🥧 Booking Mix</div>
         <span style="font-size:.7rem;color:var(--muted);">All time</span>
       </div>
-      <div class="chart-body" style="display:flex;align-items:center;gap:18px;">
-        <div style="width:120px;flex-shrink:0;">
+      <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
+        <div class="mix-donut" style="width:120px;flex-shrink:0;">
           <canvas id="donutChart"></canvas>
         </div>
         <div style="flex:1;min-width:0;">
@@ -586,9 +619,10 @@ const chartTextColor   = () => isDark() ? '#94A3B8' : '#64748B';
 const chartGridColor   = () => isDark() ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.04)';
 const chartBgColor     = () => isDark() ? '#1E293B' : '#FFFFFF';
 
+const isMob = window.innerWidth < 640;
 const axisDefaults = () => ({
   grid:  { color: chartGridColor() },
-  ticks: { font:{ size:11 }, color: chartTextColor() }
+  ticks: { font:{ size: isMob ? 9 : 11 }, color: chartTextColor(), maxTicksLimit: isMob ? 5 : 8 }
 });
 
 // ── Revenue trend ────────────────────────────────────────
