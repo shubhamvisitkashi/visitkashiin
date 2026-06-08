@@ -112,6 +112,17 @@
         .vk-hero__tagline{font-size:clamp(14px,1.3vw,17px);color:rgba(255,255,255,.68);margin:0 0 28px;line-height:1.6}
         .vk-booking-card{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.17);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:20px;overflow:hidden}
         @media(max-width:991px){.vk-hero__layout{grid-template-columns:1fr;gap:36px}.vk-hero__inner{padding:80px 0 50px}.vk-hero__left{text-align:center}.vk-hero__ctas{justify-content:center}.vk-hero__trust{justify-content:center}.vk-hero__right{align-items:center}}
+        /* ── Slider show/hide — MUST be inline to prevent double LCP image loads & CLS ── */
+        .vkp-desktop-only{display:block}.vkp-mobile-only{display:none}
+        @media(max-width:767px){.vkp-desktop-only{display:none!important}.vkp-mobile-only{display:block!important}}
+        /* ── Mobile slider CLS: reserve height before images load ── */
+        .vkm-hero{min-height:420px;background:#0d1420}
+        .vkm-slide{min-height:380px}
+        .vkm-img-wrap{min-height:280px;background:#0d1420}
+        /* ── Desktop slider CLS: contain layout to prevent reflow ── */
+        .vkp-hero{contain:layout;height:85vh;max-height:680px;min-height:320px}
+        /* ── content-visibility for below-fold sections (paint performance) ── */
+        .vk-why,.vkf-explore,.vk-db-promo{content-visibility:auto;contain-intrinsic-size:0 300px}
         </style>
 
         {{-- LCP image preload (pushed from individual pages via @push('preloads')) --}}
@@ -133,10 +144,10 @@
         <link rel="preload" href="{{asset('frontend/font/flaticon.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
         <noscript><link href="{{asset('frontend/font/flaticon.css')}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="{{asset('frontend/css/plugin.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+        <link rel="preload" href="{{asset('frontend/css/plugin.min.css')}}" as="style" fetchpriority="low" onload="this.onload=null;this.rel='stylesheet'" />
         <noscript><link href="{{asset('frontend/css/plugin.min.css')}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin />
+        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" as="style" fetchpriority="low" onload="this.onload=null;this.rel='stylesheet'" crossorigin />
         <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /></noscript>
 
         @stack('styles')

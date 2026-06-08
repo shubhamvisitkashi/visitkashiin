@@ -66,10 +66,14 @@ if ($hero_slides->isNotEmpty()) {
 }
 @endphp
 
-{{-- Preload the LCP hero image so the browser fetches it as early as possible --}}
+{{-- Preload LCP hero images — device-specific so desktop/mobile don't load each other's images --}}
 @push('preloads')
 @if(!empty($sliderSlides[0]['img']))
-<link rel="preload" as="image" href="{{ $sliderSlides[0]['img'] }}" fetchpriority="high">
+<link rel="preload" as="image" href="{{ $sliderSlides[0]['img'] }}" fetchpriority="high" media="(min-width: 768px)">
+@endif
+@php $mobileHero = $sliderSlides[0]['mobile_img'] ?? $sliderSlides[0]['img'] ?? ''; @endphp
+@if($mobileHero)
+<link rel="preload" as="image" href="{{ $mobileHero }}" fetchpriority="high" media="(max-width: 767px)">
 @endif
 @endpush
 
@@ -85,7 +89,7 @@ if ($hero_slides->isNotEmpty()) {
             @if(!empty($slide['cta1']['url']))
             <a href="{{ $slide['cta1']['url'] }}" class="vkp-img-link">
                 <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
-                     class="vkp-img"
+                     class="vkp-img" width="1440" height="680"
                      loading="{{ $i===0 ? 'eager' : 'lazy' }}"
                      {{ $i===0 ? 'fetchpriority="high"' : '' }}
                      decoding="{{ $i===0 ? 'sync' : 'async' }}"
@@ -93,7 +97,7 @@ if ($hero_slides->isNotEmpty()) {
             </a>
             @else
             <img src="{{ $slide['img'] }}" alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
-                 class="vkp-img"
+                 class="vkp-img" width="1440" height="680"
                  loading="{{ $i===0 ? 'eager' : 'lazy' }}"
                  {{ $i===0 ? 'fetchpriority="high"' : '' }}
                  decoding="{{ $i===0 ? 'sync' : 'async' }}"
@@ -135,7 +139,7 @@ if ($hero_slides->isNotEmpty()) {
                      alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
                      class="vkm-img"
                      loading="{{ $i===0 ? 'eager' : 'lazy' }}"
-                     {{ $i===0 ? 'fetchpriority="high"' : '' }}
+                     decoding="{{ $i===0 ? 'sync' : 'async' }}"
                      onerror="this.closest('.vkm-slide').style.background='linear-gradient(160deg,#0d1420,#0f3460)'">
             </a>
             <div class="vkm-content">
@@ -166,20 +170,6 @@ if ($hero_slides->isNotEmpty()) {
 </section>
 
 <style>
-/* ── Desktop slider: visible ≥768px, hidden on mobile ── */
-.vkp-desktop-only { display: block !important; }
-.vkp-mobile-only  { display: none !important; }
-
-/* ── Mobile slider: hidden ≥768px, visible on mobile ── */
-@media (min-width: 768px) {
-    .vkp-desktop-only { display: block !important; }
-    .vkp-mobile-only  { display: none !important; }
-}
-@media (max-width: 767px) {
-    .vkp-desktop-only { display: none !important; }
-    .vkp-mobile-only  { display: block !important; }
-}
-
 /* ══ MOBILE Hero Slider ════════════════════════════════════ */
 .vkm-hero {
     width: 100%;
@@ -448,28 +438,21 @@ if ($hero_slides->isNotEmpty()) {
 }
 </style>
 <script>
+// Defer slider JS to idle time — reduces TBT without affecting visible behaviour
 (function(){
-    var total={{ count($sliderSlides) }};
-    if(total<=1)return;
+  var total={{ count($sliderSlides) }};
+  if(total<=1)return;
+  function initDesktopSlider(){
     var cur=0,timer=null,int=5500,dur=900;
     function goTo(n){
-        var sl=document.querySelectorAll('.vkp-slide'),dt=document.querySelectorAll('.vkp-dot');
-        var outgoing=sl[cur];
-        if(dt[cur]) dt[cur].classList.remove('active');
-
-        // Mark outgoing slide — keep visible while fading out
-        outgoing.classList.remove('is-active');
-        outgoing.classList.add('is-leaving');
-        outgoing.setAttribute('aria-hidden','true');
-
-        // Remove leaving class once animation finishes
-        var leaving=outgoing;
-        setTimeout(function(){ leaving.classList.remove('is-leaving'); },dur);
-
-        cur=(n+total)%total;
-        sl[cur].classList.add('is-active');
-        sl[cur].setAttribute('aria-hidden','false');
-        if(dt[cur]) dt[cur].classList.add('active');
+      var sl=document.querySelectorAll('.vkp-slide'),dt=document.querySelectorAll('.vkp-dot');
+      var out=sl[cur];
+      if(dt[cur]) dt[cur].classList.remove('active');
+      out.classList.remove('is-active');out.classList.add('is-leaving');out.setAttribute('aria-hidden','true');
+      var lv=out;setTimeout(function(){lv.classList.remove('is-leaving');},dur);
+      cur=(n+total)%total;
+      sl[cur].classList.add('is-active');sl[cur].setAttribute('aria-hidden','false');
+      if(dt[cur]) dt[cur].classList.add('active');
     }
     window.vkhsGoTo=function(n){clearInterval(timer);goTo(n);timer=setInterval(function(){goTo(cur+1);},int);};
     var p=document.getElementById('vkpPrev'),nx=document.getElementById('vkpNext');
@@ -477,10 +460,14 @@ if ($hero_slides->isNotEmpty()) {
     if(nx) nx.addEventListener('click',function(){window.vkhsGoTo(cur+1);});
     var el=document.querySelector('.vkp-hero'),sx=0;
     if(el){
-        el.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
-        el.addEventListener('touchend',function(e){var d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)window.vkhsGoTo(d<0?cur+1:cur-1);});
+      el.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+      el.addEventListener('touchend',function(e){var d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)window.vkhsGoTo(d<0?cur+1:cur-1);});
     }
     timer=setInterval(function(){goTo(cur+1);},int);
+  }
+  // requestIdleCallback defers JS until browser is idle after first paint
+  if('requestIdleCallback' in window){requestIdleCallback(initDesktopSlider,{timeout:2000});}
+  else{setTimeout(initDesktopSlider,200);}
 })();
 </script>
 
@@ -488,33 +475,29 @@ if ($hero_slides->isNotEmpty()) {
 @if(count($sliderSlides) > 1)
 <script>
 (function(){
-    var total={{ count($sliderSlides) }};
-    if(total<=1)return;
+  var total={{ count($sliderSlides) }};
+  if(total<=1)return;
+  function initMobileSlider(){
     var cur=0,timer=null,int=5000;
-
     function vkmGoTo(n){
-        n=((n%total)+total)%total;
-        var slides=document.querySelectorAll('.vkm-slide');
-        var dots=document.querySelectorAll('.vkm-dot');
-        slides[cur].classList.remove('is-active');
-        if(dots[cur]) dots[cur].classList.remove('active');
-        cur=n;
-        slides[cur].classList.add('is-active');
-        if(dots[cur]) dots[cur].classList.add('active');
+      n=((n%total)+total)%total;
+      var sl=document.querySelectorAll('.vkm-slide'),dt=document.querySelectorAll('.vkm-dot');
+      sl[cur].classList.remove('is-active');if(dt[cur])dt[cur].classList.remove('active');
+      cur=n;sl[cur].classList.add('is-active');if(dt[cur])dt[cur].classList.add('active');
     }
-
     window.vkmGoTo=vkmGoTo;
     timer=setInterval(function(){vkmGoTo(cur+1);},int);
-
-    // Touch swipe support
     var mob=document.querySelector('.vkm-hero'),sx=0;
     if(mob){
-        mob.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
-        mob.addEventListener('touchend',function(e){
-            var d=e.changedTouches[0].clientX-sx;
-            if(Math.abs(d)>45){clearInterval(timer);vkmGoTo(d<0?cur+1:cur-1);timer=setInterval(function(){vkmGoTo(cur+1);},int);}
-        });
+      mob.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+      mob.addEventListener('touchend',function(e){
+        var d=e.changedTouches[0].clientX-sx;
+        if(Math.abs(d)>45){clearInterval(timer);vkmGoTo(d<0?cur+1:cur-1);timer=setInterval(function(){vkmGoTo(cur+1);},int);}
+      });
     }
+  }
+  if('requestIdleCallback' in window){requestIdleCallback(initMobileSlider,{timeout:2000});}
+  else{setTimeout(initMobileSlider,200);}
 })();
 </script>
 @endif
