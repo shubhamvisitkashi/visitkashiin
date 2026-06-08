@@ -669,17 +669,17 @@
                   <div class="nb-rupee-wrap">
                     <span class="nb-rupee">₹</span>
                     <input type="number" name="amount" class="form-control nb-input nb-rupee-input"
-                           placeholder="0.00" min="0.01" step="0.01" required>
+                           placeholder="0.00" min="0.01" step="0.01">
                   </div>
                 </div>
                 <div>
                   <label class="nb-label">Date <span class="nb-req">*</span></label>
                   <input type="date" name="payment_date" class="form-control nb-input"
-                         value="{{ now()->format('Y-m-d') }}" required>
+                         value="{{ now()->format('Y-m-d') }}">
                 </div>
                 <div>
                   <label class="nb-label">Method <span class="nb-req">*</span></label>
-                  <select name="payment_method" class="form-select nb-input" required>
+                  <select name="payment_method" class="form-select nb-input">
                     @foreach(['cash'=>'Cash','upi'=>'UPI','bank_transfer'=>'Bank Transfer','card'=>'Card','cheque'=>'Cheque','other'=>'Other'] as $v=>$l)
                     <option value="{{ $v }}">{{ $l }}</option>
                     @endforeach
@@ -687,7 +687,7 @@
                 </div>
                 <div>
                   <label class="nb-label">Account <span class="nb-req">*</span></label>
-                  <select name="payment_account_id" class="form-select nb-input" required>
+                  <select name="payment_account_id" class="form-select nb-input">
                     <option value="">Select…</option>
                     @foreach($paymentAccounts as $acc)
                     <option value="{{ $acc->id }}">{{ $acc->account_name }}</option>
@@ -752,17 +752,17 @@
                       <div class="nb-rupee-wrap">
                         <span class="nb-rupee">₹</span>
                         <input type="number" name="amount" class="form-control nb-input nb-rupee-input"
-                               value="{{ $pmt->amount }}" min="0.01" step="0.01" required>
+                               value="{{ $pmt->amount }}" min="0.01" step="0.01">
                       </div>
                     </div>
                     <div>
                       <label class="nb-label">Date</label>
                       <input type="date" name="payment_date" class="form-control nb-input"
-                             value="{{ \Carbon\Carbon::parse($pmt->payment_date)->format('Y-m-d') }}" required>
+                             value="{{ \Carbon\Carbon::parse($pmt->payment_date)->format('Y-m-d') }}">
                     </div>
                     <div>
                       <label class="nb-label">Method</label>
-                      <select name="payment_method" class="form-select nb-input" required>
+                      <select name="payment_method" class="form-select nb-input">
                         @foreach(['cash'=>'Cash','upi'=>'UPI','bank_transfer'=>'Bank Transfer','card'=>'Card','cheque'=>'Cheque','other'=>'Other'] as $v=>$l)
                         <option value="{{ $v }}" {{ $pmt->payment_method == $v ? 'selected':'' }}>{{ $l }}</option>
                         @endforeach
@@ -770,7 +770,7 @@
                     </div>
                     <div>
                       <label class="nb-label">Account</label>
-                      <select name="payment_account_id" class="form-select nb-input" required>
+                      <select name="payment_account_id" class="form-select nb-input">
                         <option value="">Select…</option>
                         @foreach($paymentAccounts as $acc)
                         <option value="{{ $acc->id }}" {{ $pmt->payment_account_id == $acc->id ? 'selected':'' }}>
