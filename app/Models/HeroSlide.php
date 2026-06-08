@@ -10,7 +10,7 @@ class HeroSlide extends Model
     use HasFactory;
 
     protected $fillable = [
-        'image','badge','title','tagline',
+        'image','mobile_image','badge','title','tagline',
         'cta_label','cta_url','sort_order','is_active',
     ];
 
@@ -24,12 +24,19 @@ class HeroSlide extends Model
         if (!$this->image) {
             return asset('backend/assets/images/placeholder.jpg');
         }
-        // Serve WebP if available, fall back to original
         $webp = preg_replace('/\.(jpe?g|png)$/i', '.webp', $this->image);
         if ($webp !== $this->image && file_exists(public_path('backend/admin/hero_slides/' . $webp))) {
             return asset('backend/admin/hero_slides/' . $webp);
         }
         return asset('backend/admin/hero_slides/' . $this->image);
+    }
+
+    public function getMobileImageUrlAttribute(): string {
+        // Return mobile image if set, otherwise fall back to desktop image
+        if (!$this->mobile_image) {
+            return $this->image_url;
+        }
+        return asset('backend/admin/hero_slides/' . $this->mobile_image);
     }
 
     public function getImageFallbackUrlAttribute(): string {

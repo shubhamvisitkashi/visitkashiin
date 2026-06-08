@@ -70,7 +70,6 @@
   max-width: 900px;
   margin: 0 auto 32px;
 }
-@media(max-width: 640px) { .hub-grid { grid-template-columns: 1fr; } }
 
 /* ── Booking type card ─────────────────────── */
 .btype-card {
@@ -208,6 +207,121 @@
   padding: 4px 12px;
   font-size: .72rem;
   font-weight: 800;
+}
+
+/* ══════════════════════════════════════
+   MOBILE RESPONSIVE — App View ≤ 767px
+══════════════════════════════════════ */
+@media (max-width: 767px) {
+
+  .hub-page {
+    padding: 12px 12px 90px;
+    background: #F1F5F9;
+  }
+
+  /* Header — compact on mobile */
+  .hub-header {
+    border-radius: 16px;
+    padding: 20px 16px 20px;
+    margin-bottom: 16px;
+    margin-top: 60px;
+    text-align: left;
+  }
+  .hub-header h1 {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+    padding-right: 80px; /* avoid overlap with back btn */
+  }
+  .hub-header p {
+    font-size: .78rem;
+    padding-right: 10px;
+  }
+  .hub-header-back {
+    top: 14px; right: 14px;
+    padding: 6px 12px;
+    font-size: .72rem;
+    border-radius: 8px;
+  }
+
+  /* Grid — 2 columns on mobile */
+  .hub-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  /* Cards — compact app-style */
+  .btype-card {
+    border-radius: 16px;
+    padding: 16px 14px;
+    border-width: 1.5px;
+  }
+  .btype-card:hover { transform: none; }
+  .btype-card:active { transform: scale(.97); opacity: .92; }
+
+  /* Top badge — hide on mobile (use icon instead) */
+  .btype-count { display: none; }
+
+  /* Icon — smaller */
+  .btype-icon-wrap {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  /* Label — slightly smaller */
+  .btype-label {
+    font-size: .92rem;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+
+  /* Description — hidden on mobile to save space */
+  .btype-desc { display: none; }
+
+  /* Tags — show max 2 */
+  .btype-tags {
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .btype-tag {
+    font-size: .6rem;
+    padding: 2px 7px;
+  }
+  .btype-tags .btype-tag:nth-child(n+3) { display: none; }
+
+  /* CTA button — compact */
+  .btype-btn {
+    padding: 9px 10px;
+    font-size: .75rem;
+    border-radius: 10px;
+    gap: 5px;
+  }
+  .btype-btn svg { width: 13px; height: 13px; }
+
+  /* Quick links — horizontal scroll */
+  .hub-quick {
+    border-radius: 14px;
+    padding: 14px 14px;
+  }
+  .hub-quick-title { margin-bottom: 10px; }
+  .hub-quick-links {
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .hub-quick-links::-webkit-scrollbar { display: none; }
+  .hub-quick-link {
+    padding: 8px 12px;
+    font-size: .75rem;
+    border-radius: 9px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 </style>
 

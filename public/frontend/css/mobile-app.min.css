@@ -6,8 +6,15 @@
 @media (max-width: 767px) {
 
   /* ── Base & Typography ── */
-  html { font-size: 15px; -webkit-text-size-adjust: 100%; }
-  body { background: #F2F3F7 !important; }
+  html {
+    font-size: 15px;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    background: #F2F3F7 !important;
+    overflow-x: hidden;
+  }
 
   /* ── Safe area support (iPhone notch) ── */
   body { padding-bottom: env(safe-area-inset-bottom); }
@@ -67,14 +74,15 @@
   .vk-mob-nav-item:hover .vk-mob-nav-label { color: #C94B20; }
   .vk-mob-nav-item:hover .vk-mob-nav-icon svg { stroke: #C94B20; }
 
-  /* ── Body bottom padding for nav bar ── */
-  footer, .vkf-footer { margin-bottom: 64px; }
+  /* ── Body bottom padding for nav bar — only on vkf-bottom (last visible element) ── */
+  footer, .vkf-footer { margin-bottom: 0 !important; padding-bottom: 0 !important; }
+  .vkf-bottom { padding-bottom: 70px !important; }
 
   /* ── Hero slider ── */
   #home_banner_video { border-radius: 0 !important; margin-top: 0 !important; }
   .vkp-hero { margin-top: 0 !important; border-radius: 0 !important; }
 
-  /* ── Section containers — app card style ── */
+  /* ── Section containers ── */
   .container { padding-left: 14px !important; padding-right: 14px !important; }
 
   /* ── Section headings ── */
@@ -91,24 +99,38 @@
   .vk-trust { border-radius: 14px; margin: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
   .vk-trust__item { padding: 14px 16px !important; min-width: unset !important; flex: 1; }
 
-  /* ── Product cards (general listing) ── */
+  /* ── Product cards ── */
   .vkl-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
   .vkl-card { border-radius: 14px !important; box-shadow: 0 2px 10px rgba(0,0,0,.08) !important; }
   .vkl-card__img-wrap { border-radius: 14px 14px 0 0 !important; }
-
-  /* ── Package cards ── */
   .vk-pkg-card { border-radius: 14px !important; box-shadow: 0 2px 10px rgba(0,0,0,.08) !important; overflow: hidden; }
-
-  /* ── Sale slider ── */
   .sale-slider .slick-slide,
   .package-slider .slick-slide { padding: 4px 6px !important; }
 
+  /* ── Quick action chips — hidden on mobile ── */
+  .vk-mob-chips { display: none !important; }
+
   /* ── Our Services grid ── */
-  .vksvc-section { padding: 20px 0 !important; display: block !important; }
-  .vksvc-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-  .vksvc-card { border-radius: 14px !important; aspect-ratio: 3/3.2 !important; }
-  .vksvc-name { font-size: .88rem !important; }
+  .vksvc-section { padding: 18px 0 10px !important; display: block !important; }
+  .vksvc-header { margin-bottom: 12px !important; }
+  .vksvc-title { font-size: 1.1rem !important; }
+  .vksvc-badge { font-size: 10px !important; padding: 4px 10px !important; margin-bottom: 6px !important; }
+  .vksvc-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .vksvc-card {
+    border-radius: 14px !important;
+    aspect-ratio: 1 / 1.05 !important;
+  }
+  .vksvc-name { font-size: .9rem !important; font-weight: 800 !important; }
   .vksvc-desc { display: none !important; }
+  .vksvc-cat-tag {
+    top: 10px !important; left: 10px !important;
+    font-size: 10px !important;
+    padding: 3px 9px !important;
+  }
+  .vksvc-content { padding: 0 12px 14px !important; }
 
   /* ── Why Choose Us cards ── */
   .vk-why__grid { gap: 10px !important; }
@@ -125,9 +147,6 @@
   /* ── Promo banners ── */
   .vk-db-promo { padding: 8px 0 !important; }
   .vk-db-promo-img { border-radius: 12px !important; }
-
-  /* ── Quick action chips — hidden, replaced by vksvc-section cards ── */
-  .vk-mob-chips { display: none !important; }
 
 }
 

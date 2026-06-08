@@ -75,8 +75,8 @@
         <style>
         :root{--vk-primary:#D94F2B;--vk-secondary:#1A2B4C;--vk-accent:#F5A623;--vk-white:#fff;--vk-transition:0.28s cubic-bezier(.4,0,.2,1)}
         *,*::before,*::after{box-sizing:border-box}
-        html{font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
-        body{margin:0;padding:0;background:#fff;color:#333;font-size:15px;font-family:'Plus Jakarta Sans',Poppins,sans-serif;line-height:1.5;font-weight:300}
+        html{font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%}
+        body{margin:0;padding:0;background:#fff;color:#333;font-size:15px;font-family:'Plus Jakarta Sans',Poppins,sans-serif;line-height:1.5;font-weight:300;overflow-x:hidden;width:100%;position:relative}
         img{max-width:100%;height:auto}
         a{text-decoration:none!important}
         ul,ol{list-style:none;margin:0;padding:0}

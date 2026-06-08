@@ -132,9 +132,6 @@
     </div>
 </footer>
 
-<div id="back-to-top">
-    <a href="#" aria-label="Back to top"></a>
-</div>
 
 <style>
 /* ══ FOOTER — Clean Light Theme ══════════════════════════════════ */
@@ -290,5 +287,6 @@
     .vkf-main { padding: 36px 0 28px; }
     .vkf-bottom__inner { flex-direction: column; text-align: center; gap: 8px; }
     .vkf-explore__group { flex-direction: column; gap: 4px; }
+    .vkf-bottom { padding: 14px 0; margin-bottom: 0 !important; }
 }
 </style>

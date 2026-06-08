@@ -123,7 +123,7 @@
                             </button>
                         </form>
                         <button type="button" class="hs-act hs-act-edit" title="Edit"
-                            onclick="hsEdit({{ $slide->id }},'{{ addslashes($slide->title) }}','{{ addslashes($slide->badge ?? '') }}','{{ addslashes($slide->tagline ?? '') }}','{{ addslashes($slide->cta_label ?? '') }}','{{ addslashes($slide->cta_url ?? '') }}','{{ $slide->sort_order }}',{{ $slide->is_active ? 'true' : 'false' }},'{{ $slide->image_url }}')">
+                            onclick="hsEdit({{ $slide->id }},'{{ addslashes($slide->title) }}','{{ addslashes($slide->badge ?? '') }}','{{ addslashes($slide->tagline ?? '') }}','{{ addslashes($slide->cta_label ?? '') }}','{{ addslashes($slide->cta_url ?? '') }}','{{ $slide->sort_order }}',{{ $slide->is_active ? 'true' : 'false' }},'{{ $slide->image_url }}','{{ $slide->mobile_image_url ?? '' }}')">
                             <i data-feather="edit-2"></i>
                         </button>
                         <form action="{{ route('hero-slides.destroy', $slide->id) }}" method="POST" id="hsdel_{{ $slide->id }}" style="display:contents;">
@@ -154,12 +154,28 @@
                     <input type="hidden" name="_method" id="hsMethod" value="POST">
 
                     <div class="hs-field">
-                        <label class="hs-label">Slide Image <span id="hsImgReq" style="color:#EF4444;">*</span></label>
+                        <label class="hs-label">Desktop Image <span id="hsImgReq" style="color:#EF4444;">*</span></label>
                         <input type="file" name="image" id="hsImageInput" class="hs-input" accept="image/*" style="padding:5px 10px;cursor:pointer;">
-                        <div style="font-size:.68rem;color:#94A3B8;margin-top:4px;">JPG/PNG/WebP · Max 4 MB · 1920×1080px recommended</div>
+                        <div style="font-size:.68rem;color:#94A3B8;margin-top:4px;">JPG/PNG/WebP · Max 4 MB · 1920×1080px recommended (landscape)</div>
                         <div id="hsCurImg" class="hs-cur-img" style="display:none;">
                             <img id="hsCurImgEl" src="" alt="">
                             <span>Current image — upload new to replace</span>
+                        </div>
+                    </div>
+
+                    <div class="hs-field">
+                        <label class="hs-label">
+                            📱 Mobile Image
+                            <span style="font-size:.68rem;font-weight:400;color:#6B7280;margin-left:6px;">(optional — portrait optimized)</span>
+                        </label>
+                        <input type="file" name="mobile_image" id="hsMobImageInput" class="hs-input" accept="image/*" style="padding:5px 10px;cursor:pointer;">
+                        <div style="font-size:.68rem;color:#94A3B8;margin-top:4px;">JPG/PNG/WebP · Max 4 MB · 750×1200px recommended (portrait) · Falls back to desktop image if not set</div>
+                        <div id="hsCurMobImg" class="hs-cur-img" style="display:none;">
+                            <img id="hsCurMobImgEl" src="" alt="" style="max-height:80px;">
+                            <span>Current mobile image — upload new to replace</span>
+                            <label style="display:flex;align-items:center;gap:5px;margin-top:6px;font-size:.72rem;color:#EF4444;cursor:pointer;">
+                                <input type="checkbox" name="clear_mobile_image" value="1"> Remove mobile image
+                            </label>
                         </div>
                     </div>
 
@@ -223,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function(){ feather.replace(); });
 
 var baseUrl = '{{ url("admin/hero-slides") }}';
 
-function hsEdit(id, title, badge, tagline, ctaLabel, ctaUrl, order, isActive, imgUrl) {
+function hsEdit(id, title, badge, tagline, ctaLabel, ctaUrl, order, isActive, imgUrl, mobImgUrl) {
     var form = document.getElementById('hsForm');
     form.action = baseUrl + '/' + id;
     document.getElementById('hsMethod').value     = 'PUT';
@@ -240,6 +256,13 @@ function hsEdit(id, title, badge, tagline, ctaLabel, ctaUrl, order, isActive, im
         document.getElementById('hsCurImgEl').src = imgUrl;
         document.getElementById('hsCurImg').style.display = 'flex';
     }
+    // Mobile image preview
+    if (mobImgUrl) {
+        document.getElementById('hsCurMobImgEl').src = mobImgUrl;
+        document.getElementById('hsCurMobImg').style.display = 'flex';
+    } else {
+        document.getElementById('hsCurMobImg').style.display = 'none';
+    }
     document.getElementById('hsFormTitle').textContent = 'Edit Slide';
     document.getElementById('hsSubmitBtn').textContent = 'Update Slide';
     document.getElementById('hsCancelBtn').style.display = '';
@@ -255,6 +278,7 @@ function hsReset() {
     document.getElementById('hsImageInput').required = true;
     document.getElementById('hsImgReq').style.display = '';
     document.getElementById('hsCurImg').style.display = 'none';
+    document.getElementById('hsCurMobImg').style.display = 'none';
     document.getElementById('hsFormTitle').textContent = 'Add New Slide';
     document.getElementById('hsSubmitBtn').textContent = 'Add Slide';
     document.getElementById('hsCancelBtn').style.display = 'none';

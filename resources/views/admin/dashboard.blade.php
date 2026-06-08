@@ -33,9 +33,17 @@
 /* ── Hero header ─────────────────────── */
 .dk-hero {
   background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #0EA5E9 100%);
-  border-radius:20px; padding:24px 30px; margin-bottom:22px;
-  display:flex; align-items:center; justify-content:space-between;
-  flex-wrap:wrap; gap:14px; position:relative; overflow:hidden;
+  border-radius: 20px;
+  padding: 24px 30px;
+  margin-bottom: 22px;
+  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
 }
 .dk-hero::before {
   content:''; position:absolute; inset:0;
@@ -190,7 +198,7 @@
 /* ── Responsive ──────────────────────── */
 @media(max-width:767px){
   .dk-page { padding:10px 12px; }
-  .dk-hero { padding:16px 18px; margin-bottom:14px; }
+  .dk-hero { padding:16px 18px; margin-bottom:14px; margin-top:55px; }
   .dk-hero h1 { font-size:1.2rem; }
   .kpi-value { font-size:1.4rem; }
   .kpi-icon  { width:40px; height:40px; font-size:1.2rem; }

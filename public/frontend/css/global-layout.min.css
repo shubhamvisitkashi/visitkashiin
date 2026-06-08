@@ -14,10 +14,38 @@
   --vk-transition: 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* Prevent horizontal scroll globally */
-html, body { overflow-x: hidden; max-width: 100%; }
+/* ── Prevent horizontal scroll & right-side gap globally ── */
+html {
+    overflow-x: hidden;
+    width: 100%;
+}
+body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+}
 
-/* ── Override old style.css hero ID that kills Visit Dubai design ── */
+/* Every direct child of body: max-width 100%, no right bleed */
+body > * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* All sections: contain horizontal overflow */
+section, .vk-section, #vk-categories, .deals-on-sale {
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Slick track: absolute positioned wide element — ensure parent clips it */
+.slick-slider, .sale-slider, .package-slider, .slider-button {
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+
+/* ── Override old style.css hero ID ── */
 #home_banner_video {
     height: auto !important;
     padding: 12px 20px 0 !important;
@@ -25,6 +53,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
     background: #f7f7f7 !important;
     box-sizing: border-box !important;
     width: 100% !important;
+    max-width: 100% !important;
 }
 
 /* Bootstrap 5 sets a{text-decoration:underline} — override globally */

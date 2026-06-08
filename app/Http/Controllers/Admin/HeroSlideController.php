@@ -18,21 +18,29 @@ class HeroSlideController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'     => 'required|string|max:255',
-            'image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-            'cta_url'   => 'nullable|string|max:255',
-            'cta_label' => 'nullable|string|max:100',
+            'title'        => 'required|string|max:255',
+            'image'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'mobile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'cta_url'      => 'nullable|string|max:255',
+            'cta_label'    => 'nullable|string|max:100',
         ]);
 
         $data = $request->only(['badge','title','tagline','cta_label','cta_url','sort_order']);
-        $data['is_active'] = $request->boolean('is_active', true);
-        $data['sort_order'] = (int)($data['sort_order'] ?? 0);
+        $data['is_active']   = $request->boolean('is_active', true);
+        $data['sort_order']  = (int)($data['sort_order'] ?? 0);
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $name = Str::random(32) . '.' . $file->extension();
             $file->move($this->uploadDir(), $name);
             $data['image'] = $name;
+        }
+
+        if ($request->hasFile('mobile_image')) {
+            $file = $request->file('mobile_image');
+            $name = 'mob_' . Str::random(28) . '.' . $file->extension();
+            $file->move($this->uploadDir(), $name);
+            $data['mobile_image'] = $name;
         }
 
         HeroSlide::create($data);
@@ -42,17 +50,19 @@ class HeroSlideController extends Controller
     public function update(Request $request, HeroSlide $heroSlide)
     {
         $request->validate([
-            'title'   => 'required|string|max:255',
-            'image'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-            'cta_url' => 'nullable|string|max:255',
+            'title'        => 'required|string|max:255',
+            'image'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'mobile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'cta_url'      => 'nullable|string|max:255',
         ]);
 
         $data = $request->only(['badge','title','tagline','cta_label','cta_url','sort_order']);
-        $data['is_active'] = $request->boolean('is_active', true);
+        $data['is_active']  = $request->boolean('is_active', true);
         $data['sort_order'] = (int)($data['sort_order'] ?? 0);
 
+        $dir = $this->uploadDir();
+
         if ($request->hasFile('image')) {
-            $dir = $this->uploadDir();
             if ($heroSlide->image && file_exists($dir . '/' . $heroSlide->image)) {
                 @unlink($dir . '/' . $heroSlide->image);
             }
@@ -60,6 +70,24 @@ class HeroSlideController extends Controller
             $name = Str::random(32) . '.' . $file->extension();
             $file->move($dir, $name);
             $data['image'] = $name;
+        }
+
+        if ($request->hasFile('mobile_image')) {
+            if ($heroSlide->mobile_image && file_exists($dir . '/' . $heroSlide->mobile_image)) {
+                @unlink($dir . '/' . $heroSlide->mobile_image);
+            }
+            $file = $request->file('mobile_image');
+            $name = 'mob_' . Str::random(28) . '.' . $file->extension();
+            $file->move($dir, $name);
+            $data['mobile_image'] = $name;
+        }
+
+        // Allow clearing mobile image
+        if ($request->has('clear_mobile_image') && $request->clear_mobile_image) {
+            if ($heroSlide->mobile_image && file_exists($dir . '/' . $heroSlide->mobile_image)) {
+                @unlink($dir . '/' . $heroSlide->mobile_image);
+            }
+            $data['mobile_image'] = null;
         }
 
         $heroSlide->update($data);
@@ -71,6 +99,9 @@ class HeroSlideController extends Controller
         $dir = public_path('backend/admin/hero_slides');
         if ($heroSlide->image && file_exists($dir . '/' . $heroSlide->image)) {
             @unlink($dir . '/' . $heroSlide->image);
+        }
+        if ($heroSlide->mobile_image && file_exists($dir . '/' . $heroSlide->mobile_image)) {
+            @unlink($dir . '/' . $heroSlide->mobile_image);
         }
         $heroSlide->delete();
         return back()->with('success', 'Slide deleted.');

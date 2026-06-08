@@ -33,30 +33,34 @@
 // Dynamic Hero Slider — pulls from DB (via controller), falls back to web setup banner
 if ($hero_slides->isNotEmpty()) {
     $sliderSlides = $hero_slides->map(fn($s) => [
-        'img'    => $s->image_url,
-        'badge'  => $s->badge  ?: "Varanasi's #1 Spiritual Platform",
-        'title'  => $s->title,
-        'tagline'=> $s->tagline ?: 'Book trusted cabs, luxury boats, Ganga Aarti, hotels & spiritual tours.',
-        'cta1'   => ['label' => $s->cta_label ?: 'Explore Tours', 'url' => $s->cta_url ?: route('product.list','packages')],
+        'img'        => $s->image_url,
+        'mobile_img' => $s->mobile_image_url ?? $s->image_url,
+        'badge'      => $s->badge  ?: "Varanasi's #1 Spiritual Platform",
+        'title'      => $s->title,
+        'tagline'    => $s->tagline ?: 'Book trusted cabs, luxury boats, Ganga Aarti, hotels & spiritual tours.',
+        'cta1'       => ['label' => $s->cta_label ?: 'Explore Tours', 'url' => $s->cta_url ?: route('product.list','packages')],
     ])->toArray();
 } else {
     // Fallback: use banner images from web setup
+    $bannerImg = asset('backend/admin/website_setup/' . websiteSetupValue('banner'));
     $sliderSlides = [[
-        'img'    => asset('backend/admin/website_setup/' . websiteSetupValue('banner')),
-        'badge'  => "Varanasi's #1 Spiritual Travel Platform",
-        'title'  => websiteSetupValue('banner_description') ?: 'Most Trusted Travel Company',
-        'tagline'=> websiteSetupValue('banner_title') ?: 'Book trusted cabs, luxury boats, Ganga Aarti, hotels & spiritual tours.',
-        'cta1'   => ['label' => 'Explore Tours', 'url' => route('product.list','packages')],
+        'img'        => $bannerImg,
+        'mobile_img' => $bannerImg,
+        'badge'      => "Varanasi's #1 Spiritual Travel Platform",
+        'title'      => websiteSetupValue('banner_description') ?: 'Most Trusted Travel Company',
+        'tagline'    => websiteSetupValue('banner_title') ?: 'Book trusted cabs, luxury boats, Ganga Aarti, hotels & spiritual tours.',
+        'cta1'       => ['label' => 'Explore Tours', 'url' => route('product.list','packages')],
     ]];
     foreach (['promo_banner','promo_banner_2','promo_banner_3'] as $idx => $key) {
         $img = websiteSetupValue($key);
         if ($img) {
+            $imgUrl = asset('backend/admin/website_setup/'.$img);
             $extras = [
                 ['badge'=>'Sacred Ganga Experience','title'=>'Ganga Aarti & Sunrise Boat Rides','tagline'=>'Witness the divine Ganga Aarti from a private boat on the sacred river.','cta1'=>['label'=>'Book Boat Ride','url'=>route('product.list','boat')]],
                 ['badge'=>'Spiritual Varanasi Tours','title'=>'Explore Kashi with Local Experts','tagline'=>'Guided temple tours, cab services and luxury stays — all in one place.','cta1'=>['label'=>'View Packages','url'=>route('product.list','packages')]],
                 ['badge'=>'Heritage Hotel Stays','title'=>'Stay Near the Holy Ganga Ghats','tagline'=>'Handpicked heritage hotels and homestays near the sacred Ganga Ghats.','cta1'=>['label'=>'Browse Hotels','url'=>route('product.list','hotels')]],
             ];
-            $sliderSlides[] = array_merge(['img' => asset('backend/admin/website_setup/'.$img)], $extras[$idx] ?? $extras[0]);
+            $sliderSlides[] = array_merge(['img' => $imgUrl, 'mobile_img' => $imgUrl], $extras[$idx] ?? $extras[0]);
         }
     }
 }
@@ -69,7 +73,8 @@ if ($hero_slides->isNotEmpty()) {
 @endif
 @endpush
 
-<section id="home_banner_video" class="vkp-hero">
+{{-- ══ DESKTOP Slider (hidden on mobile) ══ --}}
+<section id="home_banner_video" class="vkp-hero vkp-desktop-only">
     <div class="vkp-wrap">
         <div class="vkp-track" id="vkpSlides">
         @foreach($sliderSlides as $i => $slide)
@@ -120,7 +125,168 @@ if ($hero_slides->isNotEmpty()) {
     </div>
 </section>
 
+{{-- ══ MOBILE Slider (shown only on mobile ≤767px) ══ --}}
+<section class="vkm-hero vkp-mobile-only">
+    <div class="vkm-track" id="vkmSlides">
+        @foreach($sliderSlides as $i => $slide)
+        <div class="vkm-slide {{ $i===0 ? 'is-active' : '' }}" data-vkm="{{ $i }}">
+            <a href="{{ $slide['cta1']['url'] ?? '#' }}" class="vkm-img-wrap">
+                <img src="{{ $slide['mobile_img'] ?? $slide['img'] }}"
+                     alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
+                     class="vkm-img"
+                     loading="{{ $i===0 ? 'eager' : 'lazy' }}"
+                     {{ $i===0 ? 'fetchpriority="high"' : '' }}
+                     onerror="this.closest('.vkm-slide').style.background='linear-gradient(160deg,#0d1420,#0f3460)'">
+            </a>
+            <div class="vkm-content">
+                @if(!empty($slide['badge']))
+                <span class="vkm-badge">{{ $slide['badge'] }}</span>
+                @endif
+                <h2 class="vkm-title">{{ $slide['title'] ?? '' }}</h2>
+                @if(!empty($slide['tagline']))
+                <p class="vkm-tagline">{{ $slide['tagline'] }}</p>
+                @endif
+                <a href="{{ $slide['cta1']['url'] ?? '#' }}" class="vkm-cta">
+                    {{ $slide['cta1']['label'] ?? 'Explore' }}
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    @if(count($sliderSlides) > 1)
+    <div class="vkm-dots">
+        @foreach($sliderSlides as $i => $s)
+        <button class="vkm-dot {{ $i===0 ? 'active' : '' }}"
+                onclick="vkmGoTo({{ $i }})" aria-label="Slide {{ $i+1 }}"></button>
+        @endforeach
+    </div>
+    @endif
+</section>
+
 <style>
+/* ── Show/hide desktop vs mobile slider ── */
+.vkp-desktop-only { display: block; }
+.vkp-mobile-only  { display: none; }
+@media (max-width: 767px) {
+    .vkp-desktop-only { display: none !important; }
+    .vkp-mobile-only  { display: block !important; }
+}
+
+/* ══ MOBILE Hero Slider ════════════════════════════════════ */
+.vkm-hero {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #0d1420;
+    overflow: hidden;
+    display: block;
+}
+.vkm-track {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+.vkm-slide {
+    display: none;
+    width: 100%;
+    animation: vkmFadeIn 0.5s ease forwards;
+}
+.vkm-slide.is-active { display: block; }
+@keyframes vkmFadeIn { from{opacity:0;} to{opacity:1;} }
+
+/* ── Full banner image — no crop, full width, natural height ── */
+.vkm-img-wrap {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    line-height: 0;    /* removes inline whitespace gap below img */
+}
+.vkm-img {
+    display: block;
+    width: 100%;       /* spans full screen width */
+    height: auto;      /* natural height — no crop */
+    object-fit: unset; /* disable object-fit so full image shows */
+    margin: 0;
+    padding: 0;
+}
+
+/* Content below image */
+.vkm-content {
+    display: none;
+}
+.vkm-badge {
+    display: inline-block;
+    background: #FFF7ED;
+    color: #C2410C;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    width: fit-content;
+    border: 1px solid #FED7AA;
+}
+.vkm-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.25;
+    letter-spacing: -.02em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.vkm-tagline {
+    font-size: .76rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.vkm-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #D94F2B, #FF6B35);
+    color: #fff !important;
+    font-size: .78rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 50px;
+    text-decoration: none !important;
+    width: fit-content;
+    margin-top: 4px;
+    box-shadow: 0 3px 12px rgba(217,79,43,.35);
+    transition: transform .2s, box-shadow .2s;
+}
+.vkm-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(217,79,43,.45); }
+
+/* Dots */
+.vkm-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0 14px;
+    background: #fff;
+}
+.vkm-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #cbd5e1; border: none; cursor: pointer; padding: 0;
+    transition: background .25s, width .25s, border-radius .25s;
+}
+.vkm-dot.active { background: #D94F2B; width: 22px; border-radius: 4px; }
+
 /* ── Visit Dubai–style Hero ─────────────────────────────── */
 .vkp-hero {
     padding: 12px 20px 0;
@@ -311,6 +477,41 @@ if ($hero_slides->isNotEmpty()) {
     timer=setInterval(function(){goTo(cur+1);},int);
 })();
 </script>
+
+{{-- ══ MOBILE SLIDER JS ══ --}}
+@if(count($sliderSlides) > 1)
+<script>
+(function(){
+    var total={{ count($sliderSlides) }};
+    if(total<=1)return;
+    var cur=0,timer=null,int=5000;
+
+    function vkmGoTo(n){
+        n=((n%total)+total)%total;
+        var slides=document.querySelectorAll('.vkm-slide');
+        var dots=document.querySelectorAll('.vkm-dot');
+        slides[cur].classList.remove('is-active');
+        if(dots[cur]) dots[cur].classList.remove('active');
+        cur=n;
+        slides[cur].classList.add('is-active');
+        if(dots[cur]) dots[cur].classList.add('active');
+    }
+
+    window.vkmGoTo=vkmGoTo;
+    timer=setInterval(function(){vkmGoTo(cur+1);},int);
+
+    // Touch swipe support
+    var mob=document.querySelector('.vkm-hero'),sx=0;
+    if(mob){
+        mob.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+        mob.addEventListener('touchend',function(e){
+            var d=e.changedTouches[0].clientX-sx;
+            if(Math.abs(d)>45){clearInterval(timer);vkmGoTo(d<0?cur+1:cur-1);timer=setInterval(function(){vkmGoTo(cur+1);},int);}
+        });
+    }
+})();
+</script>
+@endif
 
 {{-- ── Mobile App: Quick-action chips (below hero, mobile only) ── --}}
 <div class="vk-mob-chips" role="navigation" aria-label="Quick categories">
