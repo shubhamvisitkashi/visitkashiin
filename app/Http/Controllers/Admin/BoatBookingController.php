@@ -221,6 +221,33 @@ class BoatBookingController extends Controller
         ]);
     }
 
+    public function voucherPdf($booking_id) {
+        $booking = BoatBooking::where('booking_id', $booking_id)
+            ->with(['boat.boatType', 'payments'])
+            ->withSum('payments', 'amount')
+            ->firstOrFail();
+
+        $boatman = $booking->boatman_id
+            ? \App\Models\Boatman::find($booking->boatman_id)
+            : null;
+
+        $createdBy = $booking->created_by
+            ? \App\Models\Admin\Admin::find($booking->created_by)
+            : null;
+
+        $pdf = Pdf::loadView('admin.boat_booking.voucher_pdf', compact('booking', 'boatman', 'createdBy'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'defaultFont'          => 'sans-serif',
+                'dpi'                  => 150,
+                'enable_css_float'     => true,
+            ]);
+
+        return $pdf->download('VK-Voucher-' . $booking->booking_id . '.pdf');
+    }
+
     public function show($booking_id) {
         $booking = BoatBooking::where('booking_id', $booking_id)
             ->with(['boat.boatType', 'payments'])

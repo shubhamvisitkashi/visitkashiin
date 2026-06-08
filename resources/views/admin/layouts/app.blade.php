@@ -137,38 +137,7 @@
             <i data-feather="user"></i>
             <span>Profile</span>
         </a>
-        <a href="#" class="sa-mob-nav__item" id="mobMenuBtn" onclick="mobToggleMenu(event)">
-            <i data-feather="grid"></i>
-            <span>Menu</span>
-        </a>
     </nav>
-    <script>
-    function mobToggleMenu(e) {
-        e.preventDefault();
-        // Try global function first (set by sidebar.blade.php DOMContentLoaded)
-        if (typeof window.toggleAdminSidebar === 'function') {
-            window.toggleAdminSidebar();
-            return;
-        }
-        // Fallback: directly trigger the sidebar toggler click
-        var toggler = document.querySelector('.sidebar-toggler');
-        if (toggler) { toggler.click(); return; }
-        // Last resort: manually toggle sidebar classes
-        var sidebar = document.querySelector('.sidebar');
-        var overlay = document.querySelector('.sidebar-overlay');
-        if (!sidebar) return;
-        var isOpen = sidebar.classList.contains('active');
-        if (isOpen) {
-            sidebar.classList.remove('active');
-            if (overlay) overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        } else {
-            sidebar.classList.add('active');
-            if (overlay) overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-    </script>
 
     @include('admin.layouts.footer')
 

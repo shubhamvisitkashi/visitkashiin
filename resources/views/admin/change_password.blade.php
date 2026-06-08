@@ -94,7 +94,7 @@
   .spl-pwd-input{width:120px;}
 }
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@media(max-width:640px){.prof-page{padding:14px 12px;}.prof-hero{padding:22px 18px;}.prof-avatar,.prof-avatar-init{width:76px;height:76px;font-size:26px;}.prof-card-body{padding:18px 16px;}.prof-hero-name{font-size:1.15rem;}}
+@media(max-width:640px){.prof-page{padding:14px 12px;}.prof-hero{padding:22px 18px;margin-top:50px;}.prof-avatar,.prof-avatar-init{width:76px;height:76px;font-size:26px;}.prof-card-body{padding:18px 16px;}.prof-hero-name{font-size:1.15rem;}}
 </style>
 
 <div class="prof-page">

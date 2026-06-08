@@ -214,6 +214,7 @@ Route::group(['prefix' => 'admin'], function () {
             //Boat Booking
             Route::resource('boat-booking', BoatBookingController::class);
             Route::get('boat-booking/{booking_id}/voucher', 'BoatBookingController@voucher')->name('boat-booking.voucher');
+            Route::get('boat-booking/{booking_id}/voucher/pdf', 'BoatBookingController@voucherPdf')->name('boat-booking.voucher.pdf');
             Route::post('boat-booking/check-availability', 'BoatBookingController@checkAvailability')->name('boat-booking.check.availability');
             Route::get('send-booking-mail/{booking_id}', 'BoatBookingController@sendBookingMail')->name('send.booking.mail');
             Route::get('boat-booking-payment/{booking_id}', 'BoatBookingController@payment')->name('boat-booking.payment');

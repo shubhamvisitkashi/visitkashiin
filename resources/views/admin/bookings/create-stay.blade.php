@@ -36,38 +36,38 @@
 .sb-input { border:1.5px solid #E2E8F0 !important; border-radius:11px !important; padding:10px 14px !important; font-size:.875rem !important; color:#0F172A !important; background:#FAFBFF !important; transition:all .2s !important; width:100%; }
 .sb-input:focus { border-color:#0D9488 !important; box-shadow:0 0 0 3px rgba(13,148,136,.12) !important; background:#fff !important; outline:none !important; }
 
-/* ── Hotel cards ──────────────────────────────── */
-.hotel-list { display:flex; flex-direction:column; gap:10px; }
+/* ── Hotel grid ───────────────────────────────── */
+.hotel-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:12px; }
 .hotel-row {
-  display:flex; align-items:center; gap:14px;
-  border:2px solid #E8EDF4; border-radius:14px; padding:14px 16px;
-  cursor:pointer; background:#fff; transition:all .2s; position:relative;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  border:2px solid #E8EDF4; border-radius:16px; padding:18px 12px 14px;
+  cursor:pointer; background:#fff; transition:all .22s; position:relative;
   user-select:none;
 }
-.hotel-row:hover { border-color:#0D9488; background:#F0FDFA; box-shadow:0 4px 16px rgba(13,148,136,.12); transform:translateY(-1px); }
-.hotel-row.selected { border-color:#0D9488; background:#F0FDFA; box-shadow:0 0 0 3px rgba(13,148,136,.18); }
+.hotel-row:hover { border-color:#0D9488; background:#F0FDFA; box-shadow:0 6px 20px rgba(13,148,136,.15); transform:translateY(-3px); }
+.hotel-row.selected { border-color:#0D9488; background:#F0FDFA; box-shadow:0 0 0 3px rgba(13,148,136,.2); }
 .hotel-row-icon {
-  width:48px; height:48px; border-radius:12px; flex-shrink:0;
+  width:52px; height:52px; border-radius:14px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
-  font-size:1.5rem; background:#F0FDFA;
+  font-size:1.6rem; background:#F0FDFA; margin-bottom:10px;
 }
-.hotel-row-info { flex:1; min-width:0; }
-.hotel-row-name { font-size:.88rem; font-weight:700; color:#0F172A; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.hotel-row-meta { display:flex; align-items:center; gap:8px; }
-.hotel-row-loc { font-size:.7rem; color:#64748B; font-weight:600; }
-.hotel-row-stars { color:#F59E0B; font-size:.68rem; letter-spacing:1px; }
-.hotel-row-price { text-align:right; flex-shrink:0; }
-.hotel-row-amt { font-size:1.05rem; font-weight:800; color:#0D9488; }
-.hotel-row-per { font-size:.65rem; color:#94A3B8; font-weight:600; }
+.hotel-row-info { width:100%; }
+.hotel-row-name { font-size:.78rem; font-weight:700; color:#0F172A; margin-bottom:5px; line-height:1.35; }
+.hotel-row-meta { display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:6px; flex-wrap:wrap; }
+.hotel-row-loc { font-size:.66rem; color:#64748B; font-weight:600; }
+.hotel-row-stars { color:#F59E0B; font-size:.65rem; }
+.hotel-row-price { text-align:center; margin-top:4px; }
+.hotel-row-amt { font-size:1rem; font-weight:800; color:#0D9488; display:block; }
+.hotel-row-per { font-size:.62rem; color:#94A3B8; font-weight:600; }
 .hotel-row-chk {
-  width:22px; height:22px; border-radius:50%; background:#0D9488;
-  color:#fff; font-size:.65rem; font-weight:800;
+  position:absolute; top:8px; right:8px;
+  width:20px; height:20px; border-radius:50%; background:#0D9488;
+  color:#fff; font-size:.6rem; font-weight:800;
   display:none; align-items:center; justify-content:center;
-  flex-shrink:0;
 }
 .hotel-row.selected .hotel-row-chk { display:flex; }
 
-/* Custom hotel row */
+/* Custom hotel card */
 .hotel-row-custom { border-style:dashed; border-color:#A5B4FC; }
 .hotel-row-custom:hover, .hotel-row-custom.selected { border-color:#6366F1; background:#EEF2FF; box-shadow:0 0 0 3px rgba(99,102,241,.15); }
 .hotel-row-custom .hotel-row-chk { background:#6366F1; }
@@ -339,40 +339,40 @@
               @php [$icon,$color] = getHotelIcon($t->name); @endphp
               <div class="hotel-row" data-id="{{ $t->id }}" data-name="{{ $t->name }}"
                    data-price="{{ (float)$t->default_selling_price }}" onclick="selectHotel(this)">
+                <div class="hotel-row-chk">✓</div>
                 <div class="hotel-row-icon" style="background:{{ $color }}18;">
-                  <span style="font-size:1.4rem;">{{ $icon }}</span>
+                  <span>{{ $icon }}</span>
                 </div>
                 <div class="hotel-row-info">
                   <div class="hotel-row-name">{{ $t->name }}</div>
                   <div class="hotel-row-meta">
                     <span class="hotel-row-loc">📍 {{ getHotelLocation($t->name) }}</span>
                     @if(getStars($t->name))
-                    <span style="color:#F59E0B;font-size:.7rem;">{{ getStars($t->name) }}</span>
+                    <span class="hotel-row-stars">{{ getStars($t->name) }}</span>
                     @endif
                   </div>
+                  <div class="hotel-row-price">
+                    <span class="hotel-row-amt">₹{{ number_format((float)$t->default_selling_price,0) }}</span>
+                    <span class="hotel-row-per">/night</span>
+                  </div>
                 </div>
-                <div class="hotel-row-price">
-                  <div class="hotel-row-amt">₹{{ number_format((float)$t->default_selling_price,0) }}</div>
-                  <div class="hotel-row-per">/night</div>
-                </div>
-                <div class="hotel-row-chk">✓</div>
               </div>
               @empty
-              <div style="text-align:center;padding:30px;color:#94A3B8;font-size:.85rem;">
+              <div style="grid-column:1/-1;text-align:center;padding:30px;color:#94A3B8;font-size:.85rem;">
                 No hotels found. Add from Service Templates.
               </div>
               @endforelse
 
               {{-- Custom --}}
               <div class="hotel-row hotel-row-custom selected" id="hotelCustomCard" onclick="selectHotelCustom()">
+                <div class="hotel-row-chk" style="background:#6366F1;">✓</div>
                 <div class="hotel-row-icon">✏️</div>
                 <div class="hotel-row-info">
-                  <div class="hotel-row-name" style="color:#6366F1;">Not listed? Add custom</div>
+                  <div class="hotel-row-name" style="color:#6366F1;">Custom Property</div>
                   <div class="hotel-row-meta">
-                    <span style="font-size:.7rem;color:#818CF8;">Enter hotel name & rate manually</span>
+                    <span style="font-size:.66rem;color:#818CF8;">Add manually</span>
                   </div>
                 </div>
-                <div class="hotel-row-chk" style="background:#6366F1;">✓</div>
               </div>
             </div>
 
