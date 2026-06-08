@@ -398,12 +398,18 @@
       <div class="row g-3">
         <div class="col-md-6">
           <label class="bt-label">Pickup Ghat <span class="bt-req">*</span></label>
-          <select name="pickup_ghat" class="form-select bt-input" required>
+          <select name="pickup_ghat" class="form-select bt-input" required id="pickupGhatSelect" onchange="toggleManualGhat('pickup',this.value)">
             <option value="">Select ghat…</option>
-            @foreach(['Dashashwamedh Ghat','Assi Ghat','Ravidas Ghat Nagwa','NAMO Ghat','Aadikeshav Ghat','Manikarnika Ghat','Harishchandra Ghat','Rajendra Prasad Ghat','Man Mandir Ghat','Panchganga Ghat','Kedar Ghat','Shivala Ghat','Munshi Ghat','Scindia Ghat','Narad Ghat','Chet Singh Ghat','Darbhanga Ghat','Tulsi Ghat','Lalita Ghat'] as $g)
+            @foreach(['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat'] as $g)
             <option value="{{ $g }}" {{ old('pickup_ghat')==$g?'selected':'' }}>{{ $g }}</option>
             @endforeach
+            <option value="__manual__" {{ old('pickup_ghat')&&!in_array(old('pickup_ghat'),['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat',''])?'selected':'' }}>✏️ Other (Enter manually)</option>
           </select>
+          <input type="text" id="pickupGhatManual" name="pickup_ghat_manual"
+                 class="form-control bt-input mt-2"
+                 placeholder="Enter ghat name…"
+                 style="display:{{ old('pickup_ghat')&&!in_array(old('pickup_ghat'),['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat',''])?'block':'none' }};"
+                 value="{{ old('pickup_ghat')&&!in_array(old('pickup_ghat'),['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat',''])?old('pickup_ghat'):'' }}">
         </div>
         <div class="col-md-6">
           <label class="bt-label">Pickup Time <span class="bt-req">*</span></label>
@@ -412,12 +418,18 @@
         </div>
         <div class="col-md-6">
           <label class="bt-label">Drop Ghat <span class="bt-req">*</span></label>
-          <select name="drop_ghat" class="form-select bt-input" required>
+          <select name="drop_ghat" class="form-select bt-input" required id="dropGhatSelect" onchange="toggleManualGhat('drop',this.value)">
             <option value="">Select drop ghat…</option>
-            @foreach(['Dashashwamedh Ghat','Assi Ghat','Ravidas Ghat Nagwa','NAMO Ghat','Aadikeshav Ghat','Manikarnika Ghat','Harishchandra Ghat','Rajendra Prasad Ghat','Man Mandir Ghat','Panchganga Ghat','Kedar Ghat','Shivala Ghat','Munshi Ghat','Scindia Ghat','Narad Ghat','Chet Singh Ghat','Darbhanga Ghat','Tulsi Ghat','Lalita Ghat'] as $g)
+            @foreach(['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat'] as $g)
             <option value="{{ $g }}" {{ old('drop_ghat')==$g?'selected':'' }}>{{ $g }}</option>
             @endforeach
+            <option value="__manual__" {{ old('drop_ghat')&&!in_array(old('drop_ghat'),['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat',''])?'selected':'' }}>✏️ Other (Enter manually)</option>
           </select>
+          <input type="text" id="dropGhatManual" name="drop_ghat_manual"
+                 class="form-control bt-input mt-2"
+                 placeholder="Enter ghat name…"
+                 style="display:{{ old('drop_ghat')&&!in_array(old('drop_ghat'),['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat',''])?'block':'none' }};"
+                 value="{{ old('drop_ghat')&&!in_array(old('drop_ghat'),['Darbhanga (near Dashaswamedh) Ghat','Ravidas Ghat (Nagwa)','NAMO Ghat','Aadikeshav Ghat','Scindia Ghat','Tulsi Ghat','Lalita Ghat',''])?old('drop_ghat'):'' }}">
         </div>
         <div class="col-md-6">
           <label class="bt-label">Drop / End Time</label>
@@ -739,6 +751,40 @@ function validateBoat() {
 
 // Init
 document.addEventListener('DOMContentLoaded', () => { recalc(); updateTotalPax(); });
+
+// ── Manual Ghat toggle ───────────────────────────────────
+function toggleManualGhat(type, val) {
+  var manualEl = document.getElementById(type + 'GhatManual');
+  if (!manualEl) return;
+  if (val === '__manual__') {
+    manualEl.style.display = 'block';
+    manualEl.required = true;
+    manualEl.focus();
+  } else {
+    manualEl.style.display = 'none';
+    manualEl.required = false;
+    manualEl.value = '';
+  }
+}
+
+// Before submit: if manual selected, write value back into select or hidden field
+document.getElementById('boatForm').addEventListener('submit', function() {
+  ['pickup','drop'].forEach(function(type) {
+    var sel    = document.getElementById(type + 'GhatSelect');
+    var manual = document.getElementById(type + 'GhatManual');
+    if (sel && manual && sel.value === '__manual__' && manual.value.trim()) {
+      // Inject a new option with the manual value and select it
+      var opt = document.createElement('option');
+      opt.value    = manual.value.trim();
+      opt.text     = manual.value.trim();
+      opt.selected = true;
+      sel.appendChild(opt);
+      sel.value = manual.value.trim();
+      // Remove "required" from manual input so form submits cleanly via select
+      manual.name = ''; // detach from POST
+    }
+  });
+});
 </script>
 
 @endsection
