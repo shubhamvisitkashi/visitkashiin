@@ -724,15 +724,15 @@
 
             {{-- Boats (moved out of Website Settings into own section) --}}
             @canany(['web_setup'])
-                <li class="nav-item @if (in_array(Route::currentRouteName(), ['boat-type.index','boat-type.edit','boat.index','boat.create','boat.edit'])) active @endif">
+                <li class="nav-item @if (in_array(Route::currentRouteName(), ['boat-type.index','boat-type.edit','boat.index','boat.create','boat.edit','boatmen.index'])) active @endif">
                     <a class="nav-link" data-bs-toggle="collapse" href="#manageBoats" role="button"
-                        aria-expanded="@if (in_array(Route::currentRouteName(), ['boat-type.index','boat-type.edit','boat.index','boat.create','boat.edit'])) true @else false @endif"
+                        aria-expanded="@if (in_array(Route::currentRouteName(), ['boat-type.index','boat-type.edit','boat.index','boat.create','boat.edit','boatmen.index'])) true @else false @endif"
                         aria-controls="manageBoats">
                         <div class="icon-wrapper"><i data-feather="anchor"></i></div>
                         <span class="link-title">Boats</span>
                         <i class="link-arrow" data-feather="chevron-down"></i>
                     </a>
-                    <div class="collapse @if (in_array(Route::currentRouteName(), ['boat-type.index','boat-type.edit','boat.index','boat.create','boat.edit'])) show @endif" id="manageBoats">
+                    <div class="collapse @if (in_array(Route::currentRouteName(), ['boat-type.index','boat-type.edit','boat.index','boat.create','boat.edit','boatmen.index'])) show @endif" id="manageBoats">
                         <ul class="nav sub-menu">
                             <li class="nav-item">
                                 <a href="{{ route('boat-type.index') }}"
@@ -741,6 +741,10 @@
                             <li class="nav-item">
                                 <a href="{{ route('boat.index') }}"
                                     class="nav-link @if (in_array(Route::currentRouteName(), ['boat.index','boat.create','boat.edit'])) active @endif">All Boats</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('boatmen.index') }}"
+                                    class="nav-link @if (Route::currentRouteName() === 'boatmen.index') active @endif">Boatmen</a>
                             </li>
                         </ul>
                     </div>

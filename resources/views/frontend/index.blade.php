@@ -166,9 +166,15 @@ if ($hero_slides->isNotEmpty()) {
 </section>
 
 <style>
-/* ── Show/hide desktop vs mobile slider ── */
-.vkp-desktop-only { display: block; }
-.vkp-mobile-only  { display: none; }
+/* ── Desktop slider: visible ≥768px, hidden on mobile ── */
+.vkp-desktop-only { display: block !important; }
+.vkp-mobile-only  { display: none !important; }
+
+/* ── Mobile slider: hidden ≥768px, visible on mobile ── */
+@media (min-width: 768px) {
+    .vkp-desktop-only { display: block !important; }
+    .vkp-mobile-only  { display: none !important; }
+}
 @media (max-width: 767px) {
     .vkp-desktop-only { display: none !important; }
     .vkp-mobile-only  { display: block !important; }

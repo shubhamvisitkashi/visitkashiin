@@ -47,7 +47,7 @@
         <strong>Need Help Planning Your Trip?</strong>
         <span>Chat with our local Varanasi travel experts instantly</span>
       </div>
-      <a href="https://wa.me/+919260912327"
+      <a href="https://wa.me/+917080109919"
          target="_blank"
          rel="noopener noreferrer"
          class="vk-cta-strip__btn"

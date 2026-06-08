@@ -180,7 +180,7 @@
 
     {{-- Drawer footer --}}
     <div class="vk-drawer__foot">
-        <a href="https://wa.me/+919260912327"
+        <a href="https://wa.me/+917080109919"
            target="_blank" rel="noopener noreferrer"
            class="vk-drawer__whatsapp">
             <img src="{{ asset('frontend/images/whatsapp.png') }}" alt="" width="20" height="20" />

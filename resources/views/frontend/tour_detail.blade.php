@@ -1362,7 +1362,7 @@
                             </div>
                             <span class="fest-sidebar__divider">Plan your visit</span>
                             <div class="fest-sidebar__cta">
-                                <a href="https://wa.me/{{ preg_replace('/\D/', '', websiteSetupValue('whats_app_number') ?? '919260912327') }}"
+                                <a href="https://wa.me/{{ preg_replace('/\D/', '', websiteSetupValue('whats_app_number') ?? '917080109919') }}"
                                    target="_blank" rel="noopener noreferrer"
                                    class="fest-sidebar__wa">
                                     <img src="{{ asset('frontend/images/whatsapp.png') }}" alt="" width="20" height="20" loading="lazy" />

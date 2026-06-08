@@ -201,6 +201,10 @@ Route::group(['prefix' => 'admin'], function () {
             //Lead Source
             Route::resource('lead-source', LeadSourceController::class);
 
+            //Boatmen
+            Route::resource('boatmen', 'BoatmanController')->except(['create','show','edit']);
+            Route::post('boatmen/{boatman}/toggle-status', 'BoatmanController@toggleStatus')->name('boatmen.toggle-status');
+
             //Boat Type
             Route::resource('boat-type', BoatTypeController::class)->except('create');
 

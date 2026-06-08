@@ -31,6 +31,17 @@ body > * {
     box-sizing: border-box;
 }
 
+/* ── Slider visibility — desktop/mobile split ── */
+/* Desktop (≥768px): show desktop slider, hide mobile slider */
+.vkp-desktop-only { display: block !important; }
+.vkp-mobile-only  { display: none !important; }
+
+/* Mobile (≤767px): hide desktop slider, show mobile slider */
+@media (max-width: 767px) {
+    .vkp-desktop-only { display: none !important; }
+    .vkp-mobile-only  { display: block !important; }
+}
+
 /* All sections: contain horizontal overflow */
 section, .vk-section, #vk-categories, .deals-on-sale {
     overflow-x: hidden;

@@ -78,7 +78,9 @@
   footer, .vkf-footer { margin-bottom: 0 !important; padding-bottom: 0 !important; }
   .vkf-bottom { padding-bottom: 70px !important; }
 
-  /* ── Hero slider ── */
+  /* ── Hero slider: force desktop hidden, mobile visible ── */
+  .vkp-desktop-only { display: none !important; }
+  .vkp-mobile-only  { display: block !important; }
   #home_banner_video { border-radius: 0 !important; margin-top: 0 !important; }
   .vkp-hero { margin-top: 0 !important; border-radius: 0 !important; }
 
