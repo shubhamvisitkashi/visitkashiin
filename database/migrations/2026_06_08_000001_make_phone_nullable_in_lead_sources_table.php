@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class MakePhoneNullableInLeadSourcesTable extends Migration
@@ -10,17 +10,13 @@ class MakePhoneNullableInLeadSourcesTable extends Migration
     {
         if (!Schema::hasTable('lead_sources')) return;
 
-        Schema::table('lead_sources', function (Blueprint $table) {
-            $table->bigInteger('phone')->nullable()->change();
-        });
+        DB::statement('ALTER TABLE lead_sources MODIFY phone VARCHAR(20) NULL');
     }
 
     public function down()
     {
         if (!Schema::hasTable('lead_sources')) return;
 
-        Schema::table('lead_sources', function (Blueprint $table) {
-            $table->bigInteger('phone')->nullable(false)->change();
-        });
+        DB::statement('ALTER TABLE lead_sources MODIFY phone BIGINT NOT NULL');
     }
 }
