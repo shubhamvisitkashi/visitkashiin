@@ -12,6 +12,7 @@ use App\Models\Enquiry;
 use App\Models\UserTarget;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Services\TargetCalculationService;
 
 class DashboardController extends Controller
 {
@@ -175,21 +176,25 @@ class DashboardController extends Controller
             ->pluck('cnt', 'booking_status');
 
         // ── Staff Targets (current month) ─────────────────────────
-        $staffTargets = collect();
+        $targetService  = app(TargetCalculationService::class);
+        $staffTargets   = collect();
+        $myTargetDetail = null;   // detailed breakdown for the logged-in staff member
+
         if ($isAdmin) {
-            // Super Admin / Admin / Manager sees all staff targets
             $staffTargets = UserTarget::with('user')
                 ->currentMonth()
                 ->orderBy('target_margin', 'desc')
                 ->get();
+            $staffTargets = $targetService->calculateMultipleTargets($staffTargets);
         } else {
-            // Staff sees only their own target
             $myTarget = UserTarget::with('user')
                 ->currentMonth()
                 ->where('user_id', $userId)
                 ->first();
             if ($myTarget) {
-                $staffTargets = collect([$myTarget]);
+                $myTarget->achieved_margin = $targetService->calculateAchievedMargin($myTarget);
+                $staffTargets   = collect([$myTarget]);
+                $myTargetDetail = $targetService->calculateDetailedMargin($userId, now()->month, now()->year);
             }
         }
 
@@ -214,7 +219,7 @@ class DashboardController extends Controller
             'dailyLabels', 'dailyRevenue',
             'stayStatuses', 'staffTargets',
             'teamTotalTarget', 'teamTotalAchieved', 'teamTargetPct',
-            'isAdmin',
+            'isAdmin', 'myTargetDetail',
             'recentBookings', 'upcomingCheckins', 'upcomingCabs'
         ), ['page_title' => 'Dashboard']);
     }

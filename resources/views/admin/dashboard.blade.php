@@ -370,66 +370,163 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 </div>
 
 {{-- ══ STAFF TARGETS ══ --}}
-@if($staffTargets->count())
-<div class="chart-card" style="margin-bottom:20px;">
-  <div class="chart-head">
-    <div>
-      <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
-      <div class="chart-sub">Monthly margin targets vs achieved</div>
+@if($isAdmin)
+
+  {{-- Admin: team grid --}}
+  @if($staffTargets->count())
+  <div class="chart-card" style="margin-bottom:20px;">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
+        <div class="chart-sub">Monthly margin targets vs achieved</div>
+      </div>
+      @can('target-manage')
+      <a href="{{ route('targets.index') }}" style="font-size:.72rem;color:var(--indigo);font-weight:700;text-decoration:none;">Manage →</a>
+      @endcan
     </div>
-    @can('target-manage')
-    <a href="{{ route('targets.index') }}" style="font-size:.72rem;color:var(--indigo);font-weight:700;text-decoration:none;">Manage →</a>
-    @endcan
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0;">
-    @foreach($staffTargets as $t)
-    @php
-      $pct     = $t->target_margin > 0 ? min(100, round($t->achieved_margin / $t->target_margin * 100)) : 0;
-      $remain  = max(0, $t->target_margin - $t->achieved_margin);
-      $color   = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
-      $bgColor = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
-      $txtColor= $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
-    @endphp
-    <div style="padding:16px 20px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;">
-            {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0;">
+      @foreach($staffTargets as $t)
+      @php
+        $pct     = $t->target_margin > 0 ? min(100, round($t->achieved_margin / $t->target_margin * 100)) : 0;
+        $remain  = max(0, $t->target_margin - $t->achieved_margin);
+        $color   = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
+        $bgColor = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
+        $txtColor= $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
+      @endphp
+      <div style="padding:16px 20px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;">
+              {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
+            </div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--text);">{{ $t->user->name ?? 'Staff' }}</div>
           </div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--text);">{{ $t->user->name ?? 'Staff' }}</div>
+          <span style="font-size:.64rem;font-weight:800;padding:3px 9px;border-radius:20px;background:{{ $bgColor }};color:{{ $txtColor }};">
+            {{ $pct >= 100 ? '🏆 Done' : $pct.'%' }}
+          </span>
         </div>
-        <span style="font-size:.64rem;font-weight:800;padding:3px 9px;border-radius:20px;background:{{ $bgColor }};color:{{ $txtColor }};">
-          {{ $pct >= 100 ? '🏆 Done' : $pct.'%' }}
-        </span>
+        <div style="height:7px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin-bottom:8px;">
+          <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .5s;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;">
+          <span style="color:var(--muted);">Achieved: <strong style="color:{{ $color }};">₹{{ number_format($t->achieved_margin) }}</strong></span>
+          <span style="color:var(--muted);">Target: <strong style="color:var(--text);">₹{{ number_format($t->target_margin) }}</strong></span>
+        </div>
+        @if($remain > 0)
+        <div style="font-size:.68rem;color:var(--muted);margin-top:3px;text-align:right;">₹{{ number_format($remain) }} remaining</div>
+        @endif
       </div>
-      <div style="height:7px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin-bottom:8px;">
-        <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .5s;"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;">
-        <span style="color:var(--muted);">Achieved: <strong style="color:{{ $color }};">₹{{ number_format($t->achieved_margin) }}</strong></span>
-        <span style="color:var(--muted);">Target: <strong style="color:var(--text);">₹{{ number_format($t->target_margin) }}</strong></span>
-      </div>
-      @if($remain > 0)
-      <div style="font-size:.68rem;color:var(--muted);margin-top:3px;text-align:right;">₹{{ number_format($remain) }} remaining</div>
-      @endif
+      @endforeach
     </div>
-    @endforeach
   </div>
-</div>
-@elsecan('target-manage')
-<div class="chart-card" style="margin-bottom:20px;">
-  <div class="chart-head">
-    <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
+  @else
+  @can('target-manage')
+  <div class="chart-card" style="margin-bottom:20px;">
+    <div class="chart-head"><div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div></div>
+    <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+      <div style="font-size:.84rem;color:var(--muted);">No targets set for this month yet.</div>
+      <a href="{{ route('targets.index') }}" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--indigo);color:#fff;border-radius:10px;font-size:.8rem;font-weight:700;text-decoration:none;">＋ Set Staff Targets</a>
+    </div>
   </div>
-  <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
-    <div style="font-size:.84rem;color:var(--muted);">No targets set for this month yet.</div>
-    <a href="{{ route('targets.index') }}"
-       style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--indigo);color:#fff;border-radius:10px;font-size:.8rem;font-weight:700;text-decoration:none;">
-      ＋ Set Staff Targets
-    </a>
+  @endcan
+  @endif
+
+@else
+
+  {{-- Staff: personal target with full formula breakdown --}}
+  @if($staffTargets->count() && $myTargetDetail)
+  @php
+    $mt      = $staffTargets->first();
+    $pct     = $mt->target_margin > 0 ? min(100, round($mt->achieved_margin / $mt->target_margin * 100)) : 0;
+    $remain  = max(0, $mt->target_margin - $mt->achieved_margin);
+    $color   = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
+    $bgColor = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
+    $txtColor= $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
+  @endphp
+  <div class="chart-card" style="margin-bottom:20px;">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">🎯 My Monthly Target — {{ now()->format('F Y') }}</div>
+        <div class="chart-sub">Total Booking Amount − Vendor Cost = Margin</div>
+      </div>
+      <span style="font-size:.72rem;font-weight:800;padding:4px 12px;border-radius:20px;background:{{ $bgColor }};color:{{ $txtColor }};">
+        {{ $pct >= 100 ? '🏆 Target Achieved!' : $pct.'% of target' }}
+      </span>
+    </div>
+
+    <div style="padding:20px 24px;">
+
+      {{-- Progress bar --}}
+      <div style="margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:6px;">
+          <span>Margin Achieved: <strong style="color:{{ $color }};font-size:.85rem;">₹{{ number_format($mt->achieved_margin) }}</strong></span>
+          <span>Target: <strong style="color:var(--text);font-size:.85rem;">₹{{ number_format($mt->target_margin) }}</strong></span>
+        </div>
+        <div style="height:10px;background:#E2E8F0;border-radius:99px;overflow:hidden;">
+          <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .6s;"></div>
+        </div>
+        @if($remain > 0)
+        <div style="font-size:.7rem;color:var(--muted);margin-top:5px;text-align:right;">
+          ₹{{ number_format($remain) }} more to hit target
+        </div>
+        @endif
+      </div>
+
+      {{-- Formula breakdown --}}
+      <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:16px;">
+        <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">This Month Breakdown</div>
+
+        {{-- Header row --}}
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:6px 16px;font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:8px;">
+          <span>Type</span>
+          <span style="text-align:right;">Booking Amt</span>
+          <span style="text-align:right;">Vendor Cost</span>
+          <span style="text-align:right;">Margin</span>
+        </div>
+
+        {{-- Stay row --}}
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
+          <span style="color:var(--text);font-weight:600;">🏨 Stay <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['stay']['count'] }})</span></span>
+          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['stay']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['stay']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['stay']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['stay']['margin']) }}</span>
+        </div>
+
+        {{-- Cab row --}}
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
+          <span style="color:var(--text);font-weight:600;">🚗 Cab <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['cab']['count'] }})</span></span>
+          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['cab']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['cab']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['cab']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['cab']['margin']) }}</span>
+        </div>
+
+        {{-- Boat row --}}
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:8px;">
+          <span style="color:var(--text);font-weight:600;">⛵ Boat <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['boat']['count'] }})</span></span>
+          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['boat']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['boat']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['boat']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['boat']['margin']) }}</span>
+        </div>
+
+        {{-- Totals row --}}
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.82rem;padding:4px 0;">
+          <span style="font-weight:800;color:var(--text);">Total</span>
+          <span style="text-align:right;font-weight:800;color:var(--text);">₹{{ number_format($myTargetDetail['total_amount']) }}</span>
+          <span style="text-align:right;font-weight:800;color:#EF4444;">₹{{ number_format($myTargetDetail['vendor_cost']) }}</span>
+          <span style="text-align:right;font-weight:900;color:{{ $color }};">₹{{ number_format($myTargetDetail['margin']) }}</span>
+        </div>
+
+        {{-- Formula label --}}
+        <div style="margin-top:10px;padding:8px 12px;background:{{ $bgColor }};border-radius:8px;font-size:.72rem;font-weight:700;color:{{ $txtColor }};text-align:center;">
+          ₹{{ number_format($myTargetDetail['total_amount']) }} − ₹{{ number_format($myTargetDetail['vendor_cost']) }} = ₹{{ number_format($myTargetDetail['margin']) }} Margin
+        </div>
+      </div>
+
+    </div>
   </div>
-</div>
-@endcan
+  @endif
+
+@endif
 
 {{-- ══ TYPE BREAKDOWN ══ --}}
 <div class="type-row">
