@@ -292,20 +292,22 @@
             </div>
             <div class="col-md-4">
               <label class="cn-label">Primary Mobile <span class="cn-req">*</span></label>
-              <div class="cn-phone-wrap">
-                <span class="cn-phone-prefix">+91</span>
-                <input type="tel" name="customer_phone" class="form-control cn-input cn-input-phone" required
-                       placeholder="9876543210" maxlength="10" value="{{ old('customer_phone') }}">
-              </div>
-              <div class="cn-hint">10-digit mobile number</div>
+              @include('admin.partials.phone-input', [
+                  'name'     => 'customer_phone',
+                  'codeName' => 'customer_phone_cc',
+                  'value'    => old('customer_phone'),
+                  'required' => true,
+              ])
             </div>
             <div class="col-md-4">
               <label class="cn-label">Alternate Mobile</label>
-              <div class="cn-phone-wrap">
-                <span class="cn-phone-prefix">+91</span>
-                <input type="tel" name="customer_alt_phone" class="form-control cn-input cn-input-phone"
-                       placeholder="Optional second number" maxlength="10" value="{{ old('customer_alt_phone') }}">
-              </div>
+              @include('admin.partials.phone-input', [
+                  'name'     => 'customer_alt_phone',
+                  'codeName' => 'customer_alt_phone_cc',
+                  'value'    => old('customer_alt_phone'),
+                  'required' => false,
+                  'placeholder' => 'Optional second number',
+              ])
             </div>
             <div class="col-md-4">
               <label class="cn-label">Email Address</label>

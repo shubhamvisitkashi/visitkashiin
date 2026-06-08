@@ -151,10 +151,12 @@
         </div>
         <div class="col-md-3">
           <label class="tb-label">Mobile <span class="req">*</span></label>
-          <div class="tb-prefix-wrap">
-            <span class="tb-prefix">+91</span>
-            <input type="tel" name="phone" class="tb-input tb-input-pl" required placeholder="Mobile number" maxlength="10" value="{{ old('phone') }}">
-          </div>
+          @include('admin.partials.phone-input', [
+              'name'     => 'phone',
+              'value'    => old('phone'),
+              'required' => true,
+              'placeholder' => '9876543210',
+          ])
         </div>
         <div class="col-md-3">
           <label class="tb-label">Email</label>

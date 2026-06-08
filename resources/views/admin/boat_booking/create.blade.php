@@ -195,19 +195,21 @@
         </div>
         <div class="col-md-4">
           <label class="bt-label">Mobile <span class="bt-req">*</span></label>
-          <div class="bt-wrap">
-            <span class="bt-prefix">+91</span>
-            <input type="tel" name="phone" class="form-control bt-input bt-input-ph" required
-                   placeholder="XXXXX XXXXX" maxlength="10" value="{{ old('phone') }}">
-          </div>
+          @include('admin.partials.phone-input', [
+              'name'     => 'phone',
+              'value'    => old('phone'),
+              'required' => true,
+          ])
         </div>
         <div class="col-md-4">
           <label class="bt-label">Alt. Mobile</label>
-          <div class="bt-wrap">
-            <span class="bt-prefix">+91</span>
-            <input type="tel" name="alt_phone" class="form-control bt-input bt-input-ph"
-                   placeholder="Alternate" maxlength="10" value="{{ old('alt_phone') }}">
-          </div>
+          @include('admin.partials.phone-input', [
+              'name'     => 'alt_phone',
+              'codeName' => 'alt_phone_country_code',
+              'value'    => old('alt_phone'),
+              'required' => false,
+              'placeholder' => 'Alternate',
+          ])
         </div>
         <div class="col-md-6">
           <label class="bt-label">Email Address</label>

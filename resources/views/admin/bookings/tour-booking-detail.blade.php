@@ -172,9 +172,12 @@
         </div>
         <div class="col-md-3">
           <label class="tb-label">Mobile <span class="req">*</span></label>
-          <div class="tb-prefix-wrap">
-            <span class="tb-prefix">+91</span>
-            <input type="tel" name="phone" class="tb-input tb-input-pl" required maxlength="10" value="{{ old('phone') ?: $lead->contact }}">
+          @include('admin.partials.phone-input', [
+              'name'     => 'phone',
+              'value'    => old('phone', $lead->contact ?? ''),
+              'required' => true,
+              'placeholder' => '9876543210',
+          ])
           </div>
         </div>
         <div class="col-md-3">

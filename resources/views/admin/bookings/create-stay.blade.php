@@ -156,19 +156,21 @@
               </div>
               <div class="col-md-4">
                 <label class="cs-label">Mobile <span class="cs-req">*</span></label>
-                <div class="cs-phone-wrap">
-                  <span class="cs-prefix">+91</span>
-                  <input type="tel" name="phone" class="form-control cs-input cs-input-ph" required
-                         placeholder="10-digit number" maxlength="10" value="{{ old('phone') }}">
-                </div>
+                @include('admin.partials.phone-input', [
+                    'name'     => 'phone',
+                    'value'    => old('phone'),
+                    'required' => true,
+                ])
               </div>
               <div class="col-md-4">
                 <label class="cs-label">Alt. Mobile</label>
-                <div class="cs-phone-wrap">
-                  <span class="cs-prefix">+91</span>
-                  <input type="tel" name="alt_phone" class="form-control cs-input cs-input-ph"
-                         placeholder="Optional" maxlength="10" value="{{ old('alt_phone') }}">
-                </div>
+                @include('admin.partials.phone-input', [
+                    'name'     => 'alt_phone',
+                    'codeName' => 'alt_phone_country_code',
+                    'value'    => old('alt_phone'),
+                    'required' => false,
+                    'placeholder' => 'Optional',
+                ])
               </div>
               <div class="col-md-4">
                 <label class="cs-label">Email</label>

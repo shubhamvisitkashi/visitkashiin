@@ -309,7 +309,7 @@ class LeadController extends Controller
     {
         $request->validate([
             'name'  => 'required',
-            'phone' => 'required|unique:lead_sources,phone|numeric|digits:10'
+            'phone' => 'required|unique:lead_sources,phone|string|max:20'
         ]);
         $data = new LeadSource;
         $data->name = $request->name;

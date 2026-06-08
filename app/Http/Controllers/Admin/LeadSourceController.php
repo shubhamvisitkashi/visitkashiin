@@ -27,8 +27,8 @@ class LeadSourceController extends Controller
         ]);
 
         $lead_source = new LeadSource;
-        $lead_source->name = $request->name;
-        $lead_source->phone = $request->phone;
+        $lead_source->name  = $request->name;
+        $lead_source->phone = $request->phone ?? null;
         $lead_source->save();
 
         return back()->with('success','Lead Source Added Successfully!');
@@ -66,8 +66,8 @@ class LeadSourceController extends Controller
             'name'  =>  'required'
         ]);
 
-        $leadSource->name = $request->name;
-        $leadSource->phone = $request->phone;
+        $leadSource->name  = $request->name;
+        $leadSource->phone = $request->phone ?? null;
         $leadSource->save();
 
         return redirect()->route('lead-source.index')->with('success','Lead Source Updated Successfully!');
