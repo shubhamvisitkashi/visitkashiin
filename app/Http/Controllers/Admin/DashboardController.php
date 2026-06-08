@@ -193,6 +193,13 @@ class DashboardController extends Controller
             }
         }
 
+        // ── Team target aggregates ────────────────────────────────
+        $teamTotalTarget   = $staffTargets->sum('target_margin');
+        $teamTotalAchieved = $staffTargets->sum('achieved_margin');
+        $teamTargetPct     = $teamTotalTarget > 0
+            ? min(100, round($teamTotalAchieved / $teamTotalTarget * 100))
+            : 0;
+
         return view('admin.dashboard', compact(
             'totalBookingsToday', 'totalBookingsMonth', 'totalRevenueMonth',
             'totalPending', 'revenueGrowth', 'allTimeRevenue', 'allTimeBookings',
@@ -206,6 +213,8 @@ class DashboardController extends Controller
             'typeLabels', 'typeData',
             'dailyLabels', 'dailyRevenue',
             'stayStatuses', 'staffTargets',
+            'teamTotalTarget', 'teamTotalAchieved', 'teamTargetPct',
+            'isAdmin',
             'recentBookings', 'upcomingCheckins', 'upcomingCabs'
         ), ['page_title' => 'Dashboard']);
     }

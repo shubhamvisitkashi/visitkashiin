@@ -104,9 +104,10 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 .dk-hero-btn.primary:hover { background:#fff; box-shadow:0 4px 16px rgba(255,255,255,.3); }
 
 /* ── KPI grid ─────────────────────────────── */
-.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
-@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:600px) {.kpi-grid{grid-template-columns:1fr;}}
+.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:20px; }
+@media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:900px) {.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px) {.kpi-grid{grid-template-columns:1fr;}}
 
 .kpi-card {
   background:var(--card); border-radius:var(--r); border:1px solid var(--border);
@@ -344,7 +345,91 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       <div class="kpi-sub">All-time: <strong>{{ number_format($allTimeBookings) }}</strong> · ₹{{ number_format($allTimeRevenue) }}</div>
     </div>
   </div>
+
+  {{-- 5th card: Team Monthly Target --}}
+  @if($teamTotalTarget > 0)
+  @php
+    $tkColor = $teamTargetPct >= 100 ? '#10B981' : ($teamTargetPct >= 60 ? '#4F46E5' : ($teamTargetPct >= 30 ? '#F59E0B' : '#EF4444'));
+    $tkBg    = $teamTargetPct >= 100 ? '#D1FAE5' : ($teamTargetPct >= 60 ? '#EEF2FF' : ($teamTargetPct >= 30 ? '#FEF3C7' : '#FEE2E2'));
+  @endphp
+  <div class="kpi-card" style="--kpi-color:{{ $tkColor }};--kpi-bg:{{ $tkBg }};">
+    <div class="kpi-icon">🎯</div>
+    <div class="kpi-body">
+      <div class="kpi-label">Team Target — {{ now()->format('M Y') }}</div>
+      <div class="kpi-value" style="color:{{ $tkColor }};font-size:1.5rem;">{{ $teamTargetPct }}%</div>
+      <div style="height:5px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin:6px 0 4px;">
+        <div style="height:100%;width:{{ $teamTargetPct }}%;background:{{ $tkColor }};border-radius:99px;transition:width .5s;"></div>
+      </div>
+      <div class="kpi-sub" style="flex-direction:column;gap:1px;">
+        <span>Achieved: <strong style="color:{{ $tkColor }};">₹{{ number_format($teamTotalAchieved) }}</strong></span>
+        <span>Target: <strong>₹{{ number_format($teamTotalTarget) }}</strong></span>
+      </div>
+    </div>
+  </div>
+  @endif
 </div>
+
+{{-- ══ STAFF TARGETS ══ --}}
+@if($staffTargets->count())
+<div class="chart-card" style="margin-bottom:20px;">
+  <div class="chart-head">
+    <div>
+      <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
+      <div class="chart-sub">Monthly margin targets vs achieved</div>
+    </div>
+    @can('target-manage')
+    <a href="{{ route('targets.index') }}" style="font-size:.72rem;color:var(--indigo);font-weight:700;text-decoration:none;">Manage →</a>
+    @endcan
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0;">
+    @foreach($staffTargets as $t)
+    @php
+      $pct     = $t->target_margin > 0 ? min(100, round($t->achieved_margin / $t->target_margin * 100)) : 0;
+      $remain  = max(0, $t->target_margin - $t->achieved_margin);
+      $color   = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
+      $bgColor = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
+      $txtColor= $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
+    @endphp
+    <div style="padding:16px 20px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;">
+            {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
+          </div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text);">{{ $t->user->name ?? 'Staff' }}</div>
+        </div>
+        <span style="font-size:.64rem;font-weight:800;padding:3px 9px;border-radius:20px;background:{{ $bgColor }};color:{{ $txtColor }};">
+          {{ $pct >= 100 ? '🏆 Done' : $pct.'%' }}
+        </span>
+      </div>
+      <div style="height:7px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin-bottom:8px;">
+        <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .5s;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;">
+        <span style="color:var(--muted);">Achieved: <strong style="color:{{ $color }};">₹{{ number_format($t->achieved_margin) }}</strong></span>
+        <span style="color:var(--muted);">Target: <strong style="color:var(--text);">₹{{ number_format($t->target_margin) }}</strong></span>
+      </div>
+      @if($remain > 0)
+      <div style="font-size:.68rem;color:var(--muted);margin-top:3px;text-align:right;">₹{{ number_format($remain) }} remaining</div>
+      @endif
+    </div>
+    @endforeach
+  </div>
+</div>
+@elsecan('target-manage')
+<div class="chart-card" style="margin-bottom:20px;">
+  <div class="chart-head">
+    <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
+  </div>
+  <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+    <div style="font-size:.84rem;color:var(--muted);">No targets set for this month yet.</div>
+    <a href="{{ route('targets.index') }}"
+       style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--indigo);color:#fff;border-radius:10px;font-size:.8rem;font-weight:700;text-decoration:none;">
+      ＋ Set Staff Targets
+    </a>
+  </div>
+</div>
+@endcan
 
 {{-- ══ TYPE BREAKDOWN ══ --}}
 <div class="type-row">
@@ -392,7 +477,8 @@ body.dark-mode .kpi-icon          { opacity:.85; }
   {{-- LEFT --}}
   <div>
 
-    {{-- Revenue Trend Chart --}}
+    {{-- Revenue Trend Chart (admin only) --}}
+    @if($isAdmin)
     <div class="chart-card">
       <div class="chart-head">
         <div>
@@ -409,6 +495,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         <canvas id="revenueChart" height="95"></canvas>
       </div>
     </div>
+    @endif
 
     {{-- Recent Bookings --}}
     <div class="table-card">
@@ -606,83 +693,6 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       </div>
     </div>
 
-    {{-- Staff Targets (current month) --}}
-    @if($staffTargets->count())
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
-        @can('target-manage')
-        <a href="{{ route('targets.index') }}" style="font-size:.72rem;color:var(--indigo);font-weight:700;text-decoration:none;">Manage →</a>
-        @endcan
-      </div>
-      <div style="padding:14px 18px;">
-        @foreach($staffTargets as $t)
-        @php
-          $pct     = $t->target_margin > 0 ? min(100, round($t->achieved_margin / $t->target_margin * 100)) : 0;
-          $remain  = max(0, $t->target_margin - $t->achieved_margin);
-          $color   = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
-          $bgColor = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
-          $txtColor= $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
-        @endphp
-        <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
-          {{-- Staff name + badge --}}
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;">
-                {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
-              </div>
-              <div>
-                <div style="font-size:.82rem;font-weight:700;color:var(--text);">{{ $t->user->name ?? 'Staff' }}</div>
-                <div style="font-size:.68rem;color:var(--muted);">{{ $t->monthName }} {{ $t->year }}</div>
-              </div>
-            </div>
-            <span style="font-size:.64rem;font-weight:800;padding:3px 9px;border-radius:20px;background:{{ $bgColor }};color:{{ $txtColor }};">
-              {{ $pct >= 100 ? '🏆 Achieved' : $pct.'%' }}
-            </span>
-          </div>
-          {{-- Progress bar --}}
-          <div style="height:7px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin-bottom:6px;">
-            <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .5s;"></div>
-          </div>
-          {{-- Amounts --}}
-          <div style="display:flex;justify-content:space-between;font-size:.72rem;">
-            <span style="color:var(--muted);">Achieved: <strong style="color:{{ $color }};">₹{{ number_format($t->achieved_margin) }}</strong></span>
-            <span style="color:var(--muted);">Target: <strong style="color:var(--text);">₹{{ number_format($t->target_margin) }}</strong></span>
-          </div>
-          @if($remain > 0)
-          <div style="font-size:.7rem;color:var(--muted);margin-top:3px;text-align:right;">
-            ₹{{ number_format($remain) }} remaining
-          </div>
-          @endif
-        </div>
-        @endforeach
-        @can('target-manage')
-        <a href="{{ route('targets.index') }}"
-           style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;background:var(--indigo);color:#fff;border-radius:10px;font-size:.78rem;font-weight:700;text-decoration:none;margin-top:4px;">
-          ⚙️ Set / Update Targets
-        </a>
-        @endcan
-      </div>
-    </div>
-    @else
-    {{-- No targets set yet — show only for admin --}}
-    @can('target-manage')
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
-      </div>
-      <div style="padding:24px;text-align:center;">
-        <div style="font-size:2rem;margin-bottom:8px;">🎯</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-bottom:14px;">No targets set for this month yet.</div>
-        <a href="{{ route('targets.index') }}"
-           style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--indigo);color:#fff;border-radius:10px;font-size:.8rem;font-weight:700;text-decoration:none;">
-          ＋ Set Staff Targets
-        </a>
-      </div>
-    </div>
-    @endcan
-    @endif
-
   </div>{{-- /right --}}
 </div>{{-- /dk-cols --}}
 
@@ -701,8 +711,8 @@ const axisDefaults = () => ({
   ticks: { font:{ size: isMob ? 9 : 11 }, color: chartTextColor(), maxTicksLimit: isMob ? 5 : 8 }
 });
 
-// ── Revenue trend ────────────────────────────────────────
-new Chart(document.getElementById('revenueChart'), {
+// ── Revenue trend (admin only) ───────────────────────────
+if (document.getElementById('revenueChart')) new Chart(document.getElementById('revenueChart'), {
   type: 'bar',
   data: {
     labels: {!! json_encode($monthLabels) !!},

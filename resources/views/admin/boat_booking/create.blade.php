@@ -526,7 +526,7 @@
       <label class="bt-label">Payment Method <span class="bt-req">*</span></label>
       <select name="payment_method" class="form-select bt-input" required>
         <option value="">Select…</option>
-        @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer','card'=>'💳 Card','cheque'=>'📄 Cheque'] as $v=>$l)
+        @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer'] as $v=>$l)
         <option value="{{ $v }}" {{ old('payment_method')==$v?'selected':'' }}>{{ $l }}</option>
         @endforeach
       </select>
