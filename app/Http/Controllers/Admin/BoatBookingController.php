@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use App\Models\BoatBookingPayment;
 use App\Models\BoatBookingRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -270,7 +272,6 @@ class BoatBookingController extends Controller
     }
 
     public function store(Request $request) {
-        // return $request->seat_number;
         $maxDisc = max(0, (float)$request->total_amount);
         $maxPaid = max(0, (float)$request->final_amount ?: (float)$request->total_amount);
         $request->validate([
@@ -288,128 +289,143 @@ class BoatBookingController extends Controller
         ]);
 
         $boat = Boat::where('boat_type_id', $request->boat_type)->where('event_type', $request->event_type)->first();
-        if(!$boat) {
+        if (!$boat) {
             return response()->json([
                 'status' => 'error',
-                'errors' => [
-                    'boat_type' => ['No boat available for the selected type and event.']
-                ]
+                'errors' => ['boat_type' => ['No boat available for the selected type and event.']]
             ], 422);
         }
 
-        $total_boat_booking = BoatBooking::where('boat_id', $boat->id)->whereDate('booking_date', Carbon::parse($request->event_date)->format('Y-m-d'))->sum('no_of_person');
-
-        $total_seat = $boat->total_available_boat * $boat->no_of_seat;
+        $total_boat_booking   = BoatBooking::where('boat_id', $boat->id)->whereDate('booking_date', Carbon::parse($request->event_date)->format('Y-m-d'))->sum('no_of_person');
+        $total_seat           = $boat->total_available_boat * $boat->no_of_seat;
         $total_available_seat = $total_seat - $total_boat_booking;
 
-        if($request->no_of_person > $total_available_seat) {
+        if ($request->no_of_person > $total_available_seat) {
             return response()->json(['status' => 'error', 'message' => 'No seat available on this boat for the selected date.'], 404);
         }
 
         $booking_request = BoatBookingRequest::where('booking_request_id', $request->booking_request_id)->first();
 
-        $boat_booking = new BoatBooking;
-        $boat_booking->booking_id = generateBookingId();
-        $boat_booking->booked_by = auth()->guard('admin')->user()->id;
-        $boat_booking->boat_id = $boat->id;
-        $boat_booking->name         = $request->name;
-        $boat_booking->email        = $request->email;
-        $boat_booking->phone        = $request->phone;
-        $boat_booking->adults       = (int)($request->adults ?? 1);
-        $boat_booking->children     = (int)($request->children ?? 0);
-        $boat_booking->no_of_person = (int)($request->adults ?? 1) + (int)($request->children ?? 0);
-        if($request->event_type === 'Festival') {
-            $boat_booking->total_amount = $boat->price * $request->no_of_person;
-            $boat_booking->total_discount = $request->discount_amount;
-            $boat_booking->final_amount = $boat_booking->total_amount - $request->discount_amount;
-        }
-        $boat_booking->booking_date = $request->event_date;
-        if($request->seat_number) {
-            $boat_booking->seat_number = implode(', ', range(($total_boat_booking + 1), (($total_boat_booking ? $total_boat_booking + 1 : $total_boat_booking) + ($total_boat_booking ? $request->no_of_person - 1 : $request->no_of_person))));
-        }
-        // For Regular bookings use form amounts
-        if ($request->event_type !== 'Festival') {
-            $boat_booking->total_amount   = $request->total_amount;
-            $boat_booking->total_discount = $request->discount_amount ?? 0;
-            $boat_booking->final_amount   = $request->final_amount ?? max(0, $request->total_amount - ($request->discount_amount ?? 0));
-        }
-        // Route & timing
-        $boat_booking->boarding_ghat = $request->pickup_ghat ?? $request->boarding_ghat;
-        $boat_booking->drop_ghat     = $request->drop_ghat;
-        $boat_booking->boat_timing   = $request->booking_type;
-        $boat_booking->pickup_time   = $request->pickup_time;
-        $boat_booking->drop_time     = $request->drop_time;
-        // Event type
-        $boat_booking->booking_type    = $request->booking_type;
-        $boat_booking->event_on_boat   = $request->event_on_boat;
-        $boat_booking->celebration_type= $request->event_on_boat;
-        // Add-ons
-        $boat_booking->decoration    = $request->has('decoration')   ? 1 : 0;
-        $boat_booking->photographer  = $request->has('photographer') ? 1 : 0;
-        $boat_booking->live_music    = $request->has('live_music')   ? 1 : 0;
-        $boat_booking->priest        = $request->has('priest')       ? 1 : 0;
-        $boat_booking->flowers       = $request->has('flowers')      ? 1 : 0;
-        $boat_booking->fireworks     = $request->has('fireworks')    ? 1 : 0;
-        // Notes & meta
-        $boat_booking->guest_notes    = $request->guest_notes;
-        $boat_booking->special_requests = $request->internal_notes;
-        $boat_booking->lead_source_id = $request->lead_source_id;
-        $boat_booking->payment_method     = $request->payment_method;
-        $boat_booking->payment_account_id = $request->payment_account_id ?: null;
-        // B2B / staff
-        $boat_booking->vendor_cost    = (float)($request->vendor_cost ?? 0);
-        $boat_booking->boatman_id     = $request->boatman_id;
-        $boat_booking->created_by     = auth()->guard('admin')->id();
-        // Extra per person & base pax
-        $boat_booking->extra_per_person_rate = (float)($request->extra_per_person_rate ?? 0);
-        $boat_booking->base_pax       = (int)($request->base_pax ?? 0);
-        $margin = (float)($request->final_amount ?? 0) - (float)($request->vendor_cost ?? 0);
-        $boat_booking->margin_amount  = $margin;
+        DB::beginTransaction();
+        try {
+            $paidAmt      = (float)($request->paid_amount ?? 0);
+            $discountAmt  = (float)($request->discount_amount ?? 0);
 
-        $boat_booking->booking_status = 'confirmed';
-        $paidAmt = (float)($request->paid_amount ?? 0);
-        if ($boat_booking->final_amount <= 0 || $paidAmt >= $boat_booking->final_amount) {
-            $boat_booking->payment_status = 'paid';
-        } elseif ($paidAmt > 0) {
-            $boat_booking->payment_status = 'partial';
-        } else {
-            $boat_booking->payment_status = 'unpaid';
-        }
-        $boat_booking->save();
+            $boat_booking = new BoatBooking;
+            $boat_booking->booking_id = generateBookingId();
+            $boat_booking->booked_by  = auth()->guard('admin')->user()->id;
+            $boat_booking->boat_id    = $boat->id;
+            $boat_booking->name       = $request->name;
+            $boat_booking->email      = $request->email ?? '';
+            $boat_booking->phone      = $request->phone;
+            $boat_booking->adults     = (int)($request->adults ?? 1);
+            $boat_booking->children   = (int)($request->children ?? 0);
+            $boat_booking->no_of_person = (int)($request->adults ?? 1) + (int)($request->children ?? 0);
 
-        $boat_booking_payment = new BoatBookingPayment;
-        $boat_booking_payment->boat_booking_id = $boat_booking->id;
-        $boat_booking_payment->amount = $request->paid_amount;
-        if($booking_request && isset($booking_request->payment_detail)) {
-            $paymentDetail = $booking_request->payment_detail;
-            $boat_booking_payment->payment_details = [
-                'transaction_id' => $paymentDetail['utr_number'] ?? null,
-                'payment_mode' => $paymentDetail['payment_method'] ?? 'upi',
-                'notes' => 'Converted from booking request',
-            ];
-        }
-        $boat_booking_payment->save();
-
-
-        if($booking_request) {
-            $booking_request->booking_status = 'confirmed';
-            if($boat_booking->final_amount == $request->paid_amount) {
-                $booking_request->payment_status = 'paid';
+            if ($request->event_type === 'Festival') {
+                $boat_booking->total_amount   = $boat->price * $request->no_of_person;
+                $boat_booking->total_discount = $discountAmt;
+                $boat_booking->final_amount   = $boat_booking->total_amount - $discountAmt;
+            } else {
+                $boat_booking->total_amount   = $request->total_amount;
+                $boat_booking->total_discount = $discountAmt;
+                $boat_booking->final_amount   = $request->final_amount ?? max(0, $request->total_amount - $discountAmt);
             }
-            $booking_request->save();
-        }
 
-        if($request->is_mail_send === 'send_mail') {
-            try{
-                Mail::send('email.booking_confiramtion', ['boat_booking'=>$boat_booking, 'boat_booking_payment'=>$boat_booking_payment], function($message) use ($boat_booking){
-                    $message->to($boat_booking->email);
-                    $message->subject('Dev Diwali Boat Booking Confirmation');
-                });
-            }catch (\Throwable $th) {
-                //throw $th;
+            $boat_booking->booking_date = $request->event_date;
+
+            if ($request->seat_number) {
+                $boat_booking->seat_number = implode(', ', range(
+                    ($total_boat_booking + 1),
+                    (($total_boat_booking ? $total_boat_booking + 1 : $total_boat_booking) + ($total_boat_booking ? $request->no_of_person - 1 : $request->no_of_person))
+                ));
             }
-        }
 
+            // Route & timing
+            $boat_booking->boarding_ghat = $request->pickup_ghat ?? $request->boarding_ghat;
+            $boat_booking->drop_ghat     = $request->drop_ghat;
+            $boat_booking->boat_timing   = $request->booking_type;
+            $boat_booking->pickup_time   = $request->pickup_time;
+            $boat_booking->drop_time     = $request->drop_time;
+            // Event type
+            $boat_booking->booking_type     = $request->booking_type;
+            $boat_booking->event_on_boat    = $request->event_on_boat;
+            $boat_booking->celebration_type = $request->event_on_boat;
+            // Add-ons
+            $boat_booking->decoration   = $request->has('decoration')   ? 1 : 0;
+            $boat_booking->photographer = $request->has('photographer') ? 1 : 0;
+            $boat_booking->live_music   = $request->has('live_music')   ? 1 : 0;
+            $boat_booking->priest       = $request->has('priest')       ? 1 : 0;
+            $boat_booking->flowers      = $request->has('flowers')      ? 1 : 0;
+            $boat_booking->fireworks    = $request->has('fireworks')    ? 1 : 0;
+            // Notes & meta
+            $boat_booking->guest_notes      = $request->guest_notes;
+            $boat_booking->special_requests = $request->internal_notes;
+            $boat_booking->lead_source_id   = $request->lead_source_id ?: null;
+            $boat_booking->payment_method     = $request->payment_method;
+            $boat_booking->payment_account_id = $request->payment_account_id ?: null;
+            // B2B / staff
+            $boat_booking->vendor_cost          = (float)($request->vendor_cost ?? 0);
+            $boat_booking->boatman_id           = $request->boatman_id ?: null;
+            $boat_booking->created_by           = auth()->guard('admin')->id();
+            $boat_booking->extra_per_person_rate = (float)($request->extra_per_person_rate ?? 0);
+            $boat_booking->base_pax             = (int)($request->base_pax ?? 0);
+            $boat_booking->margin_amount        = (float)($request->final_amount ?? 0) - (float)($request->vendor_cost ?? 0);
+
+            $boat_booking->booking_status = 'confirmed';
+            if ($boat_booking->final_amount <= 0 || $paidAmt >= $boat_booking->final_amount) {
+                $boat_booking->payment_status = 'paid';
+            } elseif ($paidAmt > 0) {
+                $boat_booking->payment_status = 'partial';
+            } else {
+                $boat_booking->payment_status = 'unpaid';
+            }
+            $boat_booking->save();
+
+            // Only create payment record when advance is actually paid
+            if ($paidAmt > 0) {
+                $boat_booking_payment = new BoatBookingPayment;
+                $boat_booking_payment->boat_booking_id = $boat_booking->id;
+                $boat_booking_payment->amount          = $paidAmt;
+                if ($booking_request && isset($booking_request->payment_detail)) {
+                    $paymentDetail = $booking_request->payment_detail;
+                    $boat_booking_payment->payment_details = [
+                        'transaction_id' => $paymentDetail['utr_number'] ?? null,
+                        'payment_mode'   => $paymentDetail['payment_method'] ?? 'upi',
+                        'notes'          => 'Converted from booking request',
+                    ];
+                }
+                $boat_booking_payment->save();
+            }
+
+            if ($booking_request) {
+                $booking_request->booking_status = 'confirmed';
+                if ($boat_booking->final_amount == $paidAmt) {
+                    $booking_request->payment_status = 'paid';
+                }
+                $booking_request->save();
+            }
+
+            DB::commit();
+
+            if ($request->is_mail_send === 'send_mail') {
+                try {
+                    Mail::send('email.booking_confiramtion', ['boat_booking' => $boat_booking], function ($message) use ($boat_booking) {
+                        $message->to($boat_booking->email);
+                        $message->subject('Boat Booking Confirmation');
+                    });
+                } catch (\Throwable $th) {
+                    // Mail failure should not break the booking
+                }
+            }
+
+            return redirect()->route('boat-booking.index')->with('success', 'Boat booking created successfully! Booking ID: ' . $boat_booking->booking_id);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Boat booking store failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return back()->withInput()->with('error', 'Failed to create booking: ' . $e->getMessage());
+        }
     }
 
     public function destroy($booking_id) {
