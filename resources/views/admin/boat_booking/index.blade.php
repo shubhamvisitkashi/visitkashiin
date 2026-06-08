@@ -643,7 +643,11 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
         </div>
         <div class="bb-mob-row">
           <span class="bb-mob-lbl">Guests</span>
-          <span class="bb-mob-val">{{ $bk->no_of_person }} persons ({{ $bk->adults ?? $bk->no_of_person }} adults@if(($bk->children??0)>0), {{ $bk->children }} child free@endif)</span>
+          <span class="bb-mob-val">
+            {{ $bk->no_of_person }} persons &middot;
+            {{ $bk->adults ?? $bk->no_of_person }} Adults
+            {{ ($bk->children ?? 0) > 0 ? '· ' . $bk->children . ' Child Free' : '' }}
+          </span>
         </div>
         <div class="bb-mob-row" style="border-top:1px dashed #EFF6FF;padding-top:8px;margin-top:4px;">
           <span class="bb-mob-lbl">Total Amount</span>

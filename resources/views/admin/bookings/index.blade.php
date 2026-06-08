@@ -480,54 +480,58 @@
 ═══════════════════════════════════════════════════════ */
 @media(max-width:900px){
 
-  /* ── Page padding ── */
-  .bk-page { padding: 12px; }
+  /* ── Page ── */
+  .bk-page { padding:10px 10px 70px; }
 
-  /* ── Header compact ── */
-  .bk-header { padding:16px 18px; margin-bottom:14px; border-radius:14px; margin-top:50px; }
-  .bk-header-title h1 { font-size:1.1rem; }
-  .bk-header-title p  { font-size:.75rem; }
-  .bk-header-actions  { gap:6px; }
-  .bk-hbtn { padding:7px 10px; font-size:.75rem; }
+  /* ── Header ── */
+  .bk-header { padding:14px 16px; margin-bottom:12px; border-radius:14px; margin-top:58px; }
+  .bk-header-title h1 { font-size:1rem; }
+  .bk-header-title p  { font-size:.72rem; }
+  .bk-header-actions  { gap:5px; }
+  .bk-hbtn { padding:6px 10px; font-size:.72rem; }
 
-  /* ── Stats: 2-col grid ── */
-  .bk-stats { grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:14px; }
+  /* ── Stats ── */
+  .bk-stats { grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:12px; }
 
-  /* ── Category tabs: horizontal scroll ── */
+  /* ── Tabs: horizontal scroll ── */
   .bk-cats {
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    gap:6px;
-    padding-bottom:4px;
-    margin-bottom:14px;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
+    flex-wrap:nowrap; overflow-x:auto; gap:6px;
+    padding-bottom:4px; margin-bottom:12px;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;
   }
   .bk-cats::-webkit-scrollbar { display:none; }
-  .bk-cat { flex-shrink:0; padding:7px 13px; font-size:.76rem; }
+  .bk-cat { flex-shrink:0; padding:7px 13px; font-size:.74rem; }
 
-  /* ── Table: hide header, show cards ── */
+  /* ── Filter ── */
+  .bk-filter { padding:10px 12px; }
+  .bk-filter form > div { flex-direction:column !important; gap:8px !important; }
+  .bk-filter .form-select, .bk-filter .form-control { width:100% !important; max-width:none !important; }
+  .bk-filter .input-group { width:100% !important; max-width:none !important; }
+  .bk-filter .btn { width:100% !important; }
+
+  /* ── Table → Card view ── */
   .bkt-table thead { display:none; }
 
   .bkt-table tbody tr {
-    display:flex;
-    flex-direction:column;
+    display:block;
     background:#fff;
-    border-radius:14px;
+    border-radius:16px;
     border:1px solid #EAECF0;
     box-shadow:0 1px 4px rgba(0,0,0,.06);
-    margin-bottom:10px;
-    padding:0;
+    margin-bottom:12px;
     overflow:hidden;
     cursor:pointer;
     transition:box-shadow .2s, transform .2s;
   }
   .bkt-table tbody tr:hover {
-    box-shadow:0 4px 16px rgba(79,70,229,.12);
-    transform:translateY(-1px);
+    box-shadow:0 6px 20px rgba(79,70,229,.14);
+    transform:translateY(-2px);
   }
 
-  /* All td reset */
+  /* Hide checkbox column on mobile */
+  .bkt-table tbody td:first-child { display:none; }
+
+  /* All data cells */
   .bkt-table tbody td {
     display:flex;
     align-items:center;
@@ -536,57 +540,54 @@
     border:none;
     border-bottom:1px solid #F3F4F6;
     font-size:.82rem;
-    min-height:44px;
+    min-height:42px;
   }
   .bkt-table tbody td:last-child { border-bottom:none; }
 
-  /* Label chip before each cell */
+  /* Label prefix for each cell */
   .bkt-table tbody td[data-label]::before {
     content: attr(data-label);
-    font-size:.65rem;
-    font-weight:700;
-    color:#9CA3AF;
-    text-transform:uppercase;
-    letter-spacing:.6px;
-    flex-shrink:0;
-    min-width:80px;
-    margin-right:8px;
+    font-size:.64rem; font-weight:700; color:#9CA3AF;
+    text-transform:uppercase; letter-spacing:.6px;
+    flex-shrink:0; min-width:82px; margin-right:8px;
   }
 
-  /* Card top strip: booking ref + status coloured bar */
-  .bkt-table tbody td:first-child {
-    background:linear-gradient(135deg,#EEF2FF 0%,#F5F3FF 100%);
+  /* Booking ID cell — card header strip */
+  .bkt-table tbody td[data-label="Booking ID"] {
+    background:linear-gradient(135deg,#EEF2FF,#F5F3FF);
     border-bottom:2px solid #E0E7FF;
-    padding:12px 16px;
-    font-weight:700;
-    font-size:.88rem;
-    color:#4F46E5;
+    padding:11px 16px;
     min-height:auto;
+    align-items:flex-start;
+    flex-direction:column;
+    gap:2px;
   }
-  .bkt-table tbody td:first-child::before { display:none; }
+  .bkt-table tbody td[data-label="Booking ID"]::before { display:none; }
 
-  /* Actions row — full width button row */
+  /* Actions row */
+  .bkt-table tbody td:not([data-label]):not(:first-child) {
+    background:#FAFBFF;
+    border-top:1px solid #F0F0F5;
+    padding:10px 16px 12px;
+    border-bottom:none !important;
+  }
   .bkt-acts {
     width:100%;
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(44px,1fr));
+    grid-template-columns:repeat(4,1fr);
     gap:6px;
-    padding:10px 16px 12px;
-    background:#FAFAFA;
-    border-top:1px solid #F0F0F5;
-    border-bottom:none !important;
-    margin-left:0;
   }
   .bkt-acts::before { display:none; }
   .bkt-act {
-    height:40px;
-    border-radius:10px;
-    font-size:.72rem;
-    gap:4px;
-    flex-direction:column;
-    justify-content:center;
+    height:42px; border-radius:10px;
+    font-size:.7rem; gap:3px;
+    flex-direction:column; justify-content:center;
   }
-  .bkt-act [data-feather], .bkt-act svg { width:16px; height:16px; }
+  .bkt-act [data-feather], .bkt-act svg { width:15px; height:15px; }
+
+  /* Boat/Cab section card table on mobile */
+  .bkt-card { border-radius:14px; }
+  .bkt-head { padding:12px 14px; }
 }
 
 @media(max-width:480px){
@@ -907,8 +908,9 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
         function($q){ $q->where('name','LIKE','%tour%')->orWhere('name','LIKE','%package%'); })->count();
 
     // Boat & Cab have their own dedicated tables
-    $countBoat = \App\Models\BoatBooking::where('booking_status','confirmed')->count();
-    $countCab  = \App\Models\CabBooking::where('booking_status','confirmed')->count();
+    $countBoat = \App\Models\BoatBooking::count();
+    $countCab  = \App\Models\CabBooking::count();
+    $countAll  = $stats['total'] + $countBoat + $countCab;
   @endphp
   <div class="bk-cats">
     {{-- All --}}
@@ -916,7 +918,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
        class="bk-cat cat-all {{ !$activeCat ? 'active' : '' }}">
       <span class="bk-cat-emoji">📋</span>
       All Bookings
-      <span class="bk-cat-count">{{ $stats['total'] }}</span>
+      <span class="bk-cat-count">{{ $countAll }}</span>
     </a>
 
     {{-- Boat → dedicated boat-booking index --}}
@@ -1375,6 +1377,157 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   @endif
 
 </div>
+
+{{-- ══ BOAT BOOKINGS SECTION (shown in All Bookings view) ══ --}}
+@if(!request('service_type') && !request('status') && $recentBoatBookings->count())
+<div class="bkt-card" style="margin-top:20px;">
+  <div class="bkt-head">
+    <div class="bkt-head-left">
+      <span style="font-size:1rem;">⛵</span>
+      <span>Boat Bookings</span>
+      <span style="font-size:.75rem;font-weight:600;color:#6B7280;margin-left:4px;">({{ $recentBoatBookings->count() }})</span>
+    </div>
+    <a href="{{ route('boat-booking.index') }}" class="bkt-new" style="background:#EFF6FF;color:#0369A1;border-color:#BAE6FD;">View All →</a>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="bkt-table">
+      <thead>
+        <tr>
+          <th>Booking ID</th>
+          <th>Guest</th>
+          <th>Boat</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th style="width:1%;white-space:nowrap;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($recentBoatBookings as $bk)
+        @php
+          $bPaid = (float)($bk->payments_sum_amount ?? 0);
+          $bDue  = max(0, (float)$bk->final_amount - $bPaid);
+          $bPaySt = $bk->payment_status ?? ($bDue <= 0 ? 'paid' : ($bPaid > 0 ? 'partial' : 'unpaid'));
+          $bkSt   = $bk->booking_status ?? 'confirmed';
+          $bName  = optional(optional($bk->boat)->boatType)->name ?? 'Boat';
+        @endphp
+        <tr style="cursor:pointer;" onclick="window.location='{{ route('boat-booking.show', $bk->booking_id) }}'">
+          <td data-label="Booking ID">
+            <div style="font-size:.82rem;font-weight:700;color:#0369A1;white-space:nowrap;font-family:monospace;">{{ $bk->booking_id }}</div>
+            <div style="font-size:.72rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}</div>
+          </td>
+          <td data-label="Guest">
+            <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $bk->name }}</div>
+            <div style="font-size:.73rem;color:#6B7280;">{{ $bk->phone }}</div>
+          </td>
+          <td data-label="Boat">
+            <span class="bkt-type" style="background:#E0F2FE;color:#0369A1;">⛵ {{ $bName }}</span>
+          </td>
+          <td data-label="Date">
+            <span style="font-size:.82rem;color:#374151;font-weight:600;">{{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}</span>
+            @if($bk->pickup_time)<div style="font-size:.7rem;color:#6B7280;">🕐 {{ \Carbon\Carbon::parse($bk->pickup_time)->format('h:i A') }}</div>@endif
+          </td>
+          <td data-label="Amount">
+            <div class="bkt-amount">₹{{ number_format($bk->final_amount) }}</div>
+            @if($bDue > 0)<div class="bkt-due-blink">Due ₹{{ number_format($bDue) }}</div>@endif
+          </td>
+          <td data-label="Status">
+            <span class="bkt-status bkt-s-{{ $bkSt }}">{{ ucfirst($bkSt) }}</span>
+            <span class="bkt-status bkt-s-{{ $bPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($bPaySt) }}</span>
+          </td>
+          <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
+            <div class="bkt-acts">
+              <a href="{{ route('boat-booking.show', $bk->booking_id) }}" class="bkt-act bkt-act-view" title="View">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </a>
+              <a href="{{ route('boat-booking.edit', $bk->booking_id) }}" class="bkt-act bkt-act-edit" title="Edit">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </a>
+              <a href="{{ route('boat-booking.voucher', $bk->booking_id) }}" class="bkt-act bkt-act-print" title="Voucher">
+                <i data-feather="printer"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+@endif
+
+{{-- ══ CAB BOOKINGS SECTION (shown in All Bookings view) ══ --}}
+@if(!request('service_type') && !request('status') && $recentCabBookings->count())
+<div class="bkt-card" style="margin-top:20px;">
+  <div class="bkt-head">
+    <div class="bkt-head-left">
+      <span style="font-size:1rem;">🚗</span>
+      <span>Cab Bookings</span>
+      <span style="font-size:.75rem;font-weight:600;color:#6B7280;margin-left:4px;">({{ $recentCabBookings->count() }})</span>
+    </div>
+    <a href="{{ route('cab-bookings.index') }}" class="bkt-new" style="background:#FEF3C7;color:#B45309;border-color:#FDE68A;">View All →</a>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="bkt-table">
+      <thead>
+        <tr>
+          <th>Booking #</th>
+          <th>Customer</th>
+          <th>Route</th>
+          <th>Pickup Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th style="width:1%;white-space:nowrap;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($recentCabBookings as $cb)
+        @php
+          $cPaySt = $cb->payment_status ?? 'unpaid';
+          $cBkSt  = $cb->booking_status ?? 'confirmed';
+        @endphp
+        <tr style="cursor:pointer;" onclick="window.location='{{ route('cab-bookings.show', $cb->id) }}'">
+          <td data-label="Booking #">
+            <div style="font-size:.82rem;font-weight:700;color:#B45309;white-space:nowrap;font-family:monospace;">{{ $cb->booking_number }}</div>
+            <div style="font-size:.72rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($cb->created_at)->format('d M Y') }}</div>
+          </td>
+          <td data-label="Customer">
+            <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $cb->customer_name }}</div>
+            <div style="font-size:.73rem;color:#6B7280;">{{ $cb->customer_phone }}</div>
+          </td>
+          <td data-label="Route">
+            <div style="font-size:.78rem;color:#374151;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Str::limit($cb->pickup_address, 20) }} → {{ Str::limit($cb->drop_address, 20) }}</div>
+            <div style="font-size:.7rem;color:#6B7280;">{{ $cb->trip_type }}</div>
+          </td>
+          <td data-label="Pickup">
+            <span style="font-size:.82rem;color:#374151;font-weight:600;">{{ \Carbon\Carbon::parse($cb->pickup_date)->format('d M Y') }}</span>
+            @if($cb->pickup_time)<div style="font-size:.7rem;color:#6B7280;">🕐 {{ \Carbon\Carbon::parse($cb->pickup_time)->format('h:i A') }}</div>@endif
+          </td>
+          <td data-label="Amount">
+            <div class="bkt-amount">₹{{ number_format($cb->total_amount) }}</div>
+            @if($cb->advance_paid > 0)<div style="font-size:.7rem;color:#059669;">Paid ₹{{ number_format($cb->advance_paid) }}</div>@endif
+          </td>
+          <td data-label="Status">
+            <span class="bkt-status bkt-s-{{ $cBkSt }}">{{ ucfirst($cBkSt) }}</span>
+            <span class="bkt-status bkt-s-{{ $cPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($cPaySt) }}</span>
+          </td>
+          <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
+            <div class="bkt-acts">
+              <a href="{{ route('cab-bookings.show', $cb->id) }}" class="bkt-act bkt-act-view" title="View">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </a>
+              <a href="{{ route('cab-bookings.edit', $cb->id) }}" class="bkt-act bkt-act-edit" title="Edit">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+@endif
 
 {{-- ══ QUICK VIEW MODAL ══ --}}
 <div class="qv-overlay" id="qvOverlay" onclick="if(event.target===this)bkCloseQV()">

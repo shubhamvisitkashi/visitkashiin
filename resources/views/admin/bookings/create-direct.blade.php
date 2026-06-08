@@ -356,10 +356,6 @@
         <span class="btype-tag">Meal Plan</span>
         <span class="btype-tag">PAX</span>
       </div>
-      <span class="btype-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Create Stay Booking
-      </span>
     </a>
 
     {{-- CAB --}}
@@ -379,10 +375,6 @@
         <span class="btype-tag">Trip Type</span>
         <span class="btype-tag">Tolls & Extras</span>
       </div>
-      <span class="btype-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        Create Cab Booking
-      </span>
     </a>
 
     {{-- BOAT --}}
@@ -402,10 +394,6 @@
         <span class="btype-tag">Ghat</span>
         <span class="btype-tag">Decoration</span>
       </div>
-      <span class="btype-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 20h20M12 3L4 14h16L12 3z"/><line x1="12" y1="3" x2="12" y2="14"/></svg>
-        Create Boat Booking
-      </span>
     </a>
 
     {{-- TOUR PACKAGE --}}
@@ -425,10 +413,6 @@
         <span class="btype-tag">Guide</span>
         <span class="btype-tag">Multi-day</span>
       </div>
-      <span class="btype-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-        Create Tour Package
-      </span>
     </a>
 
   </div>{{-- /hub-grid --}}

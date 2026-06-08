@@ -291,8 +291,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <p>Welcome back, {{ auth('admin')->user()->name }} &nbsp;·&nbsp; {{ now()->format('l, d F Y') }}</p>
   </div>
   <div class="dk-hero-actions">
-    <a href="{{ route('bookings.create-direct') }}" class="dk-hero-btn primary">＋ New Booking</a>
-    <a href="{{ route('bookings.index') }}" class="dk-hero-btn">📋 All Bookings</a>
+    <a href="{{ route('bookings.index') }}" class="dk-hero-btn primary">📋 All Bookings</a>
     <a href="{{ route('cab-bookings.create') }}" class="dk-hero-btn">🚗 Cab</a>
     <a href="{{ route('bookings.calendar') }}" class="dk-hero-btn">📅 Calendar</a>
   </div>
