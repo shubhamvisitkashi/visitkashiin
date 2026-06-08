@@ -345,20 +345,17 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#b8ccd8;color:#0f172a;fo
         <div class="pr-lbl">
           <div class="pr-lbl-icon" style="background:#dbeafe;">💰</div>
           Total Booking Amount
-          <span class="pr-sub" style="color:#94a3b8;display:inline;margin-top:0;margin-left:3px;">(before discount)</span>
+          @if($discAmt > 0)<span class="pr-sub" style="color:#94a3b8;display:inline;margin-top:0;margin-left:3px;">(before discount)</span>@endif
         </div>
         <div class="pr-val">₹{{ number_format($totalAmt, 2) }}</div>
       </div>
+      @if($discAmt > 0)
       <div class="pr-row">
         <div class="pr-lbl">
           <div class="pr-lbl-icon" style="background:#fef3c7;">🏷</div>
           Discount Applied
         </div>
-        @if($discAmt > 0)
         <div class="pr-val disc">− ₹{{ number_format($discAmt, 2) }}</div>
-        @else
-        <div class="pr-val" style="color:#cbd5e1;">₹0.00</div>
-        @endif
       </div>
       <div class="pr-row total-row">
         <div class="pr-lbl" style="font-weight:700;color:#0f172a;">
@@ -368,6 +365,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#b8ccd8;color:#0f172a;fo
         </div>
         <div class="pr-val final">₹{{ number_format($finalAmt, 2) }}</div>
       </div>
+      @endif
       <div class="pr-row paid-row">
         <div class="pr-lbl" style="color:#065f46;">
           <div class="pr-lbl-icon" style="background:#d1fae5;">✓</div>
@@ -378,18 +376,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#b8ccd8;color:#0f172a;fo
         </div>
         <div class="pr-val paid">₹{{ number_format($paidAmt, 2) }}</div>
       </div>
+      @if($dueAmt > 0)
       <div class="pr-row due-row" style="border-bottom:none;">
-        <div class="pr-lbl" style="color:{{ $dueAmt > 0 ? '#92400e' : '#065f46' }};">
-          <div class="pr-lbl-icon" style="background:{{ $dueAmt > 0 ? '#fef3c7' : '#d1fae5' }};">
-            {{ $dueAmt > 0 ? '⚠' : '✅' }}
-          </div>
+        <div class="pr-lbl" style="color:#92400e;">
+          <div class="pr-lbl-icon" style="background:#fef3c7;">⚠</div>
           <strong>Balance Due</strong>
-          <span class="pr-sub" style="color:{{ $dueAmt > 0 ? '#d97706' : '#059669' }};display:inline;margin-top:0;margin-left:3px;">
-            {{ $dueAmt <= 0 ? 'Fully Settled — No pending amount' : 'Please clear before boarding' }}
-          </span>
+          <span class="pr-sub" style="color:#d97706;display:inline;margin-top:0;margin-left:3px;">Please clear before boarding</span>
         </div>
-        <div class="{{ $dueAmt > 0 ? 'pr-val due' : 'pr-val zero' }}">₹{{ number_format($dueAmt, 2) }}</div>
+        <div class="pr-val due">₹{{ number_format($dueAmt, 2) }}</div>
       </div>
+      @endif
     </div>
   </div>
 
