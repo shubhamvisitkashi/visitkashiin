@@ -63,7 +63,7 @@
            placeholder="{{ $phonePlaceholder }}"
            maxlength="20"
            value="{{ $phoneValue }}"
-           inputmode="numeric"
+           inputmode="tel"
            autocomplete="tel"
-           oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+           oninput="this.value=this.value.replace(/[^0-9+\-() ]/g,'')">
 </div>

@@ -463,7 +463,7 @@
             <div class="col-6 col-md-3">
               <label class="nb-label">Check-in <span class="nb-req">*</span></label>
               <input type="date" id="stay_checkin" name="booking_start_date"
-                     class="form-control nb-input" required
+                     class="form-control nb-input"
                      value="{{ old('booking_start_date', $editCheckin) }}"
                      onchange="buildEditShortPlan();calcNights()">
               <input type="time" id="stay_checkin_time"
@@ -475,7 +475,7 @@
             <div class="col-6 col-md-3">
               <label class="nb-label">Check-out <span class="nb-req">*</span></label>
               <input type="date" id="stay_checkout" name="booking_end_date"
-                     class="form-control nb-input" required
+                     class="form-control nb-input"
                      value="{{ old('booking_end_date', $editCheckout) }}"
                      onchange="buildEditShortPlan();calcNights()">
               <input type="time" id="stay_checkout_time"
@@ -558,7 +558,9 @@
           </div>
 
           {{-- Hidden service fields --}}
-          <input type="hidden" name="services[0][id]"          value="{{ optional($items->first())->id }}">
+          @if($items->first())
+          <input type="hidden" name="services[0][id]"          value="{{ $items->first()->id }}">
+          @endif
           <input type="hidden" name="services[0][quantity]"    value="1">
           <input type="hidden" name="services[0][service_date]" id="stay-svc-date"
                  value="{{ optional($items->first())->service_date ? optional($items->first())->service_date->format('Y-m-d') : $editCheckin }}">
@@ -586,8 +588,8 @@
             <span class="nb-rupee">₹</span>
             <input type="number" name="services[0][unit_price]" id="stay-price-field"
                    class="form-control nb-input nb-rupee-input"
-                   placeholder="Total amount" min="0" step="0.01" required
-                   value="{{ $netTotal > 0 ? $netTotal : '' }}"
+                   placeholder="Total amount" min="0" step="0.01"
+                   value="{{ $netTotal > 0 ? $netTotal : 0 }}"
                    oninput="calcStayBalance()">
           </div>
           <input type="hidden" name="services[0][total_price]" id="stay-total-price-hidden" value="{{ $netTotal }}">

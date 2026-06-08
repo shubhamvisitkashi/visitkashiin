@@ -243,7 +243,7 @@ class BookingController extends Controller
             'notes'              => 'nullable|string',
             // Existing service rows
             'services'                    => 'nullable|array',
-            'services.*.id'               => 'required|exists:quotation_items,id',
+            'services.*.id'               => 'nullable|exists:quotation_items,id',
             'services.*.quantity'         => 'required|integer|min:1',
             'services.*.unit_price'       => 'required|numeric|min:0',
             'services.*.total_price'      => 'required|numeric|min:0',
@@ -284,13 +284,29 @@ class BookingController extends Controller
             // ── Service updates ─────────────────────────────────────────
             if (!empty($validated['services'])) {
                 foreach ($validated['services'] as $svc) {
-                    $item = \App\Models\QuotationItem::find($svc['id']);
-                    if ($item) {
-                        $item->update([
-                            'quantity'     => $svc['quantity'],
-                            'unit_price'   => $svc['unit_price'],
-                            'total_price'  => $svc['total_price'],
-                            'service_date' => $svc['service_date'] ?? null,
+                    if (!empty($svc['id'])) {
+                        // Update existing item
+                        $item = \App\Models\QuotationItem::find($svc['id']);
+                        if ($item) {
+                            $item->update([
+                                'quantity'     => $svc['quantity'],
+                                'unit_price'   => $svc['unit_price'],
+                                'total_price'  => $svc['total_price'],
+                                'service_date' => $svc['service_date'] ?? null,
+                            ]);
+                        }
+                    } elseif (!empty($svc['unit_price']) && $booking->quotation) {
+                        // No existing item — create a new one
+                        $tplId    = $svc['service_template_id'] ?? null;
+                        $template = $tplId ? \App\Models\ServiceTemplate::find($tplId) : null;
+                        \App\Models\QuotationItem::create([
+                            'quotation_id'        => $booking->quotation->id,
+                            'service_template_id' => $tplId,
+                            'service_type_id'     => $template ? $template->service_type_id : null,
+                            'quantity'            => $svc['quantity'] ?? 1,
+                            'unit_price'          => $svc['unit_price'],
+                            'total_price'         => $svc['total_price'] ?? $svc['unit_price'],
+                            'service_date'        => $svc['service_date'] ?? null,
                         ]);
                     }
                 }
