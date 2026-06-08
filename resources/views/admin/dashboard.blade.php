@@ -492,6 +492,14 @@ body.dark-mode .kpi-icon          { opacity:.85; }
           <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['stay']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['stay']['margin']) }}</span>
         </div>
 
+        {{-- Package row --}}
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
+          <span style="color:var(--text);font-weight:600;">🗺️ Package <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['package']['count'] }})</span></span>
+          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['package']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['package']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['package']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['package']['margin']) }}</span>
+        </div>
+
         {{-- Cab row --}}
         <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
           <span style="color:var(--text);font-weight:600;">🚗 Cab <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['cab']['count'] }})</span></span>
@@ -501,11 +509,19 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         </div>
 
         {{-- Boat row --}}
-        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
           <span style="color:var(--text);font-weight:600;">⛵ Boat <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['boat']['count'] }})</span></span>
           <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['boat']['amount']) }}</span>
           <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['boat']['vendor']) }}</span>
           <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['boat']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['boat']['margin']) }}</span>
+        </div>
+
+        {{-- Guide row --}}
+        <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:8px;opacity:{{ $myTargetDetail['guide']['count'] > 0 ? '1' : '.45' }};">
+          <span style="color:var(--text);font-weight:600;">🧭 Guide <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['guide']['count'] }})</span></span>
+          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['guide']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['guide']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:#10B981;">₹{{ number_format($myTargetDetail['guide']['margin']) }}</span>
         </div>
 
         {{-- Totals row --}}

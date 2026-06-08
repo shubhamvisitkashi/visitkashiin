@@ -9,45 +9,59 @@ use App\Models\BoatBooking;
 
 class TargetCalculationService
 {
-    /**
-     * Calculate achieved margin for all booking types:
-     * Stay: total_amount - proportional vendor cost (service assignments)
-     * Cab:  total_amount - vendor_cost
-     * Boat: final_amount - vendor_cost
-     */
     public function calculateAchievedMargin(UserTarget $target): float
     {
         return $this->calculateDetailedMargin($target->user_id, $target->month, $target->year)['margin'];
     }
 
     /**
-     * Returns total_amount, vendor_cost, margin broken down by booking type.
+     * Breaks down margin by booking type:
+     *   Stay    — Booking records where quotation.notes has no package_name
+     *   Package — Booking records where quotation.notes has package_name (tour packages)
+     *   Cab     — CabBooking: total_amount − vendor_cost
+     *   Boat    — BoatBooking: final_amount − vendor_cost
+     *   Guide   — reserved; returns 0 until a Guide model exists
+     *
+     * Stay & Package use proportional margin:
+     *   payments_received − (vendor_cost × payments_received / total_amount)
      */
     public function calculateDetailedMargin(int $userId, int $month, int $year): array
     {
-        // ── Stay Bookings (service-assignment vendor costs) ────────
-        $stayBookings = Booking::where('created_by', $userId)
+        // ── All Booking records for this staff member this month ───
+        $allBookings = Booking::where('created_by', $userId)
             ->whereYear('booking_date', $year)
             ->whereMonth('booking_date', $month)
-            ->with(['serviceAssignments', 'payments'])
+            ->with(['quotation', 'serviceAssignments', 'payments'])
             ->get();
 
-        $stayAmount = 0;
-        $stayVendor = 0;
-        foreach ($stayBookings as $b) {
+        $stayAmount = 0; $stayVendor = 0; $stayCount = 0;
+        $pkgAmount  = 0; $pkgVendor  = 0; $pkgCount  = 0;
+
+        foreach ($allBookings as $b) {
             $totalAmount      = (float)($b->total_amount ?? 0);
             $paymentsReceived = (float)($b->payments->sum('amount') ?? 0);
             $vendorCost       = (float)($b->serviceAssignments->sum('assigned_cost') ?? 0);
 
-            if ($totalAmount > 0) {
-                $payPct       = $paymentsReceived / $totalAmount;
-                $propVendor   = $vendorCost * $payPct;
-            } else {
-                $payPct     = 0;
-                $propVendor = 0;
+            $propVendor = $totalAmount > 0
+                ? $vendorCost * ($paymentsReceived / $totalAmount)
+                : 0;
+
+            // Detect tour package by JSON package_name in quotation.notes
+            $isPackage = false;
+            if ($b->quotation && $b->quotation->notes) {
+                $decoded   = json_decode($b->quotation->notes, true);
+                $isPackage = is_array($decoded) && !empty($decoded['package_name']);
             }
-            $stayAmount += $paymentsReceived;
-            $stayVendor += $propVendor;
+
+            if ($isPackage) {
+                $pkgAmount += $paymentsReceived;
+                $pkgVendor += $propVendor;
+                $pkgCount++;
+            } else {
+                $stayAmount += $paymentsReceived;
+                $stayVendor += $propVendor;
+                $stayCount++;
+            }
         }
 
         // ── Cab Bookings ───────────────────────────────────────────
@@ -68,9 +82,14 @@ class TargetCalculationService
         $boatAmount = (float)$boatBookings->sum('final_amount');
         $boatVendor = (float)$boatBookings->sum('vendor_cost');
 
-        // ── Totals ─────────────────────────────────────────────────
-        $totalAmount = $stayAmount + $cabAmount + $boatAmount;
-        $totalVendor = $stayVendor + $cabVendor + $boatVendor;
+        // ── Guide Bookings (reserved — no model yet) ───────────────
+        $guideAmount = 0;
+        $guideVendor = 0;
+        $guideCount  = 0;
+
+        // ── Grand totals ───────────────────────────────────────────
+        $totalAmount = $stayAmount + $pkgAmount + $cabAmount + $boatAmount + $guideAmount;
+        $totalVendor = $stayVendor + $pkgVendor + $cabVendor + $boatVendor + $guideVendor;
         $margin      = $totalAmount - $totalVendor;
 
         return [
@@ -81,7 +100,13 @@ class TargetCalculationService
                 'amount' => $stayAmount,
                 'vendor' => $stayVendor,
                 'margin' => $stayAmount - $stayVendor,
-                'count'  => $stayBookings->count(),
+                'count'  => $stayCount,
+            ],
+            'package' => [
+                'amount' => $pkgAmount,
+                'vendor' => $pkgVendor,
+                'margin' => $pkgAmount - $pkgVendor,
+                'count'  => $pkgCount,
             ],
             'cab' => [
                 'amount' => $cabAmount,
@@ -94,6 +119,12 @@ class TargetCalculationService
                 'vendor' => $boatVendor,
                 'margin' => $boatAmount - $boatVendor,
                 'count'  => $boatBookings->count(),
+            ],
+            'guide' => [
+                'amount' => $guideAmount,
+                'vendor' => $guideVendor,
+                'margin' => 0,
+                'count'  => $guideCount,
             ],
         ];
     }
