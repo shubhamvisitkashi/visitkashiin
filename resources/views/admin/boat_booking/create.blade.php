@@ -52,16 +52,16 @@
 .bt-input-ph{padding-left:40px !important;}
 
 /* ── Boat cards ────── */
-.boat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
-.boat-card{border:2.5px solid #BFDBFE;border-radius:14px;padding:16px 12px 12px;cursor:pointer;text-align:center;transition:.22s;background:#fff;position:relative;user-select:none;}
+.boat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.boat-card{border:2.5px solid #BFDBFE;border-radius:16px;padding:20px 14px 16px;cursor:pointer;text-align:center;transition:.22s;background:#fff;position:relative;user-select:none;}
 .boat-card:hover{border-color:#0EA5E9;background:#EFF6FF;transform:translateY(-3px);box-shadow:0 8px 24px rgba(14,165,233,.18);}
 .boat-card.selected{border-color:#0EA5E9;background:#EFF6FF;box-shadow:0 0 0 3px rgba(14,165,233,.22);}
-.bc-chk{position:absolute;top:8px;right:8px;width:18px;height:18px;background:#0EA5E9;border-radius:50%;font-size:.6rem;color:#fff;display:none;align-items:center;justify-content:center;font-weight:900;}
+.bc-chk{position:absolute;top:10px;right:10px;width:20px;height:20px;background:#0EA5E9;border-radius:50%;font-size:.65rem;color:#fff;display:none;align-items:center;justify-content:center;font-weight:900;}
 .boat-card.selected .bc-chk{display:flex;}
-.bc-emoji{font-size:1.8rem;margin-bottom:6px;line-height:1;}
-.bc-name{font-size:.74rem;font-weight:700;color:#0F172A;line-height:1.3;margin-bottom:3px;}
-.bc-cap{font-size:.65rem;color:#94A3B8;margin-bottom:5px;}
-.bc-price{font-size:.95rem;font-weight:800;color:#0EA5E9;}
+.bc-emoji{font-size:2.2rem;margin-bottom:8px;line-height:1;}
+.bc-name{font-size:.82rem;font-weight:700;color:#0F172A;line-height:1.35;margin-bottom:4px;}
+.bc-cap{font-size:.68rem;color:#94A3B8;margin-bottom:6px;}
+.bc-price{font-size:1.05rem;font-weight:800;color:#0EA5E9;}
 .bc-extra{font-size:.62rem;color:#64748B;margin-top:2px;font-weight:500;}
 
 /* ── Counters ──────── */
@@ -83,8 +83,8 @@
 .bt-sb-card{background:#fff;border-radius:16px;border:1px solid #BFDBFE;box-shadow:0 1px 4px rgba(0,0,0,.04);padding:20px;margin-bottom:16px;}
 .bt-sb-title{font-size:.85rem;font-weight:700;color:#0F172A;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #EFF6FF;display:flex;align-items:center;gap:8px;}
 .bt-rupee-wrap{position:relative;}
-.bt-rupee{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.85rem;font-weight:600;color:#475569;}
-.bt-rupee-input{padding-left:28px !important;}
+.bt-rupee{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.9rem;font-weight:700;color:#475569;pointer-events:none;z-index:2;}
+.bt-rupee-input{padding-left:32px !important;}
 
 /* ── Balance display ── */
 .bt-balance{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1.5px solid #BFDBFE;border-radius:12px;padding:14px 16px;margin:12px 0;}
@@ -107,7 +107,8 @@
 .staff-badge{background:#F59E0B;color:#fff;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;}
 .not-conf{background:#EF4444;color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;margin-left:4px;}
 .staff-label{font-size:.7rem;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;}
-.staff-input{border:1.5px solid #FDE68A !important;border-radius:9px !important;padding:8px 12px !important;font-size:.82rem !important;color:#0F172A !important;background:#FFFBEB !important;width:100%;}
+.staff-input{border:1.5px solid #FDE68A !important;border-radius:9px !important;padding:9px 12px !important;font-size:.85rem !important;color:#0F172A !important;background:#FFFBEB !important;width:100%;}
+.staff-input.bt-rupee-input{padding-left:32px !important;}
 .staff-input:focus{border-color:#F59E0B !important;outline:none !important;}
 .margin-display{background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px;padding:10px 14px;margin-top:8px;}
 .margin-row{display:flex;justify-content:space-between;font-size:.75rem;padding:3px 0;}
@@ -369,7 +370,7 @@
       {{-- Add-on toggles --}}
       <div style="margin-top:16px;">
         <label class="bt-label" style="margin-bottom:10px;">Add-on Services</label>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
           @foreach(['decoration'=>'🌸 Decoration','photographer'=>'📸 Photographer','live_music'=>'🎵 Live Music','priest'=>'🪔 Priest / Puja','flowers'=>'💐 Flower Shower','fireworks'=>'🎆 Fireworks'] as $k=>$l)
           <label style="display:flex;align-items:center;justify-content:space-between;background:#F0F9FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:9px 13px;cursor:pointer;transition:.18s;">
             <span style="font-size:.78rem;font-weight:600;color:#0F172A;">{{ $l }}</span>
@@ -399,7 +400,7 @@
           <label class="bt-label">Pickup Ghat <span class="bt-req">*</span></label>
           <select name="pickup_ghat" class="form-select bt-input" required>
             <option value="">Select ghat…</option>
-            @foreach(['Dashashwamedh Ghat','Assi Ghat','Ravidas Ghat Nagwa','NAMO Ghat','Aadikeshav Ghat','Manikarnika Ghat','Harishchandra Ghat','Rajendra Prasad Ghat','Man Mandir Ghat','Panchganga Ghat','Kedar Ghat','Shivala Ghat','Munshi Ghat','Scindia Ghat','Narad Ghat','Chet Singh Ghat','Darbhanga Ghat','Tulsi Ghat'] as $g)
+            @foreach(['Dashashwamedh Ghat','Assi Ghat','Ravidas Ghat Nagwa','NAMO Ghat','Aadikeshav Ghat','Manikarnika Ghat','Harishchandra Ghat','Rajendra Prasad Ghat','Man Mandir Ghat','Panchganga Ghat','Kedar Ghat','Shivala Ghat','Munshi Ghat','Scindia Ghat','Narad Ghat','Chet Singh Ghat','Darbhanga Ghat','Tulsi Ghat','Lalita Ghat'] as $g)
             <option value="{{ $g }}" {{ old('pickup_ghat')==$g?'selected':'' }}>{{ $g }}</option>
             @endforeach
           </select>
@@ -413,7 +414,7 @@
           <label class="bt-label">Drop Ghat <span class="bt-req">*</span></label>
           <select name="drop_ghat" class="form-select bt-input" required>
             <option value="">Select drop ghat…</option>
-            @foreach(['Dashashwamedh Ghat','Assi Ghat','Ravidas Ghat Nagwa','NAMO Ghat','Aadikeshav Ghat','Manikarnika Ghat','Harishchandra Ghat','Rajendra Prasad Ghat','Man Mandir Ghat','Panchganga Ghat','Kedar Ghat','Shivala Ghat','Munshi Ghat','Scindia Ghat','Narad Ghat','Chet Singh Ghat','Darbhanga Ghat','Tulsi Ghat'] as $g)
+            @foreach(['Dashashwamedh Ghat','Assi Ghat','Ravidas Ghat Nagwa','NAMO Ghat','Aadikeshav Ghat','Manikarnika Ghat','Harishchandra Ghat','Rajendra Prasad Ghat','Man Mandir Ghat','Panchganga Ghat','Kedar Ghat','Shivala Ghat','Munshi Ghat','Scindia Ghat','Narad Ghat','Chet Singh Ghat','Darbhanga Ghat','Tulsi Ghat','Lalita Ghat'] as $g)
             <option value="{{ $g }}" {{ old('drop_ghat')==$g?'selected':'' }}>{{ $g }}</option>
             @endforeach
           </select>
@@ -485,12 +486,12 @@
     </div>
 
     <div style="margin-bottom:12px;">
-      <label class="bt-label">Advance Paid (₹)</label>
+      <label class="bt-label">Advance Paid (₹) <span class="bt-req">*</span></label>
       <div class="bt-rupee-wrap">
         <span class="bt-rupee">₹</span>
         <input type="number" name="paid_amount" id="boatPaid"
                class="form-control bt-input bt-rupee-input"
-               value="{{ old('paid_amount',0) }}" min="0" oninput="recalc()">
+               value="{{ old('paid_amount',0) }}" min="0" required oninput="recalc()">
       </div>
     </div>
 
@@ -510,8 +511,8 @@
     </div>
 
     <div style="margin-bottom:12px;">
-      <label class="bt-label">Payment Method</label>
-      <select name="payment_method" class="form-select bt-input">
+      <label class="bt-label">Payment Method <span class="bt-req">*</span></label>
+      <select name="payment_method" class="form-select bt-input" required>
         <option value="">Select…</option>
         @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer','card'=>'💳 Card','cheque'=>'📄 Cheque'] as $v=>$l)
         <option value="{{ $v }}" {{ old('payment_method')==$v?'selected':'' }}>{{ $l }}</option>
@@ -520,8 +521,8 @@
     </div>
 
     <div style="margin-bottom:12px;">
-      <label class="bt-label">Bank Account</label>
-      <select name="payment_account_id" class="form-select bt-input">
+      <label class="bt-label">Bank Account <span class="bt-req">*</span></label>
+      <select name="payment_account_id" class="form-select bt-input" required>
         <option value="">Select account…</option>
         @foreach($paymentAccounts as $acc)
         <option value="{{ $acc->id }}" {{ old('payment_account_id')==$acc->id?'selected':'' }}>
@@ -543,8 +544,8 @@
       </div>
 
       <div style="margin-bottom:10px;">
-        <label class="staff-label">Assign Boatman</label>
-        <select name="boatman_id" class="form-select staff-input">
+        <label class="staff-label">Assign Boatman <span style="color:#EF4444;">*</span></label>
+        <select name="boatman_id" class="form-select staff-input" required>
           <option value="">Select boatman…</option>
           @foreach($boatmen as $s)
           <option value="{{ $s->id }}" {{ old('boatman_id')==$s->id?'selected':'' }}>{{ $s->name }}</option>
@@ -553,12 +554,12 @@
       </div>
 
       <div style="margin-bottom:10px;">
-        <label class="staff-label">Vendor / Supplier Cost (₹)</label>
+        <label class="staff-label">Vendor / Supplier Cost (₹) <span style="color:#EF4444;">*</span></label>
         <div class="bt-rupee-wrap">
           <span class="bt-rupee" style="color:#92400E;">₹</span>
           <input type="number" name="vendor_cost" id="vendorCost"
                  class="form-control staff-input bt-rupee-input"
-                 value="{{ old('vendor_cost',0) }}" min="0" oninput="recalcMargin()">
+                 value="{{ old('vendor_cost',0) }}" min="0" required oninput="recalcMargin()">
         </div>
       </div>
 

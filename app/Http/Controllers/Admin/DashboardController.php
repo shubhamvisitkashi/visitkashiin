@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\CabBooking;
 use App\Models\BoatBooking;
 use App\Models\Enquiry;
+use App\Models\UserTarget;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -173,6 +174,25 @@ class DashboardController extends Controller
             ->groupBy('booking_status')
             ->pluck('cnt', 'booking_status');
 
+        // ── Staff Targets (current month) ─────────────────────────
+        $staffTargets = collect();
+        if ($isAdmin) {
+            // Super Admin / Admin / Manager sees all staff targets
+            $staffTargets = UserTarget::with('user')
+                ->currentMonth()
+                ->orderBy('target_margin', 'desc')
+                ->get();
+        } else {
+            // Staff sees only their own target
+            $myTarget = UserTarget::with('user')
+                ->currentMonth()
+                ->where('user_id', $userId)
+                ->first();
+            if ($myTarget) {
+                $staffTargets = collect([$myTarget]);
+            }
+        }
+
         return view('admin.dashboard', compact(
             'totalBookingsToday', 'totalBookingsMonth', 'totalRevenueMonth',
             'totalPending', 'revenueGrowth', 'allTimeRevenue', 'allTimeBookings',
@@ -185,7 +205,7 @@ class DashboardController extends Controller
             'totalRevTrend', 'bookingsTrend',
             'typeLabels', 'typeData',
             'dailyLabels', 'dailyRevenue',
-            'stayStatuses',
+            'stayStatuses', 'staffTargets',
             'recentBookings', 'upcomingCheckins', 'upcomingCabs'
         ), ['page_title' => 'Dashboard']);
     }

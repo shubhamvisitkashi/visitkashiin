@@ -315,8 +315,12 @@ class BoatBookingController extends Controller
             'no_of_person'     => 'nullable|integer|min:1',
             'event_date'       => 'required|date',
             'total_amount'     => 'required|numeric|min:0',
-            'discount_amount'  => 'nullable|numeric|min:0|max:' . $maxDisc,
-            'paid_amount'      => 'nullable|numeric|min:0|max:' . $maxPaid,
+            'discount_amount'    => 'nullable|numeric|min:0|max:' . $maxDisc,
+            'paid_amount'        => 'required|numeric|min:0|max:' . $maxPaid,
+            'payment_method'     => 'required|string',
+            'payment_account_id' => 'required|exists:payment_accounts,id',
+            'boatman_id'         => 'required|exists:boatmen,id',
+            'vendor_cost'        => 'required|numeric|min:0',
         ]);
 
         $boat = Boat::where('boat_type_id', $request->boat_type)->where('event_type', $request->event_type)->first();

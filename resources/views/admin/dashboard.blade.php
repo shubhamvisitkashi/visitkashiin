@@ -606,6 +606,83 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       </div>
     </div>
 
+    {{-- Staff Targets (current month) --}}
+    @if($staffTargets->count())
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
+        @can('target-manage')
+        <a href="{{ route('targets.index') }}" style="font-size:.72rem;color:var(--indigo);font-weight:700;text-decoration:none;">Manage →</a>
+        @endcan
+      </div>
+      <div style="padding:14px 18px;">
+        @foreach($staffTargets as $t)
+        @php
+          $pct     = $t->target_margin > 0 ? min(100, round($t->achieved_margin / $t->target_margin * 100)) : 0;
+          $remain  = max(0, $t->target_margin - $t->achieved_margin);
+          $color   = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
+          $bgColor = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
+          $txtColor= $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
+        @endphp
+        <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+          {{-- Staff name + badge --}}
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;">
+                {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
+              </div>
+              <div>
+                <div style="font-size:.82rem;font-weight:700;color:var(--text);">{{ $t->user->name ?? 'Staff' }}</div>
+                <div style="font-size:.68rem;color:var(--muted);">{{ $t->monthName }} {{ $t->year }}</div>
+              </div>
+            </div>
+            <span style="font-size:.64rem;font-weight:800;padding:3px 9px;border-radius:20px;background:{{ $bgColor }};color:{{ $txtColor }};">
+              {{ $pct >= 100 ? '🏆 Achieved' : $pct.'%' }}
+            </span>
+          </div>
+          {{-- Progress bar --}}
+          <div style="height:7px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin-bottom:6px;">
+            <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .5s;"></div>
+          </div>
+          {{-- Amounts --}}
+          <div style="display:flex;justify-content:space-between;font-size:.72rem;">
+            <span style="color:var(--muted);">Achieved: <strong style="color:{{ $color }};">₹{{ number_format($t->achieved_margin) }}</strong></span>
+            <span style="color:var(--muted);">Target: <strong style="color:var(--text);">₹{{ number_format($t->target_margin) }}</strong></span>
+          </div>
+          @if($remain > 0)
+          <div style="font-size:.7rem;color:var(--muted);margin-top:3px;text-align:right;">
+            ₹{{ number_format($remain) }} remaining
+          </div>
+          @endif
+        </div>
+        @endforeach
+        @can('target-manage')
+        <a href="{{ route('targets.index') }}"
+           style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;background:var(--indigo);color:#fff;border-radius:10px;font-size:.78rem;font-weight:700;text-decoration:none;margin-top:4px;">
+          ⚙️ Set / Update Targets
+        </a>
+        @endcan
+      </div>
+    </div>
+    @else
+    {{-- No targets set yet — show only for admin --}}
+    @can('target-manage')
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">🎯 Staff Targets — {{ now()->format('F Y') }}</div>
+      </div>
+      <div style="padding:24px;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px;">🎯</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:14px;">No targets set for this month yet.</div>
+        <a href="{{ route('targets.index') }}"
+           style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--indigo);color:#fff;border-radius:10px;font-size:.8rem;font-weight:700;text-decoration:none;">
+          ＋ Set Staff Targets
+        </a>
+      </div>
+    </div>
+    @endcan
+    @endif
+
   </div>{{-- /right --}}
 </div>{{-- /dk-cols --}}
 
