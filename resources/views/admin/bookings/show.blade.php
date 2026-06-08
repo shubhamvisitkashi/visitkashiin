@@ -605,17 +605,29 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
     $boatType  = optional($firstItem?->serviceTemplate)->name ?? optional($lead)->short_plan ?? '—';
 
     // Financial — prefer live payments sum; fall back to stored paid_amount for older bookings
-    $paidAmt     = $booking->payments->sum('amount');
+    $paidAmt = (float)$booking->payments->sum('amount');
     if ($paidAmt == 0 && $booking->paid_amount > 0) {
         $paidAmt = (float)$booking->paid_amount;
     }
-    $discountAmt = (float)($booking->discount_amount ?? 0);
-    if ($discountAmt <= 0 && $booking->quotation) {
-        $discountAmt = (float)($booking->quotation->discount_amount ?? 0);
+
+    // Discount: booking.total_amount is already NET (after discount).
+    // Read gross from quotation.subtotal — discount = subtotal - total_amount.
+    $discountAmt = 0.0;
+    if ($booking->quotation) {
+        $qSub = (float)($booking->quotation->subtotal ?? 0);
+        $qTot = (float)($booking->quotation->total_amount ?? 0);
+        if ($qSub > 0 && $qSub > $qTot) {
+            $discountAmt = round($qSub - $qTot, 2);
+        }
     }
-    $netTotal  = max(0, $booking->total_amount - $discountAmt);
-    $pendAmt   = max(0, $netTotal - $paidAmt);
-    $paidPct   = $netTotal > 0 ? min(100, ($paidAmt / $netTotal) * 100) : 0;
+
+    // NET = booking.total_amount (already after discount applied at creation)
+    $netTotal  = (float)$booking->total_amount;
+    // GROSS = net + discount  (what the customer sees before deduction)
+    $grossTotal = $netTotal + $discountAmt;
+
+    $pendAmt  = max(0, $netTotal - $paidAmt);
+    $paidPct  = $netTotal > 0 ? min(100, ($paidAmt / $netTotal) * 100) : 0;
 
     // Vendor / margin
     $totalVendorCost = $booking->serviceAssignments->sum('assigned_cost');
@@ -676,9 +688,13 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             ? ($stayComputedTotal / $stayNightsCount / $stayRoomsCount)
             : 0;
         if ($stayComputedTotal > 0) {
-            $stayNet = max(0, $stayComputedTotal - $discountAmt);
-            $pendAmt = max(0, $stayNet - $paidAmt);
-            $paidPct = $stayNet > 0 ? min(100, ($paidAmt / $stayNet) * 100) : 0;
+            // stayComputedTotal is the GROSS total from quotation item unit_price.
+            // booking.total_amount is the NET (after discount).
+            // Use booking.total_amount as the authoritative net for due/progress.
+            $grossTotal = $stayComputedTotal;
+            $discountAmt = max(0, $stayComputedTotal - $netTotal);
+            $pendAmt = max(0, $netTotal - $paidAmt);
+            $paidPct = $netTotal > 0 ? min(100, ($paidAmt / $netTotal) * 100) : 0;
         }
     }
 
@@ -697,12 +713,12 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
     $editChildren = $ecArr[1] ?? 0;
     $editMeal     = ($stayMeal !== '—') ? $stayMeal : '';
     $editRequests = ($stayRequests !== '—') ? $stayRequests : '';
-    $editTotal    = $isStay && $stayComputedTotal > 0 ? $stayComputedTotal : $booking->total_amount;
+    $editTotal = $netTotal;
 
     // WhatsApp message
     if ($isStay) {
-        $stayDisplayTotal = $stayComputedTotal > 0 ? $stayComputedTotal : $booking->total_amount;
-        $stayPendForWa    = $stayDisplayTotal - $paidAmt;
+        $stayDisplayTotal = $grossTotal;
+        $stayPendForWa    = $pendAmt;
         $waMsg = "Namaste *{$lead?->guest_name}* 🙏\n\nYour hotel booking with *Visit Kashi* is confirmed! ✅\n\n🏨 *Stay Booking Details*\nBooking ID: *{$booking->booking_number}*\nProperty: *{$stayProperty}*\nCheck-in: *{$stayCheckinFull}*\nCheck-out: *{$stayCheckoutFull}*\nDuration: *{$stayNights}*\nRooms: *{$stayRooms}*\nGuests: *{$stayGuests}*"
             . ($altMobile ? "\nAlt. Mobile: *{$altMobile}*" : "")
             . ($stayMeal !== '—' ? "\nMeal Plan: *{$stayMeal}*" : "")
@@ -1221,34 +1237,46 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                     </button>
                 </div>
                 <div class="pk-pay-body">
+                    {{-- Gross Total --}}
                     <div class="pk-pay-row">
                         <span class="pk-pay-lbl">Total Amount</span>
-                        @php $displayTotal = ($isStay && $stayComputedTotal > 0) ? $stayComputedTotal : $booking->total_amount; @endphp
-                        <span class="pk-pay-val">₹{{ number_format($displayTotal, 2) }}</span>
+                        <span class="pk-pay-val" style="font-size:1rem;font-weight:800;">₹{{ number_format($grossTotal, 2) }}</span>
                     </div>
-                    @if($isStay && $stayComputedTotal > 0 && $stayRatePerRoom > 0 && $stayNightsCount > 0)
-                    <div style="font-size:.72rem;color:var(--pk-muted);text-align:right;margin:-6px 0 4px;padding-bottom:6px;border-bottom:1px dashed var(--pk-border)">
+                    {{-- Rate formula for stay --}}
+                    @if($isStay && $stayRatePerRoom > 0 && $stayNightsCount > 0)
+                    <div style="font-size:.71rem;color:var(--pk-muted);text-align:right;margin:-5px 0 5px;padding-bottom:6px;border-bottom:1px dashed var(--pk-border);">
                         ₹{{ number_format($stayRatePerRoom, 0) }}/room &times; {{ $stayNightsCount }}N &times; {{ $stayRoomsCount }}R
                     </div>
                     @endif
+                    {{-- Discount (only if applied) --}}
                     @if($discountAmt > 0)
-                    <div class="pk-pay-row">
-                        <span class="pk-pay-lbl" style="color:#F59E0B;">Discount</span>
-                        <span class="pk-pay-val" style="color:#F59E0B;">-₹{{ number_format($discountAmt, 2) }}</span>
+                    <div class="pk-pay-row" style="background:rgba(245,158,11,.06);border-radius:7px;padding:5px 8px;margin:2px 0;">
+                        <span class="pk-pay-lbl" style="color:#D97706;">🏷 Discount</span>
+                        <span class="pk-pay-val" style="color:#D97706;font-weight:700;">-₹{{ number_format($discountAmt, 2) }}</span>
                     </div>
-                    @php $netAfterDisc = $displayTotal - $discountAmt; @endphp
-                    <div class="pk-pay-row" style="border-top:1px dashed var(--pk-border);padding-top:5px;">
-                        <span class="pk-pay-lbl">Net Total</span>
-                        <span class="pk-pay-val">₹{{ number_format($netAfterDisc, 2) }}</span>
+                    <div class="pk-pay-row" style="border-top:1px dashed var(--pk-border);padding-top:6px;margin-top:2px;">
+                        <span class="pk-pay-lbl" style="font-weight:600;color:var(--pk-text);">Net Total</span>
+                        <span class="pk-pay-val" style="font-weight:700;">₹{{ number_format($netTotal, 2) }}</span>
                     </div>
                     @endif
-                    <div class="pk-pay-row">
-                        <span class="pk-pay-lbl">Advance Paid</span>
+                    {{-- Paid --}}
+                    <div class="pk-pay-row" style="margin-top:4px;">
+                        <span class="pk-pay-lbl">
+                            Amount Paid
+                            @if($booking->payments->count() > 0)
+                            <span style="font-size:.68rem;color:var(--pk-muted);margin-left:3px;">({{ $booking->payments->count() }} payment{{ $booking->payments->count() > 1 ? 's' : '' }})</span>
+                            @endif
+                        </span>
                         <span class="pk-pay-val em">₹{{ number_format($paidAmt, 2) }}</span>
                     </div>
-                    <div class="pk-pay-row">
-                        <span class="pk-pay-lbl">Balance Due</span>
-                        <span class="pk-pay-val {{ $pendAmt > 0 ? 'am' : 'em' }}">₹{{ number_format($pendAmt, 2) }}</span>
+                    {{-- Balance Due --}}
+                    <div class="pk-pay-row" style="border-top:2px solid var(--pk-border);padding-top:8px;margin-top:4px;">
+                        <span class="pk-pay-lbl" style="font-weight:700;color:{{ $pendAmt > 0 ? '#DC2626' : '#059669' }};">
+                            Balance Due
+                        </span>
+                        <span class="pk-pay-val {{ $pendAmt > 0 ? 'am' : 'em' }}" style="font-size:1rem;font-weight:800;">
+                            ₹{{ number_format($pendAmt, 2) }}
+                        </span>
                     </div>
                 </div>
                 <div class="pk-pay-footer">

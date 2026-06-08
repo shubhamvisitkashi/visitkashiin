@@ -243,6 +243,10 @@ class BoatBookingController extends Controller
                 'defaultFont'          => 'sans-serif',
                 'dpi'                  => 150,
                 'enable_css_float'     => true,
+                'margin_top'           => 0,
+                'margin_right'         => 0,
+                'margin_bottom'        => 0,
+                'margin_left'          => 0,
             ]);
 
         return $pdf->download('VK-Voucher-' . $booking->booking_id . '.pdf');
