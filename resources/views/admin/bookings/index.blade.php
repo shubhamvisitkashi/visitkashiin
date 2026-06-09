@@ -1167,7 +1167,21 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                 {{-- TYPE / PACKAGE --}}
                 <td data-label="Type">
                   <span class="bkt-type bkt-type-{{ $typeKey }}">{{ $typeEmoji }} {{ $typeLabel }}</span>
-                  @if($typeKey === 'tour')
+                  @if($typeKey === 'stay')
+                    @php
+                      $ciD = $booking->lead?->booking_start_date;
+                      $coD = $booking->lead?->booking_end_date;
+                    @endphp
+                    @if($ciD && $coD)
+                      <div style="font-size:.7rem;color:#065F46;font-weight:600;margin-top:3px;white-space:nowrap;">
+                        📅 {{ \Carbon\Carbon::parse($ciD)->format('d M') }} → {{ \Carbon\Carbon::parse($coD)->format('d M Y') }}
+                      </div>
+                    @elseif($ciD)
+                      <div style="font-size:.7rem;color:#065F46;font-weight:600;margin-top:3px;white-space:nowrap;">
+                        📅 Check-in: {{ \Carbon\Carbon::parse($ciD)->format('d M Y') }}
+                      </div>
+                    @endif
+                  @elseif($typeKey === 'tour')
                     @php
                       $pkgName = $booking->quotation?->items?->first()?->serviceTemplate?->name
                               ?? ($booking->lead?->short_plan ? Str::limit(strip_tags($booking->lead->short_plan), 40) : null);
@@ -1403,6 +1417,9 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                 <td data-label="Type">
                   <span class="bkt-type" style="background:#E0F2FE;color:#0369A1;">⛵ Boat</span>
                   <div style="font-size:.7rem;color:#6B7280;margin-top:2px;">{{ $bBoatName }}</div>
+                  <div style="font-size:.7rem;color:#0369A1;font-weight:600;margin-top:2px;white-space:nowrap;">
+                    📅 {{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}
+                  </div>
                 </td>
                 <td data-label="Travel Date">
                   <span style="font-size:.82rem;color:#374151;font-weight:600;white-space:nowrap;">
@@ -1461,6 +1478,9 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                 <td data-label="Type">
                   <span class="bkt-type" style="background:#FEF3C7;color:#92400E;">🚗 Cab</span>
                   <div style="font-size:.7rem;color:#6B7280;margin-top:2px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($cb->pickup_address,15) }} → {{ Str::limit($cb->drop_address,15) }}</div>
+                  <div style="font-size:.7rem;color:#B45309;font-weight:600;margin-top:2px;white-space:nowrap;">
+                    📅 {{ \Carbon\Carbon::parse($cb->pickup_date)->format('d M Y') }}
+                  </div>
                 </td>
                 <td data-label="Travel Date">
                   <span style="font-size:.82rem;color:#374151;font-weight:600;white-space:nowrap;">
