@@ -1082,7 +1082,6 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               <th style="width:36px;padding:10px 8px;">
                 <input type="checkbox" class="bk-row-check" id="bkCheckAll" title="Select All">
               </th>
-              <th>Booking ID</th>
               <th>Guest</th>
               <th>Type</th>
               <th>Travel Date</th>
@@ -1157,15 +1156,6 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                          data-phone="{{ preg_replace('/[^0-9]/','',$booking->lead->contact??'') }}"
                          data-amount="{{ $booking->total_amount }}"
                          onchange="bkUpdateBulk()">
-                </td>
-
-                {{-- BOOKING ID --}}
-                <td data-label="Booking ID">
-                  <div style="font-size:.82rem;font-weight:700;color:#111827;white-space:nowrap;">
-                    {{ $booking->booking_number }}
-                    @if($booking->is_gst_invoice)<span class="bkt-gst">GST</span>@endif
-                  </div>
-                  <div style="font-size:.73rem;color:#9CA3AF;margin-top:2px;">{{ $booking->booking_date->format('d M Y') }}</div>
                 </td>
 
                 {{-- GUEST --}}
@@ -1406,10 +1396,6 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               @endphp
               <tr style="cursor:pointer;background:#F0F9FF;" onclick="window.location='{{ route('boat-booking.show', $bk->booking_id) }}'">
                 <td onclick="event.stopPropagation()" style="padding:0 8px;vertical-align:middle;"></td>
-                <td data-label="Booking ID">
-                  <div style="font-size:.82rem;font-weight:700;color:#0369A1;white-space:nowrap;font-family:monospace;">{{ $bk->booking_id }}</div>
-                  <div style="font-size:.73rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}</div>
-                </td>
                 <td data-label="Guest">
                   <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $bk->name }}</div>
                   <div style="font-size:.73rem;color:#6B7280;">{{ $bk->phone }}</div>
@@ -1468,10 +1454,6 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               @endphp
               <tr style="cursor:pointer;background:#FFFBEB;" onclick="window.location='{{ route('cab-bookings.show', $cb->id) }}'">
                 <td onclick="event.stopPropagation()" style="padding:0 8px;vertical-align:middle;"></td>
-                <td data-label="Booking ID">
-                  <div style="font-size:.82rem;font-weight:700;color:#B45309;white-space:nowrap;font-family:monospace;">{{ $cb->booking_number }}</div>
-                  <div style="font-size:.73rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($cb->created_at)->format('d M Y') }}</div>
-                </td>
                 <td data-label="Guest">
                   <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $cb->customer_name }}</div>
                   <div style="font-size:.73rem;color:#6B7280;">{{ $cb->customer_phone }}</div>
