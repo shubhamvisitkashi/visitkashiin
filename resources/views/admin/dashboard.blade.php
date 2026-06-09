@@ -281,6 +281,9 @@ body.dark-mode .kpi-icon          { opacity:.85; }
   .dk-hero h1     { font-size:1rem; }
   .kpi-value      { font-size:1.2rem; }
 }
+@media(max-width:768px){
+  .upcoming-row-grid { grid-template-columns:1fr !important; }
+}
 </style>
 
 <div class="dk-page">
@@ -367,6 +370,64 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     </div>
   </div>
   @endif
+</div>
+
+{{-- ══ UPCOMING BOOKINGS ══ --}}
+<div class="upcoming-row-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+
+  {{-- Upcoming Check-ins --}}
+  <div class="chart-card" style="margin-bottom:0;">
+    <div class="chart-head">
+      <div class="chart-title">🏨 Upcoming Check-ins</div>
+      <span style="font-size:.7rem;color:var(--muted);">Next 7 days</span>
+    </div>
+    @if($upcomingCheckins->count())
+      @foreach($upcomingCheckins as $b)
+      @php $checkin = $b->lead?->booking_start_date; @endphp
+      <div class="upcoming-item">
+        <div class="upcoming-date">
+          <div class="ud-day">{{ $checkin ? \Carbon\Carbon::parse($checkin)->format('d') : '—' }}</div>
+          <div class="ud-mon">{{ $checkin ? \Carbon\Carbon::parse($checkin)->format('M') : '' }}</div>
+        </div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">{{ $b->lead?->guest_name ?? '—' }}</div>
+          <div class="upcoming-sub">{{ $b->booking_number }} · {{ $b->lead?->pax ?? 1 }} pax</div>
+        </div>
+        <div class="upcoming-amt">₹{{ number_format($b->total_amount) }}</div>
+      </div>
+      @endforeach
+    @else
+      <div style="padding:26px;text-align:center;color:var(--muted);font-size:.82rem;">No upcoming check-ins in next 7 days</div>
+    @endif
+  </div>
+
+  {{-- Upcoming Cab Pickups --}}
+  <div class="chart-card" style="margin-bottom:0;">
+    <div class="chart-head">
+      <div class="chart-title">🚗 Upcoming Pickups</div>
+      <span style="font-size:.7rem;color:var(--muted);">Next 7 days</span>
+    </div>
+    @if($upcomingCabs->count())
+      @foreach($upcomingCabs as $c)
+      <div class="upcoming-item">
+        <div class="upcoming-date">
+          <div class="ud-day">{{ \Carbon\Carbon::parse($c->pickup_date)->format('d') }}</div>
+          <div class="ud-mon">{{ \Carbon\Carbon::parse($c->pickup_date)->format('M') }}</div>
+        </div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">{{ $c->customer_name }}</div>
+          <div class="upcoming-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($c->pickup_address,30) }} → {{ Str::limit($c->drop_address,20) }}</div>
+        </div>
+        <div class="upcoming-amt" style="font-size:.72rem;font-weight:600;">
+          {{ $c->pickup_time ? \Carbon\Carbon::parse($c->pickup_time)->format('h:i A') : '—' }}
+        </div>
+      </div>
+      @endforeach
+    @else
+      <div style="padding:26px;text-align:center;color:var(--muted);font-size:.82rem;">No cab pickups in next 7 days</div>
+    @endif
+  </div>
+
 </div>
 
 {{-- ══ STAFF TARGETS ══ --}}
@@ -725,57 +786,6 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         </div>
       </div>
     </div>
-
-    {{-- Upcoming Check-ins --}}
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">🏨 Upcoming Check-ins</div>
-        <span style="font-size:.7rem;color:var(--muted);">Next 7 days</span>
-      </div>
-      @if($upcomingCheckins->count())
-        @foreach($upcomingCheckins as $b)
-        @php $checkin = $b->lead?->booking_start_date; @endphp
-        <div class="upcoming-item">
-          <div class="upcoming-date">
-            <div class="ud-day">{{ $checkin ? \Carbon\Carbon::parse($checkin)->format('d') : '—' }}</div>
-            <div class="ud-mon">{{ $checkin ? \Carbon\Carbon::parse($checkin)->format('M') : '' }}</div>
-          </div>
-          <div class="upcoming-info">
-            <div class="upcoming-name">{{ $b->lead?->guest_name ?? '—' }}</div>
-            <div class="upcoming-sub">{{ $b->booking_number }} · {{ $b->lead?->pax ?? 1 }} pax</div>
-          </div>
-          <div class="upcoming-amt">₹{{ number_format($b->total_amount) }}</div>
-        </div>
-        @endforeach
-      @else
-        <div style="padding:26px;text-align:center;color:var(--muted);font-size:.82rem;">No upcoming check-ins in next 7 days</div>
-      @endif
-    </div>
-
-    {{-- Upcoming Cab Pickups --}}
-    @if($upcomingCabs->count())
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">🚗 Upcoming Pickups</div>
-        <span style="font-size:.7rem;color:var(--muted);">Next 7 days</span>
-      </div>
-      @foreach($upcomingCabs as $c)
-      <div class="upcoming-item">
-        <div class="upcoming-date">
-          <div class="ud-day">{{ \Carbon\Carbon::parse($c->pickup_date)->format('d') }}</div>
-          <div class="ud-mon">{{ \Carbon\Carbon::parse($c->pickup_date)->format('M') }}</div>
-        </div>
-        <div class="upcoming-info">
-          <div class="upcoming-name">{{ $c->customer_name }}</div>
-          <div class="upcoming-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($c->pickup_address,30) }} → {{ Str::limit($c->drop_address,20) }}</div>
-        </div>
-        <div class="upcoming-amt" style="font-size:.72rem;font-weight:600;">
-          {{ $c->pickup_time ? \Carbon\Carbon::parse($c->pickup_time)->format('h:i A') : '—' }}
-        </div>
-      </div>
-      @endforeach
-    </div>
-    @endif
 
     {{-- Stay Booking Status Breakdown --}}
     <div class="chart-card">
