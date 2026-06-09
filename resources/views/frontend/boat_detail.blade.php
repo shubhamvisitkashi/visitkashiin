@@ -839,14 +839,9 @@
                             </div>
                         </div>
 
-                        {{-- Dev Diwali: Call Now for Best Price --}}
-                        <div class="vkbs-price-box" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #d97706;">
-                            <div class="vkbs-price-box-header" style="border-bottom:1px solid #fde68a;padding-bottom:8px;margin-bottom:8px;">
-                                <span style="font-weight:700;color:#92400e;">🏷️ Best Price Guaranteed</span>
-                            </div>
-                            <a href="tel:+91{{ preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917') }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#7c2d12,#b45309);color:#fff;border-radius:10px;padding:10px;font-size:.88rem;font-weight:700;text-decoration:none;">
-                                📞 Call Now for Best Price
-                            </a>
+                        {{-- Dev Diwali: Best Price badge --}}
+                        <div class="vkbs-price-box" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #d97706;padding:10px 14px;">
+                            <span style="font-weight:700;color:#92400e;font-size:.86rem;">🏷️ Best Price Guaranteed · Enquiry sent to our team</span>
                         </div>
                         @else
                         <div class="vkbs-row2">
@@ -923,10 +918,17 @@
                         </div>
 
                         {{-- Submit --}}
+                        @if($isDevDiwali)
+                        <button type="submit" class="vkbs-btn-wa" id="vkbs_submit" style="background:linear-gradient(135deg,#7c2d12,#b45309);">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+                            Submit Enquiry
+                        </button>
+                        @else
                         <button type="submit" class="vkbs-btn-wa" id="vkbs_submit">
                             <svg width="18" height="18" viewBox="0 0 32 32" fill="currentColor"><path d="M16 3C8.82 3 3 8.82 3 16c0 2.43.65 4.7 1.78 6.67L3 29l6.55-1.72A13 13 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm6.4 17.72c-.27.76-1.58 1.45-2.16 1.54-.56.09-1.26.13-2.04-.13a18.7 18.7 0 0 1-1.85-.68C13.6 20.3 11.6 17.9 11.45 17.7c-.15-.2-1.22-1.62-1.22-3.1 0-1.47.77-2.2 1.05-2.5.27-.3.6-.37.8-.37l.57.01c.18 0 .43-.07.67.51.25.6.85 2.07.92 2.22.08.15.13.33.03.53-.1.2-.15.32-.3.5-.14.17-.3.38-.43.51-.14.14-.29.3-.12.58.17.28.74 1.22 1.59 1.97 1.09.97 2 1.27 2.29 1.41.28.14.45.12.61-.07.17-.2.72-.84.91-1.13.2-.28.39-.23.66-.14.27.09 1.71.8 2 .95.29.14.48.21.55.33.07.12.07.7-.2 1.46z"/></svg>
                             Send Enquiry on WhatsApp
                         </button>
+                        @endif
                         {{-- FIX: use dynamic phone number --}}
                         <a href="tel:+91{{ preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917') }}" class="vkbs-btn-cb">
                             📞 Request a Call Back
