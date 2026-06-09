@@ -142,9 +142,27 @@
 .nb-sidebar-card{background:#fff;border-radius:16px;border:1px solid #E8ECF4;box-shadow:0 1px 3px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);padding:20px;margin-bottom:16px;}
 .nb-sidebar-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #F1F5F9;}
 .nb-amount-row{margin-bottom:14px;}
-.nb-rupee-wrap{position:relative;}
-.nb-rupee{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.85rem;font-weight:600;color:#475569;z-index:2;pointer-events:none;}
-.nb-rupee-input{padding-left:28px !important;}
+.nb-rupee-wrap{
+  display:flex;align-items:stretch;
+  border:1.5px solid #E2E8F0;border-radius:10px;overflow:hidden;background:#FAFBFF;
+  transition:border-color .2s,box-shadow .2s;
+}
+.nb-rupee-wrap:focus-within{border-color:#0EA5E9;box-shadow:0 0 0 3px rgba(14,165,233,.12);}
+.nb-rupee{
+  position:static;transform:none;
+  display:flex;align-items:center;
+  padding:0 10px 0 12px;
+  font-size:.85rem;font-weight:700;color:#64748B;
+  background:#F1F5F9;border-right:1.5px solid #E2E8F0;
+  white-space:nowrap;flex-shrink:0;pointer-events:none;
+}
+.nb-rupee-input{
+  flex:1;min-width:0;
+  border:none !important;border-radius:0 !important;
+  box-shadow:none !important;outline:none !important;
+  padding:9px 12px !important;background:transparent !important;
+}
+.nb-rupee-input:focus{border:none !important;box-shadow:none !important;background:transparent !important;}
 .nb-balance-badge{font-size:.62rem;font-weight:800;letter-spacing:.4px;padding:3px 8px;border-radius:20px;text-transform:uppercase;}
 .nb-balance-badge.paid{background:#D1FAE5;color:#065F46;}
 .nb-balance-badge.due{background:#FEE2E2;color:#DC2626;}
@@ -195,6 +213,10 @@
   .nb-input{padding:8px 11px !important;font-size:.82rem !important;border-radius:8px !important;}
   /* restore phone-prefix padding overridden by nb-input reset above */
   .nb-input-phone{padding-left:40px !important;}
+  /* rupee-wrap: flex design — override nb-input padding-left so no collision */
+  .nb-rupee-wrap{border-radius:8px;}
+  .nb-rupee{font-size:.78rem;padding:0 8px 0 10px;}
+  .nb-rupee-input{padding:8px 10px !important;font-size:.82rem !important;}
   .row.g-3{--bs-gutter-x:10px;--bs-gutter-y:10px;}
   .row.g-3>[class*=col-md]{padding-left:5px;padding-right:5px;}
 
@@ -234,6 +256,7 @@
   .nb-card{border-radius:10px;margin-bottom:10px;}
   .nb-input{padding:7px 10px !important;font-size:.8rem !important;}
   .nb-input-phone{padding-left:40px !important;}
+  .nb-rupee-input{padding:7px 10px !important;font-size:.8rem !important;}
   .nb-label{font-size:.65rem;}
   .nb-sidebar-card{padding:10px;}
   .hotel-card{padding:9px 10px;}
@@ -247,6 +270,7 @@
   .nb-card-head{padding:8px 10px;}
   .nb-input{padding:6px 9px !important;font-size:.78rem !important;}
   .nb-input-phone{padding-left:40px !important;}
+  .nb-rupee-input{padding:6px 9px !important;font-size:.78rem !important;}
   .nb-label{font-size:.63rem;}
   .hotel-card{padding:8px 10px;}
   .stay-counter-btn{width:24px;height:24px;font-size:.9rem;}
