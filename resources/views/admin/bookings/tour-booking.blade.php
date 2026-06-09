@@ -53,7 +53,36 @@
 
 /* ── Expense bar ── */
 .tb-exp-bar{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:11px;padding:12px 16px;margin-top:14px;align-items:center;}
-@media(max-width:600px){.tb-exp-bar{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){
+  .tb-exp-bar{grid-template-columns:1fr 1fr;}
+  .tb-exp-total{grid-column:1 / -1;}
+}
+
+/* ── Hotel row responsive grids (used by JS template) ── */
+.tb-hotel-row-grid-1{display:grid;grid-template-columns:160px 1fr 140px;gap:8px;margin-bottom:8px;}
+.tb-hotel-row-grid-2{display:grid;grid-template-columns:1fr 1fr 70px 1fr;gap:8px;align-items:end;}
+
+/* ── Rupee prefix — flex input-group (no overlap) ── */
+.tb-rupee-wrap{
+  display:flex;align-items:stretch;
+  border:1.5px solid var(--t-border);border-radius:9px;overflow:hidden;background:#FAFBFF;
+  transition:border-color .15s,box-shadow .15s;
+}
+.tb-rupee-wrap:focus-within{border-color:var(--t-indigo);box-shadow:0 0 0 3px rgba(79,70,229,.1);}
+.tb-rupee{
+  position:static;transform:none;
+  display:flex;align-items:center;padding:0 9px 0 11px;
+  font-size:.82rem;font-weight:700;color:var(--t-sub);
+  background:#F1F5F9;border-right:1.5px solid var(--t-border);
+  white-space:nowrap;flex-shrink:0;pointer-events:none;
+}
+.tb-input-rs{
+  flex:1;min-width:0;
+  border:none !important;border-radius:0 !important;
+  box-shadow:none !important;outline:none !important;
+  padding:9px 11px !important;background:transparent !important;
+}
+.tb-input-rs:focus{border:none !important;box-shadow:none !important;background:transparent !important;}
 .tb-exp-item{text-align:center;}
 .tb-exp-item-icon{font-size:.9rem;margin-bottom:2px;}
 .tb-exp-item-lbl{font-size:.62rem;color:#92400E;font-weight:600;margin-bottom:3px;}
@@ -97,6 +126,38 @@
 .incl-pill:hover{border-color:var(--t-indigo);color:var(--t-indigo);background:#EEF2FF;}
 .incl-pill.active{border-color:var(--t-indigo);background:var(--t-indigo);color:#fff;}
 .incl-pill input{display:none;}
+
+/* ══ MOBILE RESPONSIVE ══ */
+@media(max-width:768px){
+  .tb-page{padding:10px;padding-bottom:80px;}
+  .tb-header{padding:12px 14px;margin-top:58px;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .tb-header h1{font-size:.95rem;}
+  .tb-header p{font-size:.7rem;}
+  .tb-back{padding:6px 10px;font-size:.73rem;}
+  .tb-card{margin-bottom:12px;border-radius:12px;}
+  .tb-card-head{padding:10px 14px;}
+  .tb-card-title{font-size:.82rem;}
+  .tb-card-body{padding:12px 14px;}
+  .tb-icon{width:26px;height:26px;font-size:.85rem;}
+  .tb-label{font-size:.65rem;margin-bottom:4px;}
+  .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;}
+  .tb-svc-body{padding:10px 12px;}
+  .tb-svc-head{padding:8px 12px;}
+  .tb-sidebar-card{padding:14px;border-radius:12px;}
+  .tb-submit{padding:11px 16px;font-size:.85rem;}
+  /* hotel row grids stack on mobile */
+  .tb-hotel-row-grid-1{grid-template-columns:1fr !important;}
+  .tb-hotel-row-grid-2{grid-template-columns:1fr 1fr !important;}
+  .tb-hotel-row-grid-2>div:last-child{grid-column:1 / -1;}
+  /* rupee wrap smaller on mobile */
+  .tb-rupee{padding:0 8px 0 10px;font-size:.78rem;}
+  .tb-input-rs{padding:8px 10px !important;font-size:.82rem !important;}
+  /* adults/children counter */
+  .tb-counter-wrap{padding:4px 7px;}
+  /* profit/balance boxes */
+  .tb-balance-amt{font-size:1.4rem;}
+  .tb-profit-final{font-size:.95rem !important;}
+}
 
 /* ── Alert ── */
 .tb-alert{display:flex;align-items:center;gap:10px;border-radius:11px;padding:11px 16px;margin-bottom:18px;font-size:.83rem;font-weight:600;}
@@ -678,7 +739,7 @@ function tbAddHotelRow() {
     </div>
 
     {{-- Row 1: Destination + Hotel Name + Room Type --}}
-    <div style="display:grid;grid-template-columns:160px 1fr 140px;gap:8px;margin-bottom:8px;">
+    <div class="tb-hotel-row-grid-1">
       <div>
         <label class="tb-label">Destination</label>
         <select name="hotels[${idx}][city]" class="tb-select" onchange="tbLoadHotelOptions(${idx})">
@@ -710,7 +771,7 @@ function tbAddHotelRow() {
     </div>
 
     {{-- Row 2: Check-in + Check-out + Nights + B2B Cost --}}
-    <div style="display:grid;grid-template-columns:1fr 1fr 70px 1fr;gap:8px;align-items:end;">
+    <div class="tb-hotel-row-grid-2">
       <div>
         <label class="tb-label">Check-in</label>
         <input type="date" name="hotels[${idx}][checkin]" id="hotel-ci-${idx}" class="tb-input" min="${_today}" oninput="tbCalcRowNights(${idx})">
