@@ -127,9 +127,12 @@
 .incl-pill.active{border-color:var(--t-indigo);background:var(--t-indigo);color:#fff;}
 .incl-pill input{display:none;}
 
+/* ── Sticky mobile action bar (hidden on desktop) ── */
+.tb-mob-bar{display:none;}
+
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:768px){
-  .tb-page{padding:10px;padding-bottom:80px;}
+  .tb-page{padding:10px;padding-bottom:130px;}
   .tb-header{padding:12px 14px;margin-top:58px;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
   .tb-header h1{font-size:.95rem;}
   .tb-header p{font-size:.7rem;}
@@ -143,8 +146,10 @@
   .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;}
   .tb-svc-body{padding:10px 12px;}
   .tb-svc-head{padding:8px 12px;}
-  .tb-sidebar-card{padding:14px;border-radius:12px;}
-  .tb-submit{padding:11px 16px;font-size:.85rem;}
+  .tb-sidebar-card{padding:14px;border-radius:12px;margin-bottom:12px;}
+  .tb-sidebar-title{font-size:.82rem;margin-bottom:10px;padding-bottom:8px;}
+  /* hide in-page submit on mobile — sticky bar handles it */
+  .tb-sidebar .tb-submit{display:none;}
   /* hotel row grids stack on mobile */
   .tb-hotel-row-grid-1{grid-template-columns:1fr !important;}
   .tb-hotel-row-grid-2{grid-template-columns:1fr 1fr !important;}
@@ -152,11 +157,39 @@
   /* rupee wrap smaller on mobile */
   .tb-rupee{padding:0 8px 0 10px;font-size:.78rem;}
   .tb-input-rs{padding:8px 10px !important;font-size:.82rem !important;}
-  /* adults/children counter */
-  .tb-counter-wrap{padding:4px 7px;}
-  /* profit/balance boxes */
-  .tb-balance-amt{font-size:1.4rem;}
+  /* balance/profit boxes */
+  .tb-balance-amt{font-size:1.3rem;}
   .tb-profit-final{font-size:.95rem !important;}
+  /* payment fields: 2-col compact grid */
+  .tb-pay-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  /* booking amount full-width */
+  .tb-booking-amt-row{grid-column:1/-1;}
+
+  /* ── Sticky bottom action bar ── */
+  .tb-mob-bar{
+    display:flex;
+    position:fixed;bottom:58px;left:0;right:0;
+    background:#fff;
+    border-top:1.5px solid #E2E8F0;
+    padding:10px 14px 10px;
+    gap:12px;align-items:center;
+    z-index:998;
+    box-shadow:0 -6px 20px rgba(0,0,0,.10);
+  }
+  .tb-mob-bar-info{flex:1;min-width:0;}
+  .tb-mob-bar-lbl{font-size:.6rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;line-height:1.2;}
+  .tb-mob-bar-amt{font-size:1rem;font-weight:800;color:#1E3A8A;line-height:1.2;white-space:nowrap;}
+  .tb-mob-bar-sub{font-size:.68rem;color:#475569;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tb-mob-submit{
+    flex-shrink:0;
+    background:linear-gradient(135deg,#4F46E5,#7C3AED);
+    color:#fff;border:none;border-radius:10px;
+    padding:11px 18px;font-size:.82rem;font-weight:700;
+    cursor:pointer;white-space:nowrap;
+    box-shadow:0 4px 14px rgba(79,70,229,.35);
+    display:flex;align-items:center;gap:6px;
+  }
+  .tb-mob-submit svg{width:15px;height:15px;stroke:#fff;}
 }
 
 /* ── Alert ── */
@@ -585,27 +618,29 @@
       </div>
     </div>
 
-    <div class="tb-amt-row">
-      <label class="tb-label">Payment Status</label>
-      <select name="payment_status" id="tb-pay-status" class="tb-select" onchange="tbUpdateBadge()">
-        <option value="due">Due</option>
-        <option value="paid">Paid</option>
-        <option value="partial">Partial</option>
-      </select>
-    </div>
-    <div class="tb-amt-row">
-      <label class="tb-label">Payment Method</label>
-      <select name="payment_method" class="tb-select">
-        <option value="">Select…</option>
-        <option value="cash">💵 Cash</option>
-        <option value="upi">📱 UPI / GPay / PhonePe</option>
-        <option value="bank_transfer">🏦 Bank Transfer</option>
-        <option value="cheque">📝 Cheque</option>
-        <option value="online">💳 Online Payment</option>
-      </select>
+    <div class="tb-pay-2col">
+      <div class="tb-amt-row" style="margin-bottom:0;">
+        <label class="tb-label">Payment Status</label>
+        <select name="payment_status" id="tb-pay-status" class="tb-select" onchange="tbUpdateBadge()">
+          <option value="due">Due</option>
+          <option value="paid">Paid</option>
+          <option value="partial">Partial</option>
+        </select>
+      </div>
+      <div class="tb-amt-row" style="margin-bottom:0;">
+        <label class="tb-label">Payment Method</label>
+        <select name="payment_method" class="tb-select">
+          <option value="">Select…</option>
+          <option value="cash">💵 Cash</option>
+          <option value="upi">📱 UPI</option>
+          <option value="bank_transfer">🏦 Bank Transfer</option>
+          <option value="cheque">📝 Cheque</option>
+          <option value="online">💳 Online</option>
+        </select>
+      </div>
     </div>
 
-    <div class="tb-amt-row" style="margin-bottom:0;">
+    <div class="tb-amt-row" style="margin-bottom:0;margin-top:10px;">
       <label class="tb-label">Bank Account <span style="font-size:.6rem;font-weight:500;color:var(--t-muted);text-transform:none;">(where advance received)</span></label>
       <select name="payment_account_id" class="tb-select">
         <option value="">— Select account —</option>
@@ -650,7 +685,7 @@
     <input type="hidden" name="booking_status" value="confirmed">
   </div>
 
-  {{-- Submit --}}
+  {{-- Submit (desktop) --}}
   <button type="submit" class="tb-submit">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     Confirm Tour Booking
@@ -658,6 +693,20 @@
 
 </div>{{-- /sidebar --}}
 </div>{{-- /layout --}}
+
+{{-- ── Mobile sticky submit bar ── --}}
+<div class="tb-mob-bar">
+  <div class="tb-mob-bar-info">
+    <div class="tb-mob-bar-lbl">Balance Due</div>
+    <div class="tb-mob-bar-amt" id="tb-mob-balance">₹0</div>
+    <div class="tb-mob-bar-sub" id="tb-mob-booking-info">Booking Amount: ₹0</div>
+  </div>
+  <button type="submit" class="tb-mob-submit" form="tb-form">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    Confirm
+  </button>
+</div>
+
 </form>
 </div>
 
@@ -910,6 +959,11 @@ function tbCalcBalance() {
   var advance  = v('tb-advance');
   var balance  = Math.max(0, booking - discount - advance);
   document.getElementById('tb-balance').textContent = fmt(balance);
+  // Sync mobile sticky bar
+  var mobBal = document.getElementById('tb-mob-balance');
+  var mobInfo = document.getElementById('tb-mob-booking-info');
+  if (mobBal)  mobBal.textContent = fmt(balance);
+  if (mobInfo) mobInfo.textContent = 'Booking: ' + fmt(booking) + (discount > 0 ? ' · Disc: ' + fmt(discount) : '') + (advance > 0 ? ' · Adv: ' + fmt(advance) : '');
   tbUpdateBadge();
   tbCalcExpense();
 }
