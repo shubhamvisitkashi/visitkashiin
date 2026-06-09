@@ -219,9 +219,12 @@
     <h1>🗺️ New Tour Package Booking</h1>
     <p>Fill in guest details, services & B2B expenses</p>
   </div>
-  <a href="{{ route('bookings.create-direct') }}" class="tb-back">
-    ← Back
-  </a>
+  <div style="display:flex;gap:10px;align-items:center;position:relative;z-index:1;flex-wrap:wrap;">
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:6px 14px;font-size:.75rem;color:rgba(255,255,255,.9);font-weight:600;">
+      🔢 Booking # auto-generated on save
+    </div>
+    <a href="{{ route('bookings.create-direct') }}" class="tb-back">← Back</a>
+  </div>
 </div>
 
 <form action="{{ route('tour-booking.store') }}" method="POST" id="tb-form">
@@ -265,6 +268,27 @@
             @endforeach
           </select>
         </div>
+        <div class="col-md-3">
+          <label class="tb-label">Alternate Mobile</label>
+          @include('admin.partials.phone-input', [
+              'name'        => 'alt_phone',
+              'value'       => old('alt_phone'),
+              'required'    => false,
+              'placeholder' => 'Alt. number',
+          ])
+        </div>
+        <div class="col-md-3">
+          <label class="tb-label">Country</label>
+          <input type="text" name="country" class="tb-input" placeholder="India" value="{{ old('country','India') }}">
+        </div>
+        <div class="col-md-3">
+          <label class="tb-label">State</label>
+          <input type="text" name="state" class="tb-input" placeholder="e.g. Uttar Pradesh" value="{{ old('state') }}">
+        </div>
+        <div class="col-md-3">
+          <label class="tb-label">City</label>
+          <input type="text" name="city" class="tb-input" placeholder="e.g. Varanasi" value="{{ old('city') }}">
+        </div>
       </div>
     </div>
   </div>
@@ -303,8 +327,19 @@
           </div>
           <input type="hidden" name="children" id="tb-children" value="{{ old('children',0) }}">
         </div>
+        <div class="col-6 col-md-2">
+          <label class="tb-label">Infants</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid var(--t-border);border-radius:9px;padding:5px 8px;">
+            <button type="button" onclick="tbAdj('infants',-1)"
+                    style="width:28px;height:28px;border-radius:7px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">−</button>
+            <span id="tb-infants-dis" style="font-size:1.2rem;font-weight:800;color:#F59E0B;min-width:24px;text-align:center;">{{ old('infants',0) }}</span>
+            <button type="button" onclick="tbAdj('infants',1)"
+                    style="width:28px;height:28px;border-radius:7px;border:1.5px solid #F59E0B;background:#F59E0B;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">+</button>
+          </div>
+          <input type="hidden" name="infants" id="tb-infants" value="{{ old('infants',0) }}">
+        </div>
         <div class="col-md-3">
-          <label class="tb-label">Booking Date <span class="req">*</span></label>
+          <label class="tb-label">Travel Date <span class="req">*</span></label>
           <input type="date" name="tour_start" id="tb-tour-start" class="tb-input" required
                  min="{{ date('Y-m-d') }}"
                  value="{{ old('tour_start', date('Y-m-d')) }}" oninput="tbBuildSummary()">
@@ -312,6 +347,14 @@
         <div class="col-md-3">
           <label class="tb-label">Return Date</label>
           <input type="date" name="tour_end" id="tb-tour-end" class="tb-input" min="{{ date('Y-m-d') }}" value="{{ old('tour_end') }}" oninput="tbBuildSummary()">
+        </div>
+        <div class="col-md-3">
+          <label class="tb-label">Pickup Point</label>
+          <input type="text" name="pickup_point" class="tb-input" placeholder="e.g. Varanasi Airport / Hotel" value="{{ old('pickup_point') }}">
+        </div>
+        <div class="col-md-3">
+          <label class="tb-label">Drop Point</label>
+          <input type="text" name="drop_point" class="tb-input" placeholder="e.g. Railway Station" value="{{ old('drop_point') }}">
         </div>
         <div class="col-12">
           <label class="tb-label">Inclusions</label>
@@ -415,6 +458,14 @@
             <div class="col-md-2">
               <label class="tb-label">To Date</label>
               <input type="date" name="cab_to" class="tb-input" min="{{ date('Y-m-d') }}">
+            </div>
+            <div class="col-md-3">
+              <label class="tb-label">Driver Name</label>
+              <input type="text" name="driver_name" class="tb-input" placeholder="e.g. Ramesh Singh">
+            </div>
+            <div class="col-md-2">
+              <label class="tb-label">Pickup Time</label>
+              <input type="time" name="cab_pickup_time" class="tb-input">
             </div>
             <div class="col-md-2">
               <label class="tb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
@@ -640,7 +691,12 @@
       </div>
     </div>
 
-    <div class="tb-amt-row" style="margin-bottom:0;margin-top:10px;">
+    <div class="tb-amt-row" style="margin-top:10px;">
+      <label class="tb-label">Transaction / Reference ID</label>
+      <input type="text" name="reference_number" class="tb-input" placeholder="UPI Ref / Cheque No / TXN ID" value="{{ old('reference_number') }}">
+    </div>
+
+    <div class="tb-amt-row">
       <label class="tb-label">Bank Account <span style="font-size:.6rem;font-weight:500;color:var(--t-muted);text-transform:none;">(where advance received)</span></label>
       <select name="payment_account_id" class="tb-select">
         <option value="">— Select account —</option>
@@ -650,6 +706,40 @@
         </option>
         @endforeach
       </select>
+    </div>
+
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin-top:4px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:.72rem;font-weight:800;color:#065F46;text-transform:uppercase;letter-spacing:.04em;">🧾 GST</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:600;color:#065F46;cursor:pointer;">
+          <input type="checkbox" name="is_gst_invoice" id="tb-gst-toggle" value="1" onchange="tbCalcGst()" {{ old('is_gst_invoice') ? 'checked' : '' }}>
+          Apply GST
+        </label>
+      </div>
+      <div id="tb-gst-fields" style="{{ old('is_gst_invoice') ? '' : 'display:none;' }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <label class="tb-label">GST Rate</label>
+            <select name="gst_rate" id="tb-gst-rate" class="tb-select" onchange="tbCalcGst()">
+              <option value="0">0%</option>
+              <option value="5" {{ old('gst_rate')==5 ? 'selected':'' }}>5%</option>
+              <option value="12" {{ old('gst_rate')==12 ? 'selected':'' }}>12%</option>
+              <option value="18" {{ old('gst_rate')==18 ? 'selected':'' }}>18%</option>
+            </select>
+          </div>
+          <div>
+            <label class="tb-label">GST Amount</label>
+            <div class="tb-rupee-wrap">
+              <span class="tb-rupee">₹</span>
+              <input type="number" name="gst_amount" id="tb-gst-amount" class="tb-input tb-input-rs" readonly placeholder="0" style="background:#F0FDF4 !important;">
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="tb-label">Customer GSTIN</label>
+          <input type="text" name="customer_gstin" class="tb-input" placeholder="Optional" value="{{ old('customer_gstin') }}" style="font-size:.8rem;">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -681,8 +771,12 @@
   {{-- Booking Status --}}
   <div class="tb-sidebar-card" style="padding:14px 16px;">
     <label class="tb-label">Booking Status</label>
-    <input type="text" class="tb-input" value="✅ Confirmed" readonly style="background:#F0FDF4;color:#15803D;font-weight:600;">
-    <input type="hidden" name="booking_status" value="confirmed">
+    <select name="booking_status" id="tb-bk-status" class="tb-select" onchange="tbStatusStyle()" style="font-weight:700;">
+      <option value="confirm" {{ old('booking_status','confirm')=='confirm' ? 'selected':'' }} style="color:#15803D;">✅ Confirmed</option>
+      <option value="pending" {{ old('booking_status')=='pending' ? 'selected':'' }} style="color:#B45309;">⏳ Pending</option>
+      <option value="inquiry" {{ old('booking_status')=='inquiry' ? 'selected':'' }} style="color:#1E40AF;">🔍 Inquiry</option>
+      <option value="cancelled" {{ old('booking_status')=='cancelled' ? 'selected':'' }} style="color:#DC2626;">❌ Cancelled</option>
+    </select>
   </div>
 
   {{-- Submit (desktop) --}}
@@ -959,6 +1053,7 @@ function tbCalcBalance() {
   var advance  = v('tb-advance');
   var balance  = Math.max(0, booking - discount - advance);
   document.getElementById('tb-balance').textContent = fmt(balance);
+  tbCalcGst();
   // Sync mobile sticky bar
   var mobBal = document.getElementById('tb-mob-balance');
   var mobInfo = document.getElementById('tb-mob-booking-info');
@@ -1070,6 +1165,27 @@ document.getElementById('tb-incl-custom')?.addEventListener('keydown', function(
 
 // Init preview on load
 _syncIncl();
+
+/* ── GST calculation ─────────────────────────── */
+function tbCalcGst() {
+  var toggle = document.getElementById('tb-gst-toggle');
+  var fields = document.getElementById('tb-gst-fields');
+  if (!toggle.checked) { fields.style.display = 'none'; return; }
+  fields.style.display = '';
+  var net  = v('tb-booking-amt') - v('tb-discount');
+  var rate = parseFloat(document.getElementById('tb-gst-rate')?.value || 0);
+  var gst  = Math.round(net * rate / 100);
+  var el   = document.getElementById('tb-gst-amount');
+  if (el) el.value = gst;
+}
+
+/* ── Booking status colour ───────────────────── */
+function tbStatusStyle() {
+  var sel    = document.getElementById('tb-bk-status');
+  var colors = { confirm:'#15803D', pending:'#B45309', inquiry:'#1E40AF', cancelled:'#DC2626' };
+  sel.style.color = colors[sel.value] || '#0F172A';
+}
+document.addEventListener('DOMContentLoaded', tbStatusStyle);
 </script>
 
 {{-- CKEditor 5 for Itinerary --}}

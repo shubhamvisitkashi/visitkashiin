@@ -220,19 +220,23 @@
 </div>
 
 {{-- Top Bookings Table --}}
+@php
+$typeBadge = ['Tour'=>'#4F46E5','Cab'=>'#0369A1','Boat'=>'#0891B2','Package'=>'#059669'];
+@endphp
 <div class="pan-card">
     <div class="pan-card-head">
         <div class="pan-card-title"><i data-feather="star"></i> Top Bookings by Revenue</div>
-        <span style="font-size:.73rem;color:var(--pm);">Top 10</span>
+        <span style="font-size:.73rem;color:var(--pm);">Top 10 · All Types</span>
     </div>
     <div class="table-responsive">
         <table class="pan-table">
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Type</th>
                     <th>Guest</th>
                     <th>Date</th>
-                    <th>Plan</th>
+                    <th>Plan / Vehicle</th>
                     <th class="text-end">Revenue</th>
                     <th class="text-end">Expense</th>
                     <th class="text-end">Profit</th>
@@ -240,24 +244,21 @@
             </thead>
             <tbody>
                 @forelse($topBookings as $i => $b)
-                @php
-                    $exp = ($b->total_expense > 0) ? $b->total_expense : round($b->total_amount * 0.3);
-                    $prf = $b->total_amount - $exp;
-                @endphp
                 <tr>
                     <td style="font-weight:700;color:var(--pm);">{{ $i+1 }}</td>
+                    <td><span style="font-size:.68rem;font-weight:700;color:#fff;background:{{ $typeBadge[$b['type']] ?? '#64748B' }};border-radius:5px;padding:2px 7px;">{{ $b['type'] }}</span></td>
                     <td>
-                        <div style="font-weight:700;font-size:.84rem;">{{ $b->guest_name }}</div>
-                        <div style="font-size:.72rem;color:var(--pm);">{{ $b->contact }}</div>
+                        <div style="font-weight:700;font-size:.84rem;">{{ $b['name'] }}</div>
+                        <div style="font-size:.72rem;color:var(--pm);">{{ $b['contact'] }}</div>
                     </td>
-                    <td style="font-size:.78rem;white-space:nowrap;">{{ \Carbon\Carbon::parse($b->booking_start_date)->format('d M Y') }}</td>
-                    <td style="font-size:.75rem;color:var(--pm);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b->short_plan ?? '—' }}</td>
-                    <td class="text-end pan-amt-blue">₹{{ number_format($b->total_amount,0) }}</td>
-                    <td class="text-end pan-amt-neg">₹{{ number_format($exp,0) }}</td>
-                    <td class="text-end pan-amt-pos">₹{{ number_format($prf,0) }}</td>
+                    <td style="font-size:.78rem;white-space:nowrap;">{{ $b['date'] ? \Carbon\Carbon::parse($b['date'])->format('d M Y') : '—' }}</td>
+                    <td style="font-size:.75rem;color:var(--pm);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b['plan'] ?? '—' }}</td>
+                    <td class="text-end pan-amt-blue">₹{{ number_format($b['amount'],0) }}</td>
+                    <td class="text-end pan-amt-neg">₹{{ number_format($b['expense'],0) }}</td>
+                    <td class="text-end pan-amt-pos">₹{{ number_format($b['profit'],0) }}</td>
                 </tr>
                 @empty
-                <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--pm);">No data for selected period</td></tr>
+                <tr><td colspan="8" style="text-align:center;padding:28px;color:var(--pm);">No data for selected period</td></tr>
                 @endforelse
             </tbody>
         </table>
