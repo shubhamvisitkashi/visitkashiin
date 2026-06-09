@@ -1512,6 +1512,9 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                     <a href="{{ route('cab-bookings.edit', $cb->id) }}" class="bkt-act bkt-act-edit" data-tip="Edit">
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </a>
+                    <a href="{{ route('cab-bookings.invoice', $cb->id) }}" target="_blank" class="bkt-act bkt-act-print" data-tip="Voucher">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    </a>
                   </div>
                 </td>
               </tr>
