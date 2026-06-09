@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Admin\Admin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -36,6 +37,10 @@ class BoatBooking extends Model
 
     public function payments() {
         return $this->hasMany(BoatBookingPayment::class, 'boat_booking_id');
+    }
+
+    public function createdBy() {
+        return $this->belongsTo(Admin::class, 'created_by');
     }
 
 }

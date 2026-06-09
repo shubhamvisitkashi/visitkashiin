@@ -136,7 +136,7 @@ class BookingController extends Controller
         $isAdminUser = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
         $authId      = auth('admin')->id();
 
-        $recentBoatBookings = \App\Models\BoatBooking::with(['boat.boatType'])
+        $recentBoatBookings = \App\Models\BoatBooking::with(['boat.boatType', 'createdBy'])
             ->withSum('payments', 'amount')
             ->when(!$isAdminUser, fn($q) => $q->where('created_by', $authId))
             ->when($request->search, fn($q) => $q->where('name','like','%'.$request->search.'%')->orWhere('phone','like','%'.$request->search.'%')->orWhere('booking_id','like','%'.$request->search.'%'))
@@ -144,7 +144,7 @@ class BookingController extends Controller
             ->limit(20)
             ->get();
 
-        $recentCabBookings = \App\Models\CabBooking::with(['payments'])
+        $recentCabBookings = \App\Models\CabBooking::with(['payments', 'createdBy'])
             ->when(!$isAdminUser, fn($q) => $q->where('created_by', $authId))
             ->when($request->search, fn($q) => $q->where('customer_name','like','%'.$request->search.'%')->orWhere('customer_phone','like','%'.$request->search.'%')->orWhere('booking_number','like','%'.$request->search.'%'))
             ->latest()

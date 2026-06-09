@@ -1025,23 +1025,17 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   <div class="bkt-card">
 
     {{-- Card header --}}
+    @php
+      $allTotal = !$activeCat
+        ? ($bookings->total() + $recentBoatBookings->count() + $recentCabBookings->count())
+        : $bookings->total();
+    @endphp
     <div class="bkt-head">
       <div class="bkt-head-left">
         <i data-feather="list" style="width:18px;height:18px;"></i>
-        @if(!$activeCat)
-          <span>Stay &amp; Tour Bookings</span>
-        @else
-          <span>Bookings</span>
-        @endif
-        @if($bookings->total() > 0)
-          <span style="font-size:.75rem;font-weight:600;color:#6B7280;margin-left:4px;">({{ $bookings->total() }})</span>
-        @endif
-        @if(!$activeCat && ($recentBoatBookings->count() || $recentCabBookings->count()))
-          <span style="font-size:.7rem;color:#9CA3AF;margin-left:8px;">
-            — scroll down for
-            @if($recentBoatBookings->count()) ⛵ {{ $recentBoatBookings->count() }} Boat @endif
-            @if($recentCabBookings->count()) 🚗 {{ $recentCabBookings->count() }} Cab @endif
-          </span>
+        <span>{{ $activeCat ? 'Bookings' : 'All Bookings' }}</span>
+        @if($allTotal > 0)
+          <span style="font-size:.75rem;font-weight:600;color:#6B7280;margin-left:4px;">({{ $allTotal }})</span>
         @endif
       </div>
       <a href="{{ route('bookings.create-direct') }}" class="bkt-new">
@@ -1067,7 +1061,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
       <button class="bk-bulk-btn bkb-gray" onclick="bkBulkClear()">✕ Clear</button>
     </div>
 
-    @if($bookings->isEmpty())
+    @if($bookings->isEmpty() && (!$activeCat ? ($recentBoatBookings->isEmpty() && $recentCabBookings->isEmpty()) : true))
       <div class="bkt-empty">
         <i data-feather="calendar"></i>
         <h4>No Bookings Found</h4>
@@ -1390,7 +1384,134 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               @endif
               {{-- ── /Expand Panel ── --}}
 
-            @endforeach
+            @endforeach {{-- /main bookings loop --}}
+
+            {{-- ══ BOAT ROWS (inline, All Bookings view only) ══ --}}
+            @if(!$activeCat && !request('status'))
+              @foreach($recentBoatBookings as $bk)
+              @php
+                $bPaid  = (float)($bk->payments_sum_amount ?? 0);
+                $bDue   = max(0, (float)$bk->final_amount - $bPaid);
+                $bPaySt = $bk->payment_status ?? ($bDue <= 0 ? 'paid' : ($bPaid > 0 ? 'partial' : 'unpaid'));
+                $bkSt   = $bk->booking_status ?? 'confirmed';
+                $bBoatName = optional(optional($bk->boat)->boatType)->name ?? 'Boat';
+                $bCreator  = $bk->createdBy;
+              @endphp
+              <tr style="cursor:pointer;background:#F0F9FF;" onclick="window.location='{{ route('boat-booking.show', $bk->booking_id) }}'">
+                <td onclick="event.stopPropagation()" style="padding:0 8px;vertical-align:middle;"></td>
+                <td data-label="Booking ID">
+                  <div style="font-size:.82rem;font-weight:700;color:#0369A1;white-space:nowrap;font-family:monospace;">{{ $bk->booking_id }}</div>
+                  <div style="font-size:.73rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}</div>
+                </td>
+                <td data-label="Guest">
+                  <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $bk->name }}</div>
+                  <div style="font-size:.73rem;color:#6B7280;">{{ $bk->phone }}</div>
+                </td>
+                <td data-label="Type">
+                  <span class="bkt-type" style="background:#E0F2FE;color:#0369A1;">⛵ Boat</span>
+                  <div style="font-size:.7rem;color:#6B7280;margin-top:2px;">{{ $bBoatName }}</div>
+                </td>
+                <td data-label="Travel Date">
+                  <span style="font-size:.82rem;color:#374151;font-weight:600;white-space:nowrap;">
+                    {{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}
+                  </span>
+                </td>
+                <td data-label="Status">
+                  <span class="bkt-status bkt-s-{{ $bkSt }}">{{ ucfirst($bkSt) }}</span>
+                  <span class="bkt-status bkt-s-{{ $bPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($bPaySt) }}</span>
+                </td>
+                <td data-label="Amount">
+                  <div class="bkt-amount">₹{{ number_format($bk->final_amount) }}</div>
+                  @if($bDue > 0)<div class="bkt-due-blink">Due ₹{{ number_format($bDue) }}</div>@endif
+                </td>
+                @if($staffList->count())
+                <td data-label="Added By" onclick="event.stopPropagation()">
+                  @if($bCreator)
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#0369A1,#0EA5E9);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;">{{ strtoupper(substr($bCreator->name,0,1)) }}</div>
+                    <span style="font-size:.78rem;font-weight:600;color:#374151;white-space:nowrap;">{{ $bCreator->name }}</span>
+                  </div>
+                  @else<span style="font-size:.75rem;color:#9CA3AF;">—</span>@endif
+                </td>
+                @endif
+                <td style="display:none;"></td>
+                <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
+                  <div class="bkt-acts">
+                    <a href="{{ route('boat-booking.show', $bk->booking_id) }}" class="bkt-act bkt-act-view" title="View">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                    <a href="{{ route('boat-booking.edit', $bk->booking_id) }}" class="bkt-act bkt-act-edit" title="Edit">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                    <a href="{{ route('boat-booking.voucher', $bk->booking_id) }}" class="bkt-act bkt-act-print" title="Voucher">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              @endforeach
+
+              {{-- ══ CAB ROWS (inline) ══ --}}
+              @foreach($recentCabBookings as $cb)
+              @php
+                $cPaySt   = $cb->payment_status ?? 'unpaid';
+                $cBkSt    = $cb->booking_status ?? 'confirmed';
+                $cCreator = $cb->createdBy;
+                $cDue     = (float)($cb->pending_amount ?? 0);
+              @endphp
+              <tr style="cursor:pointer;background:#FFFBEB;" onclick="window.location='{{ route('cab-bookings.show', $cb->id) }}'">
+                <td onclick="event.stopPropagation()" style="padding:0 8px;vertical-align:middle;"></td>
+                <td data-label="Booking ID">
+                  <div style="font-size:.82rem;font-weight:700;color:#B45309;white-space:nowrap;font-family:monospace;">{{ $cb->booking_number }}</div>
+                  <div style="font-size:.73rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($cb->created_at)->format('d M Y') }}</div>
+                </td>
+                <td data-label="Guest">
+                  <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $cb->customer_name }}</div>
+                  <div style="font-size:.73rem;color:#6B7280;">{{ $cb->customer_phone }}</div>
+                </td>
+                <td data-label="Type">
+                  <span class="bkt-type" style="background:#FEF3C7;color:#92400E;">🚗 Cab</span>
+                  <div style="font-size:.7rem;color:#6B7280;margin-top:2px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($cb->pickup_address,15) }} → {{ Str::limit($cb->drop_address,15) }}</div>
+                </td>
+                <td data-label="Travel Date">
+                  <span style="font-size:.82rem;color:#374151;font-weight:600;white-space:nowrap;">
+                    {{ \Carbon\Carbon::parse($cb->pickup_date)->format('d M Y') }}
+                  </span>
+                </td>
+                <td data-label="Status">
+                  <span class="bkt-status bkt-s-{{ $cBkSt }}">{{ ucfirst($cBkSt) }}</span>
+                  <span class="bkt-status bkt-s-{{ $cPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($cPaySt) }}</span>
+                </td>
+                <td data-label="Amount">
+                  <div class="bkt-amount">₹{{ number_format($cb->total_amount) }}</div>
+                  @if($cDue > 0)<div class="bkt-due-blink">Due ₹{{ number_format($cDue) }}</div>@endif
+                </td>
+                @if($staffList->count())
+                <td data-label="Added By" onclick="event.stopPropagation()">
+                  @if($cCreator)
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#B45309,#F59E0B);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;">{{ strtoupper(substr($cCreator->name,0,1)) }}</div>
+                    <span style="font-size:.78rem;font-weight:600;color:#374151;white-space:nowrap;">{{ $cCreator->name }}</span>
+                  </div>
+                  @else<span style="font-size:.75rem;color:#9CA3AF;">—</span>@endif
+                </td>
+                @endif
+                <td style="display:none;"></td>
+                <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
+                  <div class="bkt-acts">
+                    <a href="{{ route('cab-bookings.show', $cb->id) }}" class="bkt-act bkt-act-view" title="View">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                    <a href="{{ route('cab-bookings.edit', $cb->id) }}" class="bkt-act bkt-act-edit" title="Edit">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              @endforeach
+            @endif
+            {{-- ══ /Inline boat & cab rows ══ --}}
+
           </tbody>
         </table>
       </div>
@@ -1411,157 +1532,6 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   @endif
 
 </div>
-
-{{-- ══ BOAT BOOKINGS SECTION (shown in All Bookings view) ══ --}}
-@if(!request('service_type') && !request('status') && $recentBoatBookings->count())
-<div class="bkt-card" style="margin-top:20px;">
-  <div class="bkt-head">
-    <div class="bkt-head-left">
-      <span style="font-size:1rem;">⛵</span>
-      <span>Boat Bookings</span>
-      <span style="font-size:.75rem;font-weight:600;color:#6B7280;margin-left:4px;">({{ $recentBoatBookings->count() }})</span>
-    </div>
-    <a href="{{ route('boat-booking.index') }}" class="bkt-new" style="background:#EFF6FF;color:#0369A1;border-color:#BAE6FD;">View All →</a>
-  </div>
-  <div style="overflow-x:auto;">
-    <table class="bkt-table">
-      <thead>
-        <tr>
-          <th>Booking ID</th>
-          <th>Guest</th>
-          <th>Boat</th>
-          <th>Date</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th style="width:1%;white-space:nowrap;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($recentBoatBookings as $bk)
-        @php
-          $bPaid = (float)($bk->payments_sum_amount ?? 0);
-          $bDue  = max(0, (float)$bk->final_amount - $bPaid);
-          $bPaySt = $bk->payment_status ?? ($bDue <= 0 ? 'paid' : ($bPaid > 0 ? 'partial' : 'unpaid'));
-          $bkSt   = $bk->booking_status ?? 'confirmed';
-          $bName  = optional(optional($bk->boat)->boatType)->name ?? 'Boat';
-        @endphp
-        <tr style="cursor:pointer;" onclick="window.location='{{ route('boat-booking.show', $bk->booking_id) }}'">
-          <td data-label="Booking ID">
-            <div style="font-size:.82rem;font-weight:700;color:#0369A1;white-space:nowrap;font-family:monospace;">{{ $bk->booking_id }}</div>
-            <div style="font-size:.72rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}</div>
-          </td>
-          <td data-label="Guest">
-            <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $bk->name }}</div>
-            <div style="font-size:.73rem;color:#6B7280;">{{ $bk->phone }}</div>
-          </td>
-          <td data-label="Boat">
-            <span class="bkt-type" style="background:#E0F2FE;color:#0369A1;">⛵ {{ $bName }}</span>
-          </td>
-          <td data-label="Date">
-            <span style="font-size:.82rem;color:#374151;font-weight:600;">{{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}</span>
-            @if($bk->pickup_time)<div style="font-size:.7rem;color:#6B7280;">🕐 {{ \Carbon\Carbon::parse($bk->pickup_time)->format('h:i A') }}</div>@endif
-          </td>
-          <td data-label="Amount">
-            <div class="bkt-amount">₹{{ number_format($bk->final_amount) }}</div>
-            @if($bDue > 0)<div class="bkt-due-blink">Due ₹{{ number_format($bDue) }}</div>@endif
-          </td>
-          <td data-label="Status">
-            <span class="bkt-status bkt-s-{{ $bkSt }}">{{ ucfirst($bkSt) }}</span>
-            <span class="bkt-status bkt-s-{{ $bPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($bPaySt) }}</span>
-          </td>
-          <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
-            <div class="bkt-acts">
-              <a href="{{ route('boat-booking.show', $bk->booking_id) }}" class="bkt-act bkt-act-view" title="View">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </a>
-              <a href="{{ route('boat-booking.edit', $bk->booking_id) }}" class="bkt-act bkt-act-edit" title="Edit">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </a>
-              <a href="{{ route('boat-booking.voucher', $bk->booking_id) }}" class="bkt-act bkt-act-print" title="Voucher">
-                <i data-feather="printer"></i>
-              </a>
-            </div>
-          </td>
-        </tr>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
-</div>
-@endif
-
-{{-- ══ CAB BOOKINGS SECTION (shown in All Bookings view) ══ --}}
-@if(!request('service_type') && !request('status') && $recentCabBookings->count())
-<div class="bkt-card" style="margin-top:20px;">
-  <div class="bkt-head">
-    <div class="bkt-head-left">
-      <span style="font-size:1rem;">🚗</span>
-      <span>Cab Bookings</span>
-      <span style="font-size:.75rem;font-weight:600;color:#6B7280;margin-left:4px;">({{ $recentCabBookings->count() }})</span>
-    </div>
-    <a href="{{ route('cab-bookings.index') }}" class="bkt-new" style="background:#FEF3C7;color:#B45309;border-color:#FDE68A;">View All →</a>
-  </div>
-  <div style="overflow-x:auto;">
-    <table class="bkt-table">
-      <thead>
-        <tr>
-          <th>Booking #</th>
-          <th>Customer</th>
-          <th>Route</th>
-          <th>Pickup Date</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th style="width:1%;white-space:nowrap;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($recentCabBookings as $cb)
-        @php
-          $cPaySt = $cb->payment_status ?? 'unpaid';
-          $cBkSt  = $cb->booking_status ?? 'confirmed';
-        @endphp
-        <tr style="cursor:pointer;" onclick="window.location='{{ route('cab-bookings.show', $cb->id) }}'">
-          <td data-label="Booking #">
-            <div style="font-size:.82rem;font-weight:700;color:#B45309;white-space:nowrap;font-family:monospace;">{{ $cb->booking_number }}</div>
-            <div style="font-size:.72rem;color:#9CA3AF;margin-top:2px;">{{ \Carbon\Carbon::parse($cb->created_at)->format('d M Y') }}</div>
-          </td>
-          <td data-label="Customer">
-            <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $cb->customer_name }}</div>
-            <div style="font-size:.73rem;color:#6B7280;">{{ $cb->customer_phone }}</div>
-          </td>
-          <td data-label="Route">
-            <div style="font-size:.78rem;color:#374151;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Str::limit($cb->pickup_address, 20) }} → {{ Str::limit($cb->drop_address, 20) }}</div>
-            <div style="font-size:.7rem;color:#6B7280;">{{ $cb->trip_type }}</div>
-          </td>
-          <td data-label="Pickup">
-            <span style="font-size:.82rem;color:#374151;font-weight:600;">{{ \Carbon\Carbon::parse($cb->pickup_date)->format('d M Y') }}</span>
-            @if($cb->pickup_time)<div style="font-size:.7rem;color:#6B7280;">🕐 {{ \Carbon\Carbon::parse($cb->pickup_time)->format('h:i A') }}</div>@endif
-          </td>
-          <td data-label="Amount">
-            <div class="bkt-amount">₹{{ number_format($cb->total_amount) }}</div>
-            @if($cb->advance_paid > 0)<div style="font-size:.7rem;color:#059669;">Paid ₹{{ number_format($cb->advance_paid) }}</div>@endif
-          </td>
-          <td data-label="Status">
-            <span class="bkt-status bkt-s-{{ $cBkSt }}">{{ ucfirst($cBkSt) }}</span>
-            <span class="bkt-status bkt-s-{{ $cPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($cPaySt) }}</span>
-          </td>
-          <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
-            <div class="bkt-acts">
-              <a href="{{ route('cab-bookings.show', $cb->id) }}" class="bkt-act bkt-act-view" title="View">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </a>
-              <a href="{{ route('cab-bookings.edit', $cb->id) }}" class="bkt-act bkt-act-edit" title="Edit">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </a>
-            </div>
-          </td>
-        </tr>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
-</div>
-@endif
 
 {{-- ══ QUICK VIEW MODAL ══ --}}
 <div class="qv-overlay" id="qvOverlay" onclick="if(event.target===this)bkCloseQV()">
