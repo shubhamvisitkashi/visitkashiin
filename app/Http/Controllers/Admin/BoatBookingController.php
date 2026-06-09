@@ -408,6 +408,7 @@ class BoatBookingController extends Controller
             $boat_booking->payment_account_id = $request->payment_account_id ?: null;
             // B2B / staff
             $boat_booking->vendor_cost          = (float)($request->vendor_cost ?? 0);
+            $boat_booking->b2b_vendor_cost      = $request->b2b_vendor_cost ? (float)$request->b2b_vendor_cost : null;
             $boat_booking->boatman_id           = $request->boatman_id ?: null;
             $boat_booking->created_by           = auth()->guard('admin')->id();
             $boat_booking->extra_per_person_rate = (float)($request->extra_per_person_rate ?? 0);
@@ -472,13 +473,20 @@ class BoatBookingController extends Controller
 
     public function destroy($booking_id) {
         $boat_booking = BoatBooking::where('booking_id', $booking_id)->first();
-        if(!$boat_booking) {
+        if (!$boat_booking) {
             return redirect()->back()->with('error', 'No booking found.');
+        }
+
+        // Staff can only delete their own bookings
+        if (!auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager'])) {
+            if ($boat_booking->created_by !== auth('admin')->id()) {
+                abort(403, 'Unauthorized. You can only delete bookings you created.');
+            }
         }
 
         $boat_booking->delete();
 
-        return redirect()->back()->with('success', 'Booking deleted successfully.');
+        return redirect()->route('boat-booking.index')->with('success', 'Booking deleted successfully.');
     }
 
     public function checkAvailability(Request $request) {

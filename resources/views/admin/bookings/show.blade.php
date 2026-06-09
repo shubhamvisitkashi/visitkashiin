@@ -1177,7 +1177,7 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                                         <div style="display:flex;gap:4px;justify-content:center">
                                             <button type="button" style="width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;background:#FEF3C7;color:#B45309;display:flex;align-items:center;justify-content:center;"
                                                 data-bs-toggle="modal" data-bs-target="#editPaymentModal"
-                                                onclick="editPayment({{ $payment->id }},'{{ $payment->payment_date->format('Y-m-d') }}',{{ $payment->amount }},'{{ $payment->payment_method }}',{{ $payment->payment_account_id }},'{{ $payment->reference_number }}','{{ addslashes($payment->notes ?? '') }}')"
+                                                onclick="editPayment({{ $payment->id }},'{{ $payment->payment_date->format('Y-m-d') }}',{{ $payment->amount }},'{{ $payment->payment_method }}',{{ $payment->payment_account_id ?? 'null' }},'{{ $payment->reference_number }}','{{ addslashes($payment->notes ?? '') }}','{{ addslashes($payment->cash_receiver_name ?? '') }}')"
                                                 title="Edit">
                                                 <i data-feather="edit-2" style="width:12px;height:12px"></i>
                                             </button>
@@ -1436,9 +1436,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                             <option value="other">Other</option>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3" id="payment_account_wrap">
                         <label class="form-label fw-semibold" style="font-size:.84rem">Payment Account <span class="text-danger">*</span></label>
-                        <select name="payment_account_id" id="payment_account_id" class="form-select" onchange="updateAccInfo()" required>
+                        <select name="payment_account_id" id="payment_account_id" class="form-select" onchange="updateAccInfo()">
                             <option value="">Select Payment Method First</option>
                             @foreach($paymentAccounts as $acct)
                                 <option value="{{ $acct->id }}" data-type="{{ $acct->account_type }}"
@@ -1449,6 +1449,10 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                             @endforeach
                         </select>
                         <div id="acct-info" class="mt-1" style="display:none"><small class="text-muted" id="acct-details"></small></div>
+                    </div>
+                    <div class="mb-3" id="cash_receiver_wrap" style="display:none">
+                        <label class="form-label fw-semibold" style="font-size:.84rem">Cash Receiver Name <span class="text-danger">*</span></label>
+                        <input type="text" name="cash_receiver_name" id="cash_receiver_name" class="form-control" placeholder="Name of person receiving cash">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold" style="font-size:.84rem">Amount <span class="text-danger">*</span></label>
@@ -1505,9 +1509,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                             <option value="other">Other</option>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3" id="edit_payment_account_wrap">
                         <label class="form-label fw-semibold" style="font-size:.84rem">Account <span class="text-danger">*</span></label>
-                        <select name="payment_account_id" id="edit_payment_account_id" class="form-select" required>
+                        <select name="payment_account_id" id="edit_payment_account_id" class="form-select">
                             <option value="">Select Method First</option>
                             @foreach($paymentAccounts as $acct)
                                 <option value="{{ $acct->id }}" data-type="{{ $acct->account_type }}">
@@ -1515,6 +1519,10 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-3" id="edit_cash_receiver_wrap" style="display:none">
+                        <label class="form-label fw-semibold" style="font-size:.84rem">Cash Receiver Name <span class="text-danger">*</span></label>
+                        <input type="text" name="cash_receiver_name" id="edit_cash_receiver_name" class="form-control" placeholder="Name of person receiving cash">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold" style="font-size:.84rem">Amount <span class="text-danger">*</span></label>
@@ -1611,12 +1619,30 @@ function updateStatus(status) {
 // ── Delete Booking ──
 function confirmDeleteBooking() {
     Swal.fire({
-        title:'Delete Booking?',
-        html:'<p>This cannot be <strong>undone</strong>.</p>',
-        icon:'warning', showCancelButton:true,
-        confirmButtonColor:'#ef4444', cancelButtonColor:'#6b7280',
-        confirmButtonText:'Yes, delete!'
-    }).then(r => { if(r.isConfirmed) document.getElementById('deleteBookingForm').submit(); });
+        title: 'Delete Booking?',
+        html: '<p style="margin:0;font-size:.9rem;color:#6B7280;">Booking <strong style="color:#DC2626;">{{ $booking->booking_number }}</strong> will be moved to trash.</p>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel',
+    }).then(r => {
+        if (r.isConfirmed) {
+            Swal.fire({
+                title: 'Are you absolutely sure?',
+                html: '<p style="margin:0;font-size:.9rem;color:#6B7280;">This booking and its payments will be moved to <strong>Trash</strong>. You can restore it later if needed.</p>',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '🗑 Delete Permanently',
+                cancelButtonText: 'Cancel',
+            }).then(r2 => {
+                if (r2.isConfirmed) document.getElementById('deleteBookingForm').submit();
+            });
+        }
+    });
 }
 
 // ── Delete Payment ──
@@ -1632,10 +1658,29 @@ function confirmDeletePayment(paymentId, amount) {
 
 // ── Payment Account Filtering ──
 function filterAccounts() {
-    const method = document.getElementById('payment_method').value;
-    const sel    = document.getElementById('payment_account_id');
+    const method   = document.getElementById('payment_method').value;
+    const isCash   = method === 'cash';
+    const sel      = document.getElementById('payment_account_id');
+    const accWrap  = document.getElementById('payment_account_wrap');
+    const cashWrap = document.getElementById('cash_receiver_wrap');
+    const cashInput = document.getElementById('cash_receiver_name');
+
     sel.value = '';
     document.getElementById('acct-info').style.display = 'none';
+
+    if (isCash) {
+        accWrap.style.display  = 'none';
+        sel.removeAttribute('required');
+        cashWrap.style.display = '';
+        cashInput.setAttribute('required', 'required');
+    } else {
+        accWrap.style.display  = '';
+        sel.setAttribute('required', 'required');
+        cashWrap.style.display = 'none';
+        cashInput.removeAttribute('required');
+        cashInput.value = '';
+    }
+
     const opts = sel.querySelectorAll('option');
     let has = false;
     opts.forEach(o => {
@@ -1663,23 +1708,42 @@ function updateAccInfo() {
 }
 
 // ── Edit Payment ──
-function editPayment(id, date, amount, method, accountId, reference, notes) {
+function editPayment(id, date, amount, method, accountId, reference, notes, cashReceiverName) {
     const form = document.getElementById('editPaymentForm');
     form.action = `{{ route('bookings.update-payment', [$booking->id, ':id']) }}`.replace(':id', id);
-    document.getElementById('edit_payment_date').value    = date;
-    document.getElementById('edit_amount').value          = amount;
-    document.getElementById('edit_payment_method').value  = method;
+    document.getElementById('edit_payment_date').value     = date;
+    document.getElementById('edit_amount').value           = amount;
+    document.getElementById('edit_payment_method').value   = method;
     document.getElementById('edit_reference_number').value = reference || '';
-    document.getElementById('edit_notes').value           = notes || '';
+    document.getElementById('edit_notes').value            = notes || '';
     filterEditAccounts();
-    document.getElementById('edit_payment_account_id').value = accountId;
+    document.getElementById('edit_payment_account_id').value  = accountId || '';
+    document.getElementById('edit_cash_receiver_name').value  = cashReceiverName || '';
     feather.replace();
 }
 
 function filterEditAccounts() {
-    const method = document.getElementById('edit_payment_method').value;
-    const sel    = document.getElementById('edit_payment_account_id');
-    const opts   = sel.querySelectorAll('option');
+    const method    = document.getElementById('edit_payment_method').value;
+    const isCash    = method === 'cash';
+    const sel       = document.getElementById('edit_payment_account_id');
+    const accWrap   = document.getElementById('edit_payment_account_wrap');
+    const cashWrap  = document.getElementById('edit_cash_receiver_wrap');
+    const cashInput = document.getElementById('edit_cash_receiver_name');
+
+    if (isCash) {
+        accWrap.style.display  = 'none';
+        sel.removeAttribute('required');
+        cashWrap.style.display = '';
+        cashInput.setAttribute('required', 'required');
+    } else {
+        accWrap.style.display  = '';
+        sel.setAttribute('required', 'required');
+        cashWrap.style.display = 'none';
+        cashInput.removeAttribute('required');
+        cashInput.value = '';
+    }
+
+    const opts = sel.querySelectorAll('option');
     let has = false;
     opts.forEach(o => {
         if (!o.value) return;

@@ -17,6 +17,7 @@ class BookingPayment extends Model
         'payment_time',
         'amount',
         'payment_method',
+        'cash_receiver_name',
         'reference_number',
         'received_by',
         'notes',

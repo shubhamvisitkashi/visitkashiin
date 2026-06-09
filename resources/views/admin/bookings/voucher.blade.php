@@ -9,7 +9,7 @@
    VISITKASHI PREMIUM BOOKING VOUCHER
    A4 · Corporate Travel Design
 ══════════════════════════════════════ */
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin:0; padding:0; box-sizing:border-box; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
@@ -302,6 +302,7 @@ body {
 
 /* ── Print ───────────────────────────── */
 @media print {
+  * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
   body { background: #fff; }
   .voucher-wrap { width: 100%; box-shadow: none; }
   .no-print { display: none !important; }

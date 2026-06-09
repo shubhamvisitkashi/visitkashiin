@@ -713,18 +713,29 @@
 
         {{-- Payment Method --}}
         <div style="margin-bottom:12px;">
-          <label class="cn-label">Payment Method</label>
-          <select name="payment_method" class="form-select cn-input">
+          <label class="cn-label">Payment Method <span style="color:#EF4444;">*</span></label>
+          <select name="payment_method" id="cabPaymentMethod" class="form-select cn-input" required onchange="toggleCabPaymentFields()">
             @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer','card'=>'💳 Card','cheque'=>'📝 Cheque'] as $v=>$l)
               <option value="{{ $v }}" {{ old('payment_method','cash')==$v ? 'selected' : '' }}>{{ $l }}</option>
             @endforeach
           </select>
         </div>
 
-        {{-- Bank Account --}}
-        <div style="margin-bottom:4px;">
+        {{-- Cash Receiver Name (shown when Cash selected) --}}
+        <div id="cabCashReceiverWrap" style="margin-bottom:12px;display:{{ old('payment_method','cash')==='cash' ? '' : 'none' }};">
+          <label class="cn-label">Receiver Name <span style="color:#EF4444;">*</span></label>
+          <input type="text" name="cash_receiver_name" id="cabCashReceiverName"
+                 class="form-control cn-input"
+                 placeholder="Name of person receiving cash"
+                 value="{{ old('cash_receiver_name') }}"
+                 {{ old('payment_method','cash')==='cash' ? 'required' : '' }}>
+          <div class="cn-hint">Who physically received the cash payment</div>
+        </div>
+
+        {{-- Bank Account (hidden when Cash selected) --}}
+        <div id="cabBankAccountWrap" style="margin-bottom:4px;display:{{ old('payment_method','cash')==='cash' ? 'none' : '' }};">
           <label class="cn-label">Bank Account <span style="font-size:.65rem;color:#94A3B8;font-weight:400;text-transform:none;">(where advance received)</span></label>
-          <select name="payment_account_id" class="form-select cn-input">
+          <select name="payment_account_id" id="cabPaymentAccount" class="form-select cn-input">
             <option value="">— Select account —</option>
             @foreach($paymentAccounts as $acc)
               <option value="{{ $acc->id }}" {{ old('payment_account_id') == $acc->id ? 'selected' : '' }}>
@@ -810,6 +821,26 @@
 </div>
 
 <script>
+// ── Cash / Bank Account toggle ─────────────────────────────────────
+function toggleCabPaymentFields() {
+    const method       = document.getElementById('cabPaymentMethod').value;
+    const isCash       = method === 'cash';
+    const receiverWrap = document.getElementById('cabCashReceiverWrap');
+    const receiverInput= document.getElementById('cabCashReceiverName');
+    const bankWrap     = document.getElementById('cabBankAccountWrap');
+
+    if (isCash) {
+        receiverWrap.style.display = '';
+        receiverInput.setAttribute('required', 'required');
+        bankWrap.style.display = 'none';
+    } else {
+        receiverWrap.style.display = 'none';
+        receiverInput.removeAttribute('required');
+        receiverInput.value = '';
+        bankWrap.style.display = '';
+    }
+}
+
 // ── State ─────────────────────────────────────────────────────────
 let isCustomVehicle = false;
 

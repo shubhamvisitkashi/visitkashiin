@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class CabBookingPayment extends Model
 {
     protected $fillable = [
-        'cab_booking_id', 'amount', 'payment_method',
+        'cab_booking_id', 'amount', 'payment_method', 'cash_receiver_name',
         'payment_date', 'payment_account_id', 'received_by', 'notes',
     ];
 

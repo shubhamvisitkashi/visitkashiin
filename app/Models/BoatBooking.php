@@ -25,7 +25,7 @@ class BoatBooking extends Model
         // Notes & source
         'guest_notes', 'special_requests', 'lead_source_id',
         // Pricing
-        'payment_method', 'payment_account_id', 'vendor_cost', 'margin_amount',
+        'payment_method', 'payment_account_id', 'vendor_cost', 'b2b_vendor_cost', 'margin_amount',
         'extra_per_person_rate', 'base_pax', 'created_by',
         // Staff
         'boatman_id',

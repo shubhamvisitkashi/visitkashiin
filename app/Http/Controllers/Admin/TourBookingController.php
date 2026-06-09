@@ -12,6 +12,7 @@ use App\Models\Booking;
 use App\Models\BookingPayment;
 use App\Models\PaymentAccount;
 use App\Models\ServiceType;
+use App\Models\ServiceTemplate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -27,7 +28,51 @@ class TourBookingController extends Controller
         $leadSources     = LeadSource::orderBy('name')->get();
         $paymentAccounts = PaymentAccount::where('is_active', 1)->orderBy('account_name')->get();
 
-        return view('admin.bookings.tour-booking', compact('leadSources', 'paymentAccounts'), [
+        // Load stay/hotel templates from DB grouped by city keyword
+        $stayType = ServiceType::whereRaw("LOWER(name) LIKE '%stay%' OR LOWER(name) LIKE '%hotel%'")->first();
+        $allStayTemplates = $stayType
+            ? ServiceTemplate::where('service_type_id', $stayType->id)->where('is_active', 1)->orderBy('name')->pluck('name')->toArray()
+            : [];
+
+        $cities = ['Varanasi', 'Prayagraj', 'Ayodhya', 'Chitrakoot', 'Bodhgaya', 'Lucknow', 'Naimisharanya'];
+        $cityKeywords = [
+            'Varanasi'     => ['varanasi', 'kashi', 'banaras', 'benares', 'saket nagar', 'assi', 'dashashwamedh', 'ganga'],
+            'Prayagraj'    => ['prayagraj', 'allahabad'],
+            'Ayodhya'      => ['ayodhya', 'ayodh', 'ram ghat', 'ram mandir'],
+            'Chitrakoot'   => ['chitrakoot'],
+            'Bodhgaya'     => ['bodhgaya', 'bodh gaya', 'bodh'],
+            'Lucknow'      => ['lucknow'],
+            'Naimisharanya'=> ['naimisharanya', 'nimsar', 'naimisha'],
+        ];
+
+        $hotelsByCity = [];
+        foreach ($cities as $city) {
+            $keywords = $cityKeywords[$city];
+            $matched = array_filter($allStayTemplates, function($name) use ($keywords) {
+                $lower = strtolower($name);
+                foreach ($keywords as $kw) {
+                    if (str_contains($lower, $kw)) return true;
+                }
+                return false;
+            });
+            $hotelsByCity[$city] = array_values($matched);
+        }
+
+        // Hotels that didn't match any city go into every city's list
+        $unmatched = array_filter($allStayTemplates, function($name) use ($cityKeywords) {
+            $lower = strtolower($name);
+            foreach ($cityKeywords as $kws) {
+                foreach ($kws as $kw) {
+                    if (str_contains($lower, $kw)) return false;
+                }
+            }
+            return true;
+        });
+        foreach ($cities as $city) {
+            $hotelsByCity[$city] = array_merge($hotelsByCity[$city], array_values($unmatched));
+        }
+
+        return view('admin.bookings.tour-booking', compact('leadSources', 'paymentAccounts', 'hotelsByCity'), [
             'page_title' => 'New Tour Package Booking',
         ]);
     }

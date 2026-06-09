@@ -301,8 +301,10 @@
               <label class="tb-label">Vehicle Type</label>
               <select name="cab_type" class="tb-select">
                 <option>Sedan / Swift Dzire</option>
+                <option>Ertiga</option>
                 <option>SUV / Innova Crysta</option>
                 <option>Tempo Traveller 12 Seat</option>
+                <option>Tempo Traveller 17 Seat</option>
                 <option>Tempo Traveller 20 Seat</option>
                 <option>Bus 26+ Seat</option>
                 <option>Other</option>
@@ -599,82 +601,8 @@
 </div>
 
 <script>
-/* ── Hotel city/name data ────────────────────── */
-var _hotelData = {
-  'Varanasi': [
-    'Kashi Paradise Stay (Saket Nagar)',
-    'Hotel Surya (Varuna Bridge)',
-    'Alka Hotel (Dashashwamedh)',
-    'Hotel Ganges View (Assi Ghat)',
-    'Ramada by Wyndham Varanasi',
-    'Radisson Hotel Varanasi',
-    'The Mango Hotels Varanasi',
-    'Zostel Varanasi',
-    'Hotel Rashmi (Lanka)',
-    'BrijRama Palace (Darbhanga Ghat)',
-    'Hotel Ideal Tops (Cantonment)',
-    'Rivatas by Ideal (Nadesar)',
-    'Gateway Hotel Ganges (Nadesar)',
-    'Lemon Tree Hotel Varanasi',
-    'FabHotel Prime Star Varanasi',
-    'OYO Rooms Varanasi',
-  ],
-  'Prayagraj': [
-    'Hotel Kanha Shyam (Civil Lines)',
-    'Hotel Harsh Ananda (Civil Lines)',
-    'Hotel Prayag (Allahapur)',
-    'Ramada Encore Prayagraj',
-    'Hotel Milan Palace (Civil Lines)',
-    'Hotel Yatrik (Civil Lines)',
-    'Hotel Bella Vista (Civil Lines)',
-    'Hotel President (Civil Lines)',
-    'OYO Rooms Prayagraj',
-    'FabHotel Prayagraj',
-    'Hotel Samrat (Colonelganj)',
-  ],
-  'Ayodhya': [
-    'Hotel Saket (Ram Ghat)',
-    'Hotel Ram Prastha (Nayaghat)',
-    'Treebo Trend Ayodhya',
-    'Hotel Divine Ayodhya',
-    'Ramada by Wyndham Ayodhya',
-    'Hotel Shri Ram International',
-    'The Ayodhya Hotel (Main Market)',
-    'OYO Rooms Ayodhya',
-    'Hotel Sita Ram (Near Ram Mandir)',
-    'Haveli Heritage Hotel Ayodhya',
-  ],
-  'Lucknow': [
-    'Taj Mahal Hotel Lucknow',
-    'Hyatt Regency Lucknow',
-    'Piccadily Hotel Lucknow',
-    'Radisson Blu Hotel Lucknow',
-    'Vivanta Lucknow',
-    'Hotel Clarks Avadh',
-    'Lemon Tree Hotel Lucknow',
-    'Hotel Lebua Lucknow',
-    'OYO Rooms Lucknow',
-  ],
-  'Agra': [
-    'The Oberoi Amarvilas Agra',
-    'ITC Mughal Agra',
-    'Taj Hotel & Convention Centre',
-    'Radisson Hotel Agra',
-    'Double Tree by Hilton Agra',
-    'Crystal Sarovar Premiere Agra',
-    'Hotel Amar Vilas (Near Taj)',
-    'OYO Rooms Agra',
-  ],
-  'Delhi': [
-    'The Imperial New Delhi',
-    'Taj Palace New Delhi',
-    'ITC Maurya New Delhi',
-    'Hyatt Regency Delhi',
-    'Radisson Blu Plaza Delhi Airport',
-    'Lemon Tree Hotel Delhi',
-    'OYO Rooms Delhi',
-  ],
-};
+/* ── Hotel city/name data (from DB via PHP) ─── */
+var _hotelData = @json($hotelsByCity);
 
 function tbLoadHotels() {
   var city    = document.getElementById('tb-hotel-city').value;
@@ -758,9 +686,10 @@ function tbAddHotelRow() {
           <option value="Varanasi">🕌 Varanasi</option>
           <option value="Prayagraj">🏛 Prayagraj</option>
           <option value="Ayodhya">🛕 Ayodhya</option>
+          <option value="Chitrakoot">🌿 Chitrakoot</option>
+          <option value="Bodhgaya">☸️ Bodhgaya</option>
           <option value="Lucknow">🏙 Lucknow</option>
-          <option value="Agra">🕌 Agra</option>
-          <option value="Delhi">🌆 Delhi</option>
+          <option value="Naimisharanya">🌳 Naimisharanya</option>
           <option value="Other">📍 Other</option>
         </select>
       </div>

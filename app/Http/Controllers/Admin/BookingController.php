@@ -457,24 +457,28 @@ class BookingController extends Controller
             }
         }
 
+        $isCash = $request->input('payment_method') === 'cash';
+
         $validated = $request->validate([
-            'payment_date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,bank_transfer,upi,card,cheque,other',
-            'payment_account_id' => 'required|exists:payment_accounts,id',
-            'reference_number' => 'nullable|string',
-            'notes' => 'nullable|string',
+            'payment_date'       => 'required|date',
+            'amount'             => 'required|numeric|min:0',
+            'payment_method'     => 'required|in:cash,bank_transfer,upi,card,cheque,other',
+            'payment_account_id' => $isCash ? 'nullable' : 'required|exists:payment_accounts,id',
+            'cash_receiver_name' => $isCash ? 'required|string|max:150' : 'nullable|string|max:150',
+            'reference_number'   => 'nullable|string',
+            'notes'              => 'nullable|string',
         ]);
 
         BookingPayment::create([
-            'booking_id' => $booking->id,
-            'payment_account_id' => $validated['payment_account_id'],
-            'payment_date' => $validated['payment_date'],
-            'amount' => $validated['amount'],
-            'payment_method' => $validated['payment_method'],
-            'reference_number' => $validated['reference_number'],
-            'received_by' => auth('admin')->id(),
-            'notes' => $validated['notes'],
+            'booking_id'         => $booking->id,
+            'payment_account_id' => $isCash ? null : $validated['payment_account_id'],
+            'payment_date'       => $validated['payment_date'],
+            'amount'             => $validated['amount'],
+            'payment_method'     => $validated['payment_method'],
+            'cash_receiver_name' => $validated['cash_receiver_name'] ?? null,
+            'reference_number'   => $validated['reference_number'],
+            'received_by'        => auth('admin')->id(),
+            'notes'              => $validated['notes'],
         ]);
 
         return back()->with('success', 'Payment added successfully.');
@@ -500,22 +504,26 @@ class BookingController extends Controller
             }
         }
 
+        $isCash = $request->input('payment_method') === 'cash';
+
         $validated = $request->validate([
-            'payment_date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,bank_transfer,upi,card,cheque,other',
-            'payment_account_id' => 'required|exists:payment_accounts,id',
-            'reference_number' => 'nullable|string',
-            'notes' => 'nullable|string',
+            'payment_date'       => 'required|date',
+            'amount'             => 'required|numeric|min:0',
+            'payment_method'     => 'required|in:cash,bank_transfer,upi,card,cheque,other',
+            'payment_account_id' => $isCash ? 'nullable' : 'required|exists:payment_accounts,id',
+            'cash_receiver_name' => $isCash ? 'required|string|max:150' : 'nullable|string|max:150',
+            'reference_number'   => 'nullable|string',
+            'notes'              => 'nullable|string',
         ]);
 
         $payment->update([
-            'payment_date' => $validated['payment_date'],
-            'amount' => $validated['amount'],
-            'payment_method' => $validated['payment_method'],
-            'payment_account_id' => $validated['payment_account_id'],
-            'reference_number' => $validated['reference_number'],
-            'notes' => $validated['notes'],
+            'payment_date'       => $validated['payment_date'],
+            'amount'             => $validated['amount'],
+            'payment_method'     => $validated['payment_method'],
+            'payment_account_id' => $isCash ? null : $validated['payment_account_id'],
+            'cash_receiver_name' => $validated['cash_receiver_name'] ?? null,
+            'reference_number'   => $validated['reference_number'],
+            'notes'              => $validated['notes'],
         ]);
 
         return back()->with('success', 'Payment updated successfully.');
@@ -919,16 +927,19 @@ class BookingController extends Controller
             $serviceTypes = [];
             $servicesList = '';
 
-            if ($booking->quotation && $booking->quotation->items) {
-                // Get services that have dates
-                $servicesWithDates = $booking->quotation->items->filter(function($item) {
-                    return $item->service_date !== null;
-                });
+            // Calculate payment info (shared)
+            $totalAmount       = $booking->total_amount ?? 0;
+            $paidAmount        = $booking->paid_amount ?? 0;
+            $dueAmount         = $booking->pending_amount ?? 0;
+            $paymentPercentage = $totalAmount > 0 ? ($paidAmount / $totalAmount) * 100 : 0;
+            $guestName         = $booking->lead?->guest_name ?? 'Guest';
+            $createdBy         = $booking->createdBy?->name ?? 'System';
+            $createdByEmail    = $booking->createdBy?->email ?? 'N/A';
 
-                if ($servicesWithDates->isEmpty()) {
-                    // If no services have dates, skip this booking
-                    continue;
-                }
+            $servicesWithDates = collect();
+
+            if ($booking->quotation && $booking->quotation->items) {
+                $servicesWithDates = $booking->quotation->items->filter(fn($item) => $item->service_date !== null);
 
                 $uniqueTypes = $servicesWithDates
                     ->pluck('serviceTemplate.serviceType')
@@ -939,9 +950,9 @@ class BookingController extends Controller
                 foreach ($uniqueTypes as $type) {
                     if ($type) {
                         $serviceTypes[] = [
-                            'name' => $type->name,
-                            'icon' => $this->getServiceIcon($type->name),
-                            'color' => $this->getServiceColor($type->name)
+                            'name'  => $type->name,
+                            'icon'  => $this->getServiceIcon($type->name),
+                            'color' => $this->getServiceColor($type->name),
                         ];
                     }
                 }
@@ -951,68 +962,83 @@ class BookingController extends Controller
                     ->filter()
                     ->take(5)
                     ->join(', ');
+            }
 
-                // Group services by date to create separate calendar events
-                $servicesByDate = $servicesWithDates->groupBy(function($item) {
-                    return $item->service_date->format('Y-m-d');
-                });
+            if ($servicesWithDates->isNotEmpty()) {
+                // Group services by date → one calendar event per service date
+                $servicesByDate = $servicesWithDates->groupBy(fn($item) => $item->service_date->format('Y-m-d'));
 
-                // Calculate payment status
-                $totalAmount = $booking->total_amount ?? 0;
-                $paidAmount = $booking->paid_amount ?? 0;
-                $dueAmount = $booking->pending_amount ?? 0;
-                $paymentPercentage = $totalAmount > 0 ? ($paidAmount / $totalAmount) * 100 : 0;
-
-                // Event title with financial info
-                $guestName = $booking->lead?->guest_name ?? 'Guest';
-
-                // Handle created_by
-                $createdBy = $booking->createdBy?->name ?? 'System';
-                $createdByEmail = $booking->createdBy?->email ?? 'N/A';
-
-                // Create an event for each service date
                 foreach ($servicesByDate as $date => $servicesOnDate) {
-                    // Get service types for this specific date
                     $serviceTypesOnDate = $servicesOnDate
                         ->pluck('serviceTemplate.serviceType')
                         ->filter()
                         ->unique('id');
 
-                    // Determine color based on service types
-                    $color = $this->getEventColor($serviceTypesOnDate, $booking->booking_status);
-                    
-                    $servicesOnDateList = $servicesOnDate
-                        ->pluck('serviceTemplate.name')
-                        ->filter()
-                        ->join(', ');
-
-                    $title = $guestName . ' - ' . $servicesOnDateList;
+                    $color              = $this->getEventColor($serviceTypesOnDate, $booking->booking_status);
+                    $servicesOnDateList = $servicesOnDate->pluck('serviceTemplate.name')->filter()->join(', ');
+                    $title              = $guestName . ' - ' . $servicesOnDateList;
 
                     $events[] = [
-                        'id' => $booking->id,
-                        'title' => $title,
-                        'start' => $date,
+                        'id'              => $booking->id,
+                        'title'           => $title,
+                        'start'           => $date,
                         'backgroundColor' => $color['background'],
-                        'borderColor' => $color['border'],
-                        'extendedProps' => [
-                            'booking_number' => $booking->booking_number ?? 'N/A',
-                            'guest_name' => $guestName,
-                            'contact' => $booking->lead?->contact ?? 'N/A',
-                            'pax' => $booking->lead?->pax ?? 'N/A',
-                            'status' => ucfirst(str_replace('_', ' ', $booking->booking_status)),
-                            'total_amount' => $totalAmount,
-                            'paid_amount' => $paidAmount,
-                            'due_amount' => $dueAmount,
-                            'payment_percentage' => round($paymentPercentage, 1),
-                            'services' => $servicesOnDateList ?: 'No services',
-                            'service_types' => $serviceTypes,
-                            'short_plan' => $booking->lead?->short_plan ?? 'N/A',
-                            'created_by' => $createdBy,
-                            'created_by_email' => $createdByEmail,
+                        'borderColor'     => $color['border'],
+                        'extendedProps'   => [
+                            'booking_number'    => $booking->booking_number ?? 'N/A',
+                            'guest_name'        => $guestName,
+                            'contact'           => $booking->lead?->contact ?? 'N/A',
+                            'pax'               => $booking->lead?->pax ?? 'N/A',
+                            'status'            => ucfirst(str_replace('_', ' ', $booking->booking_status)),
+                            'total_amount'      => $totalAmount,
+                            'paid_amount'       => $paidAmount,
+                            'due_amount'        => $dueAmount,
+                            'payment_percentage'=> round($paymentPercentage, 1),
+                            'services'          => $servicesOnDateList ?: 'No services',
+                            'service_types'     => $serviceTypes,
+                            'short_plan'        => $booking->lead?->short_plan ?? 'N/A',
+                            'created_by'        => $createdBy,
+                            'created_by_email'  => $createdByEmail,
                             'service_date' => $date,
                         ],
                     ];
                 }
+            } else {
+                // No service dates — fall back to booking_date so the booking still appears on the calendar
+                $fallbackDate = $booking->booking_date
+                    ? \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d')
+                    : $booking->created_at->format('Y-m-d');
+
+                // Only show in the month range it belongs to
+                if ($start && $fallbackDate < $start) continue;
+                if ($end   && $fallbackDate > $end)   continue;
+
+                $color = $this->getEventColor(collect(), $booking->booking_status);
+
+                $events[] = [
+                    'id'              => $booking->id,
+                    'title'           => $guestName . ' - ' . ($booking->booking_number ?? 'Booking'),
+                    'start'           => $fallbackDate,
+                    'backgroundColor' => $color['background'],
+                    'borderColor'     => $color['border'],
+                    'extendedProps'   => [
+                        'booking_number'     => $booking->booking_number ?? 'N/A',
+                        'guest_name'         => $guestName,
+                        'contact'            => $booking->lead?->contact ?? 'N/A',
+                        'pax'                => $booking->lead?->pax ?? 'N/A',
+                        'status'             => ucfirst(str_replace('_', ' ', $booking->booking_status)),
+                        'total_amount'       => $totalAmount,
+                        'paid_amount'        => $paidAmount,
+                        'due_amount'         => $dueAmount,
+                        'payment_percentage' => round($paymentPercentage, 1),
+                        'services'           => $servicesList ?: 'No services scheduled',
+                        'service_types'      => $serviceTypes,
+                        'short_plan'         => $booking->lead?->short_plan ?? 'N/A',
+                        'created_by'         => $createdBy,
+                        'created_by_email'   => $createdByEmail,
+                        'service_date'       => $fallbackDate,
+                    ],
+                ];
             }
         }
 

@@ -357,9 +357,7 @@
             @foreach([
               'Birthday Celebration','Anniversary Celebration',
               'Marriage Proposal','Corporate Event',
-              'Photography Session','Pre-wedding Shoot',
-              'Family Get-together','Bachelorette Party',
-              'Puja / Ritual','Other'
+              'Other'
             ] as $ev)
             <option value="{{ $ev }}" {{ old('event_on_boat')==$ev?'selected':'' }}>{{ $ev }}</option>
             @endforeach
@@ -370,21 +368,38 @@
       {{-- Add-on toggles --}}
       <div style="margin-top:16px;">
         <label class="bt-label" style="margin-bottom:10px;">Add-on Services</label>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;" id="addonGrid">
           @foreach(['decoration'=>'🌸 Decoration','photographer'=>'📸 Photographer','live_music'=>'🎵 Live Music','priest'=>'🪔 Priest / Puja','flowers'=>'💐 Flower Shower','fireworks'=>'🎆 Fireworks'] as $k=>$l)
           <label style="display:flex;align-items:center;justify-content:space-between;background:#F0F9FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:9px 13px;cursor:pointer;transition:.18s;">
             <span style="font-size:.78rem;font-weight:600;color:#0F172A;">{{ $l }}</span>
             <div style="position:relative;width:38px;height:20px;flex-shrink:0;">
               <input type="checkbox" name="{{ $k }}" value="1" {{ old($k)?'checked':'' }}
                      style="opacity:0;width:0;height:0;position:absolute;"
-                     onchange="this.closest('label').querySelector('.sw-sl').style.background=this.checked?'#0EA5E9':'#CBD5E1';this.closest('label').querySelector('.sw-th').style.transform=this.checked?'translateX(18px)':'translateX(0)'">
-              <div class="sw-sl" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#CBD5E1;border-radius:20px;transition:.25s;"></div>
-              <div class="sw-th" style="position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
+                     onchange="this.closest('label').querySelector('.sw-sl').style.background=this.checked?'#0EA5E9':'#CBD5E1';this.closest('label').querySelector('.sw-th').style.transform=this.checked?'translateX(18px)':'translateX(0)';checkB2BVisibility()">
+              <div class="sw-sl" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#CBD5E1;border-radius:20px;transition:.25s;{{ old($k) ? 'background:#0EA5E9;' : '' }}"></div>
+              <div class="sw-th" style="position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2);{{ old($k) ? 'transform:translateX(18px);' : '' }}"></div>
             </div>
           </label>
           @endforeach
         </div>
       </div>
+
+      {{-- B2B Vendor Cost (shown when event or add-on selected) --}}
+      <div id="b2bVendorWrap" style="display:none;margin-top:14px;background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:14px 16px;">
+        <label style="font-size:.75rem;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+          🏷 B2B Vendor Cost
+          <span style="font-size:.7rem;font-weight:500;color:#B45309;text-transform:none;letter-spacing:0;">(Event / Add-on supplier cost)</span>
+        </label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-weight:700;color:#92400E;font-size:.9rem;">₹</span>
+          <input type="number" name="b2b_vendor_cost" id="b2bVendorCost" min="0" step="0.01"
+                 value="{{ old('b2b_vendor_cost', '') }}"
+                 class="form-control"
+                 style="padding-left:28px;border:1.5px solid #FED7AA;border-radius:9px;font-size:.88rem;background:#fff;"
+                 placeholder="0.00">
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -600,6 +615,27 @@
 </div>{{-- /bt-page --}}
 
 <script>
+// ── B2B Vendor Cost visibility ────────────────────
+function checkB2BVisibility() {
+    const eventSel   = document.querySelector('select[name="event_on_boat"]');
+    const hasEvent   = eventSel && eventSel.value !== '';
+    const hasAddon   = Array.from(document.querySelectorAll('#addonGrid input[type="checkbox"]')).some(cb => cb.checked);
+    const wrap       = document.getElementById('b2bVendorWrap');
+    const input      = document.getElementById('b2bVendorCost');
+    if (hasEvent || hasAddon) {
+        wrap.style.display = '';
+    } else {
+        wrap.style.display = 'none';
+        if (input) input.value = '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const eventSel = document.querySelector('select[name="event_on_boat"]');
+    if (eventSel) eventSel.addEventListener('change', checkB2BVisibility);
+    checkB2BVisibility(); // run on load in case of old() values
+});
+
 // ── State ─────────────────────────────────────────
 let selBoat      = null;  // selected boat card element
 let boatPrice    = 0;

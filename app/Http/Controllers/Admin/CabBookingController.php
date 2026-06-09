@@ -82,7 +82,7 @@ class CabBookingController extends Controller
             'gst_number'         => 'nullable|string|max:20',
             'pickup_address'     => 'required|string',
             'drop_address'       => 'required|string',
-            'trip_type'          => 'required|string|max:100',
+            'trip_type'          => 'required|string|max:255',
             'pickup_date'        => 'required|date',
             'pickup_time'        => 'required|string',
             'return_date'        => 'nullable|date',
@@ -109,8 +109,9 @@ class CabBookingController extends Controller
             'vendor_cost'           => 'nullable|numeric|min:0',
             'discount'              => 'nullable|numeric|min:0',
             'advance_paid'          => 'nullable|numeric|min:0',
-            'payment_method'        => 'nullable|string',
+            'payment_method'        => 'required|string|in:cash,upi,bank_transfer,card,cheque',
             'payment_account_id'    => 'nullable|exists:payment_accounts,id',
+            'cash_receiver_name'    => 'nullable|string|max:150',
             'booking_status'        => 'nullable|in:pending,confirmed,assigned,completed,cancelled',
             'lead_source_id'        => 'nullable|exists:lead_sources,id',
             'notes'                 => 'nullable|string',
@@ -178,12 +179,14 @@ class CabBookingController extends Controller
             ]);
 
             if ($advancePaid > 0) {
+                $isCash = ($validated['payment_method'] ?? 'cash') === 'cash';
                 CabBookingPayment::create([
                     'cab_booking_id'     => $booking->id,
                     'amount'             => $advancePaid,
                     'payment_method'     => $validated['payment_method'] ?? 'cash',
+                    'cash_receiver_name' => $isCash ? ($validated['cash_receiver_name'] ?? null) : null,
                     'payment_date'       => now()->format('Y-m-d'),
-                    'payment_account_id' => $validated['payment_account_id'] ?? PaymentAccount::first()?->id,
+                    'payment_account_id' => $isCash ? null : ($validated['payment_account_id'] ?? null),
                     'received_by'        => auth('admin')->id(),
                 ]);
             }
@@ -240,7 +243,7 @@ class CabBookingController extends Controller
             'gst_number'         => 'nullable|string|max:20',
             'pickup_address'     => 'required|string',
             'drop_address'       => 'required|string',
-            'trip_type'          => 'required|string|max:100',
+            'trip_type'          => 'required|string|max:255',
             'pickup_date'        => 'required|date',
             'pickup_time'        => 'required|string',
             'return_date'        => 'nullable|date',
@@ -355,7 +358,16 @@ class CabBookingController extends Controller
     // ── DESTROY ───────────────────────────────────────────────────
     public function destroy($id)
     {
-        CabBooking::findOrFail($id)->delete();
+        $booking = CabBooking::findOrFail($id);
+
+        // Staff can only delete their own bookings
+        if (!auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager'])) {
+            if ($booking->created_by !== auth('admin')->id()) {
+                abort(403, 'Unauthorized. You can only delete bookings you created.');
+            }
+        }
+
+        $booking->delete();
         return redirect()->route('cab-bookings.index')->with('success', 'Booking deleted.');
     }
 }

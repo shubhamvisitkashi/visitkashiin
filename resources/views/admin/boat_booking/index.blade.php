@@ -342,9 +342,9 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
     <div class="bb-kpi-sub">Pending collection</div>
   </div>
   <div class="bb-kpi-card" style="--kc:#F59E0B;">
-    <div class="bb-kpi-lbl">Total Persons</div>
-    <div class="bb-kpi-val">{{ number_format($total_persons) }}</div>
-    <div class="bb-kpi-sub">Guests served</div>
+    <div class="bb-kpi-lbl">Total Bookings</div>
+    <div class="bb-kpi-val">{{ number_format($totalBookings) }}</div>
+    <div class="bb-kpi-sub">No of bookings</div>
   </div>
 </div>
 
