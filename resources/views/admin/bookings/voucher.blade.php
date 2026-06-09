@@ -226,11 +226,10 @@ body{
     width:100% !important;
     min-height:unset !important;
     box-shadow:none;
-    transform-origin:top left;
   }
-  .vh-header{padding:16px 16px;}
-  .vh-title-bar{padding:8px 16px;}
-  .vh-body{padding:12px 14px 8px;}
+  .vh-header{padding:14px 16px;}
+  .vh-title-bar{padding:8px 14px;}
+  .vh-body{padding:10px 12px 8px;}
   .vh-footer{padding:12px 16px;flex-wrap:wrap;gap:10px;}
   .vf-grid{grid-template-columns:1fr 1fr;}
   .vf-grid-4{grid-template-columns:1fr 1fr;}
@@ -240,20 +239,28 @@ body{
   .terms-list{grid-template-columns:1fr;}
   .vh-header-inner{flex-wrap:wrap;gap:10px;}
   .vh-contact-block{text-align:left;}
+  .qr-box{display:none;}
+  .pay-table{font-size:11px;}
+  .pay-table th,.pay-table td{padding:5px 7px;}
 }
 
-/* ══ PRINT — MUST come after mobile CSS so it wins on mobile print ══ */
+/* ══ PRINT — MUST come LAST so it beats both base + mobile CSS on mobile print ══ */
 @media print{
   *{
     -webkit-print-color-adjust:exact !important;
     print-color-adjust:exact !important;
     color-adjust:exact !important;
+    forced-color-adjust:none !important;
   }
-  html,body{background:#fff !important;margin:0 !important;padding:0 !important;}
+  html,body{
+    background:#fff !important;
+    margin:0 !important;padding:0 !important;
+    forced-color-adjust:none !important;
+  }
   .no-print{display:none !important;}
   @page{margin:0;size:A4 portrait;}
 
-  /* Override mobile layout for print */
+  /* Force full A4 layout — override mobile width:100% */
   .voucher-wrap{
     width:210mm !important;
     min-height:297mm !important;
@@ -262,21 +269,39 @@ body{
     page-break-inside:avoid;
   }
 
-  /* Explicitly re-declare every gradient/background so mobile CSS can't strip them */
+  /* Restore multi-column grids on print */
+  .vf-grid{grid-template-columns:1fr 1fr 1fr !important;}
+  .vf-grid-4{grid-template-columns:repeat(4,1fr) !important;}
+  .pay-summary{grid-template-columns:1fr 1fr 1fr !important;}
+  .pay-sum-item{border-right:1px solid #dde8f0 !important;border-bottom:none !important;}
+  .terms-list{grid-template-columns:1fr 1fr !important;}
+  .qr-box{display:flex !important;}
+  .pay-table{font-size:inherit !important;}
+  .pay-table th,.pay-table td{padding:7px 10px !important;}
+
+  /* ── Re-declare every background so "print without backgrounds" default can't win ── */
   .vh-header{
+    background:#075985 !important;
     background:linear-gradient(135deg,#0c4a6e 0%,#075985 45%,#0369a1 100%) !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .vh-title-bar{
-    background:rgba(0,0,0,.22) !important;
+    background:#1e293b !important;
+    background:rgba(0,0,0,.28) !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .vh-footer{
+    background:#075985 !important;
     background:linear-gradient(135deg,#0c4a6e 0%,#075985 100%) !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .vh-section-head{
+    background:#e8f4fd !important;
     background:linear-gradient(90deg,#f0f7ff,#e8f4fd) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .vh-section-icon{
+    background:#0369a1 !important;color:#fff !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .pay-table th{
@@ -288,11 +313,16 @@ body{
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .svc-card{
+    background:#dbeafe !important;
     background:linear-gradient(135deg,#eff6ff,#dbeafe) !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
+  .svc-type-badge{
+    background:#0369a1 !important;color:#fff !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
   .powered-by{
-    background:#0a3d5c !important;
+    background:#0a3d5c !important;color:rgba(255,255,255,.5) !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
 }
