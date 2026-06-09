@@ -204,6 +204,9 @@
     $subSlug = optional($product->subCategory)->slug ?? 'motor-boat';
     $subName = optional($product->subCategory)->name ?? 'Boat Ride';
     $catName = optional($product->category)->name ?? 'Boat';
+
+    $isDevDiwali = str_contains(strtolower($subSlug), 'dev-diwali')
+                   && now()->lte(\Carbon\Carbon::parse('2026-11-24')->endOfDay());
 @endphp
 
 {{-- Breadcrumb --}}
@@ -701,7 +704,7 @@
                             <span class="vkbd-card-price-old">₹{{ number_format($product->base_price) }}</span>
                             @endif
                             <span class="vkbd-card-price">₹{{ number_format($displayPrice) }}</span>
-                            <span class="vkbd-card-price-sub">/ trip</span>
+                            <span class="vkbd-card-price-sub">@if($isDevDiwali)/ person@else/ trip@endif</span>
                         </div>
                         @endif
                     </div>
@@ -743,13 +746,19 @@
                         {{-- 1. Travel Date --}}
                         <div class="vkbs-group">
                             <label class="vkbs-label" for="vkbs_date">Travel Date <span class="vkbs-req">*</span></label>
+                            @if($isDevDiwali)
+                            <input type="text" class="vkbs-input" value="24 November 2026" readonly style="background:#f9f5f0;cursor:default;color:#374151;">
+                            <input type="hidden" name="arrival_date" value="2026-11-24">
+                            @else
                             <input type="date" id="vkbs_date" name="arrival_date"
                                    class="vkbs-input" required
                                    min="{{ date('Y-m-d') }}"
                                    value="{{ old('arrival_date', date('Y-m-d')) }}">
+                            @endif
                         </div>
 
-                        {{-- 2. Time Slot --}}
+                        {{-- 2. Time Slot (hidden for Dev Diwali) --}}
+                        @if(!$isDevDiwali)
                         <div class="vkbs-group">
                             <label class="vkbs-label">Time Slot <span class="vkbs-req">*</span></label>
                             <div class="vkbs-slots">
@@ -773,6 +782,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
 
                         {{-- 3. Full Name --}}
                         <div class="vkbs-group">
@@ -810,7 +820,17 @@
                             </label>
                         </div>
 
-                        {{-- 5 & 6. Adults + Children --}}
+                        {{-- 5 & 6. Persons counter (Dev Diwali: single Persons; standard: Adults + Children) --}}
+                        @if($isDevDiwali)
+                        <div class="vkbs-group">
+                            <span class="vkbs-label">Persons <span class="vkbs-req">*</span></span>
+                            <div class="vkbs-counter" id="vkbs_persons_wrap">
+                                <button type="button" id="vkbs_pm" aria-label="Decrease">−</button>
+                                <input type="number" id="vkbs_persons_disp" value="2" readonly>
+                                <button type="button" id="vkbs_pp" aria-label="Increase">+</button>
+                            </div>
+                        </div>
+                        @else
                         <div class="vkbs-row2">
                             <div class="vkbs-group" style="margin-bottom:0;">
                                 <span class="vkbs-label">Adults <span class="vkbs-req">*</span></span>
@@ -830,9 +850,10 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
 
-                        {{-- 7. Price Estimate --}}
-                        @if($displayPrice > 0)
+                        {{-- 7. Price Estimate (hidden for Dev Diwali) --}}
+                        @if($displayPrice > 0 && !$isDevDiwali)
                         <div class="vkbs-price-box" id="vkbsPriceBox">
                             <div class="vkbs-price-box-header">
                                 <span>💰 Price Estimate</span>
@@ -853,7 +874,10 @@
                         </div>
                         @endif
 
-                        {{-- 8. Nearest Pickup Ghat --}}
+                        {{-- 8. Nearest Pickup Ghat (fixed Ravidas Ghat for Dev Diwali) --}}
+                        @if($isDevDiwali)
+                        <input type="hidden" name="pickup_ghat" value="Ravidas Ghat">
+                        @else
                         <div class="vkbs-group">
                             <label class="vkbs-label" for="vkbs_pickup">Nearest Pickup Ghat <span class="vkbs-req">*</span></label>
                             <select id="vkbs_pickup" name="pickup_ghat" class="vkbs-input" required>
@@ -871,6 +895,7 @@
                                 <option {{ old('pickup_ghat')=='NAMO Ghat'?'selected':'' }}>NAMO Ghat</option>
                             </select>
                         </div>
+                        @endif
 
                         {{-- 9. Special Requests --}}
                         <div class="vkbs-group">
@@ -1041,12 +1066,21 @@
     };
 
     /* ── Persons / Children steppers ── */
+    var persons  = 2;
+    var children = 0;
+
+    @if($isDevDiwali)
+    /* Dev Diwali: simple persons counter only */
+    function renderPersons() {
+        document.getElementById('vkbs_persons_disp').value   = persons;
+        document.getElementById('vkbs_persons_hidden').value = persons;
+        document.getElementById('vkbs_pm').disabled = persons <= 1;
+        document.getElementById('vkbs_pp').disabled = persons >= 200;
+    }
+    @else
     var BASE_PRICE   = {{ $displayPrice > 0 ? $displayPrice : 0 }};
     var INCLUDED     = 10;
     var EXTRA_RATE   = 500;
-
-    var persons  = 2;
-    var children = 0;
 
     function renderPersons() {
         document.getElementById('vkbs_persons_disp').value  = persons;
@@ -1081,14 +1115,17 @@
         document.getElementById('vkbs_cp').disabled = children >= 20;
     }
 
-    document.getElementById('vkbs_pm').addEventListener('click', function () { if (persons > 1)  { persons--;  renderPersons();  } });
-    document.getElementById('vkbs_pp').addEventListener('click', function () { if (persons < 50) { persons++;  renderPersons();  } });
     document.getElementById('vkbs_cm').addEventListener('click', function () { if (children > 0) { children--; renderChildren(); document.getElementById('vkbs_children_hidden').value = children; } });
     document.getElementById('vkbs_cp').addEventListener('click', function () { if (children < 20){ children++; renderChildren(); document.getElementById('vkbs_children_hidden').value = children; } });
+    renderChildren();
+    @endif
+
+    document.getElementById('vkbs_pm').addEventListener('click', function () { if (persons > 1)   { persons--; renderPersons(); } });
+    document.getElementById('vkbs_pp').addEventListener('click', function () { if (persons < @if($isDevDiwali)200@else50@endif) { persons++; renderPersons(); } });
 
     renderPersons();
-    renderChildren();
 
+    @if(!$isDevDiwali)
     /* ── Initialise nice-select on ghat dropdown (if loaded) ── */
     if (typeof $ !== 'undefined' && $.fn.niceSelect) {
         $('#vkbs_pickup').niceSelect();
@@ -1109,12 +1146,14 @@
             this.style.boxShadow   = '';
         }
     });
+    @endif
 
     /* ── Phone digits only (10 max) ── */
     document.getElementById('vkbs_phone').addEventListener('input', function () {
         this.value = this.value.replace(/\D/g, '').slice(0, 10);
     });
 
+    @if(!$isDevDiwali)
     /* ── Sync slot hidden field (init + on change) ── */
     (function() {
         var checked = document.querySelector('input[name="vkbs_slot"]:checked');
@@ -1125,6 +1164,7 @@
             document.getElementById('vkbs_slot_hidden').value = this.value;
         });
     });
+    @endif
 
     /* ── WhatsApp "same as mobile" checkbox ── */
     var waSameChk = document.getElementById('vkbs_wa_same');
@@ -1157,34 +1197,40 @@
 
     /* ── Bundle all data into message + set hidden fields before submit ── */
     document.getElementById('vkbsForm').addEventListener('submit', function (e) {
+        var notes = document.getElementById('vkbs_notes').value.trim();
+        var wa    = document.getElementById('vkbs_whatsapp') ? document.getElementById('vkbs_whatsapp').value.trim() : '';
+
+        @if($isDevDiwali)
+        // Dev Diwali: no ghat validation, no slot, simple message
+        document.getElementById('vkbs_persons_hidden').value = persons;
+        var msg = 'Persons: ' + persons
+                + '\nDate: 24 November 2026'
+                + '\nPickup: Ravidas Ghat';
+        if (wa && wa !== document.getElementById('vkbs_phone').value) msg += '\nWhatsApp: ' + wa;
+        if (notes) msg += '\nSpecial Notes: ' + notes;
+        document.getElementById('vkbs_message_hidden').value = msg.trim();
+        @else
         var slot   = document.querySelector('input[name="vkbs_slot"]:checked');
         var pickup = document.getElementById('vkbs_pickup').value;
-        var notes  = document.getElementById('vkbs_notes').value.trim();
 
         // Validate ghat
         if (!pickup) {
             e.preventDefault();
-            var sel     = document.getElementById('vkbs_pickup');
-            var nsEl    = sel.nextElementSibling; // .nice-select div
-            var target  = (nsEl && nsEl.classList.contains('nice-select')) ? nsEl : sel;
+            var sel    = document.getElementById('vkbs_pickup');
+            var nsEl   = sel.nextElementSibling;
+            var target = (nsEl && nsEl.classList.contains('nice-select')) ? nsEl : sel;
             target.style.borderColor = '#ef4444';
             target.style.boxShadow   = '0 0 0 3px rgba(239,68,68,.15)';
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
-        // Set structured hidden fields
-        document.getElementById('vkbs_slot_hidden').value    = slot ? slot.value : 'Not selected';
+        document.getElementById('vkbs_slot_hidden').value     = slot ? slot.value : 'Not selected';
         document.getElementById('vkbs_children_hidden').value = children;
 
-        // Include WhatsApp in message if provided
-        var wa   = document.getElementById('vkbs_whatsapp') ? document.getElementById('vkbs_whatsapp').value.trim() : '';
-        var slot = document.querySelector('input[name="vkbs_slot"]:checked');
-
-        // Build human-readable message
-        var msg = 'Pickup Ghat: '         + pickup
-                + '\nAdults: '            + persons
-                + '\nChildren (<10 yrs): '+ children;
+        var msg = 'Pickup Ghat: '          + pickup
+                + '\nAdults: '             + persons
+                + '\nChildren (<10 yrs): ' + children;
         if (wa && wa !== document.getElementById('vkbs_phone').value) msg += '\nWhatsApp: ' + wa;
         if (notes) msg += '\nSpecial Notes: ' + notes;
         if (slot) { msg = 'Time Slot: ' + slot.value + '\n' + msg; }
@@ -1192,8 +1238,10 @@
         document.getElementById('vkbs_message_hidden').value = msg.trim();
         document.getElementById('vkbs_pickup').style.borderColor = '';
         document.getElementById('vkbs_pickup').style.boxShadow   = '';
+        @endif
     });
 
+    @if(!$isDevDiwali)
     /* ── Set default date to today ── */
     var dateEl = document.getElementById('vkbs_date');
     if (dateEl && !dateEl.value) {
@@ -1202,6 +1250,7 @@
         var dd = String(d.getDate()).padStart(2,'0');
         dateEl.value = d.getFullYear()+'-'+mm+'-'+dd;
     }
+    @endif
 
     /* ── YouTube popup ── */
     var ytModal   = document.getElementById('vkytModal');
