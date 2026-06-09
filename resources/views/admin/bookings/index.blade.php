@@ -1025,9 +1025,20 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     <div class="bkt-head">
       <div class="bkt-head-left">
         <i data-feather="list" style="width:18px;height:18px;"></i>
-        <span>Bookings</span>
+        @if(!$activeCat)
+          <span>Stay &amp; Tour Bookings</span>
+        @else
+          <span>Bookings</span>
+        @endif
         @if($bookings->total() > 0)
           <span style="font-size:.75rem;font-weight:600;color:#6B7280;margin-left:4px;">({{ $bookings->total() }})</span>
+        @endif
+        @if(!$activeCat && ($recentBoatBookings->count() || $recentCabBookings->count()))
+          <span style="font-size:.7rem;color:#9CA3AF;margin-left:8px;">
+            — scroll down for
+            @if($recentBoatBookings->count()) ⛵ {{ $recentBoatBookings->count() }} Boat @endif
+            @if($recentCabBookings->count()) 🚗 {{ $recentCabBookings->count() }} Cab @endif
+          </span>
         @endif
       </div>
       <a href="{{ route('bookings.create-direct') }}" class="bkt-new">
