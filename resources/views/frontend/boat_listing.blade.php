@@ -268,6 +268,42 @@
     </div>
 </div>
 
+@php
+    $now            = now();
+    $devDiwaliStart = \Carbon\Carbon::parse('2025-11-05');
+    $devDiwaliEnd   = \Carbon\Carbon::parse('2026-11-24')->endOfDay();
+    $isDevDiwali    = optional($sub_category)->slug === 'dev-diwali-booking'
+                      && $now->between($devDiwaliStart, $devDiwaliEnd);
+@endphp
+
+@if($isDevDiwali)
+<div class="dd-banner">
+    <div class="container">
+        <div class="dd-banner-inner">
+            <div class="dd-banner-left">
+                <span class="dd-flame">🪔</span>
+                <div>
+                    <div class="dd-banner-title">Dev Diwali 2025–2026 Special Pricing</div>
+                    <div class="dd-banner-sub">Festival price per person active · 05 Nov 2025 – 24 Nov 2026</div>
+                </div>
+            </div>
+            <div class="dd-banner-badge">Dev Diwali Price / Person</div>
+        </div>
+    </div>
+</div>
+<style>
+.dd-banner{background:linear-gradient(135deg,#7c2d12 0%,#b45309 40%,#d97706 70%,#f59e0b 100%);padding:14px 0;}
+.dd-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.dd-banner-left{display:flex;align-items:center;gap:12px;}
+.dd-flame{font-size:1.8rem;animation:ddFlicker .9s ease-in-out infinite alternate;}
+@keyframes ddFlicker{0%{transform:scale(1) rotate(-3deg);}100%{transform:scale(1.1) rotate(3deg);}}
+.dd-banner-title{font-size:.95rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
+.dd-banner-sub{font-size:.75rem;color:rgba(255,255,255,.8);font-weight:500;margin-top:2px;}
+.dd-banner-badge{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);color:#fff;font-size:.75rem;font-weight:800;padding:6px 16px;border-radius:30px;white-space:nowrap;letter-spacing:.03em;text-transform:uppercase;}
+@media(max-width:600px){.dd-banner-badge{display:none;}.dd-banner-title{font-size:.85rem;}.dd-banner-sub{font-size:.68rem;}}
+</style>
+@endif
+
 {{-- ── Trust Strip ── --}}
 <div class="bl-trust-strip">
     <div class="container">
@@ -402,10 +438,18 @@
                                 <span class="bl-price-old">₹{{ number_format($product->base_price) }}</span>
                                 @endif
                                 <span class="bl-price" itemprop="price" content="{{ $product->discounted_price }}">₹{{ number_format($product->discounted_price) }}</span>
+                                @if($isDevDiwali)
+                                <span class="bl-price-unit" style="color:#b45309;font-weight:700;">🪔 Dev Diwali / person</span>
+                                @else
                                 <span class="bl-price-unit">/ trip</span>
+                                @endif
                             @elseif(($product->base_price ?? 0) > 0)
                                 <span class="bl-price" itemprop="price" content="{{ $product->base_price }}">₹{{ number_format($product->base_price) }}</span>
+                                @if($isDevDiwali)
+                                <span class="bl-price-unit" style="color:#b45309;font-weight:700;">🪔 Dev Diwali / person</span>
+                                @else
                                 <span class="bl-price-unit">/ trip</span>
+                                @endif
                             @else
                                 <span class="bl-price-unit" style="font-style:italic;color:#aaa;">Price on request</span>
                             @endif
