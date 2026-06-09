@@ -193,6 +193,8 @@
   /* form fields inside nb-card-body */
   .nb-label{font-size:.68rem;margin-bottom:4px;}
   .nb-input{padding:8px 11px !important;font-size:.82rem !important;border-radius:8px !important;}
+  /* restore phone-prefix padding overridden by nb-input reset above */
+  .nb-input-phone{padding-left:40px !important;}
   .row.g-3{--bs-gutter-x:10px;--bs-gutter-y:10px;}
   .row.g-3>[class*=col-md]{padding-left:5px;padding-right:5px;}
 
@@ -203,11 +205,20 @@
   .nb-pay-sum-row{font-size:.75rem;}
   .nb-balance-badge{font-size:.6rem;padding:2px 6px;}
 
-  /* hotel/stay cards */
-  .hotel-card{padding:12px 8px;border-radius:10px;}
-  .hotel-card-icon{font-size:1.6rem;margin-bottom:5px;}
-  .hotel-card-name{font-size:.72rem;}
-  .hotel-card-price{font-size:.85rem;}
+  /* hotel cards: compact horizontal list on mobile */
+  #hotel-cards-grid{grid-template-columns:1fr !important;gap:6px !important;}
+  .hotel-card{
+    display:grid;grid-template-columns:36px 1fr;grid-template-rows:auto auto;
+    align-items:center;column-gap:10px;text-align:left;
+    padding:10px 12px;border-radius:10px;transform:none !important;
+  }
+  .hotel-card:hover{transform:none !important;}
+  .hotel-card-icon{grid-column:1;grid-row:1/3;font-size:1.4rem;margin-bottom:0;line-height:1;text-align:center;}
+  .hotel-card-name{grid-column:2;grid-row:1;font-size:.82rem;margin-bottom:1px;}
+  .hotel-card-price{grid-column:2;grid-row:2;font-size:.85rem;}
+  .hotel-card-check{top:50%;transform:translateY(-50%);}
+  .hotel-card-del{top:50%;transform:translateY(-50%);}
+
   .stay-counter-wrap{padding:5px 7px;}
   .stay-counter-btn{width:28px;height:28px;font-size:1rem;}
   .stay-counter-val{font-size:1.1rem;min-width:24px;}
@@ -222,10 +233,11 @@
   .nb-card-head{padding:10px 12px;}
   .nb-card{border-radius:10px;margin-bottom:10px;}
   .nb-input{padding:7px 10px !important;font-size:.8rem !important;}
+  .nb-input-phone{padding-left:40px !important;}
   .nb-label{font-size:.65rem;}
   .nb-sidebar-card{padding:10px;}
-  .hotel-card{padding:10px 7px;}
-  .hotel-card-icon{font-size:1.4rem;}
+  .hotel-card{padding:9px 10px;}
+  .hotel-card-icon{font-size:1.3rem;}
   .stay-counter-btn{width:26px;height:26px;}
   .btn-save{padding:9px 16px;font-size:.82rem;border-radius:8px;}
 }
@@ -234,8 +246,9 @@
   .nb-card-body{padding:8px;}
   .nb-card-head{padding:8px 10px;}
   .nb-input{padding:6px 9px !important;font-size:.78rem !important;}
+  .nb-input-phone{padding-left:40px !important;}
   .nb-label{font-size:.63rem;}
-  .hotel-card{padding:8px 6px;}
+  .hotel-card{padding:8px 10px;}
   .stay-counter-btn{width:24px;height:24px;font-size:.9rem;}
   .btn-save{font-size:.8rem;}
 }
