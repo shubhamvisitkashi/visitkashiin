@@ -446,25 +446,28 @@
 .bkt-assigned.empty { color:#9CA3AF; }
 
 /* Action buttons */
-.bkt-acts { display:grid; grid-template-columns:repeat(2,38px); gap:6px; }
+.bkt-acts { display:flex; gap:4px; align-items:center; justify-content:flex-end; flex-wrap:nowrap; }
 .bkt-act {
-  width:100%; height:36px; border-radius:9px; border:none;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition:all .15s ease;
-  text-decoration:none;
+  width:30px; height:30px; border-radius:8px;
+  display:inline-flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .18s ease;
+  text-decoration:none !important; border:1.5px solid transparent; position:relative;
+  flex-shrink:0;
 }
-.bkt-act:hover { transform:translateY(-1px); }
-.bkt-act [data-feather], .bkt-act svg { width:15px; height:15px; flex-shrink:0; }
-.bkt-act-view  { background:#F3F4F6; color:#374151; }
-.bkt-act-view:hover  { background:#E5E7EB; }
-.bkt-act-edit  { background:#F3F4F6; color:#374151; }
-.bkt-act-edit:hover  { background:#E5E7EB; }
-.bkt-act-wa    { background:#22C55E; color:#fff; }
-.bkt-act-wa:hover    { background:#16A34A; box-shadow:0 4px 10px rgba(34,197,94,.35); }
-.bkt-act-print { background:#EEF2FF; color:#4F46E5; }
-.bkt-act-print:hover { background:#E0E7FF; }
-.bkt-act-del   { background:#FEE2E2; color:#EF4444; }
-.bkt-act-del:hover   { background:#FECACA; }
+.bkt-act:hover { transform:translateY(-2px); }
+.bkt-act [data-feather], .bkt-act svg { width:14px; height:14px; flex-shrink:0; }
+.bkt-act-view  { background:#EFF6FF; color:#1D4ED8; border-color:#BFDBFE; }
+.bkt-act-view:hover  { background:#DBEAFE; box-shadow:0 3px 10px rgba(29,78,216,.22); }
+.bkt-act-edit  { background:#F5F3FF; color:#7C3AED; border-color:#DDD6FE; }
+.bkt-act-edit:hover  { background:#EDE9FE; box-shadow:0 3px 10px rgba(124,58,237,.22); }
+.bkt-act-wa    { background:#DCFCE7; color:#15803D; border-color:#BBF7D0; }
+.bkt-act-wa:hover    { background:#22C55E; color:#fff; border-color:#16A34A; box-shadow:0 3px 10px rgba(22,163,74,.35); }
+.bkt-act-print { background:#F0FDF4; color:#059669; border-color:#BBF7D0; }
+.bkt-act-print:hover { background:#D1FAE5; box-shadow:0 3px 10px rgba(5,150,105,.22); }
+.bkt-act-pdf   { background:#FFFBEB; color:#B45309; border-color:#FDE68A; }
+.bkt-act-pdf:hover   { background:#FEF3C7; box-shadow:0 3px 10px rgba(180,83,9,.22); }
+.bkt-act-del   { background:#FEF2F2; color:#DC2626; border-color:#FECACA; }
+.bkt-act-del:hover   { background:#FEE2E2; box-shadow:0 3px 10px rgba(220,38,38,.22); }
 
 /* Empty state */
 .bkt-empty { text-align:center; padding:60px 24px; color:#9CA3AF; }
@@ -566,24 +569,39 @@
 
   /* Actions row */
   .bkt-table tbody td:not([data-label]):not(:first-child) {
-    background:#FAFBFF;
-    border-top:1px solid #F0F0F5;
-    padding:10px 16px 12px;
+    background:#F8FAFF;
+    border-top:1px solid #EEF0F8;
+    padding:10px 14px 12px;
     border-bottom:none !important;
   }
   .bkt-acts {
     width:100%;
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
+    display:flex;
     gap:6px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
   }
   .bkt-acts::before { display:none; }
   .bkt-act {
-    height:42px; border-radius:10px;
-    font-size:.7rem; gap:3px;
-    flex-direction:column; justify-content:center;
+    width:auto; height:34px;
+    border-radius:20px;
+    padding:0 12px;
+    font-size:.72rem; font-weight:700;
+    gap:5px; flex-direction:row;
+    display:inline-flex; align-items:center;
+    white-space:nowrap;
   }
-  .bkt-act [data-feather], .bkt-act svg { width:15px; height:15px; }
+  .bkt-act::after { display:none !important; }
+  .bkt-act [data-feather], .bkt-act svg { width:13px; height:13px; }
+  /* mobile labels shown via data-tip */
+  .bkt-act[data-tip]::before{
+    content:attr(data-tip);
+    font-size:.7rem; font-weight:700; line-height:1;
+  }
+  .bkt-act[title]::before{
+    content:attr(title);
+    font-size:.7rem; font-weight:700; line-height:1;
+  }
 
   /* Boat/Cab section card table on mobile */
   .bkt-card { border-radius:14px; }
@@ -705,22 +723,11 @@
 .bkb-amber{background:#D97706;color:#fff;}
 .bkb-gray{background:rgba(255,255,255,.15);color:#fff;}
 
-/* ══ Enhanced Action Buttons ══ */
-.bkt-acts{display:flex;gap:3px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;}
-.bkt-act{width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none !important;border:none;transition:.15s;position:relative;}
-.bkt-act svg,.bkt-act i[data-feather]{width:13px;height:13px;}
-.bkt-act-view{background:#EFF6FF;color:#1D4ED8;}
-.bkt-act-edit{background:#F5F3FF;color:#7C3AED;}
-.bkt-act-print{background:#F0FDF4;color:#059669;}
-.bkt-act-del{background:#FEF2F2;color:#DC2626;}
-.bkt-act-wa{background:#DCFCE7;color:#16A34A;}
-.bkt-act-pdf{background:#FEF3C7;color:#D97706;}
-.bkt-act:hover{opacity:.8;transform:scale(1.1);}
-
-/* Tooltip */
-.bkt-act[data-tip]{position:relative;}
-.bkt-act[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:#1F2937;color:#fff;font-size:.65rem;font-weight:600;padding:3px 7px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;}
-.bkt-act[data-tip]:hover::after{opacity:1;}
+/* ══ Tooltip (desktop only) ══ */
+@media(min-width:901px){
+  .bkt-act[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1F2937;color:#fff;font-size:.65rem;font-weight:600;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+  .bkt-act[data-tip]:hover::after{opacity:1;}
+}
 
 /* ══ Checkbox ══ */
 .bk-row-check{width:16px;height:16px;accent-color:#4F46E5;cursor:pointer;}
@@ -1437,13 +1444,13 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                 <td style="display:none;"></td>
                 <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
                   <div class="bkt-acts">
-                    <a href="{{ route('boat-booking.show', $bk->booking_id) }}" class="bkt-act bkt-act-view" title="View">
+                    <a href="{{ route('boat-booking.show', $bk->booking_id) }}" class="bkt-act bkt-act-view" data-tip="View">
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>
-                    <a href="{{ route('boat-booking.edit', $bk->booking_id) }}" class="bkt-act bkt-act-edit" title="Edit">
+                    <a href="{{ route('boat-booking.edit', $bk->booking_id) }}" class="bkt-act bkt-act-edit" data-tip="Edit">
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </a>
-                    <a href="{{ route('boat-booking.voucher', $bk->booking_id) }}" class="bkt-act bkt-act-print" title="Voucher">
+                    <a href="{{ route('boat-booking.voucher', $bk->booking_id) }}" class="bkt-act bkt-act-print" data-tip="Voucher">
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     </a>
                   </div>
@@ -1499,10 +1506,10 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                 <td style="display:none;"></td>
                 <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
                   <div class="bkt-acts">
-                    <a href="{{ route('cab-bookings.show', $cb->id) }}" class="bkt-act bkt-act-view" title="View">
+                    <a href="{{ route('cab-bookings.show', $cb->id) }}" class="bkt-act bkt-act-view" data-tip="View">
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>
-                    <a href="{{ route('cab-bookings.edit', $cb->id) }}" class="bkt-act bkt-act-edit" title="Edit">
+                    <a href="{{ route('cab-bookings.edit', $cb->id) }}" class="bkt-act bkt-act-edit" data-tip="Edit">
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </a>
                   </div>
