@@ -303,7 +303,6 @@ body{background:var(--cb-bg);}
     <table class="cb-tbl">
       <thead>
         <tr>
-          <th>Booking ID</th>
           <th>Customer</th>
           <th>Route</th>
           <th>Vehicle</th>
@@ -317,12 +316,6 @@ body{background:var(--cb-bg);}
       <tbody>
         @foreach($query as $b)
         <tr>
-          <td data-label="Booking ID">
-            <a href="{{ route('cab-bookings.show', $b->id) }}" style="font-weight:700;color:#4F46E5;text-decoration:none;font-size:.8rem;">
-              {{ $b->booking_number }}
-            </a>
-            <div style="font-size:.68rem;color:#94A3B8;">{{ $b->created_at->format('d M Y') }}</div>
-          </td>
           <td data-label="Customer">
             <div class="cb-cust-name">{{ $b->customer_name }}</div>
             <div class="cb-cust-phone">📞 {{ $b->customer_phone }}</div>

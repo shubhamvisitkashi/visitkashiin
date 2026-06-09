@@ -445,7 +445,6 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
     <table class="bb-tbl">
       <thead>
         <tr>
-          <th>Booking ID</th>
           <th>Guest</th>
           <th>Boat</th>
           <th>Type / Ghat</th>
@@ -470,14 +469,6 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
           $boatEmoji  = $boatEmojis[$boatName] ?? '⛵';
         @endphp
         <tr>
-          {{-- Booking ID --}}
-          <td>
-            <span class="bb-bid">{{ $bk->booking_id }}</span>
-            <div style="font-size:.62rem;color:var(--bb-muted);margin-top:3px;">
-              {{ $bk->created_at ? \Carbon\Carbon::parse($bk->created_at)->format('d M') : '' }}
-            </div>
-          </td>
-
           {{-- Guest --}}
           <td>
             <div class="bb-guest">
@@ -615,7 +606,6 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
           <div style="font-size:.7rem;color:var(--bb-muted);margin-top:1px;">📞 {{ $bk->phone }}</div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          <span class="bb-bid" style="display:block;margin-bottom:4px;">{{ $bk->booking_id }}</span>
           <span class="bs bs-{{ $payStatus }}">{{ ucfirst($payStatus) }}</span>
         </div>
       </div>
