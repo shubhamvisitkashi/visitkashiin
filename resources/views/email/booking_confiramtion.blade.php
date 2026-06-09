@@ -676,7 +676,7 @@
                 <div class="company-unit">(A unit of Albino Stays Pvt. Ltd.)</div>
             </div>
             <h1 class="title">Dev Diwali Boat Booking</h1>
-            <h1 class="title">05 Nov 2025</h1>
+            <h1 class="title">24 Nov 2026</h1>
             <div class="subtitle">(E-Ticket: Boarding Pass)</div>
             <p class="subtitle">
                 Booking ID:

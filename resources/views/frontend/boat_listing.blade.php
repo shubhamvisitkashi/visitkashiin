@@ -270,12 +270,120 @@
 
 @php
     $now            = now();
-    $devDiwaliStart = \Carbon\Carbon::parse('2025-11-05');
     $devDiwaliEnd   = \Carbon\Carbon::parse('2026-11-24')->endOfDay();
     $isDevDiwali    = optional($sub_category)->slug === 'dev-diwali-booking'
-                      && $now->between($devDiwaliStart, $devDiwaliEnd);
+                      && $now->lte($devDiwaliEnd);
 @endphp
 
+
+{{-- ══ DEV DIWALI ENQUIRY FORM ════════════════════════════════════════════════ --}}
+@if($isDevDiwali)
+<style>
+.dd-enq-section{background:linear-gradient(150deg,#1a0800 0%,#4a1800 50%,#7c2d12 100%);padding:52px 0;}
+.dd-enq-row{display:grid;grid-template-columns:1fr 420px;gap:48px;align-items:center;}
+.dd-enq-info-wrap{color:#fff;}
+.dd-enq-flame{font-size:3.2rem;line-height:1;margin-bottom:16px;display:block;}
+.dd-enq-info-title{font-size:1.95rem;font-weight:900;line-height:1.15;margin:0 0 14px;background:linear-gradient(90deg,#fbbf24,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.dd-enq-info-sub{font-size:.95rem;color:rgba(255,255,255,.82);line-height:1.7;margin:0 0 24px;}
+.dd-enq-highlights{display:flex;flex-direction:column;gap:10px;}
+.dd-enq-hl{display:flex;align-items:flex-start;gap:10px;font-size:.87rem;color:rgba(255,255,255,.85);}
+.dd-enq-hl-icon{font-size:.95rem;flex-shrink:0;margin-top:2px;}
+.dd-enq-form-card{background:#fff;border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.dd-enq-form-title{font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:0 0 5px;}
+.dd-enq-date-pill{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#7c2d12,#b45309);color:#fff;font-size:.68rem;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:20px;letter-spacing:.04em;text-transform:uppercase;}
+.dd-enq-fld{margin-bottom:14px;}
+.dd-enq-fld label{display:block;font-size:.78rem;font-weight:700;color:#374151;margin-bottom:5px;}
+.dd-enq-fld input{width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:10px;font-size:.92rem;color:#1a1a1a;outline:none;transition:border-color .2s;}
+.dd-enq-fld input:focus{border-color:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,.12);}
+.dd-enq-fld input[readonly]{background:#f9f5f0;color:#555;cursor:default;}
+.dd-enq-counter{display:flex;align-items:center;border:1.5px solid #d1d5db;border-radius:10px;overflow:hidden;}
+.dd-enq-counter button{background:#f3f4f6;border:none;width:44px;height:44px;font-size:1.3rem;font-weight:700;cursor:pointer;color:#374151;transition:background .15s;flex-shrink:0;line-height:1;}
+.dd-enq-counter button:hover{background:#e5e7eb;}
+.dd-enq-counter input{flex:1;border:none;outline:none;text-align:center;font-size:1rem;font-weight:700;color:#1a1a1a;background:#fff;}
+.dd-enq-submit-btn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#b45309,#d97706);color:#fff;font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.02em;transition:opacity .2s,transform .2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.dd-enq-submit-btn:hover{opacity:.9;transform:translateY(-1px);}
+.dd-enq-wa-link{display:flex;align-items:center;justify-content:center;gap:8px;color:rgba(255,255,255,.7);font-size:.8rem;text-decoration:none;font-weight:600;margin-top:14px;transition:color .2s;}
+.dd-enq-wa-link:hover{color:#fff;text-decoration:none;}
+@media(max-width:920px){.dd-enq-row{grid-template-columns:1fr;gap:28px;}.dd-enq-info-wrap{text-align:center;}.dd-enq-highlights{align-items:center;}}
+@media(max-width:480px){.dd-enq-section{padding:36px 0;}.dd-enq-form-card{padding:22px;}}
+</style>
+
+<section class="dd-enq-section">
+    <div class="container">
+
+        @if(session('success'))
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 20px;text-align:center;color:#166534;font-size:.93rem;font-weight:700;margin-bottom:24px;">
+            ✓ {{ session('success') }}
+        </div>
+        @endif
+
+        <div class="dd-enq-row">
+
+            {{-- Left: Event highlights --}}
+            <div class="dd-enq-info-wrap">
+                <span class="dd-enq-flame">🪔</span>
+                <h2 class="dd-enq-info-title">Dev Diwali Varanasi<br>24 November 2026</h2>
+                <p class="dd-enq-info-sub">Watch 1 lakh+ earthen lamps illuminate the sacred Ghats of Varanasi on the most magical night of the year. Secure your exclusive Dev Diwali boat ride today.</p>
+                <div class="dd-enq-highlights">
+                    <div class="dd-enq-hl"><span class="dd-enq-hl-icon">🚤</span><span>Exclusive boat ride on the sacred Ganga River</span></div>
+                    <div class="dd-enq-hl"><span class="dd-enq-hl-icon">🪔</span><span>1 Lakh+ diyas lit on 84 Ghats of Varanasi</span></div>
+                    <div class="dd-enq-hl"><span class="dd-enq-hl-icon">📅</span><span>Fixed date — 24 November 2026 only</span></div>
+                    <div class="dd-enq-hl"><span class="dd-enq-hl-icon">📍</span><span>Ravidas Ghat pickup · Per person pricing</span></div>
+                    <div class="dd-enq-hl"><span class="dd-enq-hl-icon">✅</span><span>Instant WhatsApp confirmation</span></div>
+                </div>
+            </div>
+
+            {{-- Right: Enquiry form --}}
+            <div>
+                <div class="dd-enq-form-card">
+                    <div class="dd-enq-form-title">Book Dev Diwali Boat Ride</div>
+                    <div class="dd-enq-date-pill">🪔 24 November 2026 · Fixed Date</div>
+
+                    <form action="{{ route('enquiry.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="package_name" value="Dev Diwali Boat Booking – Varanasi 2026">
+                        <input type="hidden" name="arrival_date" value="2026-11-24">
+                        <input type="hidden" name="pickup_ghat"  value="Ravidas Ghat">
+                        <input type="hidden" name="time_slot"    value="">
+
+                        <div class="dd-enq-fld">
+                            <label>Full Name <span style="color:#dc2626;">*</span></label>
+                            <input type="text" name="name" required placeholder="Your name" value="{{ old('name') }}">
+                        </div>
+                        <div class="dd-enq-fld">
+                            <label>Phone <span style="color:#dc2626;">*</span></label>
+                            <input type="tel" name="phone" required placeholder="+91 XXXXX XXXXX" value="{{ old('phone') }}">
+                        </div>
+                        <div class="dd-enq-fld">
+                            <label>Travel Date</label>
+                            <input type="text" value="24 November 2026" readonly>
+                        </div>
+                        <div class="dd-enq-fld">
+                            <label>Persons</label>
+                            <div class="dd-enq-counter">
+                                <button type="button" onclick="ddCount(-1)">&#8722;</button>
+                                <input type="number" name="no_of_person" id="ddPersons" value="2" min="1" max="200" readonly>
+                                <button type="button" onclick="ddCount(1)">&#43;</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="dd-enq-submit-btn">
+                            <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Submit Enquiry
+                        </button>
+                    </form>
+                </div>
+
+                <a href="https://wa.me/917080109917?text=Hi%2C+I+want+to+book+Dev+Diwali+Boat+Ride+on+24+November+2026" target="_blank" rel="noopener noreferrer" class="dd-enq-wa-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.004 2.003C6.477 2.003 2 6.479 2 12.007c0 1.763.463 3.418 1.26 4.861L2 22l5.278-1.243A9.963 9.963 0 0012.004 22c5.527 0 10.004-4.477 10.004-10.004S17.531 2.003 12.004 2.003z"/></svg>
+                    WhatsApp: 7080109917
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+@endif
 
 {{-- ══ BOAT CARDS GRID ════════════════════════════════════════════════════════ --}}
 <div class="bl-grid-section">
@@ -563,6 +671,15 @@
 
 @push('scripts')
 <script>
+@if($isDevDiwali)
+window.ddCount = function(n) {
+    var el = document.getElementById('ddPersons');
+    if (!el) return;
+    var v = Math.max(1, Math.min(200, (parseInt(el.value) || 1) + n));
+    el.value = v;
+};
+@endif
+
 (function () {
 
     /* ── YouTube popup ── */
