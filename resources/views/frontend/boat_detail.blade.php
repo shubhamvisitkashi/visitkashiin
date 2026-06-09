@@ -704,7 +704,7 @@
                             <span class="vkbd-card-price-old">₹{{ number_format($product->base_price) }}</span>
                             @endif
                             <span class="vkbd-card-price">₹{{ number_format($displayPrice) }}</span>
-                            <span class="vkbd-card-price-sub">@if($isDevDiwali)/ person@else/ trip@endif</span>
+                            <span class="vkbd-card-price-sub">{{ $isDevDiwali ? '/ person' : '/ trip' }}</span>
                         </div>
                         @endif
                     </div>
@@ -1121,7 +1121,7 @@
     @endif
 
     document.getElementById('vkbs_pm').addEventListener('click', function () { if (persons > 1)   { persons--; renderPersons(); } });
-    document.getElementById('vkbs_pp').addEventListener('click', function () { if (persons < @if($isDevDiwali)200@else50@endif) { persons++; renderPersons(); } });
+    document.getElementById('vkbs_pp').addEventListener('click', function () { if (persons < {{ $isDevDiwali ? 200 : 50 }}) { persons++; renderPersons(); } });
 
     renderPersons();
 
