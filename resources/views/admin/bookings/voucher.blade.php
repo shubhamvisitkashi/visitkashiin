@@ -44,19 +44,51 @@ body{
 
 /* ── Header ──────────────────────────── */
 .vh-header{
-  background:linear-gradient(135deg,#0c4a6e 0%,#075985 45%,#0369a1 100%);
-  padding:26px 32px;
+  background:linear-gradient(135deg,#1e1048 0%,#3730a3 22%,#6d28d9 45%,#be185d 72%,#ea580c 100%);
+  padding:26px 32px 0;
   position:relative;overflow:hidden;flex-shrink:0;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
 .vh-header::before{
-  content:'';position:absolute;top:-40px;right:-40px;
-  width:160px;height:160px;border-radius:50%;
-  background:rgba(255,255,255,.06);
+  content:'';position:absolute;top:-55px;right:-55px;
+  width:230px;height:230px;border-radius:50%;
+  background:radial-gradient(circle,rgba(251,191,36,.30) 0%,rgba(251,191,36,.06) 65%,transparent 100%);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
 .vh-header::after{
-  content:'';position:absolute;bottom:-50px;left:80px;
+  content:'';position:absolute;bottom:20px;left:-30px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(6,182,212,.22) 0%,rgba(6,182,212,.04) 65%,transparent 100%);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+/* extra decorative circles */
+.vh-hbg-c1{
+  position:absolute;top:10px;left:38%;
+  width:100px;height:100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(236,72,153,.18) 0%,transparent 70%);
+  pointer-events:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.vh-hbg-c2{
+  position:absolute;bottom:-20px;right:22%;
   width:130px;height:130px;border-radius:50%;
-  background:rgba(14,165,233,.08);
+  background:radial-gradient(circle,rgba(99,102,241,.22) 0%,transparent 70%);
+  pointer-events:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.vh-hbg-dots{
+  position:absolute;inset:0;pointer-events:none;opacity:.07;
+  background-image:radial-gradient(circle,#fff 1px,transparent 1px);
+  background-size:18px 18px;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+/* mandala ring (SVG inline) */
+.vh-hbg-mandala{
+  position:absolute;right:-30px;top:50%;transform:translateY(-50%);
+  width:190px;height:190px;opacity:.1;pointer-events:none;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+/* inner content padding wrapper */
+.vh-header-pad{
+  position:relative;z-index:1;padding-bottom:20px;
 }
 
 .vh-header-inner{
@@ -81,11 +113,12 @@ body{
 
 /* ── Voucher title bar ────────────────── */
 .vh-title-bar{
-  background:rgba(0,0,0,.22);
-  border-top:1px solid rgba(255,255,255,.1);
-  padding:9px 28px;
+  background:linear-gradient(90deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.15) 50%,rgba(234,88,12,.35) 100%);
+  border-top:1px solid rgba(255,255,255,.12);
+  padding:9px 32px;
   display:flex;align-items:center;justify-content:space-between;
   position:relative;z-index:1;flex-shrink:0;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
 .vt-label{color:rgba(255,255,255,.6);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;}
 .vt-number{color:#fff;font-size:17px;font-weight:900;letter-spacing:.05em;font-family:monospace;}
@@ -189,27 +222,59 @@ body{
 
 /* ── Footer ──────────────────────────── */
 .vh-footer{
-  background:linear-gradient(135deg,#0c4a6e 0%,#075985 100%);
-  padding:12px 28px;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:16px;flex-shrink:0;
+  background:linear-gradient(135deg,#064e3b 0%,#065f46 28%,#0e7490 60%,#1e3a8a 100%);
+  padding:0 28px 12px;
+  position:relative;overflow:hidden;flex-shrink:0;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
-.vh-footer-left p{color:rgba(255,255,255,.6);font-size:9.5px;line-height:1.75;}
+/* footer wave top */
+.vh-footer-wave{
+  display:block;width:100%;margin-bottom:2px;
+  line-height:0;font-size:0;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.vh-footer-wave svg{display:block;width:100%;}
+.vh-footer-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;position:relative;z-index:1;
+}
+/* footer bg circles */
+.vh-footer::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle,rgba(251,191,36,.18) 0%,transparent 70%);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.vh-footer::after{
+  content:'';position:absolute;bottom:-30px;left:15%;
+  width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,rgba(6,182,212,.15) 0%,transparent 70%);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.vh-fbg-c1{
+  position:absolute;top:10px;left:40%;
+  width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle,rgba(167,243,208,.14) 0%,transparent 70%);
+  pointer-events:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.vh-footer-left p{color:rgba(255,255,255,.65);font-size:9.5px;line-height:1.75;}
 .vh-footer-left .vfl-name{color:#fff;font-weight:800;font-size:12px;margin-bottom:2px;}
 .vh-footer-right{text-align:right;}
-.vh-footer-right .sig-line{width:100px;border-top:1.5px solid rgba(255,255,255,.3);margin:0 0 4px auto;}
+.vh-footer-right .sig-line{width:100px;border-top:1.5px solid rgba(255,255,255,.35);margin:0 0 4px auto;}
 .vh-footer-right p{color:rgba(255,255,255,.5);font-size:9px;}
-.vh-footer-right .sig-label{color:rgba(255,255,255,.8);font-weight:700;font-size:10px;}
+.vh-footer-right .sig-label{color:rgba(255,255,255,.85);font-weight:700;font-size:10px;}
 
 .vh-stamp-area{
-  width:60px;height:60px;border:2px dashed rgba(255,255,255,.2);border-radius:50%;
+  width:60px;height:60px;border:2px dashed rgba(255,255,255,.25);border-radius:50%;
   display:flex;align-items:center;justify-content:center;margin:0 auto;
 }
-.vh-stamp-area p{color:rgba(255,255,255,.3);font-size:7px;text-align:center;}
+.vh-stamp-area p{color:rgba(255,255,255,.35);font-size:7px;text-align:center;}
 
 .powered-by{
-  background:#0a3d5c;text-align:center;padding:4px 0;
-  color:rgba(255,255,255,.25);font-size:7.5px;letter-spacing:.06em;flex-shrink:0;
+  background:linear-gradient(90deg,#052e16,#0f766e,#1e3a8a);
+  text-align:center;padding:5px 0;
+  color:rgba(255,255,255,.45);font-size:7.5px;letter-spacing:.08em;flex-shrink:0;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
 
 /* ── QR placeholder ──────────────────── */
@@ -281,18 +346,36 @@ body{
 
   /* ── Re-declare every background so "print without backgrounds" default can't win ── */
   .vh-header{
-    background:#075985 !important;
-    background:linear-gradient(135deg,#0c4a6e 0%,#075985 45%,#0369a1 100%) !important;
+    background:#3730a3 !important;
+    background:linear-gradient(135deg,#1e1048 0%,#3730a3 22%,#6d28d9 45%,#be185d 72%,#ea580c 100%) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .vh-hbg-dots{
+    opacity:.07 !important;
+    background-image:radial-gradient(circle,#fff 1px,transparent 1px) !important;
+    background-size:18px 18px !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .vh-hbg-c1,.vh-hbg-c2{
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .vh-title-bar{
-    background:#1e293b !important;
-    background:rgba(0,0,0,.28) !important;
+    background:rgba(0,0,0,.3) !important;
+    background:linear-gradient(90deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.15) 50%,rgba(234,88,12,.35) 100%) !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .vh-footer{
-    background:#075985 !important;
-    background:linear-gradient(135deg,#0c4a6e 0%,#075985 100%) !important;
+    background:#065f46 !important;
+    background:linear-gradient(135deg,#064e3b 0%,#065f46 28%,#0e7490 60%,#1e3a8a 100%) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .vh-fbg-c1{
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .powered-by{
+    background:#052e16 !important;
+    background:linear-gradient(90deg,#052e16,#0f766e,#1e3a8a) !important;
+    color:rgba(255,255,255,.55) !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
   .vh-section-head{
@@ -321,10 +404,6 @@ body{
     background:#0369a1 !important;color:#fff !important;
     -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
   }
-  .powered-by{
-    background:#0a3d5c !important;color:rgba(255,255,255,.5) !important;
-    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
-  }
 }
 </style>
 </head>
@@ -350,43 +429,75 @@ body{
 
   {{-- ── HEADER ──────────────────────────── --}}
   <div class="vh-header">
-    <div class="vh-header-inner">
-      <div class="vh-logo-area">
-        @if(websiteSetupValue('logo'))
-          <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
-               style="height:54px;border-radius:10px;background:#fff;padding:4px;" alt="Logo">
-        @else
-          <div class="vh-logo-circle">VK</div>
-        @endif
-        <div>
-          <div class="vh-company-name">VISIT KASHI</div>
-          <div class="vh-tagline">Varanasi's Most Trusted Travel Company</div>
-          <div style="color:rgba(255,255,255,.45);font-size:9.5px;margin-top:3px;">
-            B-21/19, Rathyatra Kamachha Road, Bhelupur, Varanasi – 221010
+
+    {{-- Background graphics (all print-safe: inline elements) --}}
+    <div class="vh-hbg-dots"></div>
+    <div class="vh-hbg-c1"></div>
+    <div class="vh-hbg-c2"></div>
+
+    {{-- Mandala ring graphic --}}
+    <svg class="vh-hbg-mandala" viewBox="0 0 190 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="95" cy="95" r="90" stroke="white" stroke-width="1.2"/>
+      <circle cx="95" cy="95" r="74" stroke="white" stroke-width=".8"/>
+      <circle cx="95" cy="95" r="56" stroke="white" stroke-width=".6"/>
+      <circle cx="95" cy="95" r="38" stroke="white" stroke-width=".5"/>
+      <circle cx="95" cy="95" r="20" stroke="white" stroke-width=".5"/>
+      <line x1="95" y1="5"  x2="95" y2="185" stroke="white" stroke-width=".4"/>
+      <line x1="5"  y1="95" x2="185" y2="95"  stroke="white" stroke-width=".4"/>
+      <line x1="31" y1="31" x2="159" y2="159" stroke="white" stroke-width=".4"/>
+      <line x1="159" y1="31" x2="31" y2="159" stroke="white" stroke-width=".4"/>
+      <line x1="95" y1="5"  x2="185" y2="95"  stroke="white" stroke-width=".3"/>
+      <line x1="185" y1="95" x2="95" y2="185" stroke="white" stroke-width=".3"/>
+      <line x1="95" y1="185" x2="5"  y2="95"  stroke="white" stroke-width=".3"/>
+      <line x1="5"  y1="95"  x2="95" y2="5"   stroke="white" stroke-width=".3"/>
+      <polygon points="95,15 115,75 180,75 128,113 148,173 95,135 42,173 62,113 10,75 75,75" stroke="white" stroke-width=".5" fill="none"/>
+    </svg>
+
+    {{-- Content --}}
+    <div class="vh-header-pad">
+      <div class="vh-header-inner">
+        <div class="vh-logo-area">
+          @if(websiteSetupValue('logo'))
+            <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
+                 style="height:54px;border-radius:10px;background:#fff;padding:4px;" alt="Logo">
+          @else
+            <div class="vh-logo-circle">VK</div>
+          @endif
+          <div>
+            <div class="vh-company-name">VISIT KASHI</div>
+            <div class="vh-tagline">Varanasi's Most Trusted Travel Company</div>
+            <div style="color:rgba(255,255,255,.45);font-size:9.5px;margin-top:3px;">
+              B-21/19, Rathyatra Kamachha Road, Bhelupur, Varanasi – 221010
+            </div>
           </div>
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div class="vh-contact-block">
-          <p class="vh-phone">📞 7080109917 | 7080109918</p>
-          <p class="vh-web">🌐 www.visitkashi.in</p>
-          <p>✉️ info@visitkashi.in</p>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="vh-contact-block">
+            <p class="vh-phone">📞 7080109917 | 7080109918</p>
+            <p class="vh-web">🌐 www.visitkashi.in</p>
+            <p>✉️ info@visitkashi.in</p>
+          </div>
+          {{-- QR Code --}}
+          @php $qrData = 'https://visitkashi.in/verify/' . $booking->booking_number; @endphp
+          @if(class_exists('\SimpleSoftwareIO\QrCode\Facades\QrCode'))
+          <div class="qr-box">
+            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(62)->generate($qrData) !!}
+          </div>
+          @else
+          <div class="qr-box" style="background:#e0f2fe;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:8px;color:#0369a1;text-align:center;font-weight:700;padding:4px;">QR<br>CODE</span>
+          </div>
+          @endif
         </div>
-        {{-- QR Code --}}
-        @php
-          $qrData = 'https://visitkashi.in/verify/' . $booking->booking_number;
-        @endphp
-        @if(class_exists('\SimpleSoftwareIO\QrCode\Facades\QrCode'))
-        <div class="qr-box">
-          {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(62)->generate($qrData) !!}
-        </div>
-        @else
-        <div class="qr-box" style="background:#e0f2fe;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:8px;color:#0369a1;text-align:center;font-weight:700;padding:4px;">QR<br>CODE</span>
-        </div>
-        @endif
       </div>
     </div>
+
+    {{-- Wave divider at bottom of header --}}
+    <svg style="display:block;width:100%;margin-bottom:-1px;position:relative;z-index:1;" viewBox="0 0 900 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C150,28 300,0 450,18 C600,36 750,6 900,18 L900,28 L0,28 Z" fill="rgba(0,0,0,.28)"/>
+      <path d="M0,8 C180,32 360,4 540,20 C720,36 810,10 900,22 L900,28 L0,28 Z" fill="rgba(234,88,12,.20)"/>
+    </svg>
+
   </div>
 
   {{-- ── TITLE BAR ────────────────────────── --}}
@@ -651,28 +762,40 @@ body{
 
   {{-- ── FOOTER ───────────────────────────── --}}
   <div class="vh-footer">
-    <div class="vh-footer-left">
-      <div class="vfl-name">Thank you for choosing Visit Kashi!</div>
-      <p>Customer Support: 7080109917 &nbsp;|&nbsp; 7080109918</p>
-      <p>info@visitkashi.in &nbsp;|&nbsp; www.visitkashi.in</p>
-      <p style="margin-top:4px;">B-21/19, Rathyatra Kamachha Road, Bhelupur, Varanasi – 221010</p>
+
+    {{-- Wave at top of footer --}}
+    <div class="vh-footer-wave">
+      <svg viewBox="0 0 900 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <path d="M0,10 C200,-4 400,24 600,10 C750,0 830,16 900,8 L900,0 L0,0 Z" fill="rgba(255,255,255,.06)"/>
+        <path d="M0,18 C250,2 500,28 750,14 C830,8 870,20 900,14 L900,0 L0,0 Z" fill="rgba(16,185,129,.12)"/>
+      </svg>
     </div>
-    <div style="display:flex;align-items:center;gap:24px;">
-      <div style="text-align:center;">
-        <div class="vh-stamp-area">
-          <p>OFFICIAL<br>STAMP</p>
-        </div>
+
+    {{-- Background decorative circle --}}
+    <div class="vh-fbg-c1"></div>
+
+    <div class="vh-footer-inner">
+      <div class="vh-footer-left">
+        <div class="vfl-name">Thank you for choosing Visit Kashi!</div>
+        <p>Customer Support: 7080109917 &nbsp;|&nbsp; 7080109918</p>
+        <p>info@visitkashi.in &nbsp;|&nbsp; www.visitkashi.in</p>
+        <p style="margin-top:4px;">B-21/19, Rathyatra Kamachha Road, Bhelupur, Varanasi – 221010</p>
       </div>
-      <div class="vh-footer-right">
-        <div style="height:36px;"></div>
-        <div class="sig-line"></div>
-        <div class="sig-label">Authorized Signatory</div>
-        <p>Visit Kashi Travel Services</p>
+      <div style="display:flex;align-items:center;gap:24px;">
+        <div style="text-align:center;">
+          <div class="vh-stamp-area"><p>OFFICIAL<br>STAMP</p></div>
+        </div>
+        <div class="vh-footer-right">
+          <div style="height:36px;"></div>
+          <div class="sig-line"></div>
+          <div class="sig-label">Authorized Signatory</div>
+          <p>Visit Kashi Travel Services</p>
+        </div>
       </div>
     </div>
   </div>
   <div class="powered-by">
-    Powered by VisitKashi CRM &nbsp;·&nbsp; Generated on {{ now()->format('d M Y, h:i A') }}
+    ✦ &nbsp;Powered by VisitKashi CRM &nbsp;·&nbsp; Generated on {{ now()->format('d M Y, h:i A') }} &nbsp;·&nbsp; www.visitkashi.in &nbsp;✦
   </div>
 
 </div>{{-- /voucher-wrap --}}
