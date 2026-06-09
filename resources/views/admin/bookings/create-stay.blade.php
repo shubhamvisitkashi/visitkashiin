@@ -142,9 +142,24 @@
 
 /* ── Amount rows ──────────────────────────────── */
 .sb-amt-row { margin-bottom:14px; }
-.sb-rupee-wrap { position:relative; }
-.sb-rupee { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:.85rem; font-weight:700; color:#475569; pointer-events:none; }
-.sb-rupee-input { padding-left:28px !important; }
+.sb-rupee-wrap {
+  display:flex; align-items:stretch;
+  border:1.5px solid #E2E8F0; border-radius:11px; overflow:hidden; background:#FAFBFF;
+  transition:border-color .2s, box-shadow .2s;
+}
+.sb-rupee-wrap:focus-within { border-color:#0D9488; box-shadow:0 0 0 3px rgba(13,148,136,.12); }
+.sb-rupee {
+  display:flex; align-items:center; padding:0 10px 0 12px;
+  font-size:.85rem; font-weight:700; color:#475569;
+  background:#F1F5F9; border-right:1.5px solid #E2E8F0;
+  white-space:nowrap; flex-shrink:0; pointer-events:none;
+}
+.sb-rupee-input {
+  flex:1; min-width:0;
+  border:none !important; border-radius:0 !important;
+  box-shadow:none !important; outline:none !important;
+  padding:9px 12px !important; background:transparent !important;
+}
 
 /* ── Pay summary ──────────────────────────────── */
 .pay-box { background:#0F172A; border-radius:14px; overflow:hidden; margin:14px 0; }
@@ -186,10 +201,66 @@
 .plan-preview-lbl { font-size:.62rem; font-weight:800; color:#0F766E; text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px; }
 .plan-preview-text { font-size:.8rem; color:#134E4A; font-weight:600; line-height:1.7; }
 
+/* ── Mobile sticky bar ─────────────────────────── */
+.sb-mob-bar {
+  display:none;
+  position:fixed; bottom:58px; left:0; right:0; z-index:999;
+  background:#fff; border-top:2px solid #E2E8F0;
+  padding:10px 16px; box-shadow:0 -4px 20px rgba(0,0,0,.12);
+  align-items:center; gap:12px;
+}
+.sb-mob-bar-info { flex:1; min-width:0; }
+.sb-mob-bar-lbl { font-size:.62rem; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:.06em; }
+.sb-mob-bar-amt { font-size:1.15rem; font-weight:900; color:#0F766E; line-height:1.2; }
+.sb-mob-bar-sub { font-size:.65rem; color:#94A3B8; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sb-mob-submit {
+  display:flex; align-items:center; gap:6px;
+  background:linear-gradient(135deg,#0F766E,#0D9488); color:#fff;
+  border:none; border-radius:12px; padding:10px 20px;
+  font-size:.85rem; font-weight:800; cursor:pointer; flex-shrink:0;
+  box-shadow:0 4px 14px rgba(13,148,136,.35); letter-spacing:-.01em;
+}
+.sb-mob-submit svg { width:16px; height:16px; }
+
+@media(max-width:1100px){
+  .sb-mob-bar { display:flex; }
+  .sb-sidebar .sb-submit { display:none; }
+}
+
 @media(max-width:768px){
-  .sb-page { padding:12px 12px 40px; }
+  .sb-page { padding:12px 12px 130px; }
   .sb-header { flex-direction:column; align-items:flex-start; gap:12px; margin-top:56px; }
-  .hotel-row-name { font-size:.82rem; }
+
+  /* Hotel cards → single-column compact list */
+  .hotel-list { grid-template-columns:1fr !important; gap:8px !important; }
+  .hotel-row {
+    flex-direction:row !important; text-align:left !important;
+    padding:10px 14px !important; gap:12px; align-items:center;
+  }
+  .hotel-row:hover, .hotel-row.selected { transform:none !important; }
+  .hotel-row-icon {
+    width:40px !important; height:40px !important;
+    font-size:1.2rem !important; margin-bottom:0 !important;
+    border-radius:10px !important; flex-shrink:0;
+  }
+  .hotel-row-info { flex:1; min-width:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .hotel-row-name { font-size:.8rem; margin-bottom:0; }
+  .hotel-row-meta { margin-bottom:0; }
+  .hotel-row-price { margin-top:0; margin-left:auto; text-align:right; flex-shrink:0; }
+  .hotel-row-amt { font-size:.85rem; }
+
+  /* Check-in/out → checkin+nights on row1, checkout full-width on row2 */
+  .sb-dates-row { flex-wrap:wrap !important; gap:8px !important; }
+  .sb-dates-row > div:first-child { flex:1 0 140px !important; }
+  .sb-dates-row > .nights-badge { flex-shrink:0 !important; align-self:center; }
+  .sb-dates-row > div:last-child { flex:0 0 100% !important; }
+
+  /* Date card inputs a bit smaller */
+  .date-card input[type=date], .date-card input[type=time] { font-size:.82rem !important; }
+
+  /* Meal pills full-width on mobile */
+  .meal-pills { gap:6px; }
+  .meal-pill { flex:1; justify-content:center; padding:7px 8px; }
 }
 </style>
 
@@ -420,7 +491,7 @@
           <div class="sb-card-body">
 
             {{-- Check-in / Nights / Check-out --}}
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+            <div class="sb-dates-row" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
               <div style="flex:1;">
                 <div class="sb-label" style="margin-bottom:6px;">Check-in</div>
                 <div class="date-card" id="checkinCard">
@@ -668,6 +739,20 @@
       </div>{{-- /sidebar --}}
 
     </div>{{-- /layout --}}
+
+    {{-- Mobile sticky submit bar --}}
+    <div class="sb-mob-bar">
+      <div class="sb-mob-bar-info">
+        <div class="sb-mob-bar-lbl">Balance Due</div>
+        <div class="sb-mob-bar-amt" id="sbMobBal">₹0.00</div>
+        <div class="sb-mob-bar-sub" id="sbMobSub">Total: ₹0</div>
+      </div>
+      <button type="submit" class="sb-mob-submit" form="stayForm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirm
+      </button>
+    </div>
+
   </form>
 
 </div>
@@ -793,6 +878,17 @@ function recalcBalance() {
   const badge = document.getElementById('payBadge');
   badge.className = 'pay-badge ' + (bal <= 0 ? 'paid' : (paid > 0 ? 'partial' : 'due'));
   badge.textContent = bal <= 0 ? 'PAID' : (paid > 0 ? 'PARTIAL' : 'DUE');
+
+  // sync mobile sticky bar
+  const mobBal = document.getElementById('sbMobBal');
+  const mobSub = document.getElementById('sbMobSub');
+  if (mobBal) mobBal.textContent = fmt(bal);
+  if (mobSub) {
+    const p = ['Total: ' + fmt(total)];
+    if (discount > 0) p.push('Disc: ' + fmt(discount));
+    if (paid > 0) p.push('Adv: ' + fmt(paid));
+    mobSub.textContent = p.join(' · ');
+  }
 }
 
 function fmtDate(d) {
