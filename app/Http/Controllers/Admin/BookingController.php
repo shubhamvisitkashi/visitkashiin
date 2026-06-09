@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\BookingPayment;
+use App\Models\BoatBooking;
+use App\Models\CabBooking;
 use App\Services\GstInvoiceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -1040,6 +1042,121 @@ class BookingController extends Controller
                     ],
                 ];
             }
+        }
+
+        // ── BOAT BOOKINGS ────────────────────────────────────────────
+        $isAdmin = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+        $userId  = auth('admin')->id();
+
+        $boatBookings = BoatBooking::select([
+                'id', 'booking_id', 'name', 'phone', 'booking_date',
+                'booking_status', 'payment_status', 'total_amount', 'final_amount',
+                'created_by',
+            ])
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
+            ->when($start, fn($q) => $q->where('booking_date', '>=', $start))
+            ->when($end,   fn($q) => $q->where('booking_date', '<=', $end))
+            ->when(!$serviceTypeFilter, fn($q) => $q) // show boat bookings when no filter or "boat" filter
+            ->when($serviceTypeFilter && !str_contains(strtolower($serviceTypeFilter), 'boat'), fn($q) => $q->whereRaw('0=1'))
+            ->limit(300)
+            ->get();
+
+        foreach ($boatBookings as $boat) {
+            $date      = $boat->booking_date ? \Carbon\Carbon::parse($boat->booking_date)->format('Y-m-d') : null;
+            if (!$date) continue;
+
+            $paidAmt   = (float)($boat->payments_sum_amount ?? $boat->payments()->sum('amount') ?? 0);
+            $totalAmt  = (float)($boat->final_amount ?: $boat->total_amount);
+            $dueAmt    = max(0, $totalAmt - $paidAmt);
+            $payPct    = $totalAmt > 0 ? round(($paidAmt / $totalAmt) * 100, 1) : 0;
+
+            $color = $boat->booking_status === 'cancelled'
+                ? ['background' => '#EF4444', 'border' => '#DC2626']
+                : ['background' => '#0891B2', 'border' => '#0E7490']; // Cyan for boat
+
+            $events[] = [
+                'id'              => 'boat_' . $boat->id,
+                'title'           => ($boat->name ?? 'Guest') . ' - ⛵ Boat Ride',
+                'start'           => $date,
+                'backgroundColor' => $color['background'],
+                'borderColor'     => $color['border'],
+                'extendedProps'   => [
+                    'booking_number'     => $boat->booking_id ?? 'N/A',
+                    'guest_name'         => $boat->name ?? 'Guest',
+                    'contact'            => $boat->phone ?? 'N/A',
+                    'pax'                => 'N/A',
+                    'status'             => ucfirst(str_replace('_', ' ', $boat->booking_status)),
+                    'total_amount'       => $totalAmt,
+                    'paid_amount'        => $paidAmt,
+                    'due_amount'         => $dueAmt,
+                    'payment_percentage' => $payPct,
+                    'services'           => '⛵ Boat Booking',
+                    'service_types'      => [['name' => 'Boat', 'icon' => '⛵', 'color' => ['background' => '#0891B2', 'border' => '#0E7490']]],
+                    'short_plan'         => 'N/A',
+                    'created_by'         => 'Staff',
+                    'created_by_email'   => 'N/A',
+                    'service_date'       => $date,
+                    'booking_type'       => 'boat',
+                    'url'                => route('boat-booking.show', $boat->booking_id),
+                ],
+            ];
+        }
+
+        // ── CAB BOOKINGS ─────────────────────────────────────────────
+        $cabBookings = CabBooking::select([
+                'id', 'booking_number', 'customer_name', 'customer_phone',
+                'pickup_date', 'booking_status', 'payment_status',
+                'total_amount', 'advance_paid', 'pending_amount',
+                'vehicle_name', 'trip_type', 'created_by',
+            ])
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
+            ->when($start, fn($q) => $q->where('pickup_date', '>=', $start))
+            ->when($end,   fn($q) => $q->where('pickup_date', '<=', $end))
+            ->when($serviceTypeFilter && !str_contains(strtolower($serviceTypeFilter), 'cab')
+                                      && !str_contains(strtolower($serviceTypeFilter), 'transport'),
+                fn($q) => $q->whereRaw('0=1'))
+            ->limit(300)
+            ->get();
+
+        foreach ($cabBookings as $cab) {
+            $date     = $cab->pickup_date ? \Carbon\Carbon::parse($cab->pickup_date)->format('Y-m-d') : null;
+            if (!$date) continue;
+
+            $paidAmt  = (float)($cab->advance_paid ?? 0);
+            $totalAmt = (float)($cab->total_amount ?? 0);
+            $dueAmt   = max(0, (float)($cab->pending_amount ?? $totalAmt - $paidAmt));
+            $payPct   = $totalAmt > 0 ? round(($paidAmt / $totalAmt) * 100, 1) : 0;
+
+            $color = $cab->booking_status === 'cancelled'
+                ? ['background' => '#EF4444', 'border' => '#DC2626']
+                : ['background' => '#16A34A', 'border' => '#15803D']; // Green for cab
+
+            $events[] = [
+                'id'              => 'cab_' . $cab->id,
+                'title'           => ($cab->customer_name ?? 'Guest') . ' - 🚗 ' . ($cab->vehicle_name ?? 'Cab'),
+                'start'           => $date,
+                'backgroundColor' => $color['background'],
+                'borderColor'     => $color['border'],
+                'extendedProps'   => [
+                    'booking_number'     => $cab->booking_number ?? 'N/A',
+                    'guest_name'         => $cab->customer_name ?? 'Guest',
+                    'contact'            => $cab->customer_phone ?? 'N/A',
+                    'pax'                => 'N/A',
+                    'status'             => ucfirst(str_replace('_', ' ', $cab->booking_status)),
+                    'total_amount'       => $totalAmt,
+                    'paid_amount'        => $paidAmt,
+                    'due_amount'         => $dueAmt,
+                    'payment_percentage' => $payPct,
+                    'services'           => '🚗 ' . ($cab->vehicle_name ?? 'Cab') . ' — ' . ($cab->trip_type ?? ''),
+                    'service_types'      => [['name' => 'Cab', 'icon' => '🚗', 'color' => ['background' => '#16A34A', 'border' => '#15803D']]],
+                    'short_plan'         => $cab->trip_type ?? 'N/A',
+                    'created_by'         => 'Staff',
+                    'created_by_email'   => 'N/A',
+                    'service_date'       => $date,
+                    'booking_type'       => 'cab',
+                    'url'                => route('cab-bookings.show', $cab->id),
+                ],
+            ];
         }
 
         return response()->json($events);

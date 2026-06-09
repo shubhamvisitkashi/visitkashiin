@@ -6,317 +6,286 @@
 <title>Booking Voucher – {{ $booking->booking_number }}</title>
 <style>
 /* ══════════════════════════════════════
-   VISITKASHI PREMIUM BOOKING VOUCHER
-   A4 · Corporate Travel Design
+   VISITKASHI HOTEL BOOKING VOUCHER
+   A4 · Blue Design (matches Boat Voucher)
 ══════════════════════════════════════ */
-* { margin:0; padding:0; box-sizing:border-box; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #f0f4f8;
-  color: #1a202c;
-  font-size: 13px;
-  line-height: 1.5;
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  background:#b8ccd8;
+  color:#0f172a;
+  font-size:13px;
+  line-height:1.5;
 }
 
-.voucher-wrap {
-  width: 794px;
-  min-height: 1123px;
-  margin: 0 auto;
-  background: #fff;
-  position: relative;
-  overflow: hidden;
+.voucher-wrap{
+  width:210mm;
+  min-height:297mm;
+  margin:0 auto;
+  background:#fff;
+  box-shadow:0 6px 40px rgba(0,0,0,.22);
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 
 /* Watermark */
-.watermark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%) rotate(-30deg);
-  font-size: 90px;
-  font-weight: 900;
-  color: rgba(79,70,229,.04);
-  letter-spacing: -2px;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 0;
-  text-transform: uppercase;
+.watermark{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-30deg);
+  font-size:90px;font-weight:900;
+  color:rgba(3,105,161,.04);
+  letter-spacing:-2px;white-space:nowrap;
+  pointer-events:none;z-index:0;text-transform:uppercase;
 }
 
 /* ── Header ──────────────────────────── */
-.vh-header {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
-  padding: 28px 36px;
-  position: relative;
-  overflow: hidden;
+.vh-header{
+  background:linear-gradient(135deg,#0c4a6e 0%,#075985 45%,#0369a1 100%);
+  padding:26px 32px;
+  position:relative;overflow:hidden;flex-shrink:0;
 }
-.vh-header::before {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 200px; height: 200px;
-  border-radius: 50%;
-  background: rgba(79,70,229,.15);
+.vh-header::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:rgba(255,255,255,.06);
 }
-.vh-header::after {
-  content: '';
-  position: absolute;
-  bottom: -50px; left: 100px;
-  width: 150px; height: 150px;
-  border-radius: 50%;
-  background: rgba(14,165,233,.10);
+.vh-header::after{
+  content:'';position:absolute;bottom:-50px;left:80px;
+  width:130px;height:130px;border-radius:50%;
+  background:rgba(14,165,233,.08);
 }
 
-.vh-header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  z-index: 1;
+.vh-header-inner{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  position:relative;z-index:1;
 }
 
-.vh-logo-area { display: flex; align-items: center; gap: 16px; }
-.vh-logo-circle {
-  width: 60px; height: 60px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #4F46E5, #7C3AED);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px; font-weight: 900; color: #fff;
-  box-shadow: 0 4px 15px rgba(79,70,229,.4);
+.vh-logo-area{display:flex;align-items:center;gap:14px;}
+.vh-logo-circle{
+  width:54px;height:54px;border-radius:12px;
+  background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:900;color:#fff;
 }
-.vh-company-name { color: #fff; font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
-.vh-tagline { color: rgba(255,255,255,.65); font-size: 11px; margin-top: 2px; }
-.vh-contact-block { text-align: right; }
-.vh-contact-block p { color: rgba(255,255,255,.7); font-size: 10.5px; line-height: 1.7; }
-.vh-contact-block .vh-phone { color: #a5f3fc; font-weight: 700; font-size: 11.5px; }
-.vh-contact-block .vh-web { color: #c4b5fd; font-weight: 600; }
+.vh-company-name{color:#fff;font-size:20px;font-weight:900;letter-spacing:.01em;}
+.vh-tagline{color:rgba(255,255,255,.7);font-size:10px;margin-top:2px;font-weight:600;}
+.vh-contact-block{text-align:right;}
+.vh-contact-block p{color:rgba(255,255,255,.7);font-size:10px;line-height:1.75;}
+.vh-contact-block .vh-phone{color:#bae6fd;font-weight:700;font-size:11px;}
+.vh-contact-block .vh-web{color:#7dd3fc;font-weight:600;}
 
 /* ── Voucher title bar ────────────────── */
-.vh-title-bar {
-  background: linear-gradient(90deg, #4F46E5, #7C3AED);
-  padding: 12px 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.vh-title-bar{
+  background:rgba(0,0,0,.22);
+  border-top:1px solid rgba(255,255,255,.1);
+  padding:9px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;z-index:1;flex-shrink:0;
 }
-.vh-title-bar .vt-label { color: rgba(255,255,255,.75); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
-.vh-title-bar .vt-number { color: #fff; font-size: 18px; font-weight: 800; letter-spacing: .02em; }
-.vh-title-bar .vt-badge {
-  background: rgba(255,255,255,.2);
-  color: #fff;
-  border: 1.5px solid rgba(255,255,255,.3);
-  border-radius: 20px;
-  padding: 4px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .05em;
+.vt-label{color:rgba(255,255,255,.6);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;}
+.vt-number{color:#fff;font-size:17px;font-weight:900;letter-spacing:.05em;font-family:monospace;}
+.vt-date-lbl{color:rgba(255,255,255,.5);font-size:7.5px;text-transform:uppercase;letter-spacing:.06em;text-align:center;}
+.vt-date-val{color:#bae6fd;font-size:11px;font-weight:700;text-align:center;margin-top:1px;}
+.vt-badge{
+  padding:5px 16px;border-radius:20px;
+  font-size:9px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.06em;border:2px solid;
+  background:transparent;border-color:rgba(255,255,255,.4);color:#fff;
 }
 
 /* ── Body ────────────────────────────── */
-.vh-body {
-  padding: 24px 36px;
-  position: relative;
-  z-index: 1;
+.vh-body{
+  flex:1;padding:18px 28px 10px;
+  position:relative;z-index:1;
 }
 
 /* ── Section ─────────────────────────── */
-.vh-section {
-  margin-bottom: 18px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  overflow: hidden;
+.vh-section{
+  margin-bottom:14px;
+  border:1px solid #dde8f0;
+  border-radius:10px;overflow:hidden;
 }
-.vh-section-head {
-  background: linear-gradient(90deg, #f8faff, #f0f4ff);
-  padding: 10px 18px;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.vh-section-head{
+  background:linear-gradient(90deg,#f0f7ff,#e8f4fd);
+  padding:8px 16px;border-bottom:1px solid #dde8f0;
+  display:flex;align-items:center;gap:8px;
 }
-.vh-section-icon {
-  width: 28px; height: 28px;
-  border-radius: 8px;
-  background: #4F46E5;
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px;
+.vh-section-icon{
+  width:24px;height:24px;border-radius:6px;
+  background:#0369a1;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:11px;
 }
-.vh-section-title {
-  font-size: 11.5px;
-  font-weight: 800;
-  color: #3730a3;
-  text-transform: uppercase;
-  letter-spacing: .06em;
+.vh-section-title{
+  font-size:10px;font-weight:800;color:#0c4a6e;
+  text-transform:uppercase;letter-spacing:.07em;
 }
-.vh-section-body { padding: 14px 18px; }
+.vh-section-body{padding:12px 16px;}
 
 /* ── Grid layout for fields ──────────── */
-.vf-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.vf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.vf-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
-.vf-full { grid-column: 1 / -1; }
+.vf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.vf-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.vf-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.vf-full{grid-column:1 / -1;}
 
-.vf-item {}
-.vf-label { font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
-.vf-value { font-size: 12.5px; font-weight: 600; color: #0f172a; }
-.vf-value.big { font-size: 15px; font-weight: 800; }
-.vf-value.muted { color: #64748b; font-weight: 400; }
+.vf-label{font-size:8.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.vf-value{font-size:12px;font-weight:600;color:#0f172a;}
+.vf-value.big{font-size:14px;font-weight:800;}
+.vf-value.muted{color:#64748b;font-weight:400;}
 
 /* ── Service detail card ─────────────── */
-.svc-card {
-  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-  border: 1.5px solid #bae6fd;
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
+.svc-card{
+  background:linear-gradient(135deg,#eff6ff,#dbeafe);
+  border:1.5px solid #93c5fd;border-radius:8px;
+  padding:10px 14px;margin-bottom:8px;
 }
-.svc-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.svc-type-badge {
-  background: #0ea5e9;
-  color: #fff;
-  border-radius: 8px;
-  padding: 4px 12px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .05em;
+.svc-type-badge{
+  background:#0369a1;color:#fff;border-radius:20px;
+  padding:3px 10px;font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;
 }
-.svc-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+.svc-name{font-size:12px;font-weight:700;color:#0f172a;}
 
 /* ── Payment table ───────────────────── */
-.pay-table { width: 100%; border-collapse: collapse; }
-.pay-table th {
-  background: #f8fafc;
-  font-size: 10px;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+.pay-table{width:100%;border-collapse:collapse;}
+.pay-table th{
+  background:#f0f7ff;font-size:9px;font-weight:700;
+  color:#0369a1;text-transform:uppercase;letter-spacing:.05em;
+  padding:7px 10px;text-align:left;border-bottom:1px solid #dde8f0;
 }
-.pay-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
-.pay-table tr:last-child td { border-bottom: none; }
-.pay-total-row td { background: #f0fdf4; font-weight: 700; font-size: 13px; }
+.pay-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9;font-size:11.5px;}
+.pay-table tr:last-child td{border-bottom:none;}
+.pay-total-row td{background:#f0fdf4;font-weight:700;font-size:12px;}
 
 /* ── Payment summary box ─────────────── */
-.pay-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
+.pay-summary{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  border:1px solid #dde8f0;border-radius:10px;overflow:hidden;
 }
-.pay-sum-item {
-  padding: 14px 16px;
-  text-align: center;
-  border-right: 1px solid #e2e8f0;
-}
-.pay-sum-item:last-child { border-right: none; }
-.pay-sum-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
-.pay-sum-value { font-size: 17px; font-weight: 800; }
-.pay-sum-value.green  { color: #059669; }
-.pay-sum-value.blue   { color: #2563eb; }
-.pay-sum-value.orange { color: #d97706; }
-.pay-status-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  margin-top: 4px;
+.pay-sum-item{padding:12px 14px;text-align:center;border-right:1px solid #dde8f0;}
+.pay-sum-item:last-child{border-right:none;}
+.pay-sum-label{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.pay-sum-value{font-size:16px;font-weight:800;}
+.pay-sum-value.green{color:#059669;}
+.pay-sum-value.blue{color:#2563eb;}
+.pay-sum-value.orange{color:#d97706;}
+.pay-status-badge{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;margin-top:4px;
 }
 
 /* ── Terms ───────────────────────────── */
-.terms-list { padding: 0; margin: 0; }
-.terms-list li {
-  font-size: 10.5px;
-  color: #475569;
-  padding: 3px 0 3px 14px;
-  position: relative;
-  line-height: 1.5;
+.terms-list{padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;}
+.terms-list li{
+  font-size:9.5px;color:#475569;
+  padding:2px 0 2px 12px;position:relative;line-height:1.5;list-style:none;
 }
-.terms-list li::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
-  color: #4F46E5;
-  font-weight: 700;
-}
+.terms-list li::before{content:'✓';position:absolute;left:0;color:#0ea5e9;font-weight:800;}
 
 /* ── Footer ──────────────────────────── */
-.vh-footer {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  padding: 18px 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 20px;
+.vh-footer{
+  background:linear-gradient(135deg,#0c4a6e 0%,#075985 100%);
+  padding:12px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-shrink:0;
 }
-.vh-footer-left p { color: rgba(255,255,255,.6); font-size: 10px; line-height: 1.8; }
-.vh-footer-left .vfl-name { color: #fff; font-weight: 700; font-size: 13px; }
+.vh-footer-left p{color:rgba(255,255,255,.6);font-size:9.5px;line-height:1.75;}
+.vh-footer-left .vfl-name{color:#fff;font-weight:800;font-size:12px;margin-bottom:2px;}
+.vh-footer-right{text-align:right;}
+.vh-footer-right .sig-line{width:100px;border-top:1.5px solid rgba(255,255,255,.3);margin:0 0 4px auto;}
+.vh-footer-right p{color:rgba(255,255,255,.5);font-size:9px;}
+.vh-footer-right .sig-label{color:rgba(255,255,255,.8);font-weight:700;font-size:10px;}
 
-.vh-footer-right { text-align: right; }
-.vh-footer-right .sig-line {
-  width: 120px;
-  border-top: 1.5px solid rgba(255,255,255,.3);
-  margin: 0 0 4px auto;
+.vh-stamp-area{
+  width:60px;height:60px;border:2px dashed rgba(255,255,255,.2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin:0 auto;
 }
-.vh-footer-right p { color: rgba(255,255,255,.5); font-size: 9.5px; }
-.vh-footer-right .sig-label { color: rgba(255,255,255,.8); font-weight: 600; font-size: 10.5px; }
+.vh-stamp-area p{color:rgba(255,255,255,.3);font-size:7px;text-align:center;}
 
-.vh-stamp-area {
-  width: 70px; height: 70px;
-  border: 2px dashed rgba(255,255,255,.2);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto;
-}
-.vh-stamp-area p { color: rgba(255,255,255,.3); font-size: 8px; text-align: center; }
-
-.powered-by {
-  text-align: center;
-  margin-top: 6px;
-  font-size: 9px;
-  color: rgba(255,255,255,.3);
-  letter-spacing: .05em;
+.powered-by{
+  background:#0a3d5c;text-align:center;padding:4px 0;
+  color:rgba(255,255,255,.25);font-size:7.5px;letter-spacing:.06em;flex-shrink:0;
 }
 
 /* ── QR placeholder ──────────────────── */
-.qr-box {
-  width: 70px; height: 70px;
-  background: #fff;
-  border-radius: 8px;
-  padding: 4px;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+.qr-box{
+  width:62px;height:62px;background:#fff;border-radius:8px;
+  padding:3px;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
-.qr-box img { width: 100%; height: 100%; }
+.qr-box img{width:100%;height:100%;}
 
-/* ── Print ───────────────────────────── */
-@media print {
-  * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
-  body { background: #fff; }
-  .voucher-wrap { width: 100%; box-shadow: none; }
-  .no-print { display: none !important; }
-  @page { margin: 0; size: A4; }
+/* ══ PRINT — force all backgrounds/gradients ══ */
+@media print{
+  *{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color-adjust:exact !important;
+  }
+  html,body{background:#fff !important;margin:0 !important;padding:0 !important;}
+  .no-print{display:none !important;}
+  @page{margin:0;size:A4 portrait;}
+  .voucher-wrap{
+    box-shadow:none !important;
+    width:210mm !important;
+    min-height:297mm !important;
+    margin:0 auto !important;
+    page-break-inside:avoid;
+  }
+  /* Preserve gradient backgrounds in print */
+  .vh-header      {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .vh-title-bar   {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .vh-footer      {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .vh-section-head{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .pay-table th   {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .pay-total-row td{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .svc-card       {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .powered-by     {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+}
+
+/* ══ MOBILE RESPONSIVE ══ */
+@media(max-width:700px){
+  body{background:#1e293b;}
+  .voucher-wrap{
+    width:100% !important;
+    min-height:unset !important;
+    box-shadow:none;
+    transform-origin:top left;
+  }
+  .vh-header{padding:16px 16px;}
+  .vh-title-bar{padding:8px 16px;}
+  .vh-body{padding:12px 14px 8px;}
+  .vh-footer{padding:12px 16px;flex-wrap:wrap;gap:10px;}
+  .vf-grid{grid-template-columns:1fr 1fr;}
+  .vf-grid-4{grid-template-columns:1fr 1fr;}
+  .pay-summary{grid-template-columns:1fr;}
+  .pay-sum-item{border-right:none;border-bottom:1px solid #dde8f0;}
+  .pay-sum-item:last-child{border-bottom:none;}
+  .terms-list{grid-template-columns:1fr;}
+  .vh-header-inner{flex-wrap:wrap;gap:10px;}
+  .vh-contact-block{text-align:left;}
 }
 </style>
 </head>
 <body>
 
 {{-- Print / Download Toolbar --}}
-<div class="no-print" style="background:#1a1a2e;padding:10px 20px;display:flex;align-items:center;gap:10px;">
-  <button onclick="window.print()" style="background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;">🖨 Print / Download PDF</button>
-  <a href="{{ route('bookings.show', $booking->id) }}" style="color:rgba(255,255,255,.6);font-size:12px;text-decoration:none;">← Back to Booking</a>
-  <span style="margin-left:auto;color:rgba(255,255,255,.4);font-size:11px;">Voucher: {{ $booking->booking_number }}</span>
+<div class="no-print" style="background:#0c4a6e;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;flex-wrap:wrap;">
+  <a href="{{ route('bookings.show', $booking->id) }}"
+     style="color:rgba(255,255,255,.65);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:5px;white-space:nowrap;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </a>
+  <span style="color:rgba(255,255,255,.2);font-size:11px;font-family:monospace;flex:1;text-align:center;letter-spacing:.05em;">{{ $booking->booking_number }}</span>
+  <button onclick="window.print()"
+     style="background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:9px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:0 3px 14px rgba(14,165,233,.45);">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Print / Save PDF
+  </button>
 </div>
 
 <div class="voucher-wrap">
@@ -355,8 +324,8 @@ body {
           {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(62)->generate($qrData) !!}
         </div>
         @else
-        <div class="qr-box" style="background:#E0E7FF;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:8px;color:#6366f1;text-align:center;font-weight:700;padding:4px;">QR<br>CODE</span>
+        <div class="qr-box" style="background:#e0f2fe;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:8px;color:#0369a1;text-align:center;font-weight:700;padding:4px;">QR<br>CODE</span>
         </div>
         @endif
       </div>
@@ -364,29 +333,27 @@ body {
   </div>
 
   {{-- ── TITLE BAR ────────────────────────── --}}
+  @php
+    $statusColors = [
+      'confirmed'   => '#22c55e',
+      'completed'   => '#06b6d4',
+      'in_progress' => '#f59e0b',
+      'cancelled'   => '#ef4444',
+      'not_started' => '#94a3b8',
+    ];
+    $sc = $statusColors[$booking->booking_status] ?? '#94a3b8';
+  @endphp
   <div class="vh-title-bar">
     <div>
-      <div class="vt-label">Booking Confirmation Voucher</div>
+      <div class="vt-label">🏨 Hotel Booking Confirmation Voucher</div>
       <div class="vt-number">{{ $booking->booking_number }}</div>
     </div>
-    <div style="text-align:center;">
-      <div style="color:rgba(255,255,255,.6);font-size:10px;margin-bottom:2px;">Booking Date</div>
-      <div style="color:#fff;font-weight:700;">{{ $booking->booking_date->format('d M, Y') }}</div>
+    <div>
+      <div class="vt-date-lbl">Booking Date</div>
+      <div class="vt-date-val">{{ $booking->booking_date->format('d M, Y') }}</div>
     </div>
     <div>
-      @php
-        $statusColors = [
-          'confirmed'   => '#22c55e',
-          'completed'   => '#06b6d4',
-          'in_progress' => '#f59e0b',
-          'cancelled'   => '#ef4444',
-          'not_started' => '#94a3b8',
-        ];
-        $sc = $statusColors[$booking->booking_status] ?? '#94a3b8';
-      @endphp
-      <span class="vt-badge" style="background:{{ $sc }}22;border-color:{{ $sc }}55;color:#fff;">
-        {{ ucwords(str_replace('_',' ',$booking->booking_status)) }}
-      </span>
+      <span class="vt-badge">{{ ucwords(str_replace('_',' ',$booking->booking_status)) }}</span>
     </div>
   </div>
 
@@ -403,7 +370,7 @@ body {
         <div class="vf-grid-4">
           <div class="vf-item">
             <div class="vf-label">Voucher Number</div>
-            <div class="vf-value big" style="color:#4F46E5;">{{ $booking->booking_number }}</div>
+            <div class="vf-value big" style="color:#0369a1;">{{ $booking->booking_number }}</div>
           </div>
           <div class="vf-item">
             <div class="vf-label">Booking Date</div>
@@ -476,7 +443,7 @@ body {
           @endif
         </div>
         @if($lead->short_plan)
-        <div style="margin-top:12px;background:#F8FAFC;border-radius:8px;padding:10px 14px;border-left:3px solid #4F46E5;">
+        <div style="margin-top:12px;background:#F8FAFC;border-radius:8px;padding:10px 14px;border-left:3px solid #0369a1;">
           <div class="vf-label" style="margin-bottom:4px;">Booking Summary</div>
           <div style="font-size:11.5px;color:#334155;line-height:1.6;">{{ $lead->short_plan }}</div>
         </div>
@@ -511,7 +478,7 @@ body {
               <td>{{ $i + 1 }}</td>
               <td style="font-weight:600;">{{ $item->serviceTemplate?->name ?? 'Custom Service' }}</td>
               <td>
-                <span style="background:#EDE9FE;color:#6D28D9;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;">
+                <span style="background:#dbeafe;color:#0369a1;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;">
                   {{ $item->serviceTemplate?->serviceType?->name ?? $item->serviceType?->name ?? '—' }}
                 </span>
               </td>
@@ -647,7 +614,7 @@ body {
       </div>
     </div>
   </div>
-  <div class="powered-by" style="background:#111827;padding:6px;">
+  <div class="powered-by">
     Powered by VisitKashi CRM &nbsp;·&nbsp; Generated on {{ now()->format('d M Y, h:i A') }}
   </div>
 

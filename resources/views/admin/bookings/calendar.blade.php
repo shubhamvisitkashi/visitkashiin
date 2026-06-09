@@ -919,6 +919,8 @@ html { scrollbar-gutter: stable; }
         <div class="vkc-topbar-right">
             <select id="svcFilter" class="vkc-select" onchange="loadMonth()">
                 <option value="">All Services</option>
+                <option value="boat">⛵ Boat Bookings</option>
+                <option value="cab">🚗 Cab Bookings</option>
                 @foreach ($serviceTypes as $s)
                     <option value="{{ strtolower($s->name) }}">{{ $s->name }}</option>
                 @endforeach
@@ -1855,7 +1857,7 @@ function openBookingPopup(ev) {
     document.getElementById('vkpStatusBadge').textContent = p.status || '—';
 
     /* Links */
-    document.getElementById('vkpViewBtn').href = '/admin/bookings/' + ev.id;
+    document.getElementById('vkpViewBtn').href = p.url || (p.booking_type === 'boat' ? '/admin/boat-booking/' + p.booking_number : p.booking_type === 'cab' ? '/admin/cab-bookings/' + String(ev.id).replace('cab_','') : '/admin/bookings/' + ev.id);
     const phone = (p.contact||'').replace(/[^0-9]/g,'');
     const waMsg = encodeURIComponent(`Namaste ${p.guest_name} ji 🙏\nBooking ${p.booking_number} on ${p.service_date} confirmed.\nPersons: ${p.pax} | Total: ₹${fmtNum(p.total_amount)}\n— Visit Kashi Team`);
     const waEl  = document.getElementById('vkpWaBtn');
@@ -1966,7 +1968,7 @@ function openDrawer(ev) {
     document.getElementById('vkdNum').textContent   = p.booking_number || 'N/A';
     document.getElementById('vkdNum').style.color   = vip ? '#d97706' : '#0891b2';
     document.getElementById('vkdGuest').textContent = (vip?'★ ':'') + (p.guest_name||'—');
-    document.getElementById('vkdViewBtn').href      = '/admin/bookings/' + ev.id;
+    document.getElementById('vkdViewBtn').href      = p.url || (p.booking_type === 'boat' ? '/admin/boat-booking/' + p.booking_number : p.booking_type === 'cab' ? '/admin/cab-bookings/' + String(ev.id).replace('cab_','') : '/admin/bookings/' + ev.id);
 
     const phone = (p.contact||'').replace(/[^0-9]/g,'');
     const waMsg = encodeURIComponent(`Namaste ${p.guest_name} ji 🙏\nBooking ${p.booking_number} on ${p.service_date} confirmed.\nPersons: ${p.pax} | Total: ₹${fmtNum(p.total_amount)}\n— Visit Kashi Team`);
