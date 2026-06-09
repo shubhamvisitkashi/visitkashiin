@@ -232,9 +232,9 @@
                 @error('name')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
               </div>
               <div class="col-md-4 eb-field">
-                <label for="email"><i class="fas fa-envelope text-primary me-1"></i>Email Address <span class="text-danger">*</span></label>
+                <label for="email"><i class="fas fa-envelope text-primary me-1"></i>Email Address</label>
                 <input id="email" class="form-control" type="email" name="email"
-                       value="{{ old('email', $booking->email) }}" placeholder="Email address" required>
+                       value="{{ old('email', $booking->email) }}" placeholder="Email address">
                 @error('email')<div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
               </div>
               <div class="col-md-4 eb-field">

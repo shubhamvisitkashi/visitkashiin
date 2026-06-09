@@ -579,7 +579,7 @@
     display:flex;
     gap:6px;
     flex-wrap:wrap;
-    justify-content:flex-start;
+    justify-content:center;
   }
   .bkt-acts::before { display:none; }
   .bkt-act {
