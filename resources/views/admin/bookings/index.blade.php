@@ -900,16 +900,19 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   @php
     $activeCat = request('service_type', '');
 
-    // Stay & Tour come from the bookings table (via quotation service types)
-    $catBase  = \App\Models\Booking::where('booking_status','confirmed');
+    // Stay & Tour come from the bookings table — filtered by role
+    $isAdminTab = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+    $myIdTab    = auth('admin')->id();
+    $catBase  = \App\Models\Booking::where('booking_status','confirmed')
+                    ->when(!$isAdminTab, fn($q) => $q->where('created_by', $myIdTab));
     $countStay = (clone $catBase)->whereHas('quotation.items.serviceTemplate.serviceType',
         function($q){ $q->where('name','LIKE','%stay%')->orWhere('name','LIKE','%hotel%'); })->count();
     $countTour = (clone $catBase)->whereHas('quotation.items.serviceTemplate.serviceType',
         function($q){ $q->where('name','LIKE','%tour%')->orWhere('name','LIKE','%package%'); })->count();
 
-    // Boat & Cab have their own dedicated tables
-    $countBoat = \App\Models\BoatBooking::count();
-    $countCab  = \App\Models\CabBooking::count();
+    // Boat & Cab have their own dedicated tables — filtered by role
+    $countBoat = $isAdminTab ? \App\Models\BoatBooking::count() : \App\Models\BoatBooking::where('created_by', $myIdTab)->count();
+    $countCab  = $isAdminTab ? \App\Models\CabBooking::count()  : \App\Models\CabBooking::where('created_by', $myIdTab)->count();
     $countAll  = $stats['total'] + $countBoat + $countCab;
   @endphp
   <div class="bk-cats">

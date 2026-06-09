@@ -29,10 +29,14 @@ class BoatBookingController extends Controller
         $search_date_from      = $request->search_date_from;
         $search_date_to        = $request->search_date_to;
 
+        $isAdmin = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+        $userId  = auth('admin')->id();
+
         $boat_types  = BoatType::orderBy('sort_order')->get();
         $event_types = ['Festival', 'Regular'];
 
-        $boat_bookings = BoatBooking::when($search_boat_type, function($query) use ($search_boat_type) {
+        $boat_bookings = BoatBooking::when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
+                            ->when($search_boat_type, function($query) use ($search_boat_type) {
                                 $query->whereHas('boat', function($q) use ($search_boat_type) {
                                     $q->where('boat_type_id', $search_boat_type);
                                 });
@@ -62,7 +66,9 @@ class BoatBookingController extends Controller
         $total_final_amount = $boat_bookings->sum('final_amount');
         $total_amount = $boat_bookings->sum('total_amount');
         $total_discount_amount = $boat_bookings->sum('total_discount');
-        $total_payments = BoatBookingPayment::whereHas('boatBooking')->when($search_boat_type, function($query) use ($search_boat_type) {
+        $total_payments = BoatBookingPayment::whereHas('boatBooking', function($q) use ($isAdmin, $userId) {
+                                                if (!$isAdmin) $q->where('created_by', $userId);
+                                            })->when($search_boat_type, function($query) use ($search_boat_type) {
                                                 $query->whereHas('boatBooking', function($quer) use ($search_boat_type) {
                                                     $quer->whereHas('boat', function($que) use ($search_boat_type) {
                                                     $que->where('boat_type_id', ($search_boat_type));
@@ -143,7 +149,8 @@ class BoatBookingController extends Controller
         // Apply pagination for regular view
         $boat_bookings = $boat_bookings->with('boat.boatType')->withSum('payments', 'amount')->latest()->paginate(10);
 
-        $boat_type_stats = BoatBooking::when($search_boat_type, function($query) use ($search_boat_type) {
+        $boat_type_stats = BoatBooking::when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
+        ->when($search_boat_type, function($query) use ($search_boat_type) {
             $query->whereHas('boat', function($quer) use ($search_boat_type) {
                 $quer->where('boat_type_id', ($search_boat_type));
             });

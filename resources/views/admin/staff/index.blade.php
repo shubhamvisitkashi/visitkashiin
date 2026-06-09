@@ -49,8 +49,14 @@
 .sf-card-actions{display:flex;gap:7px;justify-content:center;}
 .sf-card-btn{flex:1;height:34px;border-radius:9px;border:none;font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;transition:all .15s;max-width:90px;}
 .sf-card-btn i[data-feather]{width:13px;height:13px;}
-.sf-card-btn-edit{background:#EEF2FF;color:#4F46E5;}.sf-card-btn-edit:hover{background:#DDD6FE;color:#4338CA;text-decoration:none;}
-.sf-card-btn-del {background:#FEF2F2;color:#DC2626;}.sf-card-btn-del:hover{background:#FECACA;text-decoration:none;}
+.sf-card-btn-edit  {background:#EEF2FF;color:#4F46E5;}.sf-card-btn-edit:hover{background:#DDD6FE;color:#4338CA;text-decoration:none;}
+.sf-card-btn-del   {background:#FEF2F2;color:#DC2626;}.sf-card-btn-del:hover{background:#FECACA;text-decoration:none;}
+.sf-card-btn-target{background:#ECFDF5;color:#065F46;}.sf-card-btn-target:hover{background:#A7F3D0;color:#064E3B;text-decoration:none;}
+/* Target strip on card */
+.sf-target-strip{margin:0 0 10px;padding:5px 10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.74rem;}
+.sf-target-strip-lbl{color:#16A34A;font-weight:700;}
+.sf-target-strip-amt{color:#065F46;font-weight:900;font-size:.8rem;}
+.sf-target-strip-none{color:#9CA3AF;font-size:.7rem;font-style:italic;}
 /* Company watermark on card */
 .sf-card-watermark{font-size:.6rem;color:#CBD5E1;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-top:4px;}
 /* Empty */
@@ -196,12 +202,35 @@ $stripGradients = [
             <div class="sf-card-divider"></div>
             <div class="sf-card-id">ID #{{ $staffId }}</div>
 
+            {{-- Current Month Target Strip --}}
+            @can('target-manage')
+            @php
+                $staffTargetObj = $currentTargets[$staff->id] ?? null;
+                $staffTargetAmt = $staffTargetObj ? $staffTargetObj->target_margin : null;
+                $staffTargetId  = $staffTargetObj ? $staffTargetObj->id : null;
+            @endphp
+            <div class="sf-target-strip">
+                <span class="sf-target-strip-lbl">🎯 {{ now()->format('M Y') }}</span>
+                @if($staffTargetAmt)
+                    <span class="sf-target-strip-amt">₹{{ number_format($staffTargetAmt) }}</span>
+                @else
+                    <span class="sf-target-strip-none">No target set</span>
+                @endif
+            </div>
+            @endcan
+
             {{-- Actions --}}
             <div class="sf-card-actions">
                 @can('staff-edit')
                 <a href="{{ route('staffs.edit', $staff->id) }}" class="sf-card-btn sf-card-btn-edit">
                     <i data-feather="edit-2"></i> Edit
                 </a>
+                @endcan
+                @can('target-manage')
+                <button type="button" class="sf-card-btn sf-card-btn-target"
+                    onclick="setTarget({{ $staff->id }}, '{{ addslashes($staff->name) }}', {{ $staffTargetAmt ?? 0 }}, {{ $staffTargetId ?? 'null' }})">
+                    <i data-feather="target"></i> Target
+                </button>
                 @endcan
                 @can('staff-delete')
                 <form action="{{ route('staffs.destroy', $staff->id) }}" method="POST" id="del_{{ $staff->id }}" style="display:none;">
@@ -233,6 +262,49 @@ $stripGradients = [
 
 </div>
 
+{{-- Set / Update Target Modal --}}
+@can('target-manage')
+<div class="modal fade" id="targetModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content" style="border:none;border-radius:16px;overflow:hidden;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#065F46,#10B981);padding:16px 22px;border:none;">
+        <h5 class="modal-title" style="color:#fff;font-size:.95rem;font-weight:800;margin:0;">
+          🎯 Set Monthly Target
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="targetForm" method="POST">
+        @csrf
+        <input type="hidden" name="_method" id="targetMethod" value="POST">
+        <input type="hidden" name="user_id" id="targetUserId">
+        <input type="hidden" name="month" value="{{ now()->month }}">
+        <input type="hidden" name="year" value="{{ now()->year }}">
+        <div class="modal-body" style="padding:20px 22px;">
+          <p id="targetStaffName" style="font-size:.85rem;font-weight:700;color:#0F172A;margin:0 0 14px;"></p>
+          <label style="font-size:.7rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">
+            Target Margin (₹) — {{ now()->format('F Y') }}
+          </label>
+          <input type="number" name="target_margin" id="targetAmount" class="form-control"
+                 placeholder="e.g. 50000" min="0" step="1" required
+                 style="border:1.5px solid #E2E8F0;border-radius:10px;padding:9px 13px;font-size:.9rem;font-weight:700;">
+          <label style="font-size:.7rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.04em;display:block;margin:12px 0 5px;">Notes (optional)</label>
+          <textarea name="notes" class="form-control" rows="2" placeholder="Any notes..."
+                    style="border:1.5px solid #E2E8F0;border-radius:10px;padding:9px 13px;font-size:.83rem;resize:none;"></textarea>
+        </div>
+        <div class="modal-footer" style="background:#F8FAFC;border-top:1px solid #E2E8F0;padding:12px 22px;gap:8px;">
+          <button type="button" class="btn btn-sm" data-bs-dismiss="modal"
+                  style="background:#F1F5F9;color:#64748B;border:none;border-radius:9px;padding:8px 18px;font-weight:700;font-size:.82rem;">Cancel</button>
+          <button type="submit"
+                  style="background:linear-gradient(135deg,#065F46,#10B981);color:#fff;border:none;border-radius:9px;padding:8px 20px;font-weight:700;font-size:.82rem;cursor:pointer;">
+            Save Target
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+@endcan
+
 <script>
 function delStaff(id, name){
     Swal.fire({
@@ -245,6 +317,26 @@ function delStaff(id, name){
         confirmButtonText: 'Yes, remove!'
     }).then(function(r){ if(r.isConfirmed) document.getElementById('del_' + id).submit(); });
 }
+
+function setTarget(staffId, staffName, currentAmount, targetId){
+    document.getElementById('targetUserId').value  = staffId;
+    document.getElementById('targetStaffName').textContent = 'Staff: ' + staffName;
+    document.getElementById('targetAmount').value  = currentAmount > 0 ? currentAmount : '';
+
+    if (targetId) {
+        // Update existing target via PUT
+        document.getElementById('targetForm').action = '/admin/targets/' + targetId;
+        document.getElementById('targetMethod').value = 'PUT';
+    } else {
+        // Create new target via POST
+        document.getElementById('targetForm').action = '{{ route("targets.store") }}';
+        document.getElementById('targetMethod').value = 'POST';
+    }
+
+    var modal = new bootstrap.Modal(document.getElementById('targetModal'));
+    modal.show();
+}
+
 document.addEventListener('DOMContentLoaded', function(){ feather.replace(); });
 </script>
 @endsection

@@ -77,7 +77,7 @@ class UserTargetController extends Controller
         // Calculate achieved margin using service
         $this->targetService->updateAchievedMargin($target);
 
-        return back()->with('success', 'Target set successfully!');
+        return back()->with('success', 'Target set successfully for ' . optional($target->user)->name . '!');
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Admin\Admin;
+use App\Models\UserTarget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -21,7 +22,14 @@ class StaffController extends Controller
     public function index()
     {
         $list = Admin::where('id', '!=', 1)->paginate(20);
-        return view('admin.staff.index', compact('list'), ['page_title' => 'All Staffs']);
+
+        // Load current month's targets keyed by user_id for quick access in view
+        $currentTargets = UserTarget::where('month', now()->month)
+            ->where('year', now()->year)
+            ->get()
+            ->keyBy('user_id');
+
+        return view('admin.staff.index', compact('list', 'currentTargets'), ['page_title' => 'All Staffs']);
     }
 
     public function create()

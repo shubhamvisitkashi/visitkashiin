@@ -23,7 +23,11 @@ class CabBookingController extends Controller
     // ── INDEX ─────────────────────────────────────────────────────
     public function index(Request $request)
     {
+        $isAdmin = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+        $userId  = auth('admin')->id();
+
         $query = CabBooking::with(['vehicle', 'createdBy'])
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
             ->search($request->search)
             ->when($request->status,         fn($q, $s) => $q->byStatus($s))
             ->when($request->payment_status, fn($q, $s) => $q->byPayment($s))
@@ -31,25 +35,26 @@ class CabBookingController extends Controller
             ->when($request->vehicle_name,   fn($q, $v) => $q->where('vehicle_name', 'like', "%$v%"))
             ->when($request->date_from,      fn($q, $d) => $q->where('pickup_date', '>=', $d))
             ->when($request->date_to,        fn($q, $d) => $q->where('pickup_date', '<=', $d))
-            ->when($request->staff_id,       fn($q, $s) => $q->where('created_by', $s))
+            ->when($isAdmin && $request->staff_id, fn($q, $s) => $q->where('created_by', $s))
             ->latest('pickup_date')
             ->paginate(15)
             ->withQueryString();
 
+        $statsBase = CabBooking::when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
         $stats = [
-            'total'           => CabBooking::count(),
-            'today'           => CabBooking::whereDate('pickup_date', today())->count(),
-            'pending'         => CabBooking::where('booking_status', 'pending')->count(),
-            'confirmed'       => CabBooking::where('booking_status', 'confirmed')->count(),
-            'completed'       => CabBooking::where('booking_status', 'completed')->count(),
-            'cancelled'       => CabBooking::where('booking_status', 'cancelled')->count(),
-            'revenue'         => CabBooking::where('booking_status', '!=', 'cancelled')->sum('total_amount'),
-            'pending_payment' => CabBooking::where('payment_status', '!=', 'paid')->where('booking_status', '!=', 'cancelled')->sum('pending_amount'),
+            'total'           => (clone $statsBase)->count(),
+            'today'           => (clone $statsBase)->whereDate('pickup_date', today())->count(),
+            'pending'         => (clone $statsBase)->where('booking_status', 'pending')->count(),
+            'confirmed'       => (clone $statsBase)->where('booking_status', 'confirmed')->count(),
+            'completed'       => (clone $statsBase)->where('booking_status', 'completed')->count(),
+            'cancelled'       => (clone $statsBase)->where('booking_status', 'cancelled')->count(),
+            'revenue'         => (clone $statsBase)->where('booking_status', '!=', 'cancelled')->sum('total_amount'),
+            'pending_payment' => (clone $statsBase)->where('payment_status', '!=', 'paid')->where('booking_status', '!=', 'cancelled')->sum('pending_amount'),
         ];
 
-        $staffList = Admin::select('id', 'name')->orderBy('name')->get();
+        $staffList = $isAdmin ? Admin::select('id', 'name')->orderBy('name')->get() : collect();
 
-        return view('admin.cab-bookings.index', compact('query', 'stats', 'staffList'), [
+        return view('admin.cab-bookings.index', compact('query', 'stats', 'staffList', 'isAdmin'), [
             'page_title' => 'Cab Bookings',
         ]);
     }

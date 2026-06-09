@@ -133,14 +133,19 @@ class BookingController extends Controller
         $serviceTypes = \App\Models\ServiceType::select('id', 'name')->orderBy('name')->get();
 
         // Recent boat & cab bookings for "All Bookings" combined view
+        $isAdminUser = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+        $authId      = auth('admin')->id();
+
         $recentBoatBookings = \App\Models\BoatBooking::with(['boat.boatType'])
             ->withSum('payments', 'amount')
+            ->when(!$isAdminUser, fn($q) => $q->where('created_by', $authId))
             ->when($request->search, fn($q) => $q->where('name','like','%'.$request->search.'%')->orWhere('phone','like','%'.$request->search.'%')->orWhere('booking_id','like','%'.$request->search.'%'))
             ->latest()
             ->limit(20)
             ->get();
 
         $recentCabBookings = \App\Models\CabBooking::with(['payments'])
+            ->when(!$isAdminUser, fn($q) => $q->where('created_by', $authId))
             ->when($request->search, fn($q) => $q->where('customer_name','like','%'.$request->search.'%')->orWhere('customer_phone','like','%'.$request->search.'%')->orWhere('booking_number','like','%'.$request->search.'%'))
             ->latest()
             ->limit(20)
