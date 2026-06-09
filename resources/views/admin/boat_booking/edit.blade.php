@@ -279,33 +279,67 @@
           <div class="eb-card-head">
             <div class="eb-card-head-icon" style="background:#EFF6FF;color:#0C4A6E;">📋</div>
             <div class="eb-card-head-title">Booking Information</div>
-            <span class="eb-card-head-sub"><i class="fas fa-lock me-1"></i>Read-only</span>
+            <span class="eb-card-head-sub"><i class="fas fa-edit me-1"></i>Editable</span>
           </div>
           <div class="eb-card-body">
             <div class="eb-info-grid-4">
+              {{-- Booking ID – read-only system field --}}
               <div class="eb-info-item">
                 <div class="eb-info-label">Booking ID</div>
                 <div class="eb-info-value mono">{{ $booking->booking_id }}</div>
               </div>
+
+              {{-- Booking Date --}}
               <div class="eb-info-item">
-                <div class="eb-info-label">Booking Date</div>
-                <div class="eb-info-value">{{ $bkDate }}</div>
+                <label class="eb-info-label" for="booking_date">Booking Date</label>
+                <input type="date" id="booking_date" name="booking_date"
+                       class="form-control"
+                       style="border:1.5px solid #BFDBFE;border-radius:8px;padding:9px 13px;font-size:13px;font-weight:600;color:#0F172A;background:#F8FAFF;"
+                       value="{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d') : '' }}">
               </div>
+
+              {{-- Booking Type --}}
               <div class="eb-info-item">
-                <div class="eb-info-label">Booking Type</div>
-                <div class="eb-info-value">{{ $booking->booking_type ?? '—' }}</div>
+                <label class="eb-info-label" for="booking_type">Booking Type</label>
+                <select id="booking_type" name="booking_type"
+                        class="form-select"
+                        style="border:1.5px solid #BFDBFE;border-radius:8px;padding:9px 13px;font-size:13px;font-weight:600;color:#0F172A;background:#F8FAFF;">
+                  <option value="">— Select —</option>
+                  @foreach(['Morning Boat Ride','Evening Boat Ride','Evening Boat Ride with Ganga Aarti'] as $bt)
+                    <option value="{{ $bt }}" {{ ($booking->booking_type ?? '') === $bt ? 'selected' : '' }}>{{ $bt }}</option>
+                  @endforeach
+                </select>
               </div>
+
+              {{-- Event on Boat --}}
               <div class="eb-info-item">
-                <div class="eb-info-label">Event on Boat</div>
-                <div class="eb-info-value">{{ $booking->event_on_boat ?? 'Regular Ride' }}</div>
+                <label class="eb-info-label" for="event_on_boat">Event on Boat</label>
+                <select id="event_on_boat" name="event_on_boat"
+                        class="form-select"
+                        style="border:1.5px solid #BFDBFE;border-radius:8px;padding:9px 13px;font-size:13px;font-weight:600;color:#0F172A;background:#F8FAFF;">
+                  <option value="">None / Regular Ride</option>
+                  @foreach(['Birthday Celebration','Anniversary Celebration','Marriage Proposal','Corporate Event','Other'] as $ev)
+                    <option value="{{ $ev }}" {{ ($booking->event_on_boat ?? '') === $ev ? 'selected' : '' }}>{{ $ev }}</option>
+                  @endforeach
+                </select>
               </div>
+
+              {{-- Pickup Time --}}
               <div class="eb-info-item">
-                <div class="eb-info-label">Pickup Time</div>
-                <div class="eb-info-value">{{ $pickupTime }}</div>
+                <label class="eb-info-label" for="pickup_time">Pickup Time</label>
+                <input type="time" id="pickup_time" name="pickup_time"
+                       class="form-control"
+                       style="border:1.5px solid #BFDBFE;border-radius:8px;padding:9px 13px;font-size:13px;font-weight:600;color:#0F172A;background:#F8FAFF;"
+                       value="{{ $booking->pickup_time ? \Carbon\Carbon::parse($booking->pickup_time)->format('H:i') : '' }}">
               </div>
+
+              {{-- Drop Time --}}
               <div class="eb-info-item">
-                <div class="eb-info-label">Drop Time</div>
-                <div class="eb-info-value">{{ $dropTime }}</div>
+                <label class="eb-info-label" for="drop_time">Drop Time</label>
+                <input type="time" id="drop_time" name="drop_time"
+                       class="form-control"
+                       style="border:1.5px solid #BFDBFE;border-radius:8px;padding:9px 13px;font-size:13px;font-weight:600;color:#0F172A;background:#F8FAFF;"
+                       value="{{ $booking->drop_time ? \Carbon\Carbon::parse($booking->drop_time)->format('H:i') : '' }}">
               </div>
             </div>
           </div>

@@ -284,12 +284,17 @@ class BoatBookingController extends Controller
     public function update(Request $request, $booking_id) {
         $request->validate([
             'name'          => 'required|string|max:255',
-            'email'         => 'required|email|max:255',
+            'email'         => 'nullable|email|max:255',
             'phone'         => 'required|string|max:20',
             'no_of_person'  => 'required|integer|min:1',
             'boarding_ghat' => 'nullable|string|max:255',
             'drop_ghat'     => 'nullable|string|max:255',
             'guest_notes'   => 'nullable|string|max:1000',
+            'booking_date'  => 'nullable|date',
+            'booking_type'  => 'nullable|string|max:255',
+            'event_on_boat' => 'nullable|string|max:255',
+            'pickup_time'   => 'nullable|string',
+            'drop_time'     => 'nullable|string',
         ]);
 
         $boat_booking = BoatBooking::where('booking_id', $booking_id)->first();
@@ -304,6 +309,23 @@ class BoatBookingController extends Controller
         $boat_booking->boarding_ghat = $request->boarding_ghat;
         $boat_booking->drop_ghat     = $request->drop_ghat;
         $boat_booking->guest_notes   = $request->guest_notes;
+
+        if ($request->filled('booking_date')) {
+            $boat_booking->booking_date = $request->booking_date;
+        }
+        if ($request->filled('booking_type')) {
+            $boat_booking->booking_type = $request->booking_type;
+            $boat_booking->boat_timing  = $request->booking_type;
+        }
+        $boat_booking->event_on_boat    = $request->event_on_boat;
+        $boat_booking->celebration_type = $request->event_on_boat;
+        if ($request->filled('pickup_time')) {
+            $boat_booking->pickup_time = $request->pickup_time;
+        }
+        if ($request->filled('drop_time')) {
+            $boat_booking->drop_time = $request->drop_time;
+        }
+
         $boat_booking->save();
 
         return redirect()->route('boat-booking.index')->with('success', 'Booking updated successfully.');
