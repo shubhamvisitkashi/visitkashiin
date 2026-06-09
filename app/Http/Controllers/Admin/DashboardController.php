@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $cabPending  = (clone $cabQ)->where('pending_amount', '>', 0)->sum('pending_amount');
 
         // ── Boat Bookings ─────────────────────────────────────────
-        $boatQ = BoatBooking::query();
+        $boatQ = BoatBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
         $boatToday    = (clone $boatQ)->whereDate('booking_date', $today)->count();
         $boatMonth    = (clone $boatQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->count();
