@@ -35,10 +35,11 @@
 /* ── Header card ── */
 .eb-header {
   background: linear-gradient(135deg, #0C4A6E 0%, #075985 45%, #0369a1 100%);
-  border-radius: 16px;
-  padding: 22px 28px;
+  border-radius: 15px;
+  padding: 10px 10px;
   margin-bottom: 22px;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-top: 50px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
 .eb-header-left { display: flex; align-items: center; gap: 16px; }
 .eb-header-icon {
