@@ -316,7 +316,7 @@
                     <div class="vkbd-highlight-icon"><i class="fa fa-tag"></i></div>
                     <div class="vkbd-highlight-text">
                         <h5>Best Price Guarantee
-                            @if($displayPrice > 0)
+                            @if($displayPrice > 0 && !$isDevDiwali)
                             – Starting ₹{{ number_format($displayPrice) }}/-
                             @endif
                         </h5>
@@ -354,6 +354,9 @@
                 <tr>
                     <td class="vkbd-spec-label">Price</td>
                     <td class="vkbd-spec-val">
+                        @if($isDevDiwali)
+                            <a href="tel:+91{{ preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917') }}" style="color:#b45309;font-weight:700;text-decoration:none;">📞 Call Now for Best Price</a>
+                        @else
                         <i class="fa fa-inr"></i>
                         @if($displayPrice > 0)
                             <strong style="color:#d4850a;font-size:16px;">₹{{ number_format($displayPrice) }}</strong>
@@ -363,6 +366,7 @@
                             &nbsp;<span style="font-size:12px;color:#6b7280;">private boat · up to 10 persons</span>
                         @else
                             <span style="color:#6b7280;">Price on request</span>
+                        @endif
                         @endif
                     </td>
                 </tr>
@@ -698,13 +702,17 @@
                             <h3>Book This Boat Ride</h3>
                             <p>Fill the form — we'll confirm on WhatsApp</p>
                         </div>
-                        @if($displayPrice > 0)
+                        @if($isDevDiwali)
+                        <div style="text-align:right;">
+                            <span style="display:inline-block;background:linear-gradient(135deg,#7c2d12,#b45309);color:#fff;font-size:.65rem;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;">🏷️ Best Price Guaranteed</span>
+                        </div>
+                        @elseif($displayPrice > 0)
                         <div class="vkbd-card-price-wrap">
                             @if($hasDiscount)
                             <span class="vkbd-card-price-old">₹{{ number_format($product->base_price) }}</span>
                             @endif
                             <span class="vkbd-card-price">₹{{ number_format($displayPrice) }}</span>
-                            <span class="vkbd-card-price-sub">{{ $isDevDiwali ? '/ person' : '/ trip' }}</span>
+                            <span class="vkbd-card-price-sub">/ trip</span>
                         </div>
                         @endif
                     </div>
@@ -741,7 +749,7 @@
                         <input type="hidden" name="children_count" id="vkbs_children_hidden" value="0">
                         <input type="hidden" name="time_slot"      id="vkbs_slot_hidden" value="">
                         <input type="hidden" name="message"        id="vkbs_message_hidden">
-                        <input type="hidden" name="booking_amount" value="{{ $displayPrice ?? 0 }}">
+                        @if(!$isDevDiwali)<input type="hidden" name="booking_amount" value="{{ $displayPrice ?? 0 }}">@endif
 
                         {{-- 1. Travel Date --}}
                         <div class="vkbs-group">
@@ -829,6 +837,16 @@
                                 <input type="number" id="vkbs_persons_disp" value="2" readonly>
                                 <button type="button" id="vkbs_pp" aria-label="Increase">+</button>
                             </div>
+                        </div>
+
+                        {{-- Dev Diwali: Call Now for Best Price --}}
+                        <div class="vkbs-price-box" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #d97706;">
+                            <div class="vkbs-price-box-header" style="border-bottom:1px solid #fde68a;padding-bottom:8px;margin-bottom:8px;">
+                                <span style="font-weight:700;color:#92400e;">🏷️ Best Price Guaranteed</span>
+                            </div>
+                            <a href="tel:+91{{ preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917') }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#7c2d12,#b45309);color:#fff;border-radius:10px;padding:10px;font-size:.88rem;font-weight:700;text-decoration:none;">
+                                📞 Call Now for Best Price
+                            </a>
                         </div>
                         @else
                         <div class="vkbs-row2">
@@ -1013,7 +1031,9 @@
 <div class="vkbd-mob-bar">
     <div class="vkbd-mob-bar-info">
         <div class="vkbd-mob-bar-label">{{ Str::limit($product->name, 28) }}</div>
-        @if($displayPrice > 0)
+        @if($isDevDiwali)
+        <div class="vkbd-mob-bar-price" style="color:#fbbf24;font-size:.72rem;">Best Price Guaranteed</div>
+        @elseif($displayPrice > 0)
         <div class="vkbd-mob-bar-price">From ₹{{ number_format($displayPrice) }}/-</div>
         @endif
     </div>
@@ -1070,7 +1090,6 @@
     var children = 0;
 
     @if($isDevDiwali)
-    /* Dev Diwali: simple persons counter only */
     function renderPersons() {
         document.getElementById('vkbs_persons_disp').value   = persons;
         document.getElementById('vkbs_persons_hidden').value = persons;

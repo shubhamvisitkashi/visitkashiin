@@ -490,23 +490,17 @@
                     {{-- Price + Rating row --}}
                     <div class="bl-price-rating-row">
                         <div class="bl-price-inline">
-                            @if(($product->discounted_price ?? 0) > 0)
+                            @if($isDevDiwali)
+                                <span style="font-size:.76rem;font-weight:700;color:#b45309;white-space:nowrap;">📞 Call Now · Best Price Guaranteed</span>
+                            @elseif(($product->discounted_price ?? 0) > 0)
                                 @if($hasDiscount)
                                 <span class="bl-price-old">₹{{ number_format($product->base_price) }}</span>
                                 @endif
                                 <span class="bl-price" itemprop="price" content="{{ $product->discounted_price }}">₹{{ number_format($product->discounted_price) }}</span>
-                                @if($isDevDiwali)
-                                <span class="bl-price-unit" style="color:#b45309;font-weight:700;">🪔 Dev Diwali / person</span>
-                                @else
                                 <span class="bl-price-unit">/ trip</span>
-                                @endif
                             @elseif(($product->base_price ?? 0) > 0)
                                 <span class="bl-price" itemprop="price" content="{{ $product->base_price }}">₹{{ number_format($product->base_price) }}</span>
-                                @if($isDevDiwali)
-                                <span class="bl-price-unit" style="color:#b45309;font-weight:700;">🪔 Dev Diwali / person</span>
-                                @else
                                 <span class="bl-price-unit">/ trip</span>
-                                @endif
                             @else
                                 <span class="bl-price-unit" style="font-style:italic;color:#aaa;">Price on request</span>
                             @endif
