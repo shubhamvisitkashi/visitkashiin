@@ -649,7 +649,8 @@
                 </li>
             @endcanany
 
-            {{-- ══════════════ CONFIGURATION ══════════════ --}}
+            {{-- ══════════════ CONFIGURATION (Super Admin only) ══════════════ --}}
+            @if(auth('admin')->user()?->hasRole('Super Admin'))
             <li class="nav-item nav-category">Configuration</li>
 
             {{-- Tour Packages --}}
@@ -828,6 +829,8 @@
                     </div>
                 </li>
             @endcan
+
+            @endif {{-- end Super Admin Configuration block --}}
 
         </ul>
     </div>
