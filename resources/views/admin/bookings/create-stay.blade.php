@@ -603,15 +603,10 @@
           </div>
           <div class="sb-card-body">
             <div class="row g-3">
-              <div class="col-md-6">
+              <div class="col-12">
                 <label class="sb-label">Internal Notes <span style="font-weight:400;text-transform:none;font-size:.68rem;">(Staff only)</span></label>
                 <textarea name="internal_notes" class="form-control sb-input" rows="3"
                           placeholder="Notes visible to staff only…">{{ old('internal_notes') }}</textarea>
-              </div>
-              <div class="col-md-6">
-                <label class="sb-label">Tour Plan / Itinerary</label>
-                <textarea name="tour_plan" class="form-control sb-input" rows="3"
-                          placeholder="Day 1: Arrival | Day 2: Darshan…">{{ old('tour_plan') }}</textarea>
               </div>
             </div>
           </div>
@@ -649,6 +644,17 @@
             <div id="perNightNote" style="font-size:.7rem;color:#0D9488;margin-top:5px;font-weight:700;display:none;"></div>
           </div>
 
+          {{-- B2B Vendor Cost --}}
+          <div class="sb-amt-row">
+            <label class="sb-label">B2B Vendor Cost (₹)</label>
+            <div class="sb-rupee-wrap">
+              <span class="sb-rupee">₹</span>
+              <input type="number" name="vendor_cost" id="vendorCost"
+                     class="form-control sb-input sb-rupee-input"
+                     placeholder="0" min="0" step="0.01" value="{{ old('vendor_cost',0) }}">
+            </div>
+          </div>
+
           {{-- Discount --}}
           <div class="sb-amt-row">
             <label class="sb-label">Discount (₹)</label>
@@ -662,24 +668,32 @@
 
           {{-- Advance --}}
           <div class="sb-amt-row">
-            <label class="sb-label">Advance Paid (₹)</label>
+            <label class="sb-label">Advance Paid (₹) <span class="sb-req">*</span></label>
             <div class="sb-rupee-wrap">
               <span class="sb-rupee">₹</span>
               <input type="number" name="advance_paid" id="advancePaid"
                      class="form-control sb-input sb-rupee-input"
-                     value="0" min="0" oninput="recalcBalance()">
+                     value="0" min="0" required oninput="recalcBalance()">
             </div>
           </div>
 
           {{-- Method --}}
           <div class="sb-amt-row">
             <label class="sb-label">Payment Method</label>
-            <select name="payment_method" class="form-select sb-input">
+            <select name="payment_method" id="paymentMethod" class="form-select sb-input" onchange="toggleReceiverName()">
               <option value="">Select…</option>
-              @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer','card'=>'💳 Card','cheque'=>'📄 Cheque'] as $v=>$l)
-              <option value="{{ $v }}">{{ $l }}</option>
-              @endforeach
+              <option value="cash" {{ old('payment_method')==='cash' ? 'selected':'' }}>💵 Cash</option>
+              <option value="upi"  {{ old('payment_method')==='upi'  ? 'selected':'' }}>📱 UPI</option>
             </select>
+          </div>
+
+          {{-- Receiver Name (Cash only) --}}
+          <div class="sb-amt-row" id="receiverNameRow" style="display:none;">
+            <label class="sb-label">Receiver Name</label>
+            <input type="text" name="cash_receiver_name" id="cashReceiverName"
+                   class="form-control sb-input"
+                   placeholder="Name of person collecting cash"
+                   value="{{ old('cash_receiver_name') }}">
           </div>
 
           {{-- Account --}}
@@ -935,12 +949,29 @@ function buildPlan() {
   if (prop) updateHotelSummary(prop);
 }
 
+function toggleReceiverName() {
+  const method = document.getElementById('paymentMethod').value;
+  const row    = document.getElementById('receiverNameRow');
+  const input  = document.getElementById('cashReceiverName');
+  if (method === 'cash') {
+    row.style.display = '';
+    input.setAttribute('required', 'required');
+  } else {
+    row.style.display = 'none';
+    input.removeAttribute('required');
+    input.value = '';
+  }
+}
+
 document.getElementById('stayForm').addEventListener('submit', function() {
   buildPlan();
   document.getElementById('bookingDateHidden').value = new Date().toISOString().slice(0,10);
 });
 
-document.addEventListener('DOMContentLoaded', () => { recalcBalance(); });
+document.addEventListener('DOMContentLoaded', () => {
+  recalcBalance();
+  toggleReceiverName();
+});
 </script>
 
 @endsection

@@ -107,14 +107,15 @@ class DirectBookingController extends Controller
                 'services.*.unit_price'             => 'required|numeric|min:0',
                 'services.*.service_date'           => 'nullable|date',
 
-                // Payment (Optional)
-                'advance_paid'     => 'nullable|numeric|min:0',
-                'discount'         => 'nullable|numeric|min:0',
-                'payment_status'   => 'nullable|string',
-                'payment_method'   => 'nullable|string',
+                // Payment
+                'advance_paid'        => 'required|numeric|min:0',
+                'discount'            => 'nullable|numeric|min:0',
+                'payment_status'      => 'nullable|string',
+                'payment_method'      => 'nullable|string|in:cash,upi',
+                'cash_receiver_name'  => 'nullable|string|max:255',
+                'vendor_cost'         => 'nullable|numeric|min:0',
 
                 // Additional Details (Optional)
-                'tour_plan'        => 'nullable|string',
                 'guest_notes'      => 'nullable|string',
                 'internal_notes'   => 'nullable|string',
                 'tags'             => 'nullable|string',
@@ -171,7 +172,7 @@ class DirectBookingController extends Controller
                 'lead_source_id'      => $validated['lead_source_id'],
                 'booking_status'      => 'confirm',
                 'total_amount'        => $totalAmount,
-                'plan_detail'         => $validated['tour_plan'] ?? null,
+                'plan_detail'         => null,
                 'notes'               => $validated['internal_notes'] ?? null,
                 'added_by'            => auth('admin')->id(),
             ]);
@@ -190,7 +191,7 @@ class DirectBookingController extends Controller
                 'tax_rate' => 0,
                 'status' => 'accepted', // Auto-approved
                 'notes' => 'Auto-created via Direct Booking',
-                'itinerary_html' => $validated['tour_plan'] ?? null,
+                'itinerary_html' => null,
                 'created_by' => auth('admin')->id(),
             ]);
 
@@ -225,6 +226,7 @@ class DirectBookingController extends Controller
                 'paid_amount'     => $advancePaid,
                 'pending_amount'  => $pendingAmount,
                 'discount_amount' => $discountAmount,
+                'vendor_cost'     => !empty($validated['vendor_cost']) ? (float)$validated['vendor_cost'] : null,
                 'tax_amount'      => 0,
                 'notes'           => $validated['internal_notes'] ?? null,
                 'created_by'      => auth('admin')->id(),
@@ -242,12 +244,15 @@ class DirectBookingController extends Controller
                     ? $request->payment_account_id
                     : PaymentAccount::first()?->id;
                 BookingPayment::create([
-                    'booking_id'         => $booking->id,
-                    'payment_account_id' => $selectedAccountId,
-                    'payment_date'       => now()->format('Y-m-d'),
-                    'amount'             => $advancePaid,
-                    'payment_method'     => $validated['payment_method'] ?? 'cash',
-                    'received_by'        => auth('admin')->id(),
+                    'booking_id'          => $booking->id,
+                    'payment_account_id'  => $selectedAccountId,
+                    'payment_date'        => now()->format('Y-m-d'),
+                    'amount'              => $advancePaid,
+                    'payment_method'      => $validated['payment_method'] ?? 'cash',
+                    'cash_receiver_name'  => ($validated['payment_method'] ?? '') === 'cash'
+                                             ? ($validated['cash_receiver_name'] ?? null)
+                                             : null,
+                    'received_by'         => auth('admin')->id(),
                 ]);
             }
 

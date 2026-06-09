@@ -22,6 +22,7 @@ class Booking extends Model
         'total_amount',
         'paid_amount',
         'pending_amount',
+        'vendor_cost',
         'created_by',
         'deleted_by',
         'is_gst_invoice',
