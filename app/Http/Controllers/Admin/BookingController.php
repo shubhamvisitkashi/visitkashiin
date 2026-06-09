@@ -126,7 +126,7 @@ class BookingController extends Controller
             ->paginate(15);
 
         // Get all staff for filter dropdown (only for admins/managers)
-        $staffList = [];
+        $staffList = collect([]);
         if (auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager'])) {
             $staffList = \App\Models\Admin\Admin::select('id', 'name')->orderBy('name')->get();
         }
