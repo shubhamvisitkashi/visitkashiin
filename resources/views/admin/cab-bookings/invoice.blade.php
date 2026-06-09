@@ -128,40 +128,6 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
 .watermark{background:#0a3d5c;text-align:center;padding:4px;font-size:.6rem;color:rgba(255,255,255,.25);letter-spacing:.06em;flex-shrink:0;}
 
 /* ══ PRINT — force all backgrounds/gradients ══ */
-@media print{
-  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
-  html,body{background:#fff !important;margin:0 !important;padding:0 !important;}
-  .screen-bar{display:none !important;}
-  @page{size:A4 portrait;margin:0;}
-
-  .wrap{
-    width:210mm !important;min-height:297mm !important;
-    margin:0 auto !important;box-shadow:none !important;border-radius:0 !important;
-  }
-
-  /* Preserve gradient backgrounds */
-  .bh          {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .title-band  {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .card-head   {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .trip-bar    {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .terms       {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .inv-footer  {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .watermark   {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .body-content{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;background:#f0f7ff !important;}
-  .pref-pill   {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .pref-detail {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-
-  .bh{padding:14px 18px;}
-  .bh-logo{height:36px;}
-  .main{padding:10px 16px;}
-  .card{margin-bottom:7px;}
-  .card-head{padding:6px 12px;}
-  .card-body{padding:9px 12px;}
-  .journey{padding:10px 16px;}
-  .trip-bar{padding:7px 16px;gap:16px;}
-  .inv-footer{padding:9px 16px;}
-}
-
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:700px){
   body{background:#1e293b;}
@@ -178,6 +144,69 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
   .jm-arr{transform:none;}
   .dg{grid-template-columns:1fr;}
   .inv-footer{padding:12px 16px;}
+}
+
+/* ══ PRINT — MUST come after mobile CSS so it wins on mobile print ══ */
+@media print{
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
+  html,body{background:#fff !important;margin:0 !important;padding:0 !important;}
+  .screen-bar{display:none !important;}
+  @page{size:A4 portrait;margin:0;}
+
+  /* Override mobile layout for print */
+  .wrap{
+    width:210mm !important;min-height:297mm !important;
+    margin:0 auto !important;box-shadow:none !important;border-radius:0 !important;
+  }
+
+  /* Explicitly re-declare every background so mobile CSS can't strip them */
+  .bh{
+    background:linear-gradient(135deg,#0c4a6e 0%,#075985 45%,#0369a1 100%) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+    padding:14px 18px;
+  }
+  .title-band{
+    background:rgba(0,0,0,.22) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .card-head{
+    background:linear-gradient(90deg,#f0f7ff,#e8f4fd) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+    padding:6px 12px;
+  }
+  .trip-bar{
+    background:#f0f7ff !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+    padding:7px 16px;gap:16px;
+  }
+  .body-content{
+    background:#f0f7ff !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .terms{
+    background:#f0f7ff !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .pref-detail{
+    background:#f0f7ff !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .pref-pill{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .inv-footer{
+    background:linear-gradient(135deg,#0c4a6e 0%,#075985 100%) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+    padding:9px 16px;
+  }
+  .watermark{
+    background:#0a3d5c !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+
+  .bh-logo{height:36px;}
+  .main{padding:10px 16px;}
+  .card{margin-bottom:7px;}
+  .card-body{padding:9px 12px;}
+  .journey{padding:10px 16px;}
 }
 </style>
 </head>

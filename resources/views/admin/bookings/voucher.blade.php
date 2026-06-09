@@ -219,34 +219,6 @@ body{
 }
 .qr-box img{width:100%;height:100%;}
 
-/* ══ PRINT — force all backgrounds/gradients ══ */
-@media print{
-  *{
-    -webkit-print-color-adjust:exact !important;
-    print-color-adjust:exact !important;
-    color-adjust:exact !important;
-  }
-  html,body{background:#fff !important;margin:0 !important;padding:0 !important;}
-  .no-print{display:none !important;}
-  @page{margin:0;size:A4 portrait;}
-  .voucher-wrap{
-    box-shadow:none !important;
-    width:210mm !important;
-    min-height:297mm !important;
-    margin:0 auto !important;
-    page-break-inside:avoid;
-  }
-  /* Preserve gradient backgrounds in print */
-  .vh-header      {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .vh-title-bar   {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .vh-footer      {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .vh-section-head{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .pay-table th   {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .pay-total-row td{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .svc-card       {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  .powered-by     {-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-}
-
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:700px){
   body{background:#1e293b;}
@@ -268,6 +240,61 @@ body{
   .terms-list{grid-template-columns:1fr;}
   .vh-header-inner{flex-wrap:wrap;gap:10px;}
   .vh-contact-block{text-align:left;}
+}
+
+/* ══ PRINT — MUST come after mobile CSS so it wins on mobile print ══ */
+@media print{
+  *{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color-adjust:exact !important;
+  }
+  html,body{background:#fff !important;margin:0 !important;padding:0 !important;}
+  .no-print{display:none !important;}
+  @page{margin:0;size:A4 portrait;}
+
+  /* Override mobile layout for print */
+  .voucher-wrap{
+    width:210mm !important;
+    min-height:297mm !important;
+    box-shadow:none !important;
+    margin:0 auto !important;
+    page-break-inside:avoid;
+  }
+
+  /* Explicitly re-declare every gradient/background so mobile CSS can't strip them */
+  .vh-header{
+    background:linear-gradient(135deg,#0c4a6e 0%,#075985 45%,#0369a1 100%) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .vh-title-bar{
+    background:rgba(0,0,0,.22) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .vh-footer{
+    background:linear-gradient(135deg,#0c4a6e 0%,#075985 100%) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .vh-section-head{
+    background:linear-gradient(90deg,#f0f7ff,#e8f4fd) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .pay-table th{
+    background:#f0f7ff !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .pay-total-row td{
+    background:#f0fdf4 !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .svc-card{
+    background:linear-gradient(135deg,#eff6ff,#dbeafe) !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  .powered-by{
+    background:#0a3d5c !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
 }
 </style>
 </head>
