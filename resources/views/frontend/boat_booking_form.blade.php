@@ -27,7 +27,7 @@
                         <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h3 class="text-white mb-0">Booking Details</h3>
-                                <span class="text-white"><i class="fa fa-calendar"></i> 05 Nov 2025</span>
+                                <span class="text-white"><i class="fa fa-calendar"></i> 24 Nov 2026</span>
                             </div>
                         </div>
                         <div class="card-body">

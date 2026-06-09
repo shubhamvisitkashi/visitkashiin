@@ -276,57 +276,6 @@
                       && $now->between($devDiwaliStart, $devDiwaliEnd);
 @endphp
 
-@if($isDevDiwali)
-<div class="dd-banner">
-    <div class="container">
-        <div class="dd-banner-inner">
-            <div class="dd-banner-left">
-                <span class="dd-flame">🪔</span>
-                <div>
-                    <div class="dd-banner-title">Dev Diwali 2025–2026 Special Pricing</div>
-                    <div class="dd-banner-sub">Festival price per person active · 05 Nov 2025 – 24 Nov 2026</div>
-                </div>
-            </div>
-            <div class="dd-banner-badge">Dev Diwali Price / Person</div>
-        </div>
-    </div>
-</div>
-<style>
-.dd-banner{background:linear-gradient(135deg,#7c2d12 0%,#b45309 40%,#d97706 70%,#f59e0b 100%);padding:14px 0;}
-.dd-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
-.dd-banner-left{display:flex;align-items:center;gap:12px;}
-.dd-flame{font-size:1.8rem;animation:ddFlicker .9s ease-in-out infinite alternate;}
-@keyframes ddFlicker{0%{transform:scale(1) rotate(-3deg);}100%{transform:scale(1.1) rotate(3deg);}}
-.dd-banner-title{font-size:.95rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
-.dd-banner-sub{font-size:.75rem;color:rgba(255,255,255,.8);font-weight:500;margin-top:2px;}
-.dd-banner-badge{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);color:#fff;font-size:.75rem;font-weight:800;padding:6px 16px;border-radius:30px;white-space:nowrap;letter-spacing:.03em;text-transform:uppercase;}
-@media(max-width:600px){.dd-banner-badge{display:none;}.dd-banner-title{font-size:.85rem;}.dd-banner-sub{font-size:.68rem;}}
-</style>
-@endif
-
-{{-- ── Trust Strip ── --}}
-<div class="bl-trust-strip">
-    <div class="container">
-        <div class="bl-trust-strip-inner">
-            <div class="bl-trust-item">
-                <svg width="16" height="16" fill="none" stroke="#0f3460" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                Free Cancellation
-            </div>
-            <div class="bl-trust-item">
-                <svg width="16" height="16" fill="none" stroke="#0f3460" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Safe & Licensed Boats
-            </div>
-            <div class="bl-trust-item">
-                <svg width="16" height="16" fill="none" stroke="#0f3460" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.52 2 2 0 0 1 3.6 1.35h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                24/7 WhatsApp Support
-            </div>
-            <div class="bl-trust-item">
-                <svg width="16" height="16" fill="none" stroke="#0f3460" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Best Price Guaranteed
-            </div>
-        </div>
-    </div>
-</div>
 
 {{-- ══ BOAT CARDS GRID ════════════════════════════════════════════════════════ --}}
 <div class="bl-grid-section">
