@@ -646,12 +646,13 @@
 
           {{-- B2B Vendor Cost --}}
           <div class="sb-amt-row">
-            <label class="sb-label">B2B Vendor Cost (₹)</label>
+            <label class="sb-label">B2B Vendor Cost (₹) <span class="sb-req">*</span></label>
             <div class="sb-rupee-wrap">
               <span class="sb-rupee">₹</span>
               <input type="number" name="vendor_cost" id="vendorCost"
                      class="form-control sb-input sb-rupee-input"
-                     placeholder="0" min="0" step="0.01" value="{{ old('vendor_cost',0) }}">
+                     placeholder="0" min="0" step="0.01" required
+                     value="{{ old('vendor_cost',0) }}">
             </div>
           </div>
 

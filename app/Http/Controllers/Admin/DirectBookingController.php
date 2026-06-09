@@ -113,7 +113,7 @@ class DirectBookingController extends Controller
                 'payment_status'      => 'nullable|string',
                 'payment_method'      => 'nullable|string|in:cash,upi',
                 'cash_receiver_name'  => 'nullable|string|max:255',
-                'vendor_cost'         => 'nullable|numeric|min:0',
+                'vendor_cost'         => 'required|numeric|min:0',
 
                 // Additional Details (Optional)
                 'guest_notes'      => 'nullable|string',
