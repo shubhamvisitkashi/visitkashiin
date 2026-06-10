@@ -28,6 +28,8 @@ class HeroSlideController extends Controller
         $data = $request->only(['badge','title','tagline','cta_label','cta_url','sort_order']);
         $data['is_active']   = $request->boolean('is_active', true);
         $data['sort_order']  = (int)($data['sort_order'] ?? 0);
+        $data['cta_label']   = $data['cta_label'] ?: 'Explore Tours';
+        $data['cta_url']     = $data['cta_url'] ?: '/packages';
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -59,6 +61,8 @@ class HeroSlideController extends Controller
         $data = $request->only(['badge','title','tagline','cta_label','cta_url','sort_order']);
         $data['is_active']  = $request->boolean('is_active', true);
         $data['sort_order'] = (int)($data['sort_order'] ?? 0);
+        $data['cta_label']  = $data['cta_label'] ?: 'Explore Tours';
+        $data['cta_url']    = $data['cta_url'] ?: '/packages';
 
         $dir = $this->uploadDir();
 
