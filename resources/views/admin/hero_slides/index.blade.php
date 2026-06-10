@@ -101,6 +101,8 @@
                 <div class="hs-slide-thumb" style="min-height:110px;">
                     @if($slide->image)
                     <img src="{{ $slide->image_url }}" alt="{{ $slide->title }}">
+                    @elseif($slide->mobile_image)
+                    <img src="{{ $slide->mobile_image_url }}" alt="{{ $slide->title }}">
                     @else
                     <div class="hs-slide-thumb-placeholder">🖼</div>
                     @endif

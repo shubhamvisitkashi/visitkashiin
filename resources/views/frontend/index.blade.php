@@ -33,8 +33,9 @@
 // Dynamic Hero Slider — pulls from DB (via controller), falls back to web setup banner
 if ($hero_slides->isNotEmpty()) {
     $sliderSlides = $hero_slides->map(fn($s) => [
-        'img'        => $s->image_url,
-        'mobile_img' => $s->mobile_image_url ?? $s->image_url,
+        'img'            => $s->image_url,
+        'mobile_img'     => $s->mobile_image_url ?? $s->image_url,
+        'has_mobile_img' => (bool) $s->mobile_image,
         'badge'      => $s->badge  ?: "Varanasi's #1 Spiritual Platform",
         'title'      => $s->title,
         'tagline'    => $s->tagline ?: 'Book trusted cabs, luxury boats, Ganga Aarti, hotels & spiritual tours.',
@@ -44,8 +45,9 @@ if ($hero_slides->isNotEmpty()) {
     // Fallback: use banner images from web setup
     $bannerImg = asset('backend/admin/website_setup/' . websiteSetupValue('banner'));
     $sliderSlides = [[
-        'img'        => $bannerImg,
-        'mobile_img' => $bannerImg,
+        'img'            => $bannerImg,
+        'mobile_img'     => $bannerImg,
+        'has_mobile_img' => true,
         'badge'      => "Varanasi's #1 Spiritual Travel Platform",
         'title'      => websiteSetupValue('banner_description') ?: 'Most Trusted Travel Company',
         'tagline'    => websiteSetupValue('banner_title') ?: 'Book trusted cabs, luxury boats, Ganga Aarti, hotels & spiritual tours.',
@@ -60,9 +62,16 @@ if ($hero_slides->isNotEmpty()) {
                 ['badge'=>'Spiritual Varanasi Tours','title'=>'Explore Kashi with Local Experts','tagline'=>'Guided temple tours, cab services and luxury stays — all in one place.','cta1'=>['label'=>'View Packages','url'=>route('product.list','packages')]],
                 ['badge'=>'Heritage Hotel Stays','title'=>'Stay Near the Holy Ganga Ghats','tagline'=>'Handpicked heritage hotels and homestays near the sacred Ganga Ghats.','cta1'=>['label'=>'Browse Hotels','url'=>route('product.list','hotels')]],
             ];
-            $sliderSlides[] = array_merge(['img' => $imgUrl, 'mobile_img' => $imgUrl], $extras[$idx] ?? $extras[0]);
+            $sliderSlides[] = array_merge(['img' => $imgUrl, 'mobile_img' => $imgUrl, 'has_mobile_img' => true], $extras[$idx] ?? $extras[0]);
         }
     }
+}
+
+// Mobile slider shows ONLY slides with a dedicated portrait Mobile Image.
+// Falls back to the full slide list if none have one (so mobile is never empty).
+$mobileSliderSlides = array_values(array_filter($sliderSlides, fn($s) => !empty($s['has_mobile_img'])));
+if (empty($mobileSliderSlides)) {
+    $mobileSliderSlides = $sliderSlides;
 }
 @endphp
 
@@ -71,7 +80,7 @@ if ($hero_slides->isNotEmpty()) {
 @if(!empty($sliderSlides[0]['img']))
 <link rel="preload" as="image" href="{{ $sliderSlides[0]['img'] }}" fetchpriority="high" media="(min-width: 768px)">
 @endif
-@php $mobileHero = $sliderSlides[0]['mobile_img'] ?? $sliderSlides[0]['img'] ?? ''; @endphp
+@php $mobileHero = $mobileSliderSlides[0]['mobile_img'] ?? $mobileSliderSlides[0]['img'] ?? ''; @endphp
 @if($mobileHero)
 <link rel="preload" as="image" href="{{ $mobileHero }}" fetchpriority="high" media="(max-width: 767px)">
 @endif
@@ -132,7 +141,7 @@ if ($hero_slides->isNotEmpty()) {
 {{-- ══ MOBILE Slider (shown only on mobile ≤767px) ══ --}}
 <section class="vkm-hero vkp-mobile-only">
     <div class="vkm-track" id="vkmSlides">
-        @foreach($sliderSlides as $i => $slide)
+        @foreach($mobileSliderSlides as $i => $slide)
         <div class="vkm-slide {{ $i===0 ? 'is-active' : '' }}" data-vkm="{{ $i }}">
             <a href="{{ $slide['cta1']['url'] ?? '#' }}" class="vkm-img-wrap">
                 <img src="{{ $slide['mobile_img'] ?? $slide['img'] }}"
@@ -159,9 +168,9 @@ if ($hero_slides->isNotEmpty()) {
         @endforeach
     </div>
 
-    @if(count($sliderSlides) > 1)
+    @if(count($mobileSliderSlides) > 1)
     <div class="vkm-dots">
-        @foreach($sliderSlides as $i => $s)
+        @foreach($mobileSliderSlides as $i => $s)
         <button class="vkm-dot {{ $i===0 ? 'active' : '' }}"
                 onclick="vkmGoTo({{ $i }})" aria-label="Slide {{ $i+1 }}"></button>
         @endforeach
@@ -472,10 +481,10 @@ if ($hero_slides->isNotEmpty()) {
 </script>
 
 {{-- ══ MOBILE SLIDER JS ══ --}}
-@if(count($sliderSlides) > 1)
+@if(count($mobileSliderSlides) > 1)
 <script>
 (function(){
-  var total={{ count($sliderSlides) }};
+  var total={{ count($mobileSliderSlides) }};
   if(total<=1)return;
   function initMobileSlider(){
     var cur=0,timer=null,int=5000;

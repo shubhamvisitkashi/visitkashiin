@@ -261,8 +261,8 @@
         <div class="ws-card-head">
             <div class="ws-card-head-icon"><i data-feather="sliders"></i></div>
             <div style="flex:1;">
-                <div class="ws-card-head-title">Hero Slider Slides</div>
-                <div class="ws-card-head-sub">Add multiple slides — each with its own image, title &amp; button</div>
+                <div class="ws-card-head-title">Hero Slider Slides (Desktop View)</div>
+                <div class="ws-card-head-sub">Add multiple slides — each with its own desktop image, title &amp; button</div>
             </div>
             <a href="{{ route('hero-slides.index') }}" style="font-size:.72rem;font-weight:700;color:#EA580C;text-decoration:none;white-space:nowrap;">Manage All →</a>
         </div>
@@ -435,6 +435,67 @@
                 </form>
             </div>
 
+        </div>
+    </div>
+
+    <div class="ws-card" style="margin-bottom:16px;">
+        <div class="ws-card-head">
+            <div class="ws-card-head-icon"><i data-feather="smartphone"></i></div>
+            <div style="flex:1;">
+                <div class="ws-card-head-title">Hero Slider Slides (Mobile View)</div>
+                <div class="ws-card-head-sub">Upload a portrait Mobile Image (optional — falls back to desktop image if not set)</div>
+            </div>
+        </div>
+        <div class="ws-card-body">
+            @if($heroSlides->isNotEmpty())
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                @foreach($heroSlides as $slide)
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 14px;">
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        {{-- Mobile thumb --}}
+                        <div style="width:40px;height:60px;border-radius:7px;overflow:hidden;flex-shrink:0;background:#E2E8F0;display:flex;align-items:center;justify-content:center;">
+                            @if($slide->mobile_image)
+                            <img src="{{ $slide->mobile_image_url }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+                            @else
+                            <span style="font-size:.9rem;">📱</span>
+                            @endif
+                        </div>
+                        {{-- Info --}}
+                        <div style="flex:1;min-width:160px;">
+                            <div style="font-size:.83rem;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $slide->title }}</div>
+                            <div style="font-size:.7rem;color:{{ $slide->mobile_image ? '#15803D' : '#94A3B8' }};">
+                                {{ $slide->mobile_image ? '✓ Custom mobile image set' : 'No mobile image — falls back to desktop image' }}
+                            </div>
+                        </div>
+                        {{-- Upload / replace / remove form --}}
+                        <form action="{{ route('hero-slides.update', $slide->id) }}" method="POST" enctype="multipart/form-data" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            @csrf @method('PUT')
+                            <input type="hidden" name="badge" value="{{ $slide->badge }}">
+                            <input type="hidden" name="title" value="{{ $slide->title }}">
+                            <input type="hidden" name="tagline" value="{{ $slide->tagline }}">
+                            <input type="hidden" name="cta_label" value="{{ $slide->cta_label }}">
+                            <input type="hidden" name="cta_url" value="{{ $slide->cta_url }}">
+                            <input type="hidden" name="sort_order" value="{{ $slide->sort_order }}">
+                            <input type="hidden" name="is_active" value="{{ $slide->is_active ? 1 : 0 }}">
+                            <input type="file" name="mobile_image" accept="image/*" class="ws-file" style="font-size:.72rem;padding:5px 10px;width:auto;">
+                            @if($slide->mobile_image)
+                            <label style="font-size:.68rem;color:#EF4444;display:flex;align-items:center;gap:4px;white-space:nowrap;cursor:pointer;">
+                                <input type="checkbox" name="clear_mobile_image" value="1"> Remove
+                            </label>
+                            @endif
+                            <button type="submit" style="border:none;background:linear-gradient(135deg,#4338CA,#6366F1);color:#fff;border-radius:7px;padding:7px 14px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;">Save</button>
+                        </form>
+                    </div>
+                    <div style="font-size:.66rem;color:#94A3B8;margin-top:6px;">📱 Mobile Image (optional — portrait optimized) · JPG/PNG/WebP · Max 4MB · 750×1200px recommended</div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div style="text-align:center;padding:20px;color:#94A3B8;background:#F8FAFC;border-radius:10px;">
+                <div style="font-size:1.5rem;opacity:.4;margin-bottom:6px;">📱</div>
+                <p style="font-size:.82rem;margin:0;">No slides yet — add a slide in Desktop View first</p>
+            </div>
+            @endif
         </div>
     </div>
 
