@@ -153,7 +153,7 @@
     <section class="main-content detail">
         <div class="container">
             <div class="row">
-                @php $hideSidebar = optional($product->category)->slug === 'things-to-do'; @endphp
+                @php $hideSidebar = in_array(optional($product->category)->slug, ['things-to-do', 'sights']); @endphp
                 <div id="content" class="{{ $hideSidebar ? 'col-lg-12' : 'col-lg-8' }}">
                     <div class="detail-content content-wrapper">
                         {{-- <div class="detail-info">
