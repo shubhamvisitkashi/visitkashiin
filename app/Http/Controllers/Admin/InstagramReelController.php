@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\InstagramReel;
 use App\Models\Admin\Product;
+use App\Services\ImageCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,6 +30,7 @@ class InstagramReelController extends Controller
 
         if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('instagram_thumbs', 'public');
+            ImageCompressor::compress(storage_path('app/public/' . $path));
             $data['thumbnail'] = $path;
         }
 
@@ -48,7 +50,9 @@ class InstagramReelController extends Controller
 
         if ($request->hasFile('thumbnail')) {
             if ($instagramReel->thumbnail) Storage::disk('public')->delete($instagramReel->thumbnail);
-            $data['thumbnail'] = $request->file('thumbnail')->store('instagram_thumbs', 'public');
+            $path = $request->file('thumbnail')->store('instagram_thumbs', 'public');
+            ImageCompressor::compress(storage_path('app/public/' . $path));
+            $data['thumbnail'] = $path;
         }
 
         $instagramReel->update($data);

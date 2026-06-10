@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\Admin\Package;
 use App\Models\Admin\Category;
+use App\Services\ImageCompressor;
 use App\Http\Controllers\Controller;
 
 class PackageController extends Controller
@@ -132,6 +133,7 @@ class PackageController extends Controller
 
                 $filename = time().rand(10, 99).'.'.$image->extension();
                 $image->move(public_path('backend/admin/package_images'), $filename);
+                ImageCompressor::compress(public_path('backend/admin/package_images/' . $filename));
                 $imagesNames[] = $filename;
 
             }

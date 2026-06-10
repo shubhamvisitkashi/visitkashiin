@@ -35,6 +35,7 @@ if ($hero_slides->isNotEmpty()) {
     $sliderSlides = $hero_slides->map(fn($s) => [
         'img'            => $s->image_url,
         'mobile_img'     => $s->mobile_image_url ?? $s->image_url,
+        'has_desktop_img' => (bool) $s->image,
         'has_mobile_img' => (bool) $s->mobile_image,
         'badge'      => $s->badge  ?: "Varanasi's #1 Spiritual Platform",
         'title'      => $s->title,
@@ -47,6 +48,7 @@ if ($hero_slides->isNotEmpty()) {
     $sliderSlides = [[
         'img'            => $bannerImg,
         'mobile_img'     => $bannerImg,
+        'has_desktop_img' => true,
         'has_mobile_img' => true,
         'badge'      => "Varanasi's #1 Spiritual Travel Platform",
         'title'      => websiteSetupValue('banner_description') ?: 'Most Trusted Travel Company',
@@ -62,7 +64,7 @@ if ($hero_slides->isNotEmpty()) {
                 ['badge'=>'Spiritual Varanasi Tours','title'=>'Explore Kashi with Local Experts','tagline'=>'Guided temple tours, cab services and luxury stays — all in one place.','cta1'=>['label'=>'View Packages','url'=>route('product.list','packages')]],
                 ['badge'=>'Heritage Hotel Stays','title'=>'Stay Near the Holy Ganga Ghats','tagline'=>'Handpicked heritage hotels and homestays near the sacred Ganga Ghats.','cta1'=>['label'=>'Browse Hotels','url'=>route('product.list','hotels')]],
             ];
-            $sliderSlides[] = array_merge(['img' => $imgUrl, 'mobile_img' => $imgUrl, 'has_mobile_img' => true], $extras[$idx] ?? $extras[0]);
+            $sliderSlides[] = array_merge(['img' => $imgUrl, 'mobile_img' => $imgUrl, 'has_desktop_img' => true, 'has_mobile_img' => true], $extras[$idx] ?? $extras[0]);
         }
     }
 }
@@ -73,12 +75,21 @@ $mobileSliderSlides = array_values(array_filter($sliderSlides, fn($s) => !empty(
 if (empty($mobileSliderSlides)) {
     $mobileSliderSlides = $sliderSlides;
 }
+
+// Desktop slider shows ONLY slides with a Desktop View image.
+// A slide saved only via "Hero Slider Slides (Mobile View)" has no desktop
+// image and would otherwise fall back to the placeholder, getting cropped
+// into the wide desktop banner — so it's excluded here.
+$desktopSliderSlides = array_values(array_filter($sliderSlides, fn($s) => !empty($s['has_desktop_img'])));
+if (empty($desktopSliderSlides)) {
+    $desktopSliderSlides = $sliderSlides;
+}
 @endphp
 
 {{-- Preload LCP hero images — device-specific so desktop/mobile don't load each other's images --}}
 @push('preloads')
-@if(!empty($sliderSlides[0]['img']))
-<link rel="preload" as="image" href="{{ $sliderSlides[0]['img'] }}" fetchpriority="high" media="(min-width: 768px)">
+@if(!empty($desktopSliderSlides[0]['img']))
+<link rel="preload" as="image" href="{{ $desktopSliderSlides[0]['img'] }}" fetchpriority="high" media="(min-width: 768px)">
 @endif
 @php $mobileHero = $mobileSliderSlides[0]['mobile_img'] ?? $mobileSliderSlides[0]['img'] ?? ''; @endphp
 @if($mobileHero)
@@ -90,7 +101,7 @@ if (empty($mobileSliderSlides)) {
 <section id="home_banner_video" class="vkp-hero vkp-desktop-only">
     <div class="vkp-wrap">
         <div class="vkp-track" id="vkpSlides">
-        @foreach($sliderSlides as $i => $slide)
+        @foreach($desktopSliderSlides as $i => $slide)
         <div class="vkp-slide {{ $i===0 ? 'is-active' : '' }}" data-slide="{{ $i }}"
              aria-hidden="{{ $i!==0 ? 'true' : 'false' }}">
 
@@ -119,7 +130,7 @@ if (empty($mobileSliderSlides)) {
         @endforeach
         </div>
 
-        @if(count($sliderSlides) > 1)
+        @if(count($desktopSliderSlides) > 1)
         {{-- Arrows --}}
         <button class="vkp-arrow vkp-prev" id="vkpPrev" aria-label="Previous">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -129,7 +140,7 @@ if (empty($mobileSliderSlides)) {
         </button>
         {{-- Dots --}}
         <div class="vkp-dots">
-            @foreach($sliderSlides as $i => $s)
+            @foreach($desktopSliderSlides as $i => $s)
             <button class="vkp-dot {{ $i===0 ? 'active' : '' }}"
                     onclick="vkhsGoTo({{ $i }})" aria-label="Slide {{ $i+1 }}"></button>
             @endforeach
@@ -449,7 +460,7 @@ if (empty($mobileSliderSlides)) {
 <script>
 // Defer slider JS to idle time — reduces TBT without affecting visible behaviour
 (function(){
-  var total={{ count($sliderSlides) }};
+  var total={{ count($desktopSliderSlides) }};
   if(total<=1)return;
   function initDesktopSlider(){
     var cur=0,timer=null,int=5500,dur=900;

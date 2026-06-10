@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ImageCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -23,6 +24,7 @@ class ImageUploadController extends Controller
         }
 
         $file->move($dest, $filename);
+        ImageCompressor::compress($dest . '/' . $filename);
 
         return response()->json(['name' => $filename]);
     }

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
 use App\Models\PromoBanner;
+use App\Services\ImageCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
@@ -39,6 +40,7 @@ class PromoBannerController extends Controller
             $file = $request->file('image');
             $name = Str::random(32).'.'.$file->extension();
             $file->move(public_path('backend/admin/promo_banners'), $name);
+            ImageCompressor::compress(public_path('backend/admin/promo_banners/' . $name));
             $data['image'] = $name;
         }
         $promoBanner->update($data);

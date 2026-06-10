@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\WebsiteSetup;
 use App\Models\HeroSlide;
+use App\Services\ImageCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
@@ -55,6 +56,7 @@ class WebsiteSetupController extends Controller
                     }
 
                     $file->move($dest, $filename);
+                    ImageCompressor::compress($dest . '/' . $filename);
                     $input[$types] = $filename;
                 }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\BoatType;
+use App\Services\ImageCompressor;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -29,6 +30,9 @@ class BoatTypeController extends Controller
         $boat_type->slug            = Str::slug($request->name).rand(11111, 99999);
         $boat_type->name            = $request->name;
         $boat_type->image           = $request->image ? $request->file('image')->store('boat_type', 'public') : null;
+        if ($boat_type->image) {
+            ImageCompressor::compress(storage_path('app/public/' . $boat_type->image));
+        }
         $boat_type->seo_title       = $request->seo_title ?? $request->name;
         $boat_type->seo_keyword     = $request->seo_keyword ?? $request->name;
         $boat_type->seo_description = $request->seo_description ?? $request->name;
@@ -75,6 +79,7 @@ class BoatTypeController extends Controller
         $boat_type->name            = $request->name;
         if($request->hasFile('image')) {
             $boat_type->image           = $request->file('image')->store('boat_type', 'public');
+            ImageCompressor::compress(storage_path('app/public/' . $boat_type->image));
         }
         $boat_type->seo_title       = $request->seo_title ?? $request->name;
         $boat_type->seo_keyword     = $request->seo_keyword ?? $request->name;

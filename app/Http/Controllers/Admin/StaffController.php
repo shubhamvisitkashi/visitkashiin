@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Admin\Admin;
 use App\Models\UserTarget;
+use App\Services\ImageCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -58,6 +59,7 @@ class StaffController extends Controller
             $file     = $request->file('avatar');
             $filename = 'avatar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads/avatars'), $filename);
+            ImageCompressor::compress(public_path('uploads/avatars/' . $filename));
             $staff->avatar = $filename;
         }
 
@@ -103,6 +105,7 @@ class StaffController extends Controller
             $file     = $request->file('avatar');
             $filename = 'avatar_' . $id . '_' . time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads/avatars'), $filename);
+            ImageCompressor::compress(public_path('uploads/avatars/' . $filename));
             $staff->avatar = $filename;
         }
 

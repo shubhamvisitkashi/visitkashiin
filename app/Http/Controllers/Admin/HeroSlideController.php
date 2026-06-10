@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\HeroSlide;
+use App\Services\ImageCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
@@ -35,6 +36,7 @@ class HeroSlideController extends Controller
             $file = $request->file('image');
             $name = Str::random(32) . '.' . $file->extension();
             $file->move($this->uploadDir(), $name);
+            ImageCompressor::compress($this->uploadDir() . '/' . $name);
             $data['image'] = $name;
         }
 
@@ -42,6 +44,7 @@ class HeroSlideController extends Controller
             $file = $request->file('mobile_image');
             $name = 'mob_' . Str::random(28) . '.' . $file->extension();
             $file->move($this->uploadDir(), $name);
+            ImageCompressor::compress($this->uploadDir() . '/' . $name);
             $data['mobile_image'] = $name;
         }
 
@@ -73,6 +76,7 @@ class HeroSlideController extends Controller
             $file = $request->file('image');
             $name = Str::random(32) . '.' . $file->extension();
             $file->move($dir, $name);
+            ImageCompressor::compress($dir . '/' . $name);
             $data['image'] = $name;
         }
 
@@ -83,6 +87,7 @@ class HeroSlideController extends Controller
             $file = $request->file('mobile_image');
             $name = 'mob_' . Str::random(28) . '.' . $file->extension();
             $file->move($dir, $name);
+            ImageCompressor::compress($dir . '/' . $name);
             $data['mobile_image'] = $name;
         }
 
