@@ -674,20 +674,20 @@ footer .footer-upper { background: #0F1B30; }
 .vk-why__card p { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; color: #717171; line-height: 1.65; margin: 0; }
 
 /* WhatsApp CTA Strip */
-.vk-cta-strip { background: linear-gradient(180deg, #ff6600 0%, #00a995 100%); padding: 30px 0; margin-bottom: 18px; }
+.vk-cta-strip { background: #000; padding: 30px 0; margin-bottom: 18px; }
 .vk-cta-strip__inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
 .vk-cta-strip__text strong { display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 3px; }
 .vk-cta-strip__text span  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; color: rgba(255,255,255,.80); }
 .vk-cta-strip__btn {
   display: inline-flex; align-items: center; gap: 9px;
-  background: #fff; color: #128c83 !important;
+  background: #fff; color: #000 !important;
   font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 14px;
   padding: 12px 26px; border-radius: 50px; margin-bottom: 15px;
   text-decoration: none !important;
   box-shadow: 0 4px 18px rgba(0,0,0,.14);
   transition: transform .22s, box-shadow .22s;
 }
-.vk-cta-strip__btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.20); color: #128C7E !important; }
+.vk-cta-strip__btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.20); color: #000 !important; }
 .vk-cta-strip__btn img { width: 22px; height: 22px; }
 
 /* Weather Widget */
