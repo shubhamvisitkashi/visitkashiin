@@ -68,7 +68,7 @@ class WebsiteSetupController extends Controller
                 if (!in_array($types, $imageTypes)) {
                     WebsiteSetup::updateOrCreate(
                         ['name' => $types],
-                        ['name' => $types, 'value' => null]
+                        ['name' => $types, 'value' => '']
                     );
                 }
             }
