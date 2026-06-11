@@ -19,7 +19,7 @@
     "@type": "TravelAgency",
     "name": "{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}",
     "telephone": "+91-{{ websiteSetupValue('contact_number') }}",
-    "email": "{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}",
+    "email": "{{ websiteSetupValue('email') }}",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Varanasi",
@@ -319,7 +319,7 @@
                     </div>
                     <div class="vk-contact-card__body">
                         <h3>Email Us</h3>
-                        @php $contactEmail = optional(App\Models\WebsiteSetup::where('name','email')->first())->value; @endphp
+                        @php $contactEmail = websiteSetupValue('email'); @endphp
                         <a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a>
                         <p style="margin-top:4px;">We respond within 24 hours</p>
                     </div>

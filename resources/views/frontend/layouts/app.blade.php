@@ -34,7 +34,7 @@
             "addressCountry": "IN"
           },
           "telephone": "+91-{{ websiteSetupValue('contact_number') }}",
-          "email": "{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}",
+          "email": "{{ websiteSetupValue('email') }}",
           "sameAs": [
             "https://www.facebook.com/visitkashiofficial/",
             "https://www.instagram.com/visitkashi/",

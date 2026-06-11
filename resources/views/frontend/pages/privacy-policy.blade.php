@@ -87,7 +87,7 @@
                 <li>Request deletion of your data (subject to legal obligations)</li>
                 <li>Withdraw consent for marketing communications at any time</li>
             </ul>
-            <p>To exercise any of these rights, contact us at <a href="mailto:{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}">{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}</a>.</p>
+            <p>To exercise any of these rights, contact us at <a href="mailto:{{ websiteSetupValue('email') }}">{{ websiteSetupValue('email') }}</a>.</p>
 
             <h2>8. Third-Party Links</h2>
             <p>Our website may contain links to third-party websites (e.g., hotel partners, payment gateways). We are not responsible for the privacy practices of these sites and encourage you to review their privacy policies.</p>
@@ -101,7 +101,7 @@
             <h2>11. Contact Us</h2>
             <p>For any privacy-related questions or requests, please reach out:</p>
             <ul>
-                <li><strong>Email:</strong> <a href="mailto:{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}">{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}</a></li>
+                <li><strong>Email:</strong> <a href="mailto:{{ websiteSetupValue('email') }}">{{ websiteSetupValue('email') }}</a></li>
                 <li><strong>Phone:</strong> +91-{{ websiteSetupValue('contact_number') }}</li>
                 <li><strong>Address:</strong> {{ websiteSetupValue('address') }}, Varanasi, Uttar Pradesh, India</li>
             </ul>

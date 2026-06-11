@@ -124,7 +124,7 @@
             <p>To initiate a cancellation, please contact us through any of the following methods:</p>
             <ul>
                 <li><strong>Phone / WhatsApp:</strong> <a href="tel:+91{{ websiteSetupValue('contact_number') }}">+91-{{ websiteSetupValue('contact_number') }}</a> or +91-7080109918</li>
-                <li><strong>Email:</strong> <a href="mailto:{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}">{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}</a></li>
+                <li><strong>Email:</strong> <a href="mailto:{{ websiteSetupValue('email') }}">{{ websiteSetupValue('email') }}</a></li>
                 <li><strong>Contact form:</strong> <a href="{{ route('contact.show') }}">Visit our Contact page</a></li>
             </ul>
             <p>Please provide your booking reference number, name, and travel date when requesting a cancellation. Cancellation requests are processed within 2 business days.</p>

@@ -111,8 +111,8 @@
                             </div>
                             <div class="vkf-address__row">
                                 <i class="flaticon-mail vkf-icon"></i>
-                                <a href="mailto:{{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}" itemprop="email">
-                                    {{ optional(App\Models\WebsiteSetup::where('name','email')->first())->value }}
+                                <a href="mailto:{{ websiteSetupValue('email') }}" itemprop="email">
+                                    {{ websiteSetupValue('email') }}
                                 </a>
                             </div>
                             <div class="vkf-address__row">
