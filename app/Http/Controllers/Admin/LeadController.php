@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Models\Lead;
 use App\Models\Vendor;
 use App\Models\Enquiry;
@@ -117,49 +118,56 @@ class LeadController extends Controller
             'enquiry_date' => 'required',
         ]);
 
-        $data = new Lead;
-        $data->booking_id       = 'B-'.date('Ymd').$data->id.rand(11, 99);
-        $data->added_by         = Auth::guard('admin')->user()->id;
-        $data->enquiry_date     = $request->enquiry_date;
+        DB::beginTransaction();
+        try {
+            $data = new Lead;
+            $data->booking_id       = 'B-'.date('Ymd').$data->id.rand(11, 99);
+            $data->added_by         = Auth::guard('admin')->user()->id;
+            $data->enquiry_date     = $request->enquiry_date;
 
-        // Handle date range
-        if($request->daterange){
-            $data->booking_start_date   = date('Y-m-d',strtotime(explode('-',$request->daterange)[0]));
-            $data->booking_end_date   = date('Y-m-d',strtotime(explode('-',$request->daterange)[1]));
-        }
-        $data->guest_name       = $request->guest_name;
-        $data->contact          = $request->contact;
-        $data->pax              = $request->pax;
-        $data->short_plan       = $request->short_plan;
-        $data->service_ids      = $request->service_ids;
-        $data->tm_category_ids      = $request->tm_category_ids;
-        $data->country          = $request->country;
-        $data->state            = $request->state;
-        $data->city             = $request->city;
-        $data->lead_source_id   = $request->lead_source_id;
-        $data->booking_status   = 'follow up';
-        $data->plan_detail      = $request->plan_detail;
-        $data->remark           = $request->remark;
-        $data->save();
-
-        // Handle booking services
-        if ($request->has('booking_services') && is_array($request->booking_services)) {
-            foreach ($request->booking_services as $service) {
-                if (isset($service['service_item_id']) && $service['service_item_id']) {
-                    BookingService::create([
-                        'lead_id' => $data->id,
-                        'service_item_id' => $service['service_item_id'],
-                        'service_type_id' => $service['service_type_id'] ?? null,
-                        'quantity' => $service['quantity'] ?? 1,
-                        'selling_price' => $service['selling_price'] ?? 0,
-                        'cost_price' => $service['cost_price'] ?? 0,
-                        'service_date' => $service['service_date'] ?? now(),
-                        'notes' => $service['notes'] ?? null,
-                    ]);
-                }
+            // Handle date range
+            if($request->daterange){
+                $data->booking_start_date   = date('Y-m-d',strtotime(explode('-',$request->daterange)[0]));
+                $data->booking_end_date   = date('Y-m-d',strtotime(explode('-',$request->daterange)[1]));
             }
-            // Recalculate lead service totals
-            $data->calculateServiceTotals();
+            $data->guest_name       = $request->guest_name;
+            $data->contact          = $request->contact;
+            $data->pax              = $request->pax;
+            $data->short_plan       = $request->short_plan;
+            $data->service_ids      = $request->service_ids;
+            $data->tm_category_ids      = $request->tm_category_ids;
+            $data->country          = $request->country;
+            $data->state            = $request->state;
+            $data->city             = $request->city;
+            $data->lead_source_id   = $request->lead_source_id;
+            $data->booking_status   = 'follow up';
+            $data->plan_detail      = $request->plan_detail;
+            $data->remark           = $request->remark;
+            $data->save();
+
+            // Handle booking services
+            if ($request->has('booking_services') && is_array($request->booking_services)) {
+                foreach ($request->booking_services as $service) {
+                    if (isset($service['service_item_id']) && $service['service_item_id']) {
+                        BookingService::create([
+                            'lead_id' => $data->id,
+                            'service_item_id' => $service['service_item_id'],
+                            'service_type_id' => $service['service_type_id'] ?? null,
+                            'quantity' => $service['quantity'] ?? 1,
+                            'selling_price' => $service['selling_price'] ?? 0,
+                            'cost_price' => $service['cost_price'] ?? 0,
+                            'service_date' => $service['service_date'] ?? now(),
+                            'notes' => $service['notes'] ?? null,
+                        ]);
+                    }
+                }
+                $data->calculateServiceTotals();
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Failed to create lead: ' . $e->getMessage());
         }
 
         $searchForm = session('leadSearchForm', []);

@@ -23,6 +23,19 @@ class TourBookingController extends Controller
         $this->middleware('permission:booking-create');
     }
 
+    /**
+     * Map the tour booking form's status options (confirm/pending/inquiry/cancelled)
+     * to the bookings.booking_status enum (confirmed/in_progress/completed/cancelled).
+     */
+    private function mapBookingStatus(?string $formStatus): string
+    {
+        return match ($formStatus) {
+            'pending', 'inquiry' => 'in_progress',
+            'cancelled' => 'cancelled',
+            default => 'confirmed',
+        };
+    }
+
     public function create()
     {
         $leadSources     = LeadSource::orderBy('name')->get();
@@ -89,11 +102,14 @@ class TourBookingController extends Controller
             'notes'          => 'nullable|string|max:255',
         ]);
 
-        $defaultAccount = PaymentAccount::first();
+        $defaultAccount = PaymentAccount::where('is_active', 1)->first() ?? PaymentAccount::first();
+        if (!$defaultAccount) {
+            return back()->with('error', 'No payment account configured. Please add one in Payment Accounts before recording payments.');
+        }
 
         BookingPayment::create([
             'booking_id'         => $booking->id,
-            'payment_account_id' => $defaultAccount?->id,
+            'payment_account_id' => $defaultAccount->id,
             'payment_date'       => $request->payment_date,
             'amount'             => $request->amount,
             'payment_method'     => $request->payment_method,
@@ -214,7 +230,7 @@ class TourBookingController extends Controller
         try {
             $bookingAmount = (float) $request->booking_amount;
             $discount      = (float) ($request->discount ?? 0);
-            $advance       = (float) ($request->advance_paid ?? $booking->paid_amount ?? 0);
+            $advance       = (float) $booking->payments->sum('amount'); // always derive from real payment records, not form input
             $net           = max(0, $bookingAmount - $discount);
             $balance       = max(0, $net - $advance);
 
@@ -313,11 +329,16 @@ class TourBookingController extends Controller
             ]);
 
             // Update booking
-            $booking->update([
-                'total_amount'   => $net,
-                'paid_amount'    => $advance,
-                'pending_amount' => $balance,
-            ]);
+            $bookingUpdate = [
+                'total_amount'    => $net,
+                'discount_amount' => $discount,
+                'paid_amount'     => $advance,
+                'pending_amount'  => $balance,
+            ];
+            if ($request->filled('booking_status')) {
+                $bookingUpdate['booking_status'] = $this->mapBookingStatus($request->booking_status);
+            }
+            $booking->update($bookingUpdate);
 
             // Store service JSON in quotation.notes (bookings table has no notes column)
             if ($booking->quotation) {
@@ -339,6 +360,21 @@ class TourBookingController extends Controller
             DB::rollBack();
             return back()->withInput()->with('error', 'Update failed: ' . $e->getMessage());
         }
+    }
+
+    /** Show printable Tour Booking Voucher */
+    public function voucher($id)
+    {
+        $booking = Booking::with([
+            'lead',
+            'quotation.items.serviceTemplate.serviceType',
+            'quotation.items.serviceType',
+            'payments',
+        ])->withSum('payments', 'amount')->findOrFail($id);
+
+        return view('admin.bookings.tour-voucher', compact('booking'), [
+            'page_title' => 'Tour Booking Voucher',
+        ]);
     }
 
     /** Show printable confirmation page */
@@ -516,11 +552,7 @@ class TourBookingController extends Controller
                 'quotation_date'   => now()->format('Y-m-d'),
                 'valid_until'      => now()->addDays(7),
                 'total_amount'     => $net,
-                'discount_amount'  => $discount,
-                'discount_type'    => 'fixed',
                 'subtotal'         => $bookingAmount,
-                'tax_amount'       => 0,
-                'tax_rate'         => 0,
                 'status'           => 'accepted',
                 'notes'            => 'Tour Package — ' . $request->package_name,
                 'itinerary_html'   => $request->itinerary,
@@ -556,7 +588,7 @@ class TourBookingController extends Controller
                 'lead_id'            => $lead->id,
                 'booking_number'     => 'BK-' . date('Ymd') . '-' . str_pad($lead->id, 4, '0', STR_PAD_LEFT),
                 'booking_date'       => now()->format('Y-m-d'),
-                'booking_status'     => 'confirmed',
+                'booking_status'     => $this->mapBookingStatus($request->booking_status),
                 'total_amount'       => $net,
                 'paid_amount'        => $advance,
                 'pending_amount'     => $balance,

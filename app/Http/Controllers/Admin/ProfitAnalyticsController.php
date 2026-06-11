@@ -15,6 +15,11 @@ use DB;
 
 class ProfitAnalyticsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:dashboard-view|analytics-profit');
+    }
+
     public function index(Request $request)
     {
         $dates = $this->getAllBookingDateRange();

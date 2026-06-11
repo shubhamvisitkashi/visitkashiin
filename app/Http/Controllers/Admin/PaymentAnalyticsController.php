@@ -13,6 +13,11 @@ use DB;
 
 class PaymentAnalyticsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:dashboard-view|analytics-profit|payment-view');
+    }
+
     public function index(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth());

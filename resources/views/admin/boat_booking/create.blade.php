@@ -396,7 +396,7 @@
                  value="{{ old('b2b_vendor_cost', '') }}"
                  class="form-control"
                  style="padding-left:28px;border:1.5px solid #FED7AA;border-radius:9px;font-size:.88rem;background:#fff;"
-                 placeholder="0.00">
+                 placeholder="0.00" oninput="recalcMargin()">
         </div>
       </div>
 
@@ -767,7 +767,9 @@ function recalc() {
 function recalcMargin() {
   const final_  = parseFloat(document.getElementById('finalAmtHidden').value) || 0;
   const vendor  = parseFloat(document.getElementById('vendorCost').value) || 0;
-  const margin  = final_ - vendor;
+  const b2bEl   = document.getElementById('b2bVendorCost');
+  const b2b     = b2bEl ? (parseFloat(b2bEl.value) || 0) : 0;
+  const margin  = final_ - vendor - b2b;
   const pct     = final_ > 0 ? (margin / final_ * 100) : 0;
 
   document.getElementById('marginAmt').textContent = (margin >= 0 ? '₹' : '-₹') + Math.abs(margin).toLocaleString('en-IN');

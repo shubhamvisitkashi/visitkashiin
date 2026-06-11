@@ -427,16 +427,16 @@
         <div class="inv-sec-title">Tour Plan / Itinerary</div>
         <div class="inv-tour-plan">
             @if($booking->lead->plan_detail)
-                {!! $booking->lead->plan_detail !!}
+                {!! safe_html($booking->lead->plan_detail) !!}
             @else
-                {!! $booking->lead->short_plan !!}
+                {!! safe_html($booking->lead->short_plan) !!}
             @endif
         </div>
     </div>
     @elseif($booking->quotation?->itinerary)
     <div class="inv-section">
         <div class="inv-sec-title">Tour Plan / Itinerary</div>
-        <div class="inv-tour-plan">{!! $booking->quotation->itinerary !!}</div>
+        <div class="inv-tour-plan">{!! safe_html($booking->quotation->itinerary) !!}</div>
     </div>
     @endif
 

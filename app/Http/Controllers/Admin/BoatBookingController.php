@@ -175,11 +175,7 @@ class BoatBookingController extends Controller
             $startDate = Carbon::createFromFormat('Y-m-d', $da1)->startOfDay();
             $endDate = Carbon::createFromFormat('Y-m-d', $da2)->endOfDay();
 
-            $query->whereHas('boatBooking', function($quer) use ($search_user) {
-                $quer->where(function($qu) use ($startDate,$endDate){
-                    $qu->whereBetween('created_at', [$startDate, $endDate]);
-                });
-            });
+            $query->whereBetween('created_at', [$startDate, $endDate]);
         })
         ->select('boat_id')
         ->selectRaw('SUM(no_of_person) as total_persons')
@@ -278,10 +274,21 @@ class BoatBookingController extends Controller
         $boat_types = BoatType::orderBy('sort_order')->get();
         $booking = BoatBooking::where('booking_id', $booking_id)->with('boat.boatType')->withSum('payments', 'amount')->first();
 
-        return view('admin.boat_booking.edit', compact('boat_types', 'booking'), ['page_title' => 'Edit Boat Booking']);
+        $leadSources     = \App\Models\LeadSource::orderBy('name')->get();
+        $paymentAccounts = \App\Models\PaymentAccount::where('is_active', 1)->orderBy('account_name')->get();
+        $boatmen         = \App\Models\Boatman::active()->orderBy('name')->get();
+
+        return view('admin.boat_booking.edit', compact('boat_types', 'booking', 'leadSources', 'paymentAccounts', 'boatmen'), ['page_title' => 'Edit Boat Booking']);
     }
 
     public function update(Request $request, $booking_id) {
+        $boat_booking = BoatBooking::where('booking_id', $booking_id)->withSum('payments', 'amount')->first();
+        if(!$boat_booking) {
+            return redirect()->back()->with('error', 'No booking found.');
+        }
+
+        $maxDisc = max(0, (float)($request->total_amount ?? $boat_booking->total_amount));
+
         $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'nullable|email|max:255',
@@ -295,12 +302,16 @@ class BoatBookingController extends Controller
             'event_on_boat' => 'nullable|string|max:255',
             'pickup_time'   => 'nullable|string',
             'drop_time'     => 'nullable|string',
+            'booking_status'     => 'nullable|in:confirmed,in_progress,completed,cancelled',
+            'total_amount'       => 'nullable|numeric|min:0',
+            'discount_amount'    => 'nullable|numeric|min:0|max:' . $maxDisc,
+            'payment_method'     => 'nullable|string|max:50',
+            'payment_account_id' => 'nullable|exists:payment_accounts,id',
+            'lead_source_id'     => 'nullable|exists:lead_sources,id',
+            'boatman_id'         => 'nullable|exists:boatmen,id',
+            'vendor_cost'        => 'nullable|numeric|min:0',
+            'b2b_vendor_cost'    => 'nullable|numeric|min:0',
         ]);
-
-        $boat_booking = BoatBooking::where('booking_id', $booking_id)->first();
-        if(!$boat_booking) {
-            return redirect()->back()->with('error', 'No booking found.');
-        }
 
         $boat_booking->name          = $request->name;
         $boat_booking->email         = $request->email;
@@ -315,10 +326,10 @@ class BoatBookingController extends Controller
         }
         if ($request->filled('booking_type')) {
             $boat_booking->booking_type = $request->booking_type;
-            $boat_booking->boat_timing  = $request->booking_type;
+            $boat_booking->boat_timing  = $request->booking_type; // boat_timing mirrors booking_type (same concept, two columns)
         }
         $boat_booking->event_on_boat    = $request->event_on_boat;
-        $boat_booking->celebration_type = $request->event_on_boat;
+        $boat_booking->celebration_type = $request->event_on_boat; // celebration_type mirrors event_on_boat (same concept, two columns)
         if ($request->filled('pickup_time')) {
             $boat_booking->pickup_time = $request->pickup_time;
         }
@@ -326,9 +337,49 @@ class BoatBookingController extends Controller
             $boat_booking->drop_time = $request->drop_time;
         }
 
+        if ($request->filled('booking_status')) {
+            $boat_booking->booking_status = $request->booking_status;
+        }
+
+        $boat_booking->payment_method     = $request->payment_method;
+        $boat_booking->payment_account_id = $request->payment_account_id ?: null;
+        $boat_booking->lead_source_id     = $request->lead_source_id ?: null;
+        $boat_booking->boatman_id         = $request->boatman_id ?: null;
+
+        // Add-ons
+        $boat_booking->decoration   = $request->has('decoration')   ? 1 : 0;
+        $boat_booking->photographer = $request->has('photographer') ? 1 : 0;
+        $boat_booking->live_music   = $request->has('live_music')   ? 1 : 0;
+        $boat_booking->priest       = $request->has('priest')       ? 1 : 0;
+        $boat_booking->flowers      = $request->has('flowers')      ? 1 : 0;
+        $boat_booking->fireworks    = $request->has('fireworks')    ? 1 : 0;
+
+        // Pricing recalculation
+        $totalAmount   = $request->filled('total_amount') ? (float)$request->total_amount : (float)$boat_booking->total_amount;
+        $discountAmt   = $request->filled('discount_amount') ? (float)$request->discount_amount : (float)$boat_booking->total_discount;
+        $vendorCost    = $request->filled('vendor_cost') ? (float)$request->vendor_cost : (float)$boat_booking->vendor_cost;
+        $b2bVendorCost = $request->filled('b2b_vendor_cost') ? (float)$request->b2b_vendor_cost : (float)$boat_booking->b2b_vendor_cost;
+
+        $boat_booking->total_amount   = $totalAmount;
+        $boat_booking->total_discount = $discountAmt;
+        $boat_booking->final_amount   = max(0, $totalAmount - $discountAmt);
+        $boat_booking->vendor_cost     = $vendorCost;
+        $boat_booking->b2b_vendor_cost = $b2bVendorCost;
+        $boat_booking->margin_amount   = max(0, $boat_booking->final_amount - $vendorCost - $b2bVendorCost);
+
+        // Recompute payment status against the new final amount
+        $paidAmt = (float)($boat_booking->payments_sum_amount ?? 0);
+        if ($boat_booking->final_amount <= 0 || $paidAmt >= $boat_booking->final_amount) {
+            $boat_booking->payment_status = 'paid';
+        } elseif ($paidAmt > 0) {
+            $boat_booking->payment_status = 'partial';
+        } else {
+            $boat_booking->payment_status = 'unpaid';
+        }
+
         $boat_booking->save();
 
-        return redirect()->route('boat-booking.index')->with('success', 'Booking updated successfully.');
+        return redirect()->route('boat-booking.show', $boat_booking->booking_id)->with('success', 'Booking updated successfully.');
     }
 
     public function store(Request $request) {
@@ -354,18 +405,17 @@ class BoatBookingController extends Controller
 
         $boat = Boat::where('boat_type_id', $request->boat_type)->where('event_type', $request->event_type)->first();
         if (!$boat) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => ['boat_type' => ['No boat available for the selected type and event.']]
-            ], 422);
+            return redirect()->back()->withInput()->withErrors(['boat_type' => 'No boat available for the selected type and event.']);
         }
+
+        $noOfPerson = (int)($request->adults ?? 1) + (int)($request->children ?? 0);
 
         $total_boat_booking   = BoatBooking::where('boat_id', $boat->id)->whereDate('booking_date', Carbon::parse($request->event_date)->format('Y-m-d'))->sum('no_of_person');
         $total_seat           = $boat->total_available_boat * $boat->no_of_seat;
         $total_available_seat = $total_seat - $total_boat_booking;
 
-        if ($request->no_of_person > $total_available_seat) {
-            return response()->json(['status' => 'error', 'message' => 'No seat available on this boat for the selected date.'], 404);
+        if ($noOfPerson > $total_available_seat) {
+            return redirect()->back()->withInput()->withErrors(['no_of_person' => 'No seat available on this boat for the selected date.']);
         }
 
         $booking_request = BoatBookingRequest::where('booking_request_id', $request->booking_request_id)->first();
@@ -384,10 +434,10 @@ class BoatBookingController extends Controller
             $boat_booking->phone      = $request->phone;
             $boat_booking->adults     = (int)($request->adults ?? 1);
             $boat_booking->children   = (int)($request->children ?? 0);
-            $boat_booking->no_of_person = (int)($request->adults ?? 1) + (int)($request->children ?? 0);
+            $boat_booking->no_of_person = $noOfPerson;
 
             if ($request->event_type === 'Festival') {
-                $boat_booking->total_amount   = $boat->price * $request->no_of_person;
+                $boat_booking->total_amount   = $boat->price * $noOfPerson;
                 $boat_booking->total_discount = $discountAmt;
                 $boat_booking->final_amount   = $boat_booking->total_amount - $discountAmt;
             } else {
@@ -401,7 +451,7 @@ class BoatBookingController extends Controller
             if ($request->seat_number) {
                 $boat_booking->seat_number = implode(', ', range(
                     ($total_boat_booking + 1),
-                    (($total_boat_booking ? $total_boat_booking + 1 : $total_boat_booking) + ($total_boat_booking ? $request->no_of_person - 1 : $request->no_of_person))
+                    (($total_boat_booking ? $total_boat_booking + 1 : $total_boat_booking) + ($total_boat_booking ? $noOfPerson - 1 : $noOfPerson))
                 ));
             }
 
@@ -435,7 +485,7 @@ class BoatBookingController extends Controller
             $boat_booking->created_by           = auth()->guard('admin')->id();
             $boat_booking->extra_per_person_rate = (float)($request->extra_per_person_rate ?? 0);
             $boat_booking->base_pax             = (int)($request->base_pax ?? 0);
-            $boat_booking->margin_amount        = (float)($request->final_amount ?? 0) - (float)($request->vendor_cost ?? 0);
+            $boat_booking->margin_amount        = max(0, (float)$boat_booking->final_amount - (float)($request->vendor_cost ?? 0) - (float)($request->b2b_vendor_cost ?? 0));
 
             $boat_booking->booking_status = 'confirmed';
             if ($boat_booking->final_amount <= 0 || $paidAmt >= $boat_booking->final_amount) {

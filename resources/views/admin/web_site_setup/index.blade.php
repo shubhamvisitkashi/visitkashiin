@@ -232,14 +232,22 @@
 
             <div class="ws-divider"></div>
 
-            {{-- Footer Description --}}
+            {{-- Company GSTIN & Firm Name --}}
             <div class="ws-field">
-                <label class="ws-label">Footer Description</label>
-                <input type="text" name="footer_description" class="ws-input"
-                    placeholder="Short tagline shown in footer, e.g. Explore the Soul of Varanasi"
-                    value="{{ websiteSetupValue('footer_description') }}">
-                <input type="hidden" name="type[]" value="footer_description">
-                <p class="ws-hint">1–2 line description displayed beneath the footer logo.</p>
+                <label class="ws-label">Company GSTIN</label>
+                <input type="text" name="company_gstin" class="ws-input"
+                    placeholder="e.g. 09ABCDE1234F1Z5"
+                    value="{{ websiteSetupValue('company_gstin') }}">
+                <input type="hidden" name="type[]" value="company_gstin">
+            </div>
+
+            <div class="ws-field">
+                <label class="ws-label">Firm Name</label>
+                <input type="text" name="company_legal_name" class="ws-input"
+                    placeholder="e.g. Visit Kashi Pvt Ltd"
+                    value="{{ websiteSetupValue('company_legal_name') }}">
+                <input type="hidden" name="type[]" value="company_legal_name">
+                <p class="ws-hint">Shown as "GSTIN/VAT" and Company Name on the booking invoice header.</p>
             </div>
 
             <div class="ws-card-save-row">

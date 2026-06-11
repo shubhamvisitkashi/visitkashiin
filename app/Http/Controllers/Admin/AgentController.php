@@ -45,7 +45,7 @@ class AgentController extends Controller
         $agents = $agents->paginate(40);
 
         if($request->ajax()){
-            return view('admin.agent.table',comapact('search_staff','search_service','search_key','agent_services','agents','search_state','total_agent','staffs'));
+            return view('admin.agent.table',compact('search_staff','search_service','search_key','agent_services','agents','search_state','total_agent','staffs'));
         }
 
         return view('admin.agent.index',compact('search_staff','search_service','search_key','agent_services','agents','states','search_state','total_agent','staffs'),['page_title'=>'Agent List']);

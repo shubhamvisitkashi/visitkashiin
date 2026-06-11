@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 class YoutubeVideoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:web_setup');
+    }
+
     public function index()
     {
         $videos   = YoutubeVideo::with('product')->orderBy('sort_order')->orderByDesc('id')->paginate(20);

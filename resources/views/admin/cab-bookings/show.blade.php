@@ -404,7 +404,7 @@
                      placeholder="₹ Amount" min="1" step="0.01" required>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-              <select name="payment_method" class="form-select" style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;">
+              <select name="payment_method" id="cabAddPmtMethod" class="form-select" style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;" onchange="toggleCabAddPmtCashReceiver()">
                 <option value="cash">💵 Cash</option>
                 <option value="upi">📱 UPI</option>
                 <option value="bank_transfer">🏦 Bank Transfer</option>
@@ -412,6 +412,10 @@
               </select>
               <input type="date" name="payment_date" class="form-control" style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;"
                      value="{{ date('Y-m-d') }}" required>
+            </div>
+            <div id="cabAddPmtCashReceiverWrap" style="margin-bottom:8px;">
+              <input type="text" name="cash_receiver_name" class="form-control" style="border-radius:8px;font-size:.78rem;border:1.5px solid #E2E8F0;"
+                     placeholder="Receiver Name (cash)" required>
             </div>
             @if($paymentAccounts->count())
             <div style="margin-bottom:8px;">
@@ -473,7 +477,19 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded',()=>feather.replace());
+document.addEventListener('DOMContentLoaded',()=>{
+    feather.replace();
+    toggleCabAddPmtCashReceiver();
+});
+
+function toggleCabAddPmtCashReceiver() {
+    const method = document.getElementById('cabAddPmtMethod').value;
+    const wrap   = document.getElementById('cabAddPmtCashReceiverWrap');
+    const input  = wrap.querySelector('input[name="cash_receiver_name"]');
+    const isCash = method === 'cash';
+    wrap.style.display = isCash ? '' : 'none';
+    input.required = isCash;
+}
 
 function confirmDeleteCabBooking() {
     Swal.fire({

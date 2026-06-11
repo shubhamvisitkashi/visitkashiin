@@ -32,6 +32,8 @@ class Lead extends Model
         'address',
         'pax',
         'country',
+        'state',
+        'city',
         'booking_start_date',
         'booking_end_date',
         'short_plan',

@@ -76,6 +76,21 @@ if (empty($mobileSliderSlides)) {
     $mobileSliderSlides = $sliderSlides;
 }
 
+// Real width/height for each mobile slide image — lets the browser reserve
+// the correct aspect ratio before the image loads (avoids CLS, satisfies
+// the "image elements have explicit width/height" audit).
+$vkImgDims = function (string $url): array {
+    $base = asset('');
+    $rel  = str_starts_with($url, $base) ? substr($url, strlen($base)) : ltrim((string) parse_url($url, PHP_URL_PATH), '/');
+    $path = public_path($rel);
+    $info = is_file($path) ? @getimagesize($path) : false;
+    return ($info && $info[0] && $info[1]) ? [$info[0], $info[1]] : [1080, 1350];
+};
+foreach ($mobileSliderSlides as &$s) {
+    [$s['mobile_w'], $s['mobile_h']] = $vkImgDims($s['mobile_img'] ?? $s['img']);
+}
+unset($s);
+
 // Desktop slider shows ONLY slides with a Desktop View image.
 // A slide saved only via "Hero Slider Slides (Mobile View)" has no desktop
 // image and would otherwise fall back to the placeholder, getting cropped
@@ -158,6 +173,7 @@ if (empty($desktopSliderSlides)) {
                 <img src="{{ $slide['mobile_img'] ?? $slide['img'] }}"
                      alt="{{ $slide['title'] ?? 'Visit Kashi' }}"
                      class="vkm-img"
+                     width="{{ $slide['mobile_w'] }}" height="{{ $slide['mobile_h'] }}"
                      loading="{{ $i===0 ? 'eager' : 'lazy' }}"
                      decoding="{{ $i===0 ? 'sync' : 'async' }}"
                      onerror="this.closest('.vkm-slide').style.background='linear-gradient(160deg,#0d1420,#0f3460)'">

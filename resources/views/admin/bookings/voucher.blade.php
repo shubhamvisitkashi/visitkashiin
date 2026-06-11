@@ -681,6 +681,19 @@ body{
     </div>
     @endif
 
+    {{-- ── ITINERARY ────────────────────────── --}}
+    @if($lead && !empty($lead->plan_detail))
+    <div class="vh-section">
+      <div class="vh-section-head">
+        <div class="vh-section-icon">🗺️</div>
+        <div class="vh-section-title">Itinerary</div>
+      </div>
+      <div class="vh-section-body">
+        <div style="font-size:11.5px;color:#334155;line-height:1.7;">{!! safe_html($lead->plan_detail) !!}</div>
+      </div>
+    </div>
+    @endif
+
     {{-- ── PAYMENT SUMMARY ──────────────────── --}}
     <div class="vh-section">
       <div class="vh-section-head">

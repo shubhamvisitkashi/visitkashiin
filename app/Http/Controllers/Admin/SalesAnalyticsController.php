@@ -14,6 +14,11 @@ use DB;
 
 class SalesAnalyticsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:dashboard-view|analytics-customer');
+    }
+
     public function index(Request $request)
     {
         // Date range filter

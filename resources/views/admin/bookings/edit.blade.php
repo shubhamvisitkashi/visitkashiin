@@ -22,6 +22,8 @@
     $editNights      = 0;
     $editRoomsCount  = 1;
     $editRoomType    = '';
+    $editRoomNumbers = '';
+    $editFlatDetails = '';
     $editAdults      = 1;
     $editChildren    = 0;
     $editMeal        = '';
@@ -40,9 +42,16 @@
             }
         } elseif (preg_match('/^Duration:\s*(\d+)/i', $seg, $m)) {
             $editNights = (int)$m[1];
-        } elseif (preg_match('/^Rooms:\s*(\d+)(?:\s*\(([^)]+)\))?/i', $seg, $m)) {
-            $editRoomsCount = (int)$m[1];
-            $editRoomType   = $m[2] ?? '';
+        } elseif (preg_match('/^([A-Za-z][A-Za-z ]*?):\s*(\d+)(?:\s*\(([^)]*)\))?(?:\s*·\s*No:\s*(.+))?$/u', $seg, $m)) {
+            $editRoomsCount  = (int)$m[2];
+            $editRoomType    = trim($m[3] ?? '');
+            $editRoomNumbers = trim($m[4] ?? '');
+            if ($editRoomType && preg_match('/^Homestay Flats?$/i', $editRoomType)) {
+                $editRoomType = 'Homestay Flats';
+            } elseif ($editRoomType && preg_match('/BHK|Studio|RK|Villa|Duplex/i', $editRoomType)) {
+                $editFlatDetails = $editRoomType;
+                $editRoomType    = 'Homestay Flats';
+            }
         } elseif (preg_match('/^Guests:\s*(\d+)\s*Adult/i', $seg, $m)) {
             $editAdults   = (int)$m[1];
             if (preg_match('/(\d+)\s*Child/i', $seg, $mc)) $editChildren = (int)$mc[1];
@@ -108,6 +117,7 @@
 .nb-req{color:#EF4444;margin-left:2px;}
 .nb-input{border:1.5px solid #E2E8F0 !important;border-radius:10px !important;padding:9px 13px !important;font-size:.875rem !important;color:#0F172A !important;background:#FAFBFF !important;transition:all .2s ease !important;width:100%;}
 .nb-input:focus{border-color:#0EA5E9 !important;box-shadow:0 0 0 3px rgba(14,165,233,.12) !important;background:#fff !important;outline:none !important;}
+.nb-input[readonly]{background:#F1F5F9 !important;color:#64748B !important;cursor:not-allowed;}
 
 .nb-phone-wrap{position:relative;}
 .nb-phone-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.8rem;font-weight:600;color:#64748B;z-index:2;pointer-events:none;}
@@ -527,6 +537,29 @@
                      value="{{ $editNights ?: '' }}"
                      placeholder="Auto" style="background:#F1F5F9 !important;text-align:center;font-weight:700;">
             </div>
+            <div class="col-md-3">
+              <label class="nb-label">Room Type</label>
+              <select id="stay_room_type" class="form-select nb-input" onchange="toggleRoomsField();buildEditShortPlan()">
+                <option value="">Select room type</option>
+                @foreach(['Deluxe Room','Executive Room','Premium Room','Homestay Flats'] as $rt)
+                  <option {{ $editRoomType === $rt ? 'selected' : '' }}>{{ $rt }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="nb-label">No. of Rooms / Flats <span class="nb-req">*</span></label>
+              <input type="number" id="stay_rooms" class="form-control nb-input"
+                     min="1" value="{{ $editRoomsCount }}" required
+                     onchange="recalcStayTotal();buildEditShortPlan()">
+              <input type="text" id="stay_room_numbers" class="form-control nb-input"
+                     style="margin-top:6px;padding:7px 10px !important;font-size:.78rem !important;display:{{ $editRoomType === 'Homestay Flats' ? 'none' : '' }};"
+                     placeholder="Room/Flat No. (optional)" value="{{ $editRoomNumbers }}"
+                     oninput="buildEditShortPlan()">
+              <textarea id="stay_flat_details" class="form-control nb-input" rows="2"
+                        style="margin-top:6px;padding:7px 10px !important;font-size:.78rem !important;display:{{ $editRoomType === 'Homestay Flats' ? '' : 'none' }};"
+                        placeholder="e.g. 2 BHK Flat x1, 1 BHK Flat x1, Flat No. 201 &amp; 305"
+                        oninput="buildEditShortPlan()">{{ $editFlatDetails }}</textarea>
+            </div>
             <div class="col-4 col-md-2">
               <label class="nb-label">Adults <span style="font-weight:500;color:#94A3B8;text-transform:none;font-size:.67rem;">(18+)</span></label>
               <div class="stay-counter-wrap">
@@ -544,21 +577,6 @@
                 <button type="button" class="stay-counter-btn" onclick="changeStayKids(1)">+</button>
               </div>
               <input type="hidden" id="stay_kids_val" value="{{ $editChildren }}">
-            </div>
-            <div class="col-md-3">
-              <label class="nb-label">Room Type</label>
-              <select id="stay_room_type" class="form-select nb-input" onchange="buildEditShortPlan()">
-                <option value="">Select room type</option>
-                @foreach(['Deluxe Room','Executive Room','Premium Room','Homestay Flats'] as $rt)
-                  <option {{ $editRoomType === $rt ? 'selected' : '' }}>{{ $rt }}</option>
-                @endforeach
-              </select>
-            </div>
-            <div class="col-6 col-md-2">
-              <label class="nb-label">No. of Rooms <span class="nb-req">*</span></label>
-              <input type="number" id="stay_rooms" class="form-control nb-input"
-                     min="1" value="{{ $editRoomsCount }}" required
-                     onchange="recalcStayTotal();buildEditShortPlan()">
             </div>
             <div class="col-md-3">
               <label class="nb-label">Meal Plan</label>
@@ -878,6 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedHotelName = '{{ addslashes($editProperty) }}';
   @endif
 
+  toggleRoomsField();
   updatePerNightNote();
   calcStayBalance();
 });
@@ -924,6 +943,23 @@ function saveCustomHotel() {
   selectedHotelPrice = price;
   isCustomHotel      = true;
   document.getElementById('stay-price-auto-tag').style.display = price > 0 ? 'inline-flex' : 'none';
+  recalcStayTotal();
+  buildEditShortPlan();
+}
+
+// ── Toggle No. of Rooms / Flats vs Homestay Flat details ──────────
+function toggleRoomsField() {
+  const rtype = document.getElementById('stay_room_type')?.value;
+  const roomNumbers = document.getElementById('stay_room_numbers');
+  const flatDetails = document.getElementById('stay_flat_details');
+  if (!roomNumbers || !flatDetails) return;
+  if (rtype === 'Homestay Flats') {
+    roomNumbers.style.display = 'none';
+    flatDetails.style.display = '';
+  } else {
+    roomNumbers.style.display = '';
+    flatDetails.style.display = 'none';
+  }
   recalcStayTotal();
   buildEditShortPlan();
 }
@@ -1049,7 +1085,6 @@ function buildEditShortPlan() {
   const cit = document.getElementById('stay_checkin_time')?.value;
   const cot = document.getElementById('stay_checkout_time')?.value;
   const ni  = parseInt(document.getElementById('stay_nights')?.value) || 0;
-  const rooms = parseInt(document.getElementById('stay_rooms')?.value) || 1;
   const rtype = document.getElementById('stay_room_type')?.value;
   const adults= parseInt(document.getElementById('stay_adults_val')?.value) || 1;
   const kids  = parseInt(document.getElementById('stay_kids_val')?.value)   || 0;
@@ -1065,7 +1100,14 @@ function buildEditShortPlan() {
   if (prop)  parts.push('Property: ' + prop);
   if (ci && co) parts.push('Check-in: ' + fmtDate(ci) + ' ' + fmtTime(cit) + '  →  Check-out: ' + fmtDate(co) + ' ' + fmtTime(cot));
   if (ni > 0) parts.push('Duration: ' + ni + ' night(s)');
-  parts.push('Rooms: ' + rooms + (rtype ? ' (' + rtype + ')' : ''));
+  const rooms = parseInt(document.getElementById('stay_rooms')?.value) || 1;
+  const roomNo = document.getElementById('stay_room_numbers')?.value?.trim();
+  if (rtype === 'Homestay Flats') {
+    const details = document.getElementById('stay_flat_details')?.value?.trim();
+    parts.push('Flats: ' + rooms + (details ? ' (' + details + ')' : ''));
+  } else {
+    parts.push('Rooms: ' + rooms + (rtype ? ' (' + rtype + ')' : '') + (roomNo ? ' · No: ' + roomNo : ''));
+  }
   parts.push('Guests: ' + adults + ' Adult' + (adults !== 1 ? 's' : '') + (kids > 0 ? ', ' + kids + ' Child' + (kids !== 1 ? 'ren' : '') : ''));
   if (meal) parts.push('Meal Plan: ' + meal);
   if (extra > 0) parts.push('Extra Bed: ₹' + extra.toLocaleString('en-IN'));

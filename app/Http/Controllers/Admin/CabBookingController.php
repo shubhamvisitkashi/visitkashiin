@@ -91,6 +91,7 @@ class CabBookingController extends Controller
             'vehicle_id'            => 'nullable|exists:vehicles,id',
             'vehicle_name'          => 'required|string|max:255',
             'seating_capacity'      => 'nullable|integer|min:1',
+            'vehicle_count'         => 'nullable|integer|min:1',
             'no_of_adults'          => 'nullable|integer|min:0',
             'no_of_children'        => 'nullable|integer|min:0',
             'carrier_on_roof'       => 'nullable|boolean',
@@ -119,10 +120,12 @@ class CabBookingController extends Controller
 
         DB::beginTransaction();
         try {
+            $vehicleCount = max(1, (int)($validated['vehicle_count'] ?? 1));
+
             $subtotal = array_sum(array_map(fn($k) => (float)($validated[$k] ?? 0), [
                 'base_fare', 'driver_allowance', 'toll_tax', 'parking',
                 'state_tax', 'night_charges', 'extra_km_charges',
-            ]));
+            ])) * $vehicleCount;
 
             $discount      = (float)($validated['discount']     ?? 0);
             $totalAmount   = max(0, $subtotal - $discount);
@@ -151,6 +154,7 @@ class CabBookingController extends Controller
                 'vehicle_id'            => $validated['vehicle_id']            ?? null,
                 'vehicle_name'          => $validated['vehicle_name'],
                 'seating_capacity'      => $validated['seating_capacity']      ?? null,
+                'vehicle_count'         => $vehicleCount,
                 'no_of_adults'          => $validated['no_of_adults']          ?? 1,
                 'no_of_children'        => $validated['no_of_children']        ?? 0,
                 'carrier_on_roof'       => !empty($validated['carrier_on_roof']),
@@ -251,7 +255,17 @@ class CabBookingController extends Controller
             'total_km'           => 'nullable|numeric|min:0',
             'vehicle_id'         => 'nullable|exists:vehicles,id',
             'vehicle_name'       => 'required|string|max:255',
+            'vehicle_number'     => 'nullable|string|max:20',
             'seating_capacity'   => 'nullable|integer|min:1',
+            'vehicle_count'      => 'nullable|integer|min:1',
+            'no_of_adults'          => 'nullable|integer|min:0',
+            'no_of_children'        => 'nullable|integer|min:0',
+            'carrier_on_roof'       => 'nullable|boolean',
+            'child_seat'            => 'nullable|boolean',
+            'wheelchair_accessible' => 'nullable|boolean',
+            'ac_required'           => 'nullable|boolean',
+            'luggage_details'       => 'nullable|string|max:255',
+            'flight_train_number'   => 'nullable|string|max:50',
             'base_fare'          => 'required|numeric|min:0',
             'driver_allowance'   => 'nullable|numeric|min:0',
             'toll_tax'           => 'nullable|numeric|min:0',
@@ -266,10 +280,12 @@ class CabBookingController extends Controller
             'notes'              => 'nullable|string',
         ]);
 
+        $vehicleCount = max(1, (int)($validated['vehicle_count'] ?? 1));
+
         $subtotal = array_sum(array_map(fn($k) => (float)($validated[$k] ?? 0), [
             'base_fare', 'driver_allowance', 'toll_tax', 'parking',
             'state_tax', 'night_charges', 'extra_km_charges',
-        ]));
+        ])) * $vehicleCount;
 
         $discount      = (float)($validated['discount'] ?? 0);
         $totalAmount   = max(0, $subtotal - $discount);
@@ -281,12 +297,19 @@ class CabBookingController extends Controller
         elseif ($paidTotal > 0) $paymentStatus = 'partial';
 
         $booking->update(array_merge($validated, [
-            'vendor_cost'    => !empty($validated['vendor_cost']) ? (float)$validated['vendor_cost'] : null,
-            'discount'       => $discount,
-            'total_amount'   => $totalAmount,
-            'advance_paid'   => $paidTotal,
-            'pending_amount' => $pendingAmount,
-            'payment_status' => $paymentStatus,
+            'vendor_cost'           => !empty($validated['vendor_cost']) ? (float)$validated['vendor_cost'] : null,
+            'discount'              => $discount,
+            'vehicle_count'         => $vehicleCount,
+            'total_amount'          => $totalAmount,
+            'advance_paid'          => $paidTotal,
+            'pending_amount'        => $pendingAmount,
+            'payment_status'        => $paymentStatus,
+            'no_of_adults'          => $validated['no_of_adults']          ?? 1,
+            'no_of_children'        => $validated['no_of_children']        ?? 0,
+            'carrier_on_roof'       => !empty($validated['carrier_on_roof']),
+            'child_seat'            => !empty($validated['child_seat']),
+            'wheelchair_accessible' => !empty($validated['wheelchair_accessible']),
+            'ac_required'           => isset($validated['ac_required']) ? (bool)$validated['ac_required'] : true,
         ]));
 
         return redirect()->route('cab-bookings.show', $booking->id)
@@ -303,8 +326,11 @@ class CabBookingController extends Controller
             'payment_method'     => 'required|string',
             'payment_date'       => 'required|date',
             'payment_account_id' => 'nullable|exists:payment_accounts,id',
+            'cash_receiver_name' => 'nullable|string|max:150',
             'notes'              => 'nullable|string',
         ]);
+
+        $isCash = $validated['payment_method'] === 'cash';
 
         CabBookingPayment::create([
             'cab_booking_id'     => $booking->id,
@@ -312,6 +338,7 @@ class CabBookingController extends Controller
             'payment_method'     => $validated['payment_method'],
             'payment_date'       => $validated['payment_date'],
             'payment_account_id' => $validated['payment_account_id'] ?? null,
+            'cash_receiver_name' => $isCash ? ($validated['cash_receiver_name'] ?? null) : null,
             'received_by'        => auth('admin')->id(),
             'notes'              => $validated['notes'] ?? null,
         ]);

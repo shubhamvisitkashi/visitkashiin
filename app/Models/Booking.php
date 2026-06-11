@@ -20,6 +20,7 @@ class Booking extends Model
         'booking_date',
         'booking_status',
         'total_amount',
+        'discount_amount',
         'paid_amount',
         'pending_amount',
         'vendor_cost',
@@ -31,11 +32,13 @@ class Booking extends Model
         'taxable_amount',
         'gst_amount',
         'customer_gstin',
+        'company_name',
     ];
 
     protected $casts = [
         'booking_date' => 'date',
         'total_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
         'pending_amount' => 'decimal:2',
         'is_gst_invoice' => 'boolean',

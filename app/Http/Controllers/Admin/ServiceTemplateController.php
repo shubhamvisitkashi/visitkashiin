@@ -9,13 +9,41 @@ use App\Models\ServiceType;
 
 class ServiceTemplateController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:service-template-list|service-type-list|service-item-list');
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $templates = ServiceTemplate::with('serviceType')->latest()->paginate(15);
-        return view('admin.service-templates.index', compact('templates'), ['page_title' => 'Service Templates']);
+        $query = ServiceTemplate::with('serviceType');
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('service_type_id')) {
+            $query->where('service_type_id', $request->service_type_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $templates = $query->latest()->paginate(15)->withQueryString();
+
+        $serviceTypes = ServiceType::active()->get();
+
+        $stats = [
+            'total'    => ServiceTemplate::count(),
+            'active'   => ServiceTemplate::where('is_active', true)->count(),
+            'inactive' => ServiceTemplate::where('is_active', false)->count(),
+        ];
+
+        return view('admin.service-templates.index', compact('templates', 'serviceTypes', 'stats'), ['page_title' => 'Service Templates']);
     }
 
     /**
@@ -36,6 +64,9 @@ class ServiceTemplateController extends Controller
             'service_type_id' => 'required|exists:service_types,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'address' => 'nullable|string',
+            'property_type' => 'nullable|in:hotel,homestay',
+            'bhk_type' => 'nullable|string',
             'default_selling_price' => 'required|numeric|min:0',
             'default_cost_estimate' => 'required|numeric|min:0',
             'capacity' => 'nullable|integer|min:1',
@@ -71,6 +102,9 @@ class ServiceTemplateController extends Controller
             'service_type_id' => 'required|exists:service_types,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'address' => 'nullable|string',
+            'property_type' => 'nullable|in:hotel,homestay',
+            'bhk_type' => 'nullable|string',
             'default_selling_price' => 'required|numeric|min:0',
             'default_cost_estimate' => 'required|numeric|min:0',
             'capacity' => 'nullable|integer|min:1',

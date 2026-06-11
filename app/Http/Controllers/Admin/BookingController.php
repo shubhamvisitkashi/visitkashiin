@@ -259,7 +259,7 @@ class BookingController extends Controller
             'booking_date'       => 'required|date',
             'booking_start_date' => 'nullable|date',
             'booking_end_date'   => 'nullable|date',
-            'booking_status'     => 'nullable|in:confirmed,in_progress,completed,cancelled',
+            'booking_status'     => 'nullable|in:not_started,confirmed,in_progress,completed,cancelled',
             'discount'           => 'nullable|numeric|min:0',
             'notes'              => 'nullable|string',
             // Existing service rows
@@ -782,7 +782,12 @@ class BookingController extends Controller
         ->withSum('payments', 'amount')
         ->findOrFail($id);
 
-        return view('admin.bookings.invoice', compact('booking'), ['page_title' => 'Booking Invoice']);
+        $stName = strtolower($booking->quotation?->items?->first()?->serviceTemplate?->serviceType?->name ?? '');
+        $isStayBooking = str_contains($stName, 'stay') || str_contains($stName, 'hotel');
+
+        $view = $isStayBooking ? 'admin.bookings.invoice-hotel' : 'admin.bookings.invoice';
+
+        return view($view, compact('booking'), ['page_title' => 'Booking Invoice']);
     }
 
     /**

@@ -84,6 +84,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('bookings/tour/{id}', 'TourBookingController@show')->name('tour-booking.show');
             Route::put('bookings/tour/{id}', 'TourBookingController@update')->name('tour-booking.update');
             Route::get('bookings/tour/{id}/confirmation', 'TourBookingController@confirmation')->name('tour-booking.confirmation');
+            Route::get('bookings/tour/{id}/voucher', 'TourBookingController@voucher')->name('tour-booking.voucher');
             Route::get('bookings/tour/{id}/pdf', 'TourBookingController@downloadPdf')->name('tour-booking.pdf');
             
             Route::get('bookings', 'BookingController@index')->name('bookings.index');
@@ -246,6 +247,7 @@ Route::group(['prefix' => 'admin'], function () {
             // New Analytics Dashboards
             Route::get('sales-analytics', 'SalesAnalyticsController@index')->name('sales-analytics.index');
             Route::get('payment-analytics', 'PaymentAnalyticsController@index')->name('payment-analytics.index');
+            Route::get('ledger', 'LedgerController@index')->name('ledger.index');
             Route::get('executive-dashboard', 'ExecutiveDashboardController@index')->name('executive-dashboard.index');
 
             // Payment Accounts

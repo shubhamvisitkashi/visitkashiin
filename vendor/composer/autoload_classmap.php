@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\CPU\\CategoryManager' => $baseDir . '/app/CPU/CategoryManager.php',
+    'App\\Console\\Commands\\CompressImages' => $baseDir . '/app/Console/Commands/CompressImages.php',
     'App\\Console\\Commands\\ConvertImagesToWebP' => $baseDir . '/app/Console/Commands/ConvertImagesToWebP.php',
     'App\\Console\\Commands\\MinifyAssets' => $baseDir . '/app/Console/Commands/MinifyAssets.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
@@ -19,6 +20,7 @@ return array(
     'App\\Http\\Controllers\\Admin\\BoatBookingController' => $baseDir . '/app/Http/Controllers/Admin/BoatBookingController.php',
     'App\\Http\\Controllers\\Admin\\BoatController' => $baseDir . '/app/Http/Controllers/Admin/BoatController.php',
     'App\\Http\\Controllers\\Admin\\BoatTypeController' => $baseDir . '/app/Http/Controllers/Admin/BoatTypeController.php',
+    'App\\Http\\Controllers\\Admin\\BoatmanController' => $baseDir . '/app/Http/Controllers/Admin/BoatmanController.php',
     'App\\Http\\Controllers\\Admin\\BookingController' => $baseDir . '/app/Http/Controllers/Admin/BookingController.php',
     'App\\Http\\Controllers\\Admin\\CabBookingController' => $baseDir . '/app/Http/Controllers/Admin/CabBookingController.php',
     'App\\Http\\Controllers\\Admin\\CategoryController' => $baseDir . '/app/Http/Controllers/Admin/CategoryController.php',
@@ -34,6 +36,7 @@ return array(
     'App\\Http\\Controllers\\Admin\\InstagramReelController' => $baseDir . '/app/Http/Controllers/Admin/InstagramReelController.php',
     'App\\Http\\Controllers\\Admin\\LeadController' => $baseDir . '/app/Http/Controllers/Admin/LeadController.php',
     'App\\Http\\Controllers\\Admin\\LeadSourceController' => $baseDir . '/app/Http/Controllers/Admin/LeadSourceController.php',
+    'App\\Http\\Controllers\\Admin\\LedgerController' => $baseDir . '/app/Http/Controllers/Admin/LedgerController.php',
     'App\\Http\\Controllers\\Admin\\PackageController' => $baseDir . '/app/Http/Controllers/Admin/PackageController.php',
     'App\\Http\\Controllers\\Admin\\PaymentAccountController' => $baseDir . '/app/Http/Controllers/Admin/PaymentAccountController.php',
     'App\\Http\\Controllers\\Admin\\PaymentAnalyticsController' => $baseDir . '/app/Http/Controllers/Admin/PaymentAnalyticsController.php',
@@ -146,6 +149,7 @@ return array(
     'App\\Providers\\EventServiceProvider' => $baseDir . '/app/Providers/EventServiceProvider.php',
     'App\\Providers\\RouteServiceProvider' => $baseDir . '/app/Providers/RouteServiceProvider.php',
     'App\\Services\\GstInvoiceService' => $baseDir . '/app/Services/GstInvoiceService.php',
+    'App\\Services\\ImageCompressor' => $baseDir . '/app/Services/ImageCompressor.php',
     'App\\Services\\TargetCalculationService' => $baseDir . '/app/Services/TargetCalculationService.php',
     'App\\View\\Components\\AddBtn' => $baseDir . '/app/View/Components/AddBtn.php',
     'App\\View\\Components\\CancleBtn' => $baseDir . '/app/View/Components/CancleBtn.php',

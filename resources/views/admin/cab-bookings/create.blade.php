@@ -577,7 +577,7 @@
             <div style="display:flex;align-items:center;gap:14px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 16px;margin-bottom:12px;">
               <div style="flex:1;">
                 <div style="font-size:.65rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">No. of Vehicles</div>
-                <div style="font-size:.75rem;color:#94A3B8;">Guests booking same cab type</div>
+                <div style="font-size:.75rem;color:#94A3B8;">Guests booking same cab type. Fare fields below are per vehicle &mdash; total fare = fare × vehicle count.</div>
               </div>
               <div style="display:flex;align-items:center;gap:10px;">
                 <button type="button" onclick="changeVehCount(-1)"
@@ -925,6 +925,8 @@ function removeVehicle(card) {
 
 function updateVehicleSelection() {
   const selected = document.querySelectorAll('.veh-card:not(.veh-custom).selected');
+  const count = parseInt(document.getElementById('veh-count-val')?.textContent) || 1;
+  document.getElementById('f_vehicle_count').value = count;
   if (selected.length === 0) {
     document.getElementById('f_vehicle_id').value   = '';
     document.getElementById('f_vehicle_name').value = '';
@@ -932,7 +934,6 @@ function updateVehicleSelection() {
     document.getElementById('veh-details-row').style.display = 'none';
     return;
   }
-  const count = parseInt(document.getElementById('veh-count-val')?.textContent) || 1;
   const ids = [], names = [];
   let baseSeats = 0;
   selected.forEach(c => {
@@ -945,7 +946,6 @@ function updateVehicleSelection() {
   document.getElementById('f_vehicle_id').value    = ids[0];
   document.getElementById('f_vehicle_name').value  = displayName;
   document.getElementById('f_veh_seats').value     = totalSeats;
-  document.getElementById('f_vehicle_count').value = count;
   document.getElementById('veh_name_display').value  = displayName;
   document.getElementById('veh_seats_display').value = totalSeats;
   document.getElementById('veh-details-row').style.display = '';
@@ -955,6 +955,7 @@ function changeVehCount(delta) {
   const el = document.getElementById('veh-count-val');
   el.textContent = Math.max(1, (parseInt(el.textContent) || 1) + delta);
   updateVehicleSelection();
+  recalcFare();
 }
 
 function onCustomVehName() {
@@ -965,7 +966,8 @@ function onCustomVehName() {
 // ── Fare Recalc ───────────────────────────────────────────────────
 function recalcFare() {
   const flds = ['base_fare','driver_allowance','toll_tax','parking','state_tax','night_charges','extra_km_charges'];
-  let subtotal = flds.reduce((s,f) => s + (parseFloat(document.getElementById(f)?.value) || 0), 0);
+  const vehCount = parseInt(document.getElementById('f_vehicle_count')?.value) || 1;
+  let subtotal = flds.reduce((s,f) => s + (parseFloat(document.getElementById(f)?.value) || 0), 0) * vehCount;
   const discount = parseFloat(document.getElementById('discount')?.value)     || 0;
   const advance  = parseFloat(document.getElementById('advance_paid')?.value) || 0;
   const total    = Math.max(0, subtotal - discount);

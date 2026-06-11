@@ -268,6 +268,79 @@
       </div>
     </div>
 
+    {{-- Passengers & Extras --}}
+    <div class="cn-card">
+      <div class="cn-card-head">
+        <div class="cn-card-icon" style="background:#FEF3C7;color:#B45309;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div class="cn-card-title">Passengers & Extras</div>
+      </div>
+      <div class="cn-card-body">
+
+        {{-- Persons row --}}
+        <div class="row g-3" style="margin-bottom:16px;">
+          <div class="col-6 col-md-3">
+            <label class="cn-label">Adults <span class="cn-req">*</span></label>
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
+              <button type="button" onclick="adjCount('no_of_adults',-1)"
+                      style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+              <span id="no_of_adults_dis" style="font-size:1.3rem;font-weight:800;color:#4F46E5;min-width:28px;text-align:center;">{{ old('no_of_adults', $booking->no_of_adults ?? 1) }}</span>
+              <button type="button" onclick="adjCount('no_of_adults',1)"
+                      style="width:30px;height:30px;border-radius:8px;border:1.5px solid #4F46E5;background:#4F46E5;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+            </div>
+            <input type="hidden" name="no_of_adults" id="no_of_adults" value="{{ old('no_of_adults', $booking->no_of_adults ?? 1) }}">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="cn-label">Children</label>
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
+              <button type="button" onclick="adjCount('no_of_children',-1)"
+                      style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+              <span id="no_of_children_dis" style="font-size:1.3rem;font-weight:800;color:#7C3AED;min-width:28px;text-align:center;">{{ old('no_of_children', $booking->no_of_children ?? 0) }}</span>
+              <button type="button" onclick="adjCount('no_of_children',1)"
+                      style="width:30px;height:30px;border-radius:8px;border:1.5px solid #7C3AED;background:#7C3AED;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+            </div>
+            <input type="hidden" name="no_of_children" id="no_of_children" value="{{ old('no_of_children', $booking->no_of_children ?? 0) }}">
+          </div>
+          <div class="col-md-3">
+            <label class="cn-label">Flight / Train No.</label>
+            <input type="text" name="flight_train_number" class="form-control cn-input"
+                   placeholder="e.g. AI-202, 12345" value="{{ old('flight_train_number', $booking->flight_train_number) }}">
+            <div class="cn-hint">For airport / station transfers</div>
+          </div>
+          <div class="col-md-3">
+            <label class="cn-label">Luggage Details</label>
+            <input type="text" name="luggage_details" class="form-control cn-input"
+                   placeholder="e.g. 2 large bags, 1 stroller" value="{{ old('luggage_details', $booking->luggage_details) }}">
+          </div>
+        </div>
+
+        {{-- Add-on toggles --}}
+        <label class="cn-label" style="margin-bottom:10px;">Add-ons & Special Requirements</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+
+          @foreach([
+            'carrier_on_roof'       => ['🚗', 'Carrier on Roof',    'Roof luggage carrier needed'],
+            'child_seat'            => ['👶', 'Child Seat',          'Baby / child safety seat'],
+            'wheelchair_accessible' => ['♿', 'Wheelchair Access',   'Accessible vehicle needed'],
+            'ac_required'           => ['❄️', 'AC Required',         'Air-conditioned cab'],
+          ] as $field => [$icon, $label, $hint])
+          <label style="display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #E2E8F0;border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .18s;background:#fff;user-select:none;"
+                 id="addon-lbl-{{ $field }}"
+                 onclick="toggleAddon('{{ $field }}', this)">
+            <span style="font-size:1.5rem;line-height:1;">{{ $icon }}</span>
+            <span style="font-size:.76rem;font-weight:700;color:#374151;">{{ $label }}</span>
+            <span style="font-size:.65rem;color:#94A3B8;line-height:1.3;">{{ $hint }}</span>
+            <input type="hidden" name="{{ $field }}" id="addon-{{ $field }}"
+                   value="{{ old($field, $booking->{$field} ?? ($field === 'ac_required' ? '1' : '0')) }}">
+          </label>
+          @endforeach
+
+        </div>
+
+      </div>
+    </div>
+
     {{-- Pricing --}}
     <div class="cn-card">
       <div class="cn-card-head">
@@ -277,6 +350,23 @@
         <div class="cn-card-title">Pricing Breakdown</div>
       </div>
       <div class="cn-card-body">
+
+        {{-- Vehicle count counter --}}
+        <div style="display:flex;align-items:center;gap:14px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 16px;margin-bottom:16px;">
+          <div style="flex:1;">
+            <div style="font-size:.65rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">No. of Vehicles</div>
+            <div style="font-size:.75rem;color:#94A3B8;">Fare fields below are per vehicle &mdash; total fare = fare × vehicle count.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button type="button" onclick="changeVehCount(-1)"
+                    style="width:34px;height:34px;border-radius:50%;border:1.5px solid #CBD5E1;background:#fff;font-size:1.2rem;font-weight:700;color:#475569;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+            <span id="veh-count-val" style="font-size:1.6rem;font-weight:800;color:#4F46E5;min-width:36px;text-align:center;line-height:1;">{{ old('vehicle_count', $booking->vehicle_count ?? 1) }}</span>
+            <button type="button" onclick="changeVehCount(1)"
+                    style="width:34px;height:34px;border-radius:50%;border:1.5px solid #4F46E5;background:#4F46E5;font-size:1.2rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+          </div>
+          <input type="hidden" name="vehicle_count" id="f_vehicle_count" value="{{ old('vehicle_count', $booking->vehicle_count ?? 1) }}">
+        </div>
+
         <div class="price-grid">
           @foreach([
             'base_fare'        => ['Base Fare',         $booking->base_fare,         true ],
@@ -421,7 +511,40 @@ let isCustomVehicle = {{ $booking->vehicle_id ? 'false' : 'true' }};
 
 document.addEventListener('DOMContentLoaded', () => {
   feather.replace();
+
+  // Init: highlight active add-ons on load
+  ['carrier_on_roof','child_seat','wheelchair_accessible','ac_required'].forEach(field => {
+    const lbl = document.getElementById('addon-lbl-' + field);
+    const inp = document.getElementById('addon-' + field);
+    if (lbl && inp && inp.value === '1') {
+      lbl.style.borderColor = '#4F46E5';
+      lbl.style.background  = '#EEF2FF';
+      lbl.style.boxShadow   = '0 0 0 3px rgba(79,70,229,.15)';
+      lbl.querySelector('span:nth-child(2)').style.color = '#4F46E5';
+    }
+  });
 });
+
+// ── Passenger count steppers ─────────────────────────────────────
+function adjCount(field, delta) {
+  const hidden = document.getElementById(field);
+  const disp   = document.getElementById(field + '_dis');
+  const min    = field === 'no_of_adults' ? 1 : 0;
+  const val    = Math.max(min, (parseInt(hidden.value) || 0) + delta);
+  hidden.value = val;
+  if (disp) disp.textContent = val;
+}
+
+// ── Add-on toggles ────────────────────────────────────────────────
+function toggleAddon(field, lbl) {
+  const inp = document.getElementById('addon-' + field);
+  const active = inp.value === '1';
+  inp.value = active ? '0' : '1';
+  lbl.style.borderColor  = active ? '#E2E8F0'  : '#4F46E5';
+  lbl.style.background   = active ? '#fff'     : '#EEF2FF';
+  lbl.style.boxShadow    = active ? 'none'     : '0 0 0 3px rgba(79,70,229,.15)';
+  lbl.querySelector('span:nth-child(2)').style.color = active ? '#374151' : '#4F46E5';
+}
 
 function calcDays() {
   const ci    = document.getElementById('pickup_date')?.value;
@@ -459,9 +582,18 @@ function selectVehicleCustom() {
   document.getElementById('f_vehicle_id').value = '';
 }
 
+function changeVehCount(delta) {
+  const el = document.getElementById('veh-count-val');
+  const val = Math.max(1, (parseInt(el.textContent) || 1) + delta);
+  el.textContent = val;
+  document.getElementById('f_vehicle_count').value = val;
+  recalcFare();
+}
+
 function recalcFare() {
   const flds = ['base_fare','driver_allowance','toll_tax','parking','state_tax','night_charges','extra_km_charges'];
-  let sub = flds.reduce((s,f) => s + (parseFloat(document.getElementById(f)?.value)||0), 0);
+  const vehCount = parseInt(document.getElementById('f_vehicle_count')?.value) || 1;
+  let sub = flds.reduce((s,f) => s + (parseFloat(document.getElementById(f)?.value)||0), 0) * vehCount;
   const disc  = parseFloat(document.getElementById('discount')?.value) || 0;
   const total = Math.max(0, sub - disc);
   const paid  = {{ $paidTotal }};

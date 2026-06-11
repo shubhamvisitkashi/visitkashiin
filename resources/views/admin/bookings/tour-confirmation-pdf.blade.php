@@ -45,6 +45,11 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #1a1a1a; ba
 .itin-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
 .itin-label { font-size: 9px; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .itin-text { font-size: 11px; color: #334155; line-height: 1.8; }
+.itin-text h4 { font-size: 11.5px; font-weight: bold; color: #1E293B; margin: 8px 0 4px; }
+.itin-text h4:first-child { margin-top: 0; }
+.itin-text p { margin: 4px 0; }
+.itin-text ul { margin: 2px 0 8px; padding-left: 18px; }
+.itin-text li { margin-bottom: 2px; }
 
 /* Payment box */
 .amt-box { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
@@ -120,6 +125,36 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #1a1a1a; ba
 
 <div class="body">
 
+  @php
+    $pdfNotes = $booking->quotation?->notes ?? $booking->lead?->notes ?? '';
+    $pdfData  = ($pdfNotes && substr(trim($pdfNotes), 0, 1) === '{') ? (json_decode($pdfNotes, true) ?? []) : [];
+
+    // Hotels (new array + old flat)
+    if (!empty($pdfData['hotels']) && is_array($pdfData['hotels'])) {
+        $pdfHotels = $pdfData['hotels'];
+    } elseif (!empty($pdfData['hotel'])) {
+        $oh = $pdfData['hotel'];
+        $hn = trim($oh['name'] ?? $oh['hotel_name'] ?? '');
+        $pdfHotels = $hn ? [['name'=>$hn,'city'=>$oh['city']??'','room_type'=>$oh['room_type']??'','checkin'=>$oh['checkin']??$oh['hotel_checkin']??'','checkout'=>$oh['checkout']??$oh['hotel_checkout']??'']] : [];
+    } else { $pdfHotels = []; }
+
+    $pdfCab   = $pdfData['cab']        ?? null;
+    $pdfBoat  = $pdfData['boat']       ?? null;
+    $pdfGuide = $pdfData['guide']      ?? null;
+    $pdfIncl  = $pdfData['inclusions'] ?? '';
+
+    // Tour end date: use booking_end_date or fall back to last hotel checkout
+    $pdfEndDate = '';
+    if (!empty($booking->lead->booking_end_date)) {
+        $pdfEndDate = \Carbon\Carbon::parse($booking->lead->booking_end_date)->format('d M, Y');
+    } elseif (!empty($pdfHotels)) {
+        $lastCheckout = $pdfHotels[count($pdfHotels)-1]['checkout']
+                     ?? $pdfHotels[count($pdfHotels)-1]['hotel_checkout']
+                     ?? '';
+        if ($lastCheckout) $pdfEndDate = \Carbon\Carbon::parse($lastCheckout)->format('d M, Y');
+    }
+  @endphp
+
   {{-- Guest Details ── --}}
   <div class="section-title">Guest Details</div>
   <table class="info-table">
@@ -170,36 +205,6 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #1a1a1a; ba
   </table>
 
   {{-- Tour Package ── --}}
-  @php
-    $pdfNotes = $booking->quotation?->notes ?? $booking->lead?->notes ?? '';
-    $pdfData  = ($pdfNotes && substr(trim($pdfNotes), 0, 1) === '{') ? (json_decode($pdfNotes, true) ?? []) : [];
-
-    // Hotels (new array + old flat)
-    if (!empty($pdfData['hotels']) && is_array($pdfData['hotels'])) {
-        $pdfHotels = $pdfData['hotels'];
-    } elseif (!empty($pdfData['hotel'])) {
-        $oh = $pdfData['hotel'];
-        $hn = trim($oh['name'] ?? $oh['hotel_name'] ?? '');
-        $pdfHotels = $hn ? [['name'=>$hn,'city'=>$oh['city']??'','room_type'=>$oh['room_type']??'','checkin'=>$oh['checkin']??$oh['hotel_checkin']??'','checkout'=>$oh['checkout']??$oh['hotel_checkout']??'']] : [];
-    } else { $pdfHotels = []; }
-
-    $pdfCab   = $pdfData['cab']        ?? null;
-    $pdfBoat  = $pdfData['boat']       ?? null;
-    $pdfGuide = $pdfData['guide']      ?? null;
-    $pdfIncl  = $pdfData['inclusions'] ?? '';
-
-    // Tour end date: use booking_end_date or fall back to last hotel checkout
-    $pdfEndDate = '';
-    if (!empty($booking->lead->booking_end_date)) {
-        $pdfEndDate = \Carbon\Carbon::parse($booking->lead->booking_end_date)->format('d M, Y');
-    } elseif (!empty($pdfHotels)) {
-        $lastCheckout = $pdfHotels[count($pdfHotels)-1]['checkout']
-                     ?? $pdfHotels[count($pdfHotels)-1]['hotel_checkout']
-                     ?? '';
-        if ($lastCheckout) $pdfEndDate = \Carbon\Carbon::parse($lastCheckout)->format('d M, Y');
-    }
-  @endphp
-
   <div class="section-title">Tour Package Details</div>
 
   {{-- Inclusions --}}
@@ -307,7 +312,7 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #1a1a1a; ba
   @if(!empty($booking->lead->plan_detail))
   <div class="itin-box">
     <div class="itin-label">Itinerary</div>
-    <div class="itin-text">{{ strip_tags($booking->lead->plan_detail) }}</div>
+    <div class="itin-text">{!! safe_html($booking->lead->plan_detail) !!}</div>
   </div>
   @endif
 

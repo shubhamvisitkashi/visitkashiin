@@ -43,7 +43,7 @@ class VendorController extends Controller
         $vendors = $vendors->paginate(40);
 
         if($request->ajax()){
-            return view('admin.crm.vendor.table',comapact('search_staff','search_service','search_key','vendor_services','vendors','search_state','total_vendor','staffs'));
+            return view('admin.crm.vendor.table',compact('search_staff','search_service','search_key','vendor_services','vendors','search_state','total_vendor','staffs'));
         }
 
         return view('admin.crm.vendor.index',compact('search_staff','search_service','search_key','vendor_services','vendors','states','search_state','total_vendor','staffs'),['page_title'=>'Vendor List']);

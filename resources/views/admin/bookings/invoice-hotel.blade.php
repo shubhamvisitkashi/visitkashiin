@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tax Invoice #{{ $booking->gst_invoice_number ?? $booking->booking_number }} | Visit Kashi</title>
+    <title>Booking Confirmation #{{ $booking->booking_number }} | Visit Kashi</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:Arial, Helvetica, sans-serif; background:#1a1a1a; padding:24px; font-size:13px; color:#000; }
@@ -177,7 +177,7 @@
     $companyName = websiteSetupValue('company_legal_name') ?: $siteName;
 
     // ── Number to words (Indian system) ──
-    function numberToWordsIndianGst($number) {
+    function numberToWordsIndian($number) {
         $number = (int) round($number);
         if ($number == 0) return 'Zero';
         $ones = ['', 'One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
@@ -223,12 +223,14 @@
     {{-- Title row --}}
     <div class="title-row">
         <div></div>
-        <div class="title">Tax Invoice</div>
+        <div class="title">Booking Confirmation</div>
         <div class="recipient">ORIGINAL FOR RECIPIENT</div>
     </div>
 
     {{-- GSTIN --}}
+    @if($booking->is_gst_invoice)
     <div class="gstin-row">GSTIN/VAT: {{ websiteSetupValue('company_gstin') ?: '—' }}</div>
+    @endif
 
     {{-- Invoice / Booking info --}}
     <div class="info-grid">
@@ -239,8 +241,10 @@
             <div class="info-line"><span class="lbl">Guest Phone :</span> {{ $contact }}</div>
             <div class="info-line"><span class="lbl">Guest Email :</span> {{ $email }}</div>
             <div class="info-line"><span class="lbl">Guest Address :</span> {{ $address }}</div>
+            @if($booking->is_gst_invoice)
             <div class="info-line"><span class="lbl">Company Name :</span> {{ $booking->company_name }}</div>
             <div class="info-line"><span class="lbl">Company GST/VAT :</span> {{ $booking->customer_gstin }}</div>
+            @endif
         </div>
         <div class="info-col">
             <div class="info-line"><span class="lbl">Booking ID:</span> {{ $booking->booking_number }}</div>
@@ -359,7 +363,7 @@
                     <td>INR {{ number_format($netAmt, 0) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="2">AMOUNT IN WORDS: INR {{ strtoupper(numberToWordsIndianGst($netAmt)) }} ONLY</td>
+                    <td colspan="2">AMOUNT IN WORDS: INR {{ strtoupper(numberToWordsIndian($netAmt)) }} ONLY</td>
                 </tr>
                 <tr>
                     <td>TOTAL DUE AMOUNT:</td>
@@ -370,7 +374,9 @@
     </div>
 
     {{-- Signature --}}
+    @if($booking->is_gst_invoice)
     <div class="sig-for">FOR {{ strtoupper($companyName) }}</div>
+    @endif
     <div class="sig-row">
         <div>Guest Signature</div>
         <div>Authorised Signatory</div>

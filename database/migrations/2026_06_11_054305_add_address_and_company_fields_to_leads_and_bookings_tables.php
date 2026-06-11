@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddAddressAndCompanyFieldsToLeadsAndBookingsTables extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('leads', function (Blueprint $table) {
+            $table->text('address')->nullable()->after('email');
+        });
+
+        Schema::table('bookings', function (Blueprint $table) {
+            $table->string('company_name')->nullable()->after('customer_gstin');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('leads', function (Blueprint $table) {
+            $table->dropColumn('address');
+        });
+
+        Schema::table('bookings', function (Blueprint $table) {
+            $table->dropColumn('company_name');
+        });
+    }
+}

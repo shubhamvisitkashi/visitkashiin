@@ -35,6 +35,7 @@
 .sb-label { font-size:.7rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; display:block; }
 .sb-input { border:1.5px solid #E2E8F0 !important; border-radius:11px !important; padding:10px 14px !important; font-size:.875rem !important; color:#0F172A !important; background:#FAFBFF !important; transition:all .2s !important; width:100%; }
 .sb-input:focus { border-color:#0D9488 !important; box-shadow:0 0 0 3px rgba(13,148,136,.12) !important; background:#fff !important; outline:none !important; }
+.sb-input[readonly] { background:#F1F5F9 !important; color:#64748B !important; cursor:not-allowed; }
 
 /* ── Hotel grid ───────────────────────────────── */
 .hotel-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:12px; }
@@ -295,6 +296,7 @@
     @csrf
     <input type="hidden" name="short_plan" id="shortPlanHidden">
     <input type="hidden" name="booking_date" id="bookingDateHidden" value="{{ now()->format('Y-m-d') }}">
+    <input type="hidden" name="pax" id="paxHidden" value="1">
 
     <div class="sb-layout">
 
@@ -354,6 +356,11 @@
                     <option value="{{ $src->id }}" {{ old('lead_source_id')==$src->id ? 'selected':'' }}>{{ $src->name }}</option>
                   @endforeach
                 </select>
+              </div>
+              <div class="col-md-12">
+                <label class="sb-label">Guest Address</label>
+                <textarea name="address" class="form-control sb-input" rows="2"
+                          placeholder="Guest's billing address (optional)">{{ old('address') }}</textarea>
               </div>
             </div>
           </div>
@@ -526,6 +533,26 @@
 
             <div class="row g-3">
               <div class="col-6 col-md-3">
+                <label class="sb-label">Room Type</label>
+                <select id="roomType" class="form-select sb-input" onchange="toggleRoomsField();buildPlan()">
+                  <option value="">Select…</option>
+                  @foreach(['Deluxe Room','Executive Room','Premium Room','Suite','Homestay Flat'] as $rt)
+                    <option>{{ $rt }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="sb-label">No. of Rooms / Flats <span class="sb-req">*</span></label>
+                <input type="number" id="rooms" class="form-control sb-input" min="1" value="1" required
+                       oninput="recalcTotal();buildPlan()">
+                <input type="text" id="roomNumbers" class="form-control sb-input"
+                       style="margin-top:6px;padding:7px 10px !important;font-size:.78rem !important;"
+                       placeholder="Room/Flat No. (optional)" oninput="buildPlan()">
+                <textarea id="flatDetails" class="form-control sb-input" rows="2"
+                          style="display:none;margin-top:6px;padding:7px 10px !important;font-size:.78rem !important;"
+                          placeholder="e.g. 2 BHK Flat x1, 1 BHK Flat x1, Flat No. 201 &amp; 305" oninput="buildPlan()"></textarea>
+              </div>
+              <div class="col-6 col-md-3">
                 <label class="sb-label">Adults</label>
                 <div class="counter-wrap">
                   <button type="button" class="counter-btn" onclick="adj('adults',-1)">−</button>
@@ -542,20 +569,6 @@
                   <button type="button" class="counter-btn" onclick="adj('kids',1)">+</button>
                 </div>
                 <input type="hidden" id="kidsVal" value="0">
-              </div>
-              <div class="col-6 col-md-3">
-                <label class="sb-label">No. of Rooms <span class="sb-req">*</span></label>
-                <input type="number" id="rooms" class="form-control sb-input" min="1" value="1" required
-                       oninput="recalcTotal();buildPlan()">
-              </div>
-              <div class="col-6 col-md-3">
-                <label class="sb-label">Room Type</label>
-                <select id="roomType" class="form-select sb-input" onchange="buildPlan()">
-                  <option value="">Select…</option>
-                  @foreach(['Deluxe Room','Executive Room','Premium Room','Suite','Homestay Flat'] as $rt)
-                    <option>{{ $rt }}</option>
-                  @endforeach
-                </select>
               </div>
               <div class="col-md-4">
                 <label class="sb-label">Extra Bed (₹ / night)</label>
@@ -585,6 +598,38 @@
                 @endforeach
               </div>
               <input type="hidden" id="mealVal" value="">
+            </div>
+
+            {{-- GST Invoice --}}
+            <div class="row g-3" style="margin-top:18px;">
+              <div class="col-md-4">
+                <label class="sb-label">Need GST Invoice?</label>
+                <select id="needGst" name="is_gst_invoice" class="form-select sb-input" onchange="toggleGstFields()">
+                  <option value="0" {{ old('is_gst_invoice','0')=='0' ? 'selected':'' }}>No</option>
+                  <option value="1" {{ old('is_gst_invoice')=='1' ? 'selected':'' }}>Yes</option>
+                </select>
+              </div>
+              <div id="gstFieldsWrap" class="col-md-8" style="display:none;">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="sb-label">Company Name</label>
+                    <input type="text" name="company_name" class="form-control sb-input"
+                           placeholder="Company / Firm name" value="{{ old('company_name') }}">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="sb-label">Company GST/VAT (GSTIN)</label>
+                    <input type="text" name="customer_gstin" class="form-control sb-input"
+                           placeholder="e.g. 09ABCDE1234F1Z5" value="{{ old('customer_gstin') }}">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="sb-label">GST Rate (%)</label>
+                    <select id="gstRate" name="gst_rate" class="form-select sb-input" oninput="recalcBalance()" onchange="recalcBalance()">
+                      <option value="0" {{ old('gst_rate')=='0' ? 'selected':'' }}>0%</option>
+                      <option value="5" {{ old('gst_rate','5')=='5' ? 'selected':'' }}>5%</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {{-- Plan preview --}}
@@ -725,6 +770,14 @@
                 <span class="pay-row-lbl">Discount</span>
                 <span class="pay-row-val" style="color:#FCA5A5;" id="sumDisc">-₹0.00</span>
               </div>
+              <div class="pay-row" id="gstRow" style="display:none;">
+                <span class="pay-row-lbl">GST</span>
+                <span class="pay-row-val" id="sumGst">+₹0.00</span>
+              </div>
+              <div class="pay-row" id="netRow" style="display:none;">
+                <span class="pay-row-lbl">Net Payable</span>
+                <span class="pay-row-val" id="sumNet">₹0.00</span>
+              </div>
               <div class="pay-row">
                 <span class="pay-row-lbl">Advance Paid</span>
                 <span class="pay-row-val" style="color:#6EE7B7;" id="sumPaid">₹0.00</span>
@@ -841,9 +894,26 @@ function adj(type, delta) {
 }
 
 function selectMeal(val, el) {
-  document.querySelectorAll('.meal-pill').forEach(p => p.classList.remove('active'));
+  el.parentElement.querySelectorAll('.meal-pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('mealVal').value = val;
+  buildPlan();
+}
+
+// ── Toggle No. of Rooms / Flats vs Homestay Flat details ──────────
+function toggleRoomsField() {
+  const rtype = document.getElementById('roomType')?.value;
+  const roomNumbers = document.getElementById('roomNumbers');
+  const flatDetails = document.getElementById('flatDetails');
+  if (!roomNumbers || !flatDetails) return;
+  if (rtype === 'Homestay Flat') {
+    roomNumbers.style.display = 'none';
+    flatDetails.style.display = '';
+  } else {
+    roomNumbers.style.display = '';
+    flatDetails.style.display = 'none';
+  }
+  recalcTotal();
   buildPlan();
 }
 
@@ -873,12 +943,16 @@ function updatePerNightNote(rate, nights, rooms) {
 }
 
 function recalcBalance() {
-  const total    = parseFloat(document.getElementById('totalAmt').value) || 0;
-  const discount = parseFloat(document.getElementById('discountAmt').value) || 0;
-  const paid     = parseFloat(document.getElementById('advancePaid').value) || 0;
-  const net      = Math.max(0, total - discount);
-  const bal      = Math.max(0, net - paid);
-  const pct      = net > 0 ? Math.min(100, paid / net * 100) : 0;
+  const total     = parseFloat(document.getElementById('totalAmt').value) || 0;
+  const discount  = parseFloat(document.getElementById('discountAmt').value) || 0;
+  const paid      = parseFloat(document.getElementById('advancePaid').value) || 0;
+  const needGst   = document.getElementById('needGst')?.value === '1';
+  const gstRate   = needGst ? (parseFloat(document.getElementById('gstRate')?.value) || 0) : 0;
+  const taxable   = Math.max(0, total - discount);
+  const gstAmt    = gstRate > 0 ? taxable * gstRate / 100 : 0;
+  const net       = taxable + gstAmt;
+  const bal       = Math.max(0, net - paid);
+  const pct       = net > 0 ? Math.min(100, paid / net * 100) : 0;
   const fmt = v => '₹' + v.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('sumTotal').textContent = fmt(total);
   document.getElementById('sumPaid').textContent  = fmt(paid);
@@ -890,6 +964,14 @@ function recalcBalance() {
     document.getElementById('sumDisc').textContent = '-' + fmt(discount);
     discRow.style.display = '';
   } else { discRow.style.display = 'none'; }
+  const gstRow = document.getElementById('gstRow');
+  const netRow = document.getElementById('netRow');
+  if (gstAmt > 0) {
+    document.getElementById('sumGst').textContent = '+' + fmt(gstAmt) + ' (' + gstRate + '%)';
+    document.getElementById('sumNet').textContent = fmt(net);
+    gstRow.style.display = '';
+    netRow.style.display = '';
+  } else { gstRow.style.display = 'none'; netRow.style.display = 'none'; }
   const badge = document.getElementById('payBadge');
   badge.className = 'pay-badge ' + (bal <= 0 ? 'paid' : (paid > 0 ? 'partial' : 'due'));
   badge.textContent = bal <= 0 ? 'PAID' : (paid > 0 ? 'PARTIAL' : 'DUE');
@@ -901,6 +983,7 @@ function recalcBalance() {
   if (mobSub) {
     const p = ['Total: ' + fmt(total)];
     if (discount > 0) p.push('Disc: ' + fmt(discount));
+    if (gstAmt > 0) p.push('GST: ' + fmt(gstAmt));
     if (paid > 0) p.push('Adv: ' + fmt(paid));
     mobSub.textContent = p.join(' · ');
   }
@@ -937,7 +1020,13 @@ function buildPlan() {
   if (prop) parts.push('Property: '+prop);
   if (ci && co) parts.push('Check-in: '+fmtDate(ci)+' '+fmtTime(cit)+'  →  Check-out: '+fmtDate(co)+' '+fmtTime(cot));
   if (ni && ni !== '—' && parseInt(ni) > 0) parts.push('Duration: '+ni+' night(s)');
-  parts.push('Rooms: '+rooms+(rtype?' ('+rtype+')':''));
+  if (rtype === 'Homestay Flat') {
+    const details = document.getElementById('flatDetails')?.value.trim();
+    parts.push('Flats: '+rooms+(details ? ' ('+details+')' : ''));
+  } else {
+    const roomNo = document.getElementById('roomNumbers')?.value.trim();
+    parts.push('Rooms: '+rooms+(rtype?' ('+rtype+')':'')+(roomNo ? ' · No: '+roomNo : ''));
+  }
   parts.push('Guests: '+adults+' Adult'+(adults!=1?'s':'')+(kids>0?', '+kids+' Child'+(kids!=1?'ren':''):''));
   if (meal) parts.push('Meal Plan: '+meal);
   if (extra > 0) parts.push('Extra Bed: ₹'+Number(extra).toLocaleString('en-IN'));
@@ -948,6 +1037,12 @@ function buildPlan() {
   document.getElementById('planPreviewText').textContent = plan || 'Fill in the details above…';
 
   if (prop) updateHotelSummary(prop);
+}
+
+function toggleGstFields() {
+  const wrap = document.getElementById('gstFieldsWrap');
+  wrap.style.display = document.getElementById('needGst').value === '1' ? '' : 'none';
+  recalcBalance();
 }
 
 function toggleReceiverName() {
@@ -967,11 +1062,16 @@ function toggleReceiverName() {
 document.getElementById('stayForm').addEventListener('submit', function() {
   buildPlan();
   document.getElementById('bookingDateHidden').value = new Date().toISOString().slice(0,10);
+  const adults = parseInt(document.getElementById('adultsVal').value) || 1;
+  const kids   = parseInt(document.getElementById('kidsVal').value) || 0;
+  document.getElementById('paxHidden').value = adults + kids;
 });
 
 document.addEventListener('DOMContentLoaded', () => {
   recalcBalance();
   toggleReceiverName();
+  toggleGstFields();
+  toggleRoomsField();
 });
 </script>
 

@@ -10,6 +10,11 @@ use App\Http\Controllers\Controller;
 
 class CustomerAnalyticsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:dashboard-view|analytics-customer');
+    }
+
     public function index(Request $request)
     {
         // Whitelist-validate date_range to prevent parameter injection

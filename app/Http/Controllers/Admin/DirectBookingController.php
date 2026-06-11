@@ -89,6 +89,11 @@ class DirectBookingController extends Controller
                 'phone'             => 'required|string|max:20',
                 'alt_phone'         => 'nullable|string|max:20',
                 'email'             => 'nullable|email|max:255',
+                'address'           => 'nullable|string',
+                'is_gst_invoice'    => 'nullable|in:0,1',
+                'company_name'      => 'nullable|string|max:255',
+                'customer_gstin'    => 'nullable|string|max:50',
+                'gst_rate'          => 'nullable|numeric|min:0|max:5',
                 'country'           => 'nullable|string|max:100',
                 'pax'               => 'nullable|integer|min:1',
                 'short_plan'        => 'required|string',
@@ -151,10 +156,10 @@ class DirectBookingController extends Controller
             $amountAfterDiscount = max(0, $subtotal - $discountAmount);
 
             // Apply GST
-            $gstAmount = 0;
-            if (!empty($validated['apply_gst']) && !empty($validated['gst_rate'])) {
-                $gstAmount = ($amountAfterDiscount * $validated['gst_rate']) / 100;
-            }
+            $isGstInvoice = !empty($validated['is_gst_invoice']);
+            $gstRate      = $isGstInvoice ? (float)($validated['gst_rate'] ?? 0) : 0;
+            $taxableAmount = $amountAfterDiscount;
+            $gstAmount     = $gstRate > 0 ? round(($taxableAmount * $gstRate) / 100, 2) : 0;
 
             $totalAmount = $amountAfterDiscount + $gstAmount;
 
@@ -164,6 +169,7 @@ class DirectBookingController extends Controller
                 'contact'             => $validated['phone'],
                 'alt_phone'           => $validated['alt_phone'] ?? null,
                 'email'               => $validated['email'] ?? null,
+                'address'             => $validated['address'] ?? null,
                 'country'             => $validated['country'] ?? null,
                 'pax'                 => $validated['pax'] ?? null,
                 'booking_start_date'  => $validated['booking_start_date'] ?? null,
@@ -184,11 +190,7 @@ class DirectBookingController extends Controller
                 'quotation_date' => now()->format('Y-m-d'),
                 'valid_until' => now()->addDays(7),
                 'total_amount' => $totalAmount,
-                'discount_amount' => $discountAmount,
-                'discount_type' => 'fixed',
                 'subtotal' => $subtotal,
-                'tax_amount' => 0,
-                'tax_rate' => 0,
                 'status' => 'accepted', // Auto-approved
                 'notes' => 'Auto-created via Direct Booking',
                 'itinerary_html' => null,
@@ -227,7 +229,12 @@ class DirectBookingController extends Controller
                 'pending_amount'  => $pendingAmount,
                 'discount_amount' => $discountAmount,
                 'vendor_cost'     => !empty($validated['vendor_cost']) ? (float)$validated['vendor_cost'] : null,
-                'tax_amount'      => 0,
+                'is_gst_invoice'  => $isGstInvoice,
+                'customer_gstin'  => $validated['customer_gstin'] ?? null,
+                'company_name'    => $validated['company_name'] ?? null,
+                'gst_rate'        => $isGstInvoice ? $gstRate : null,
+                'taxable_amount'  => $isGstInvoice ? $taxableAmount : null,
+                'gst_amount'      => $isGstInvoice ? $gstAmount : null,
                 'notes'           => $validated['internal_notes'] ?? null,
                 'created_by'      => auth('admin')->id(),
             ]);

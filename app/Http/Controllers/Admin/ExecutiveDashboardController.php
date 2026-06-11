@@ -13,6 +13,11 @@ use DB;
 
 class ExecutiveDashboardController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:dashboard-view|analytics-customer');
+    }
+
     public function index(Request $request)
     {
         $now = Carbon::now();

@@ -346,6 +346,122 @@
           </div>
         </div>
 
+        {{-- ── EDITABLE: Pricing & Status ── --}}
+        <div class="eb-edit-card">
+          <div class="eb-edit-card-head">
+            <i class="fas fa-rupee-sign" style="color:#7dd3fc;font-size:14px;"></i>
+            <div class="eb-edit-card-head-title">Pricing &amp; Status</div>
+            <div class="eb-edit-card-head-note"><i class="fas fa-pencil-alt me-1"></i>These fields are editable</div>
+          </div>
+          <div class="eb-edit-card-body">
+            <div class="row g-3">
+              <div class="col-md-3 eb-field">
+                <label for="total_amount"><i class="fas fa-money-bill text-primary me-1"></i>Total Amount (₹)</label>
+                <input id="total_amount" class="form-control" type="number" name="total_amount" min="0" step="0.01"
+                       value="{{ old('total_amount', $booking->total_amount) }}">
+                @error('total_amount')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+              </div>
+              <div class="col-md-3 eb-field">
+                <label for="discount_amount"><i class="fas fa-tags text-primary me-1"></i>Discount (₹)</label>
+                <input id="discount_amount" class="form-control" type="number" name="discount_amount" min="0" step="0.01"
+                       value="{{ old('discount_amount', $booking->total_discount) }}">
+                @error('discount_amount')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+              </div>
+              <div class="col-md-3 eb-field">
+                <label for="booking_status"><i class="fas fa-flag text-primary me-1"></i>Booking Status</label>
+                <select id="booking_status" name="booking_status" class="form-select">
+                  @foreach(['confirmed'=>'Confirmed','in_progress'=>'In Progress','completed'=>'Completed','cancelled'=>'Cancelled'] as $val=>$label)
+                    <option value="{{ $val }}" {{ old('booking_status', $booking->booking_status) == $val ? 'selected' : '' }}>{{ $label }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-3 eb-field">
+                <label for="payment_method"><i class="fas fa-credit-card text-primary me-1"></i>Payment Method</label>
+                <select id="payment_method" name="payment_method" class="form-select">
+                  <option value="">Select…</option>
+                  @foreach(['cash'=>'💵 Cash','upi'=>'📱 UPI','bank_transfer'=>'🏦 Bank Transfer'] as $val=>$label)
+                    <option value="{{ $val }}" {{ old('payment_method', $booking->payment_method) == $val ? 'selected' : '' }}>{{ $label }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-4 eb-field">
+                <label for="payment_account_id"><i class="fas fa-university text-primary me-1"></i>Bank / Payment Account</label>
+                <select id="payment_account_id" name="payment_account_id" class="form-select">
+                  <option value="">Select account…</option>
+                  @foreach($paymentAccounts as $acc)
+                    <option value="{{ $acc->id }}" {{ old('payment_account_id', $booking->payment_account_id) == $acc->id ? 'selected' : '' }}>
+                      {{ $acc->account_name }}@if($acc->bank_name) — {{ $acc->bank_name }}@endif
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-4 eb-field">
+                <label for="lead_source_id"><i class="fas fa-bullhorn text-primary me-1"></i>Lead Source</label>
+                <select id="lead_source_id" name="lead_source_id" class="form-select">
+                  <option value="">Select source…</option>
+                  @foreach($leadSources as $src)
+                    <option value="{{ $src->id }}" {{ old('lead_source_id', $booking->lead_source_id) == $src->id ? 'selected' : '' }}>{{ $src->name }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-4 eb-field">
+                <label for="boatman_id"><i class="fas fa-user-tie text-primary me-1"></i>Assigned Boatman</label>
+                <select id="boatman_id" name="boatman_id" class="form-select">
+                  <option value="">Select boatman…</option>
+                  @foreach($boatmen as $man)
+                    <option value="{{ $man->id }}" {{ old('boatman_id', $booking->boatman_id) == $man->id ? 'selected' : '' }}>{{ $man->name }}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{-- ── EDITABLE: Vendor Costs (Internal) ── --}}
+        <div class="eb-edit-card">
+          <div class="eb-edit-card-head">
+            <i class="fas fa-coins" style="color:#7dd3fc;font-size:14px;"></i>
+            <div class="eb-edit-card-head-title">Vendor Costs (Internal — Staff Only)</div>
+            <div class="eb-edit-card-head-note"><i class="fas fa-pencil-alt me-1"></i>Not shown on voucher</div>
+          </div>
+          <div class="eb-edit-card-body">
+            <div class="row g-3">
+              <div class="col-md-6 eb-field">
+                <label for="vendor_cost"><i class="fas fa-ship text-primary me-1"></i>Boatman / Vendor Cost (₹)</label>
+                <input id="vendor_cost" class="form-control" type="number" name="vendor_cost" min="0" step="0.01"
+                       value="{{ old('vendor_cost', $booking->vendor_cost) }}">
+                @error('vendor_cost')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+              </div>
+              <div class="col-md-6 eb-field">
+                <label for="b2b_vendor_cost"><i class="fas fa-handshake text-primary me-1"></i>B2B Vendor Cost (Event/Add-on, ₹)</label>
+                <input id="b2b_vendor_cost" class="form-control" type="number" name="b2b_vendor_cost" min="0" step="0.01"
+                       value="{{ old('b2b_vendor_cost', $booking->b2b_vendor_cost) }}">
+                @error('b2b_vendor_cost')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{-- ── EDITABLE: Add-on Services ── --}}
+        <div class="eb-edit-card">
+          <div class="eb-edit-card-head">
+            <i class="fas fa-star" style="color:#7dd3fc;font-size:14px;"></i>
+            <div class="eb-edit-card-head-title">Add-on Services</div>
+            <div class="eb-edit-card-head-note"><i class="fas fa-pencil-alt me-1"></i>These fields are editable</div>
+          </div>
+          <div class="eb-edit-card-body">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              @foreach(['decoration'=>'🌸 Decoration','photographer'=>'📸 Photographer','live_music'=>'🎵 Live Music','priest'=>'🪔 Priest / Puja','flowers'=>'💐 Flower Shower','fireworks'=>'🎆 Fireworks'] as $key=>$label)
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="{{ $key }}" value="1" id="addon_{{ $key }}"
+                         {{ old($key, $booking->{$key}) ? 'checked' : '' }}>
+                  <label class="form-check-label" for="addon_{{ $key }}">{{ $label }}</label>
+                </div>
+              @endforeach
+            </div>
+          </div>
+        </div>
+
         {{-- ── READ-ONLY: Boat Details ── --}}
         <div class="eb-card">
           <div class="eb-card-head">
@@ -457,7 +573,7 @@
       </a>
       <div class="ms-auto" style="font-size:11.5px;color:#64748b;">
         <i class="fas fa-info-circle me-1 text-primary"></i>
-        Editable: <strong>Name, Email, Phone, Persons, Ghats &amp; Notes</strong>
+        Editable: <strong>Customer Info, Pricing, Status, Vendor Costs &amp; Add-ons</strong>
       </div>
     </div>
 

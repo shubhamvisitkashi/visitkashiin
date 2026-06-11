@@ -641,6 +641,7 @@ class ComposerStaticInitd75b13bbabba0c3b56249ae45a666b78
 
     public static $classMap = array (
         'App\\CPU\\CategoryManager' => __DIR__ . '/../..' . '/app/CPU/CategoryManager.php',
+        'App\\Console\\Commands\\CompressImages' => __DIR__ . '/../..' . '/app/Console/Commands/CompressImages.php',
         'App\\Console\\Commands\\ConvertImagesToWebP' => __DIR__ . '/../..' . '/app/Console/Commands/ConvertImagesToWebP.php',
         'App\\Console\\Commands\\MinifyAssets' => __DIR__ . '/../..' . '/app/Console/Commands/MinifyAssets.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
@@ -653,6 +654,7 @@ class ComposerStaticInitd75b13bbabba0c3b56249ae45a666b78
         'App\\Http\\Controllers\\Admin\\BoatBookingController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BoatBookingController.php',
         'App\\Http\\Controllers\\Admin\\BoatController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BoatController.php',
         'App\\Http\\Controllers\\Admin\\BoatTypeController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BoatTypeController.php',
+        'App\\Http\\Controllers\\Admin\\BoatmanController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BoatmanController.php',
         'App\\Http\\Controllers\\Admin\\BookingController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BookingController.php',
         'App\\Http\\Controllers\\Admin\\CabBookingController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/CabBookingController.php',
         'App\\Http\\Controllers\\Admin\\CategoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/CategoryController.php',
@@ -668,6 +670,7 @@ class ComposerStaticInitd75b13bbabba0c3b56249ae45a666b78
         'App\\Http\\Controllers\\Admin\\InstagramReelController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/InstagramReelController.php',
         'App\\Http\\Controllers\\Admin\\LeadController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/LeadController.php',
         'App\\Http\\Controllers\\Admin\\LeadSourceController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/LeadSourceController.php',
+        'App\\Http\\Controllers\\Admin\\LedgerController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/LedgerController.php',
         'App\\Http\\Controllers\\Admin\\PackageController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/PackageController.php',
         'App\\Http\\Controllers\\Admin\\PaymentAccountController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/PaymentAccountController.php',
         'App\\Http\\Controllers\\Admin\\PaymentAnalyticsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/PaymentAnalyticsController.php',
@@ -780,6 +783,7 @@ class ComposerStaticInitd75b13bbabba0c3b56249ae45a666b78
         'App\\Providers\\EventServiceProvider' => __DIR__ . '/../..' . '/app/Providers/EventServiceProvider.php',
         'App\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/app/Providers/RouteServiceProvider.php',
         'App\\Services\\GstInvoiceService' => __DIR__ . '/../..' . '/app/Services/GstInvoiceService.php',
+        'App\\Services\\ImageCompressor' => __DIR__ . '/../..' . '/app/Services/ImageCompressor.php',
         'App\\Services\\TargetCalculationService' => __DIR__ . '/../..' . '/app/Services/TargetCalculationService.php',
         'App\\View\\Components\\AddBtn' => __DIR__ . '/../..' . '/app/View/Components/AddBtn.php',
         'App\\View\\Components\\CancleBtn' => __DIR__ . '/../..' . '/app/View/Components/CancleBtn.php',

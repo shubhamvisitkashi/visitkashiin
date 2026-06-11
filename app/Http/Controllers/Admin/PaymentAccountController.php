@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class PaymentAccountController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:payment-list|payment-view|payment-account-view');
+    }
+
     public function index(Request $request)
     {
         $query = PaymentAccount::query();

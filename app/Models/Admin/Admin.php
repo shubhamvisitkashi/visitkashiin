@@ -3,6 +3,8 @@
 namespace App\Models\Admin;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -20,6 +22,23 @@ class Admin extends Authenticatable
         'plain_password',
         'avatar',
     ];
+
+    // Encrypt on write
+    public function setPlainPasswordAttribute(?string $value): void
+    {
+        $this->attributes['plain_password'] = $value ? Crypt::encryptString($value) : null;
+    }
+
+    // Decrypt on read; fall back to raw value for old unencrypted records
+    public function getPlainPasswordAttribute(?string $value): ?string
+    {
+        if ($value === null) return null;
+        try {
+            return Crypt::decryptString($value);
+        } catch (DecryptException) {
+            return $value; // legacy plaintext row — still readable until re-saved
+        }
+    }
 
     public function getAvatarUrlAttribute(): string
     {
