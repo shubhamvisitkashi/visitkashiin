@@ -3,11 +3,21 @@
 --}}
 
 {{-- ── SEO product link cloud ── --}}
+@php
+    // Shared on every page via app.blade.php — cache it and eager-load
+    // product.category/product.subCategory so the link-building below
+    // doesn't fire a per-product N+1 query.
+    $footer_categories = cache()->remember('footer_explore_categories', 1800, function () {
+        return App\Models\Admin\Category::where('is_active','active')
+            ->with(['subCategory', 'product.category', 'product.subCategory'])
+            ->get();
+    });
+@endphp
 <section class="vkf-explore" aria-label="Explore Varanasi experiences">
     <div class="container">
         <h2 class="vkf-explore__title">Explore Varanasi</h2>
         <div class="vkf-explore__grid">
-            @foreach (App\Models\Admin\Category::where('is_active','active')->with(['subCategory','product'])->get() as $footer_category)
+            @foreach ($footer_categories as $footer_category)
                 <div class="vkf-explore__group">
                     <strong class="vkf-explore__cat">{{ $footer_category->name }}</strong>
                     <div class="vkf-explore__links">

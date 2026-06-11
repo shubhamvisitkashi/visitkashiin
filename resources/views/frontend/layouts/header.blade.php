@@ -37,8 +37,9 @@
                         <ul class="nav navbar-nav" id="responsive-menu">
                             @php
                                 $homestayCategory = App\CPU\CategoryManager::active()->where('slug', 'homestay')->first();
+                                $navCategories    = App\CPU\CategoryManager::active()->with(['subCategory'])->get();
                             @endphp
-                            @foreach (App\CPU\CategoryManager::active()->with(['subCategory'])->get() as $category)
+                            @foreach ($navCategories as $category)
                                 @php
                                     $catSlug   = strtolower($category->slug ?? '');
                                     $isHotels  = str_contains($catSlug, 'hotel');
@@ -128,7 +129,7 @@
 
     {{-- Nav links --}}
     <nav class="vk-drawer__nav">
-        @foreach (App\CPU\CategoryManager::active()->with(['subCategory'])->get() as $category)
+        @foreach ($navCategories as $category)
             @php
                 $catSlug   = strtolower($category->slug ?? '');
                 $isHotels  = str_contains($catSlug, 'hotel');

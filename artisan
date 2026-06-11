@@ -1,6 +1,12 @@
 #!/usr/bin/env php
 <?php
 
+// Laravel 8 / SwiftMailer and other bundled packages predate PHP 8.1's
+// nullable-parameter and callable-array deprecations, flooding logs with
+// E_DEPRECATED noise on PHP 8.4. Must be set before vendor/autoload.php,
+// since some deprecations fire at function-definition time during autoload.
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 define('LARAVEL_START', microtime(true));
 
 /*

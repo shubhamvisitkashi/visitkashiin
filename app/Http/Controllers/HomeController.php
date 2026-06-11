@@ -16,6 +16,15 @@ class HomeController extends Controller
             return CategoryManager::active()->where('on_home','1')->with(['product.category','product.subCategory'])->get();
         });
 
+        // Cached collections can outlive a code change to the eager-loads
+        // above (or lose nested relations across the cache round-trip),
+        // which would otherwise cause a per-product N+1 in the view when
+        // it accesses ->category / ->subCategory. loadMissing() is a no-op
+        // when the relation is already present.
+        foreach ($on_home_categories as $on_home_category) {
+            $on_home_category->product->loadMissing(['category', 'subCategory']);
+        }
+
         $on_home_products = cache()->remember('home_products', 1800, function () {
             return Product::where('is_active','active')->where('on_home','1')->with(['category','subCategory'])->get();
         });
