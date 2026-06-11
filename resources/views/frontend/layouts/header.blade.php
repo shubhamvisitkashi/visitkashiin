@@ -3,8 +3,6 @@
   JS hooks preserved:
     • .navigation         → navbar-sticky class added by scroll in main.js
     • #navbar             → mouseenter/mouseleave dropdown in main.js
-    • #responsive-menu    → slicknav mobile init in main.js (still present, hidden)
-    • #slicknav-mobile    → slicknav appends here (hidden — replaced by vk-drawer)
     • .navbar-arrow       → angle-right indicators injected by main.js
     • .navbar-default, .navbar-sticky-function → existing CSS classes kept
 --}}
@@ -91,9 +89,6 @@
                         <span class="vk-hamburger__bar"></span>
                         <span class="vk-hamburger__bar"></span>
                     </button>
-
-                    {{-- Slicknav placeholder — kept for JS compat, visually hidden --}}
-                    <div id="slicknav-mobile" style="display:none"></div>
 
                 </nav>
             </div>
