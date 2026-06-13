@@ -367,7 +367,7 @@
                         How do I confirm my booking?
                         <span class="faq-icon">▼</span>
                     </div>
-                    <div class="pkd-faq-a">Fill in the enquiry form and click "Send on WhatsApp". Our team will respond within minutes with availability, pricing and booking confirmation. No advance payment required to hold a tentative booking.</div>
+                    <div class="pkd-faq-a">Fill in the enquiry form and click "Submit Enquiry". Our team will respond within minutes with availability, pricing and booking confirmation. No advance payment required to hold a tentative booking.</div>
                 </div>
             </div>
 
@@ -405,10 +405,38 @@
                 </div>
 
                 <div class="vpc-body">
-                    <form id="pkgEnqForm" novalidate>
+                    <style>
+                    .vpc-success{text-align:center;padding:28px 20px;}
+                    .vpc-success-icon{width:56px;height:56px;border-radius:50%;background:#DCFCE7;color:#16A34A;font-size:1.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+                    .vpc-success h4{font-size:1rem;font-weight:800;color:#111;margin:0 0 7px;}
+                    .vpc-success p{font-size:.83rem;color:#4B5563;margin:0 0 14px;line-height:1.6;}
+                    .vpc-success-call{display:inline-flex;align-items:center;gap:6px;background:#0f3460;color:#fff;font-size:.82rem;font-weight:700;padding:9px 20px;border-radius:8px;text-decoration:none;}
+                    .vpc-errors{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:9px;padding:11px 14px;margin-bottom:13px;font-size:.79rem;color:#991b1b;}
+                    .vpc-errors ul{margin:4px 0 0;padding-left:16px;}
+                    </style>
+
+                    @if(session('success'))
+                    <div class="vpc-success">
+                        <div class="vpc-success-icon">✓</div>
+                        <h4>Enquiry Sent Successfully!</h4>
+                        <p>Our team will contact you on WhatsApp within 15 minutes to confirm your booking.</p>
+                        <a href="tel:+91{{ $waNumber }}" class="vpc-success-call">📞 Call us now</a>
+                    </div>
+                    @else
+
+                    @if($errors->any())
+                    <div class="vpc-errors">
+                        <ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                    </div>
+                    @endif
+
+                    <form action="{{ route('enquiry.store') }}" method="POST" id="pkgEnqForm" novalidate>
                         @csrf
                         <input type="hidden" name="package_id"   value="{{ $product->id }}">
                         <input type="hidden" name="package_name" value="{{ $product->name }}">
+                        <input type="hidden" name="no_of_person"   id="pkg_persons_hidden" value="2">
+                        <input type="hidden" name="children_count" id="pkg_children_hidden" value="0">
+                        <input type="hidden" name="message"        id="pkg_message_hidden">
 
                         {{-- Guest Info --}}
                         <div class="vpc-section">
@@ -416,11 +444,11 @@
                             <div class="vpc-row2">
                                 <div class="vpc-field">
                                     <label class="vpc-label">Full Name *</label>
-                                    <input type="text" class="vpc-input" id="pkg_name" placeholder="Your name" required>
+                                    <input type="text" class="vpc-input" id="pkg_name" name="name" placeholder="Your name" required>
                                 </div>
                                 <div class="vpc-field">
                                     <label class="vpc-label">Phone *</label>
-                                    <input type="tel" class="vpc-input" id="pkg_phone" placeholder="10-digit" maxlength="10" required>
+                                    <input type="tel" class="vpc-input" id="pkg_phone" name="phone" placeholder="10-digit" maxlength="10" required>
                                 </div>
                             </div>
                         </div>
@@ -461,7 +489,7 @@
                             <div class="vpc-row2">
                                 <div class="vpc-field">
                                     <label class="vpc-label">Start Date *</label>
-                                    <input type="date" class="vpc-input" id="pkg_date" min="{{ date('Y-m-d') }}" required>
+                                    <input type="date" class="vpc-input" id="pkg_date" name="arrival_date" min="{{ date('Y-m-d') }}" required>
                                 </div>
                                 <div class="vpc-field">
                                     <label class="vpc-label">No. of Days</label>
@@ -580,7 +608,7 @@
                         {{-- Submit --}}
                         <button type="submit" class="vpc-submit">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-                            Send on WhatsApp
+                            Submit Enquiry
                         </button>
                         <p class="vpc-submit-note">We'll respond within minutes ⚡</p>
                     </form>
@@ -589,6 +617,7 @@
                         <a href="tel:+91{{ $waNumber }}" class="btn-call">📞 Call Us</a>
                         <a href="https://wa.me/{{ $waNumber }}" target="_blank" rel="noopener" class="btn-wa">💬 WhatsApp</a>
                     </div>
+                    @endif
                 </div>
             </div>
         </aside>
@@ -708,10 +737,8 @@
         dateEl.value = d.toISOString().slice(0,10);
     }
 
-    /* ── Form submit → WhatsApp ── */
+    /* ── Form submit → save enquiry on dashboard + email ── */
     document.getElementById('pkgEnqForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
         var name   = document.getElementById('pkg_name').value.trim();
         var phone  = document.getElementById('pkg_phone').value.trim();
         var date   = document.getElementById('pkg_date').value;
@@ -729,65 +756,23 @@
         var cab   = document.querySelector('input[name="pkg_cab"]:checked');
 
         if (!name || !phone || phone.length < 10) {
+            e.preventDefault();
             alert('Please enter your name and a valid 10-digit phone number.');
             return;
         }
-        if (!date) { alert('Please select a travel start date.'); return; }
+        if (!date) { e.preventDefault(); alert('Please select a travel start date.'); return; }
 
-        var msg = '🙏 *Varanasi Tour Package Enquiry*\n'
-                + '━━━━━━━━━━━━━━━━━━━━\n'
-                + '📦 *Package:* {{ $product->name }}\n'
-                + '━━━━━━━━━━━━━━━━━━━━\n'
-                + '👤 *Name:* ' + name + '\n'
-                + '📞 *Phone:* ' + phone + '\n'
-                + '━━━━━━━━━━━━━━━━━━━━\n'
-                + '📅 *Start Date:* ' + date + '\n'
-                + '🗓️ *Duration:* ' + days + '\n'
-                + '👥 *Adults:* ' + adults + '  |  *Children:* ' + children + '  |  *Infants:* ' + infants + '\n'
-                + (pickup ? '📍 *Pickup:* ' + pickup + '\n' : '')
-                + (drop   ? '🏁 *Drop:* '   + drop   + '\n' : '')
-                + '━━━━━━━━━━━━━━━━━━━━\n'
-                + '🏨 *Hotel:* ' + (hotel ? hotel.value : 'Not selected') + '\n'
-                + '🍽️ *Food Plan:* ' + (food ? food.value : 'Not selected') + '\n'
-                + '🚗 *Cab Type:* ' + (cab ? cab.value : 'Not selected') + '\n'
-                + (notes ? '📝 *Notes:* ' + notes + '\n' : '')
-                + '━━━━━━━━━━━━━━━━━━━━\n'
-                + '💰 *Price:* ₹{{ number_format($displayPrice) }} per person onwards';
-
-        var url = 'https://wa.me/{{ $waNumber }}?text=' + encodeURIComponent(msg);
-        window.open(url, '_blank');
-
-        /* Also save to DB via background POST */
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("enquiry.store") }}';
-        form.style.display = 'none';
-        var fields = {
-            '_token': '{{ csrf_token() }}',
-            'package_id':   '{{ $product->id }}',
-            'package_name': '{{ $product->name }}',
-            'name':          name,
-            'phone':         phone,
-            'arrival_date':  date,
-            'no_of_person':  adults,
-            'message': 'Adults: ' + adults + '\n'
-                     + 'Children: ' + children + '\n'
-                     + 'Infants: ' + infants + '\n'
-                     + 'Duration: ' + days + '\n'
-                     + 'Pickup: ' + pickup + '\n'
-                     + 'Drop: ' + drop + '\n'
-                     + 'Hotel Category: ' + (hotel ? hotel.value : '') + '\n'
-                     + 'Food Plan: ' + (food ? food.value : '') + '\n'
-                     + 'Cab Type: ' + (cab ? cab.value : '') + '\n'
-                     + (notes ? 'Notes: ' + notes : '')
-        };
-        for (var k in fields) {
-            var inp = document.createElement('input');
-            inp.type = 'hidden'; inp.name = k; inp.value = fields[k];
-            form.appendChild(inp);
-        }
-        document.body.appendChild(form);
-        form.submit();
+        document.getElementById('pkg_persons_hidden').value  = adults;
+        document.getElementById('pkg_children_hidden').value = children;
+        document.getElementById('pkg_message_hidden').value =
+              'Duration: ' + days + '\n'
+            + 'Infants: ' + infants + '\n'
+            + 'Pickup: ' + pickup + '\n'
+            + 'Drop: ' + drop + '\n'
+            + 'Hotel Category: ' + (hotel ? hotel.value : '') + '\n'
+            + 'Food Plan: ' + (food ? food.value : '') + '\n'
+            + 'Cab Type: ' + (cab ? cab.value : '') + '\n'
+            + (notes ? 'Notes: ' + notes : '');
     });
 
 })();
@@ -809,5 +794,9 @@ document.getElementById('pkgBookingPopup').addEventListener('click', function(e)
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') pkgClosePopup();
 });
+/* Auto-open popup on mobile after successful enquiry submission */
+@if(session('success'))
+if (window.innerWidth < 992) { pkgOpenPopup(); }
+@endif
 </script>
 @endpush

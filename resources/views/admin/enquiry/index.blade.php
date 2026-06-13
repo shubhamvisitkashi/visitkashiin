@@ -200,6 +200,84 @@
         display: inline-block; white-space: nowrap;
     }
     .price-pill.discounted { background: #fef2f2; color: #b91c1c; }
+
+    /* ══════════════════════════════════════════════════════
+       Mobile responsive
+    ══════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+        .enq-header { padding: 1.1rem 1.25rem; text-align: center; }
+        .enq-header .text-end { text-align: center !important; width: 100%; }
+
+        /* Category tabs — horizontal scroll instead of wrapping */
+        .cat-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 6px;
+            margin: 0 -.25rem 1.25rem;
+            padding-left: .25rem;
+            padding-right: .25rem;
+        }
+        .cat-tabs::-webkit-scrollbar { height: 4px; }
+        .cat-tab { flex-shrink: 0; }
+
+        /* Search card — stack fields full-width */
+        .search-card { padding: 1rem; }
+        .search-card .col-md-5,
+        .search-card .col-md-2 { flex: 0 0 100%; max-width: 100%; margin-bottom: .5rem; }
+        .search-card .col-md-2:last-child { margin-bottom: 0; }
+
+        /* ── Tables → stacked cards ── */
+        .enq-table thead { display: none; }
+        .enq-table, .enq-table tbody, .enq-table tr, .enq-table td {
+            display: block; width: 100%;
+        }
+        .enq-table tbody tr {
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.05);
+        }
+        .enq-table tbody tr:hover { background: #fff; }
+        .enq-table tbody td {
+            border: none;
+            border-bottom: 1px solid #f8fafc;
+            padding: 7px 0;
+            font-size: .85rem;
+            white-space: normal !important;
+            max-width: none !important;
+        }
+        .enq-table tbody td:last-child { border-bottom: none; padding-bottom: 0; }
+        .enq-table tbody td::before {
+            content: attr(data-label);
+            display: block;
+            font-size: .64rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #94a3b8;
+            margin-bottom: 3px;
+        }
+        /* Empty-state row (single <td colspan>) — no card chrome, no label */
+        .enq-table tbody tr td:only-child {
+            border: none; padding: 0;
+        }
+        .enq-table tbody tr td:only-child::before { display: none; }
+
+        /* Row number — not useful as its own card field */
+        .enq-table tbody td[data-label="#"] { display: none; }
+
+        /* Actions — bigger tap targets, wrap nicely */
+        .enq-table tbody td[data-label="Actions"] { padding-top: 10px; }
+        .enq-table tbody td[data-label="Actions"] .action-btn {
+            padding: .5rem .7rem; font-size: .85rem; margin-bottom: 6px;
+        }
+
+        /* Pagination footer — center on mobile */
+        .card-body .border-top { justify-content: center !important; text-align: center; }
+        .card-body .border-top .pagination { justify-content: center; }
+    }
 </style>
 
 <div class="page-content">
@@ -309,46 +387,46 @@
                     <tbody>
                         @forelse ($hotelEnquiries as $key => $h)
                             <tr>
-                                <td class="text-muted fw-semibold">
+                                <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($hotelEnquiries->currentPage() - 1) * $hotelEnquiries->perPage() }}
                                 </td>
-                                <td>
+                                <td data-label="Hotel / Homestay">
                                     <span class="badge-pkg badge-hotel" title="{{ $h->hotel_name }}">
                                         &#127968; {{ \Str::limit($h->hotel_name, 22) }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Guest">
                                     <div class="fw-semibold text-dark" style="font-size:.88rem;">{{ $h->guest_name }}</div>
                                     <div class="text-muted" style="font-size:.78rem;">&#128222; {{ $h->contact_number }}</div>
                                 </td>
-                                <td>
+                                <td data-label="Adults">
                                     <span class="person-pill">&#128100; {{ $h->adults }}</span>
                                 </td>
-                                <td>
+                                <td data-label="Kids">
                                     @if($h->kids > 0)
                                         <span class="person-pill" style="background:#fef9f0;color:#92400e;">&#128118; {{ $h->kids }}</span>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td style="font-size:.82rem;white-space:nowrap;">
+                                <td style="font-size:.82rem;white-space:nowrap;" data-label="Check-In">
                                     {{ $h->checkin_datetime->format('d M Y') }}<br>
                                     <span class="text-muted">{{ $h->checkin_datetime->format('h:i A') }}</span>
                                 </td>
-                                <td style="font-size:.82rem;white-space:nowrap;">
+                                <td style="font-size:.82rem;white-space:nowrap;" data-label="Check-Out">
                                     {{ $h->checkout_datetime->format('d M Y') }}<br>
                                     <span class="text-muted">{{ $h->checkout_datetime->format('h:i A') }}</span>
                                 </td>
-                                <td>
+                                <td data-label="Nights">
                                     <span style="background:#eff6ff;color:#1d4ed8;font-size:.75rem;font-weight:700;padding:.3rem .65rem;border-radius:20px;display:inline-block;">
                                         &#127769; {{ $h->nights }}N
                                     </span>
                                 </td>
-                                <td style="font-size:.78rem;color:#64748b;white-space:nowrap;">
+                                <td style="font-size:.78rem;color:#64748b;white-space:nowrap;" data-label="Received">
                                     {{ $h->created_at->format('d M Y') }}<br>
                                     {{ $h->created_at->format('h:i A') }}
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Actions">
                                     <button type="button"
                                         class="action-btn btn-view me-1"
                                         data-bs-toggle="modal"
@@ -437,22 +515,22 @@
                                 $cabShowPrice = $cabDiscPrice > 0 ? $cabDiscPrice : $cabBasePrice;
                             @endphp
                             <tr>
-                                <td class="text-muted fw-semibold">
+                                <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
-                                <td>
+                                <td data-label="Customer">
                                     <div class="fw-semibold text-dark" style="font-size:.88rem;">{{ $enquiry->name }}</div>
                                     @if(!is_null($enquiry->no_of_person) && $enquiry->no_of_person !== '')
                                     <div style="font-size:.75rem;color:#475569;margin:1px 0;">&#128100; {{ $enquiry->no_of_person }} Person{{ $enquiry->no_of_person != 1 ? 's' : '' }}</div>
                                     @endif
                                     <div class="text-muted" style="font-size:.78rem;">&#128222; {{ $enquiry->phone }}</div>
                                 </td>
-                                <td>
+                                <td data-label="Cab">
                                     <span class="badge-pkg badge-cab" title="{{ $enquiry->package_name }}">
                                         &#128663; {{ \Str::limit($enquiry->package_name ?? '—', 22) }}
                                     </span>
                                 </td>
-                                <td style="font-size:.82rem;white-space:nowrap;">
+                                <td style="font-size:.82rem;white-space:nowrap;" data-label="Pickup Date">
                                     @if($enquiry->arrival_date)
                                         {{ date('d M Y', strtotime($enquiry->arrival_date)) }}<br>
                                         <span class="text-muted">{{ date('h:i A', strtotime($enquiry->arrival_date)) }}</span>
@@ -460,21 +538,21 @@
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Trip Type">
                                     <span style="background:#fffbeb;color:#b45309;font-size:.72rem;font-weight:600;padding:.25rem .55rem;border-radius:20px;display:inline-block;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $tripType }}">
                                         &#128663; {{ $tripType }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Pickup Location">
                                     <span class="msg-preview" title="{{ $pickupLoc }}" style="max-width:130px;">{{ $pickupLoc }}</span>
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Luggage">
                                     <span style="font-size:.8rem;color:#475569;">{{ $luggageCnt }} bag{{ $luggageCnt != 1 ? 's' : '' }}</span>
                                     @if(strtolower($roofCarrier) === 'yes')
                                     <br><span style="font-size:.72rem;background:#fffbeb;color:#92400e;padding:.1rem .4rem;border-radius:4px;">&#128230; Roof</span>
                                     @endif
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Price">
                                     @if($cabShowPrice > 0)
                                         @if($cabDiscPrice > 0 && $cabBasePrice > $cabDiscPrice)
                                         <div style="font-size:.72rem;color:#aaa;text-decoration:line-through;">₹{{ number_format($cabBasePrice) }}</div>
@@ -486,11 +564,11 @@
                                         <span class="text-muted" style="font-size:.78rem;">—</span>
                                     @endif
                                 </td>
-                                <td style="font-size:.78rem;color:#64748b;white-space:nowrap;">
+                                <td style="font-size:.78rem;color:#64748b;white-space:nowrap;" data-label="Received">
                                     {{ $enquiry->created_at->format('d M Y') }}<br>
                                     {{ $enquiry->created_at->format('h:i A') }}
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Actions">
                                     <button type="button"
                                         class="action-btn btn-view me-1"
                                         data-bs-toggle="modal"
@@ -607,10 +685,10 @@
                                 $showPrice  = $enquiry->booking_amount > 0 ? $enquiry->booking_amount : ($discPrice > 0 ? $discPrice : $basePrice);
                             @endphp
                             <tr>
-                                <td class="text-muted fw-semibold">
+                                <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
-                                <td>
+                                <td data-label="Customer">
                                     <div class="fw-semibold text-dark" style="font-size:.88rem;">{{ $enquiry->name }}</div>
                                     @if($persons !== '—')
                                     <div style="font-size:.75rem;color:#475569;margin:1px 0;">&#128100; {{ $persons }} Person{{ $persons != 1 ? 's' : '' }}</div>
@@ -620,19 +698,19 @@
                                     <div class="text-muted" style="font-size:.72rem;color:#25d366!important;">&#128172; {{ $whatsapp }}</div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Boat / Package">
                                     <span class="badge-pkg badge-boat" title="{{ $enquiry->package_name }}">
                                         &#9971; {{ \Str::limit($enquiry->package_name ?? '—', 22) }}
                                     </span>
                                 </td>
-                                <td style="font-size:.82rem;white-space:nowrap;">
+                                <td style="font-size:.82rem;white-space:nowrap;" data-label="Travel Date">
                                     @if($enquiry->arrival_date)
                                         {{ date('d M Y', strtotime($enquiry->arrival_date)) }}
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Time Slot">
                                     @php $isEvening = str_contains(strtolower($timeSlot), 'evening'); @endphp
                                     <span style="font-size:.72rem;font-weight:700;padding:.25rem .55rem;border-radius:20px;display:inline-block;
                                         background:{{ $isEvening ? '#fef9f0' : '#eff6ff' }};
@@ -640,10 +718,10 @@
                                         {{ $isEvening ? '🌆' : '🌅' }} {{ $isEvening ? 'Evening' : 'Morning' }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Pickup Ghat">
                                     <span class="msg-preview" style="max-width:110px;" title="{{ $ghat }}">{{ $ghat }}</span>
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Actions">
                                     <button type="button"
                                         class="action-btn btn-view me-1"
                                         data-bs-toggle="modal"
@@ -765,39 +843,39 @@
                                 $tShowPrice = $tDiscPrice > 0 ? $tDiscPrice : $tBasePrice;
                             @endphp
                             <tr>
-                                <td class="text-muted fw-semibold">
+                                <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
-                                <td>
+                                <td data-label="Customer">
                                     <div class="fw-semibold text-dark" style="font-size:.88rem;">{{ $enquiry->name }}</div>
                                     @if($tAdults !== '—')
                                     <div style="font-size:.75rem;color:#475569;margin:1px 0;">&#128100; {{ $tAdults }} Adult{{ $tAdults != 1 ? 's' : '' }}</div>
                                     @endif
                                     <div class="text-muted" style="font-size:.78rem;">&#128222; {{ $enquiry->phone }}</div>
                                 </td>
-                                <td>
+                                <td data-label="Package">
                                     <span class="badge-pkg badge-tour" title="{{ $enquiry->package_name }}">
                                         &#128506; {{ \Str::limit($enquiry->package_name ?? '—', 22) }}
                                     </span>
                                 </td>
-                                <td style="font-size:.82rem;white-space:nowrap;">
+                                <td style="font-size:.82rem;white-space:nowrap;" data-label="Travel Date">
                                     @if($enquiry->arrival_date)
                                         {{ date('d M Y', strtotime($enquiry->arrival_date)) }}
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Duration">
                                     <span style="background:#f0fdf4;color:#15803d;font-size:.72rem;font-weight:600;padding:.25rem .55rem;border-radius:20px;display:inline-block;white-space:nowrap;">
                                         &#128197; {{ $tDuration }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Hotel Cat.">
                                     <span style="font-size:.78rem;color:#475569;display:block;max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $tHotelCat }}">
                                         {{ $tHotelCat !== '—' ? '&#127968; '.$tHotelCat : '—' }}
                                     </span>
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Price">
                                     @if($tShowPrice > 0)
                                         @if($tDiscPrice > 0 && $tBasePrice > $tDiscPrice)
                                         <div style="font-size:.72rem;color:#aaa;text-decoration:line-through;">₹{{ number_format($tBasePrice) }}</div>
@@ -809,11 +887,11 @@
                                         <span class="text-muted" style="font-size:.78rem;">—</span>
                                     @endif
                                 </td>
-                                <td style="font-size:.78rem;color:#64748b;white-space:nowrap;">
+                                <td style="font-size:.78rem;color:#64748b;white-space:nowrap;" data-label="Received">
                                     {{ $enquiry->created_at->format('d M Y') }}<br>
                                     {{ $enquiry->created_at->format('h:i A') }}
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Actions">
                                     <button type="button"
                                         class="action-btn btn-view me-1"
                                         data-bs-toggle="modal"
@@ -938,41 +1016,41 @@
                                 };
                             @endphp
                             <tr>
-                                <td class="text-muted fw-semibold">
+                                <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
-                                <td>
+                                <td data-label="Customer">
                                     <div class="fw-semibold text-dark" style="font-size:.88rem;">{{ $enquiry->name }}</div>
                                     <div class="text-muted" style="font-size:.78rem;">&#128222; {{ $enquiry->phone }}</div>
                                 </td>
-                                <td>
+                                <td data-label="Category">
                                     <span class="cat-badge" style="
                                         background:{{ $catKey==='hotel' ? '#f5f3ff' : ($catKey==='cab' ? '#fffbeb' : ($catKey==='boat' ? '#ecfeff' : '#f0fdf4')) }};
                                         color:{{ $catKey==='hotel' ? '#6d28d9' : ($catKey==='cab' ? '#b45309' : ($catKey==='boat' ? '#0e7490' : '#15803d')) }};">
                                         {!! $catLabel !!}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Package">
                                     <span class="{{ $badgeCls }}" title="{{ $enquiry->package_name }}">
                                         {{ $enquiry->package_name ?: '—' }}
                                     </span>
                                 </td>
-                                <td style="font-size:.82rem;">
+                                <td style="font-size:.82rem;" data-label="Arrival Date">
                                     {{ $enquiry->arrival_date ? date('d M Y', strtotime($enquiry->arrival_date)) : '—' }}
                                 </td>
-                                <td>
+                                <td data-label="Persons">
                                     @if(!is_null($enquiry->no_of_person) && $enquiry->no_of_person !== '')
                                         <span class="person-pill">&#128100; {{ $enquiry->no_of_person }}</span>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Message">
                                     <span class="msg-preview" title="{{ $enquiry->message }}">
                                         {{ $enquiry->message ? \Str::limit($enquiry->message, 40) : '—' }}
                                     </span>
                                 </td>
-                                <td style="white-space:nowrap;">
+                                <td style="white-space:nowrap;" data-label="Actions">
                                     <button type="button"
                                         class="action-btn btn-view me-1"
                                         data-bs-toggle="modal"
