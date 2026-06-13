@@ -694,7 +694,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="chart-card">
       <div class="chart-head">
         <div>
-          <div class="chart-title">📊 Daily Revenue — Last 30 Days</div>
+          <div class="chart-title">📊 Daily Revenue — {{ now()->format('F Y') }}</div>
           <div class="chart-sub">All booking types combined</div>
         </div>
       </div>

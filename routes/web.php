@@ -170,6 +170,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('enquiry-index','EnquiryController@index')->name('enquiry.index');
             Route::delete('enquiry-delete/{id}','EnquiryController@destroy')->name('enquiry.delete');
             Route::delete('hotel-enquiry-delete/{id}','EnquiryController@destroyHotel')->name('hotel-enquiry.admin.delete');
+            Route::post('enquiry-resend/{id}','EnquiryController@resend')->name('enquiry.resend');
 
             // Website Setup Route
             Route::resource('web_setup', 'WebsiteSetupController');

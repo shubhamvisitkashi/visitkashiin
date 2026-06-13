@@ -106,11 +106,10 @@ class DashboardController extends Controller
             (clone $boatQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->count(),
         ];
 
-        // ── Daily revenue last 30 days ────────────────────────────
+        // ── Daily revenue — current month ──────────────────────────
         $dailyLabels  = [];
         $dailyRevenue = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $d = Carbon::today()->subDays($i);
+        for ($d = Carbon::today()->startOfMonth(); $d->lte(Carbon::today()); $d->addDay()) {
             $dailyLabels[]  = $d->format('d M');
             $dailyRevenue[] = round(
                 (clone $stayQ)->whereDate('booking_date', $d)->sum('total_amount') +
