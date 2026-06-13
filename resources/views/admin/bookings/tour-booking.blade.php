@@ -904,13 +904,19 @@ function tbAddHotelRow() {
       </div>
       <div>
         <label class="tb-label">Room Type</label>
-        <select name="hotels[${idx}][room_type]" class="tb-select">
+        <select name="hotels[${idx}][room_type]" class="tb-select" onchange="tbToggleFlatName(${idx})">
           <option value="">Select…</option>
           <option>Deluxe Room</option><option>Executive Room</option>
           <option>Premium Room</option><option>Suite</option>
           <option>Homestay Flat</option><option>Dormitory</option>
         </select>
       </div>
+    </div>
+
+    {{-- Row 1b: Flat Type / Name — only for Homestay Flat --}}
+    <div id="hotel-flat-wrap-${idx}" style="display:none;margin-bottom:8px;">
+      <label class="tb-label">Flat Type / Name</label>
+      <input type="text" name="hotels[${idx}][flat_name]" class="tb-input" placeholder="e.g. 2 BHK Flat, 3 BHK Flat, Studio Flat">
     </div>
 
     {{-- Row 2: Check-in + Check-out + Nights + B2B Cost --}}
@@ -946,6 +952,13 @@ function tbRemoveHotelRow(idx) {
   var row = document.getElementById('hotel-row-' + idx);
   if (row) row.remove();
   tbSumHotels();
+}
+
+function tbToggleFlatName(idx) {
+  var sel  = document.querySelector('[name="hotels[' + idx + '][room_type]"]');
+  var wrap = document.getElementById('hotel-flat-wrap-' + idx);
+  if (!sel || !wrap) return;
+  wrap.style.display = sel.value === 'Homestay Flat' ? '' : 'none';
 }
 
 function tbCalcRowNights(idx) {

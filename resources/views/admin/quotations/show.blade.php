@@ -382,8 +382,8 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>
-                                    <strong>{{ $item->serviceTemplate->name }}</strong><br>
-                                    <small class="text-muted">{{ $item->serviceType->name }}</small>
+                                    <strong>{{ $item->custom_name ?? optional($item->serviceTemplate)->name }}</strong><br>
+                                    <small class="text-muted">{{ optional($item->serviceType)->name }}</small>
                                 </td>
                                 <td class="text-end"><strong>₹{{ number_format($item->unit_price, 2) }}</strong></td>
                                 <td>{{ $item->service_date ? $item->service_date->format('d M Y') : '-' }}</td>

@@ -27,4 +27,16 @@ class Enquiry extends Model
         'luggage_bags',
         'roof_carrier',
     ];
+
+    /**
+     * Decode any HTML-entity-encoded ampersands (e.g. "&amp;") in older records
+     * so the package name displays correctly everywhere.
+     */
+    public function getPackageNameAttribute($value)
+    {
+        while ($value && str_contains($value, '&amp;')) {
+            $value = html_entity_decode($value, ENT_QUOTES);
+        }
+        return $value;
+    }
 }

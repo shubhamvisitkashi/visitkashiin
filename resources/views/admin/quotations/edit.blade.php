@@ -217,11 +217,18 @@
             const templateId = existingItem ? existingItem.service_template_id : '';
             const unitPrice = existingItem ? existingItem.unit_price : 0;
             const serviceDate = existingItem ? existingItem.service_date : '';
+            const customName = existingItem ? existingItem.custom_name : '';
+            const isCustom = !!(existingItem && !templateId && customName);
 
             // Find the category for existing item
             let selectedCategory = '';
             if (templateId) {
                 const template = serviceTemplates.find(t => t.id == templateId);
+                if (template) {
+                    selectedCategory = template.service_type.name;
+                }
+            } else if (isCustom && existingItem.service_type_id) {
+                const template = serviceTemplates.find(t => t.service_type.id == existingItem.service_type_id);
                 if (template) {
                     selectedCategory = template.service_type.name;
                 }
@@ -240,14 +247,15 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small">Service Template</label>
-                            <select class="form-select form-select-sm template-select" name="items[${itemIndex}][service_template_id]" 
+                            <select class="form-select form-select-sm template-select" name="items[${itemIndex}][service_template_id]"
                                     onchange="loadTemplateDetails(${itemIndex})" required ${selectedCategory ? '' : 'disabled'}>
                                 <option value="">Select ${selectedCategory ? 'Service' : 'Category First'}</option>
                             </select>
+                            <input type="hidden" class="service-type-input" name="items[${itemIndex}][service_type_id]" value="">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label small">Final Price</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm price-input" name="items[${itemIndex}][unit_price]" 
+                            <input type="number" step="0.01" class="form-control form-control-sm price-input" name="items[${itemIndex}][unit_price]"
                                    value="${unitPrice}" min="0" onchange="calculateTotal()" required>
                             <input type="hidden" name="items[${itemIndex}][quantity]" value="1">
                         </div>
@@ -260,6 +268,10 @@
                                 <i data-feather="trash-2"></i>
                             </button>
                         </div>
+                        <div class="col-md-12 custom-name-row d-none mt-2">
+                            <label class="form-label small">Custom Item Name</label>
+                            <input type="text" class="form-control form-control-sm custom-name-input" name="items[${itemIndex}][custom_name]" placeholder="Enter custom item name" value="${customName || ''}">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -270,7 +282,7 @@
             if (selectedCategory) {
                 const currentIndex = itemIndex;
                 setTimeout(() => {
-                    filterServiceTemplates(currentIndex, templateId);
+                    filterServiceTemplates(currentIndex, isCustom ? '__custom__' : templateId, isCustom ? existingItem.service_type_id : null);
                 }, 0);
             }
 
@@ -279,7 +291,7 @@
             calculateTotal();
         }
 
-        function filterServiceTemplates(index, preselectedId = null) {
+        function filterServiceTemplates(index, preselectedId = null, customServiceTypeId = null) {
             const item = document.getElementById(`item-${index}`);
             const categorySelect = item.querySelector('.category-select');
             const templateSelect = item.querySelector('.template-select');
@@ -287,23 +299,46 @@
 
             if (selectedCategory) {
                 const filteredTemplates = serviceTemplates.filter(t => t.service_type.name === selectedCategory);
+                const serviceTypeId = customServiceTypeId || (filteredTemplates.length ? filteredTemplates[0].service_type.id : '');
                 templateSelect.innerHTML = '<option value="">Select Service</option>' +
                     filteredTemplates.map(t =>
                         `<option value="${t.id}" data-price="${t.default_selling_price}" ${t.id == preselectedId ? 'selected' : ''}>${t.name}</option>`
-                    ).join('');
+                    ).join('') +
+                    `<option value="__custom__" data-service-type-id="${serviceTypeId}" ${preselectedId === '__custom__' ? 'selected' : ''}>✏️ Type custom name…</option>`;
                 templateSelect.disabled = false;
 
                 // If preselected, load its price
-                if (preselectedId) {
+                if (preselectedId && preselectedId !== '__custom__') {
                     const selectedOption = templateSelect.options[templateSelect.selectedIndex];
                     if (selectedOption && selectedOption.value) {
                         item.querySelector('.price-input').value = selectedOption.dataset.price;
                     }
                 }
+
+                if (preselectedId === '__custom__') {
+                    templateSelect.removeAttribute('name');
+                    item.querySelector('.service-type-input').value = serviceTypeId;
+                    item.querySelector('.custom-name-row').classList.remove('d-none');
+                    item.querySelector('.custom-name-input').required = true;
+                } else {
+                    templateSelect.setAttribute('name', `items[${index}][service_template_id]`);
+                    item.querySelector('.service-type-input').value = '';
+                    item.querySelector('.custom-name-row').classList.add('d-none');
+                    item.querySelector('.custom-name-input').required = false;
+                    item.querySelector('.custom-name-input').value = '';
+                    if (!preselectedId) {
+                        item.querySelector('.price-input').value = 0;
+                    }
+                }
             } else {
                 templateSelect.innerHTML = '<option value="">Select Category First</option>';
                 templateSelect.disabled = true;
+                templateSelect.setAttribute('name', `items[${index}][service_template_id]`);
                 item.querySelector('.price-input').value = 0;
+                item.querySelector('.service-type-input').value = '';
+                item.querySelector('.custom-name-row').classList.add('d-none');
+                item.querySelector('.custom-name-input').required = false;
+                item.querySelector('.custom-name-input').value = '';
             }
             calculateTotal();
         }
@@ -312,11 +347,28 @@
             const item = document.getElementById(`item-${index}`);
             const select = item.querySelector('.template-select');
             const priceInput = item.querySelector('.price-input');
+            const serviceTypeInput = item.querySelector('.service-type-input');
+            const customNameRow = item.querySelector('.custom-name-row');
+            const customNameInput = item.querySelector('.custom-name-input');
             const selectedOption = select.options[select.selectedIndex];
 
-            if (selectedOption.value) {
-                priceInput.value = selectedOption.dataset.price;
+            if (selectedOption.value === '__custom__') {
+                select.removeAttribute('name');
+                serviceTypeInput.value = selectedOption.dataset.serviceTypeId || '';
+                customNameRow.classList.remove('d-none');
+                customNameInput.required = true;
+                priceInput.value = 0;
                 calculateTotal();
+            } else {
+                select.setAttribute('name', `items[${index}][service_template_id]`);
+                serviceTypeInput.value = '';
+                customNameRow.classList.add('d-none');
+                customNameInput.required = false;
+                customNameInput.value = '';
+                if (selectedOption.value) {
+                    priceInput.value = selectedOption.dataset.price;
+                    calculateTotal();
+                }
             }
         }
 

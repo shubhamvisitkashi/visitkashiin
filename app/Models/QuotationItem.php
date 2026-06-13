@@ -13,6 +13,7 @@ class QuotationItem extends Model
         'quotation_id',
         'service_template_id',
         'service_type_id',
+        'custom_name',
         'quantity',
         'unit_price',
         'total_price',

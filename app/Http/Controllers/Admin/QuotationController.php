@@ -75,12 +75,20 @@ public function store(Request $request)
         'subtotal' => 'required|numeric|min:0',
         'custom_total' => 'nullable|numeric|min:0',
         'items' => 'required|array|min:1',
-        'items.*.service_template_id' => 'required|exists:service_templates,id',
+        'items.*.service_template_id' => 'nullable|exists:service_templates,id',
+        'items.*.service_type_id' => 'nullable|exists:service_types,id',
+        'items.*.custom_name' => 'nullable|string|max:255',
         'items.*.quantity' => 'required|integer|min:1',
         'items.*.unit_price' => 'required|numeric|min:0',
         'items.*.service_date' => 'nullable|date',
         'items.*.notes' => 'nullable|string',
     ]);
+
+    foreach ($validated['items'] as $itemData) {
+        if (empty($itemData['service_template_id']) && (empty($itemData['custom_name']) || empty($itemData['service_type_id']))) {
+            return back()->withInput()->with('error', 'Please select a service or provide a custom name and category for each item.');
+        }
+    }
 
     DB::beginTransaction();
     try {
@@ -90,7 +98,7 @@ public function store(Request $request)
         $subtotal = $servicesTotal + $serviceCharge;
         $gstAmount = $validated['gst_amount'];
         $totalAmount = $validated['gst_type'] === 'include' ? $subtotal : $subtotal + $gstAmount;
-        
+
         // Create quotation
         $quotation = Quotation::create([
             'lead_id' => $validated['lead_id'],
@@ -111,17 +119,30 @@ public function store(Request $request)
 
         // Create quotation items
         foreach ($validated['items'] as $itemData) {
-            $template = ServiceTemplate::find($itemData['service_template_id']);
-            
-            QuotationItem::create([
-                'quotation_id' => $quotation->id,
-                'service_template_id' => $itemData['service_template_id'],
-                'service_type_id' => $template->service_type_id,
-                'quantity' => $itemData['quantity'],
-                'unit_price' => $itemData['unit_price'],
-                'service_date' => $itemData['service_date'] ?? null,
-                'notes' => $itemData['notes'] ?? null,
-            ]);
+            if (!empty($itemData['service_template_id'])) {
+                $template = ServiceTemplate::find($itemData['service_template_id']);
+
+                QuotationItem::create([
+                    'quotation_id' => $quotation->id,
+                    'service_template_id' => $itemData['service_template_id'],
+                    'service_type_id' => $template->service_type_id,
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'service_date' => $itemData['service_date'] ?? null,
+                    'notes' => $itemData['notes'] ?? null,
+                ]);
+            } else {
+                QuotationItem::create([
+                    'quotation_id' => $quotation->id,
+                    'service_template_id' => null,
+                    'service_type_id' => $itemData['service_type_id'],
+                    'custom_name' => $itemData['custom_name'],
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'service_date' => $itemData['service_date'] ?? null,
+                    'notes' => $itemData['notes'] ?? null,
+                ]);
+            }
         }
 
         DB::commit();
@@ -190,12 +211,20 @@ public function update(Request $request, $id)
         'subtotal' => 'required|numeric|min:0',
         'custom_total' => 'nullable|numeric|min:0',
         'items' => 'required|array|min:1',
-        'items.*.service_template_id' => 'required|exists:service_templates,id',
+        'items.*.service_template_id' => 'nullable|exists:service_templates,id',
+        'items.*.service_type_id' => 'nullable|exists:service_types,id',
+        'items.*.custom_name' => 'nullable|string|max:255',
         'items.*.quantity' => 'required|integer|min:1',
         'items.*.unit_price' => 'required|numeric|min:0',
         'items.*.service_date' => 'nullable|date',
         'items.*.notes' => 'nullable|string',
     ]);
+
+    foreach ($validated['items'] as $itemData) {
+        if (empty($itemData['service_template_id']) && (empty($itemData['custom_name']) || empty($itemData['service_type_id']))) {
+            return back()->withInput()->with('error', 'Please select a service or provide a custom name and category for each item.');
+        }
+    }
 
     DB::beginTransaction();
     try {
@@ -205,7 +234,7 @@ public function update(Request $request, $id)
         $subtotal = $servicesTotal + $serviceCharge;
         $gstAmount = $validated['gst_amount'];
         $totalAmount = $validated['gst_type'] === 'include' ? $subtotal : $subtotal + $gstAmount;
-        
+
         // Update quotation
         $quotation->update([
             'lead_id' => $validated['lead_id'],
@@ -226,17 +255,30 @@ public function update(Request $request, $id)
         $quotation->items()->delete();
 
         foreach ($validated['items'] as $itemData) {
-            $template = ServiceTemplate::find($itemData['service_template_id']);
-            
-            QuotationItem::create([
-                'quotation_id' => $quotation->id,
-                'service_template_id' => $itemData['service_template_id'],
-                'service_type_id' => $template->service_type_id,
-                'quantity' => $itemData['quantity'],
-                'unit_price' => $itemData['unit_price'],
-                'service_date' => $itemData['service_date'] ?? null,
-                'notes' => $itemData['notes'] ?? null,
-            ]);
+            if (!empty($itemData['service_template_id'])) {
+                $template = ServiceTemplate::find($itemData['service_template_id']);
+
+                QuotationItem::create([
+                    'quotation_id' => $quotation->id,
+                    'service_template_id' => $itemData['service_template_id'],
+                    'service_type_id' => $template->service_type_id,
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'service_date' => $itemData['service_date'] ?? null,
+                    'notes' => $itemData['notes'] ?? null,
+                ]);
+            } else {
+                QuotationItem::create([
+                    'quotation_id' => $quotation->id,
+                    'service_template_id' => null,
+                    'service_type_id' => $itemData['service_type_id'],
+                    'custom_name' => $itemData['custom_name'],
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'service_date' => $itemData['service_date'] ?? null,
+                    'notes' => $itemData['notes'] ?? null,
+                ]);
+            }
         }
 
         DB::commit();

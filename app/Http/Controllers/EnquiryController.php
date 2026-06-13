@@ -10,6 +10,14 @@ class EnquiryController extends Controller
 {
 
     public function store(Request $request){
+        // Normalize package name — some product names are stored with HTML-encoded
+        // ampersands (e.g. "&amp;"), which would otherwise show up literally in the
+        // enquiry email and admin list instead of "&".
+        $packageName = $request->package_name;
+        while ($packageName && str_contains($packageName, '&amp;')) {
+            $packageName = html_entity_decode($packageName, ENT_QUOTES);
+        }
+
         $enquiry = new Enquiry;
         $enquiry->name = $request->name;
         $enquiry->phone = $request->phone;
@@ -19,7 +27,7 @@ class EnquiryController extends Controller
         $enquiry->checkout_time = $request->checkout_time;
         $enquiry->message = $request->message;
         $enquiry->package_id     = $request->package_id;
-        $enquiry->package_name   = $request->package_name;
+        $enquiry->package_name   = $packageName;
         $enquiry->booking_amount = $request->booking_amount;
         $enquiry->time_slot      = $request->time_slot;
         $enquiry->pickup_ghat    = $request->pickup_ghat;
@@ -30,7 +38,7 @@ class EnquiryController extends Controller
         $enquiry->save();
 
         // Detect category from package name
-        $pn = strtolower($request->package_name ?? '');
+        $pn = strtolower($packageName ?? '');
         if (str_contains($pn, 'boat') || str_contains($pn, 'ganga') || str_contains($pn, 'aarti') || str_contains($pn, 'cruise')) {
             $enqCategory = 'Boat Ride';     $enqIcon = '⛵'; $enqSubject = 'New Boat Enquiry';
         } elseif (str_contains($pn, 'cab') || str_contains($pn, 'car') || str_contains($pn, 'taxi') || str_contains($pn, 'traveller') || str_contains($pn, 'seater') || str_contains($pn, 'airport') || str_contains($pn, 'railway')) {
@@ -51,7 +59,7 @@ class EnquiryController extends Controller
                 'phone'          => $request->phone,
                 'arrival_date'   => $request->arrival_date ? date('d M Y', strtotime($request->arrival_date)) : null,
                 'messages'       => $request->message,
-                'package_name'   => $request->package_name,
+                'package_name'   => $packageName,
                 'no_of_person'   => $request->no_of_person,
                 'children_count' => (int)($request->children_count ?? 0),
                 'time_slot'      => $request->time_slot,
@@ -65,9 +73,9 @@ class EnquiryController extends Controller
                 'enquiry'        => $enquiry,
                 'enq_category'   => $enqCategory,
                 'enq_icon'       => $enqIcon,
-            ], function($message) use ($request, $enqSubject){
+            ], function($message) use ($packageName, $enqSubject){
                 $message->to('help.visitkashi@gmail.com');
-                $message->subject($enqSubject . ' — ' . $request->package_name . ' | Visit Kashi');
+                $message->subject($enqSubject . ' — ' . $packageName . ' | Visit Kashi');
             });
         } catch (\Throwable $th) {
             //throw $th;

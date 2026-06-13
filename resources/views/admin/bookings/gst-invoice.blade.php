@@ -1,9 +1,12 @@
+@php
+    $brand = invoiceBrand($booking->lead?->leadSource?->name);
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tax Invoice #{{ $booking->gst_invoice_number ?? $booking->booking_number }} | Visit Kashi</title>
+    <title>Tax Invoice #{{ $booking->gst_invoice_number ?? $booking->booking_number }} | {{ $brand['name'] }}</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:Arial, Helvetica, sans-serif; background:#1a1a1a; padding:24px; font-size:13px; color:#000; }
@@ -169,11 +172,11 @@
     $cPhone = preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917');
 
     // ── Property name (the hotel/stay being booked) ──
-    $propertyName = $serviceItems->first()->serviceTemplate->name ?? (websiteSetupValue('site_name') ?: 'Visit Kashi');
+    $propertyName = $serviceItems->first()->serviceTemplate->name ?? $brand['name'];
     $propertyAddress = $serviceItems->first()->serviceTemplate->address ?? null;
     $propertyType = $serviceItems->first()->serviceTemplate->property_type ?? null;
     $bhkType = $serviceItems->first()->serviceTemplate->bhk_type ?? null;
-    $siteName = websiteSetupValue('site_name') ?: 'Visit Kashi';
+    $siteName = $brand['name'];
     $companyName = websiteSetupValue('company_legal_name') ?: $siteName;
 
     // ── Number to words (Indian system) ──
@@ -362,6 +365,10 @@
                     <td colspan="2">AMOUNT IN WORDS: INR {{ strtoupper(numberToWordsIndianGst($netAmt)) }} ONLY</td>
                 </tr>
                 <tr>
+                    <td>PAID AMOUNT:</td>
+                    <td>INR {{ number_format($paidAmt, 0) }}</td>
+                </tr>
+                <tr>
                     <td>TOTAL DUE AMOUNT:</td>
                     <td>INR {{ number_format($dueAmt, 0) }}</td>
                 </tr>
@@ -377,7 +384,7 @@
     </div>
 
     <div class="thanks">Thank you for your stay in our accommodation.</div>
-    <div class="powered">Powered By <span class="brand">Visit Kashi</span></div>
+    <div class="powered">Powered By <span class="brand">{{ $brand['name'] }}</span></div>
 
 </div>
 

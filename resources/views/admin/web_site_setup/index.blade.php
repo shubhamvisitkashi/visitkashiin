@@ -257,6 +257,51 @@
             </div>
         </div>
     </div>
+
+    <div class="ws-card">
+        <div class="ws-card-head">
+            <div class="ws-card-head-icon"><i data-feather="image"></i></div>
+            <div>
+                <div class="ws-card-head-title">Kashi Yatra Branding</div>
+                <div class="ws-card-head-sub">Logo &amp; site name used on Kashi Yatra invoices/vouchers (lead source = "Kashi Yatra")</div>
+            </div>
+        </div>
+        <div class="ws-card-body">
+            <div class="ws-grid ws-grid-3">
+
+                {{-- Kashi Yatra Logo --}}
+                <div class="ws-field">
+                    <label class="ws-label">Kashi Yatra Logo</label>
+                    <input type="file" name="kashiyatra_logo" class="ws-file" accept="image/*">
+                    <input type="hidden" name="type[]" value="kashiyatra_logo">
+                    <p class="ws-hint">PNG/SVG with transparent bg recommended. Max 2 MB.</p>
+                    @if(websiteSetupValue('kashiyatra_logo'))
+                    <div class="ws-preview">
+                        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('kashiyatra_logo')) }}"
+                             onerror="this.closest('.ws-preview').remove()">
+                        <span>Current logo</span>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Kashi Yatra Site Name --}}
+                <div class="ws-field">
+                    <label class="ws-label">Kashi Yatra Site Name</label>
+                    <input type="text" name="kashiyatra_site_name" class="ws-input"
+                        placeholder="e.g. Kashi Yatra"
+                        value="{{ websiteSetupValue('kashiyatra_site_name') }}">
+                    <input type="hidden" name="type[]" value="kashiyatra_site_name">
+                    <p class="ws-hint">Shown as the brand name on Kashi Yatra invoices.</p>
+                </div>
+            </div>
+
+            <div class="ws-card-save-row">
+                <button type="submit" class="ws-save-btn">
+                    <i data-feather="save"></i> Save Kashi Yatra Branding
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 </form>
 

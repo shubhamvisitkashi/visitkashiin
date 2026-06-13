@@ -221,14 +221,15 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small">Service Template</label>
-                            <select class="form-select form-select-sm template-select" name="items[${itemIndex}][service_template_id]" 
+                            <select class="form-select form-select-sm template-select" name="items[${itemIndex}][service_template_id]"
                                     onchange="loadTemplateDetails(${itemIndex})" required disabled>
                                 <option value="">Select Category First</option>
                             </select>
+                            <input type="hidden" class="service-type-input" name="items[${itemIndex}][service_type_id]" value="">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label small">Final Price</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm price-input" name="items[${itemIndex}][unit_price]" 
+                            <input type="number" step="0.01" class="form-control form-control-sm price-input" name="items[${itemIndex}][unit_price]"
                                    value="0" min="0" onchange="calculateTotal()" required>
                             <input type="hidden" name="items[${itemIndex}][quantity]" value="1">
                         </div>
@@ -240,6 +241,10 @@
                             <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeItem(${itemIndex})">
                                 <i data-feather="trash-2"></i>
                             </button>
+                        </div>
+                        <div class="col-md-12 custom-name-row d-none mt-2">
+                            <label class="form-label small">Custom Item Name</label>
+                            <input type="text" class="form-control form-control-sm custom-name-input" name="items[${itemIndex}][custom_name]" placeholder="Enter custom item name">
                         </div>
                     </div>
                 </div>
@@ -258,16 +263,23 @@
 
             if (selectedCategory) {
                 const filteredTemplates = serviceTemplates.filter(t => t.service_type.name === selectedCategory);
+                const serviceTypeId = filteredTemplates.length ? filteredTemplates[0].service_type.id : '';
                 templateSelect.innerHTML = '<option value="">Select Service</option>' +
                     filteredTemplates.map(t =>
-                        `<option value="${t.id}" data-price="${t.default_selling_price}">${t.name}</option>`).join('');
+                        `<option value="${t.id}" data-price="${t.default_selling_price}">${t.name}</option>`).join('') +
+                    `<option value="__custom__" data-service-type-id="${serviceTypeId}">✏️ Type custom name…</option>`;
                 templateSelect.disabled = false;
             } else {
                 templateSelect.innerHTML = '<option value="">Select Category First</option>';
                 templateSelect.disabled = true;
             }
             templateSelect.value = '';
+            templateSelect.setAttribute('name', `items[${index}][service_template_id]`);
             item.querySelector('.price-input').value = 0;
+            item.querySelector('.service-type-input').value = '';
+            item.querySelector('.custom-name-row').classList.add('d-none');
+            item.querySelector('.custom-name-input').required = false;
+            item.querySelector('.custom-name-input').value = '';
             calculateTotal();
         }
 
@@ -275,11 +287,28 @@
             const item = document.getElementById(`item-${index}`);
             const select = item.querySelector('.template-select');
             const priceInput = item.querySelector('.price-input');
+            const serviceTypeInput = item.querySelector('.service-type-input');
+            const customNameRow = item.querySelector('.custom-name-row');
+            const customNameInput = item.querySelector('.custom-name-input');
             const selectedOption = select.options[select.selectedIndex];
 
-            if (selectedOption.value) {
-                priceInput.value = selectedOption.dataset.price;
+            if (selectedOption.value === '__custom__') {
+                select.removeAttribute('name');
+                serviceTypeInput.value = selectedOption.dataset.serviceTypeId || '';
+                customNameRow.classList.remove('d-none');
+                customNameInput.required = true;
+                priceInput.value = 0;
                 calculateTotal();
+            } else {
+                select.setAttribute('name', `items[${index}][service_template_id]`);
+                serviceTypeInput.value = '';
+                customNameRow.classList.add('d-none');
+                customNameInput.required = false;
+                customNameInput.value = '';
+                if (selectedOption.value) {
+                    priceInput.value = selectedOption.dataset.price;
+                    calculateTotal();
+                }
             }
         }
 

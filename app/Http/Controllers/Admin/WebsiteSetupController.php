@@ -38,9 +38,10 @@ class WebsiteSetupController extends Controller
             'promo_banner'   => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:2048',
             'promo_banner_2' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:2048',
             'promo_banner_3' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            'kashiyatra_logo' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,svg|max:2048',
         ]);
 
-        $imageTypes = ['logo', 'favicon', 'banner', 'footer_logo', 'promo_banner', 'promo_banner_2', 'promo_banner_3'];
+        $imageTypes = ['logo', 'favicon', 'banner', 'footer_logo', 'promo_banner', 'promo_banner_2', 'promo_banner_3', 'kashiyatra_logo'];
         $input      = $request->all();
 
         foreach ($input['type'] as $types) {

@@ -1,9 +1,12 @@
+@php
+    $brand = invoiceBrand($booking->lead?->leadSource?->name);
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tour Booking Voucher #{{ $booking->booking_number }} | Visit Kashi</title>
+    <title>Tour Booking Voucher #{{ $booking->booking_number }} | {{ $brand['name'] }}</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:Arial, Helvetica, sans-serif; background:#1a1a1a; padding:24px; font-size:13px; color:#000; }
@@ -177,7 +180,7 @@
 
     $cPhone = preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917');
 
-    $siteName    = websiteSetupValue('site_name') ?: 'Visit Kashi';
+    $siteName    = $brand['name'];
     $companyName = websiteSetupValue('company_legal_name') ?: $siteName;
 
     // ── Number to words (Indian system) ──
@@ -305,6 +308,7 @@
                         $hName   = trim($h['name'] ?? $h['hotel_name'] ?? '');
                         $hCity   = trim($h['city'] ?? '');
                         $hRoom   = $h['room_type'] ?? '';
+                        $hFlat   = trim($h['flat_name'] ?? '');
                         $hCi     = !empty($h['checkin'])  ? \Carbon\Carbon::parse($h['checkin'])->format('d M Y')  : (!empty($h['hotel_checkin'])  ? \Carbon\Carbon::parse($h['hotel_checkin'])->format('d M Y')  : '');
                         $hCo     = !empty($h['checkout']) ? \Carbon\Carbon::parse($h['checkout'])->format('d M Y') : (!empty($h['hotel_checkout']) ? \Carbon\Carbon::parse($h['hotel_checkout'])->format('d M Y') : '');
                         $hNights = $h['nights'] ?? $h['hotel_nights'] ?? '';
@@ -314,6 +318,9 @@
                         <td>
                             <strong>🏨 Hotel Stay — {{ $hName ?: '—' }}</strong>
                             <div class="room-sub">{{ $hCity ? $hCity . ($hRoom ? ' · ' . $hRoom : '') : $hRoom }}</div>
+                            @if($hFlat)
+                            <div class="room-sub">Flat Type: {{ $hFlat }}</div>
+                            @endif
                         </td>
                         <td>{{ $hCi ?: '—' }} → {{ $hCo ?: '—' }}</td>
                         <td class="num">{{ $hNights ?: '—' }} {{ $hNights == 1 ? 'Night' : 'Nights' }}</td>
@@ -480,7 +487,7 @@
     </div>
 
     <div class="thanks">Thank you for booking your tour with us.</div>
-    <div class="powered">Powered By <span class="brand">Visit Kashi</span></div>
+    <div class="powered">Powered By <span class="brand">{{ $brand['name'] }}</span></div>
 
 </div>
 

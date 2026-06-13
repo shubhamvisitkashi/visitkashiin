@@ -14,6 +14,31 @@ if (!function_exists('websiteSetupValue')) {
     }
 }
 
+if (!function_exists('invoiceBrand')) {
+    /**
+     * Resolve invoice branding (name + logo) based on the lead source.
+     * Lead source "Kashi Yatra" gets the Kashi Yatra branding; everything
+     * else (including no lead source) falls back to Visit Kashi.
+     */
+    function invoiceBrand($leadSourceName = null) {
+        $isKashiYatra = $leadSourceName && stripos($leadSourceName, 'kashi yatra') !== false;
+
+        if ($isKashiYatra) {
+            return [
+                'name' => websiteSetupValue('kashiyatra_site_name') ?: 'Kashi Yatra',
+                'logo' => websiteSetupValue('kashiyatra_logo'),
+                'is_kashiyatra' => true,
+            ];
+        }
+
+        return [
+            'name' => websiteSetupValue('site_name') ?: 'Visit Kashi',
+            'logo' => websiteSetupValue('logo'),
+            'is_kashiyatra' => false,
+        ];
+    }
+}
+
 if(!function_exists('dateTimeFormat')){
     function dateTimeFormat($datesTime){
         return date('d-M-Y h:i A', strtotime($datesTime));

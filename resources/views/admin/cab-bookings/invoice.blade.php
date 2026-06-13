@@ -1,9 +1,12 @@
+@php
+  $brand = invoiceBrand($booking->leadSource?->name);
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Booking Confirmation — {{ $booking->booking_number }}</title>
+<title>Booking Confirmation — {{ $booking->booking_number }} | {{ $brand['name'] }}</title>
 <style>
 /* ══════════════════════════════════════
    VISITKASHI CAB BOOKING VOUCHER
@@ -215,7 +218,7 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
 {{-- Screen Actions --}}
 @php
   $waMsg = urlencode(
-    "🚗 *Cab Booking Confirmed — Visit Kashi*\n\n" .
+    "🚗 *Cab Booking Confirmed — {$brand['name']}*\n\n" .
     "📋 ID: *{$booking->booking_number}*\n" .
     "👤 {$booking->customer_name}\n" .
     "📍 {$booking->pickup_address}\n" .
@@ -223,7 +226,7 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
     "📅 " . $booking->pickup_date->format('d M Y') . " at " . \Carbon\Carbon::parse($booking->pickup_time)->format('g:i A') . "\n" .
     "🚗 {$booking->vehicle_name}\n" .
     "💰 Total: ₹" . number_format($booking->total_amount,2) . "\n\n" .
-    "Thank you for choosing Visit Kashi! 🙏"
+    "Thank you for choosing {$brand['name']}! 🙏"
   );
   $rawPhone = preg_replace('/\D/', '', $booking->customer_phone ?? '');
   $waPhone  = strlen($rawPhone) === 10 ? '91'.$rawPhone : (strlen($rawPhone) === 12 && str_starts_with($rawPhone,'91') ? $rawPhone : $rawPhone);
@@ -251,16 +254,16 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
   {{-- Brand Header --}}
   <div class="bh">
     <div class="bh-left">
-      @if(websiteSetupValue('logo'))
-        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('logo')) }}"
-             alt="Visit Kashi" class="bh-logo">
+      @if($brand['logo'])
+        <img src="{{ asset('backend/admin/website_setup/'.$brand['logo']) }}"
+             alt="{{ $brand['name'] }}" class="bh-logo">
       @else
-        <div style="font-size:1.3rem;font-weight:900;color:#fff;letter-spacing:-.02em;">Visit Kashi</div>
+        <div style="font-size:1.3rem;font-weight:900;color:#fff;letter-spacing:-.02em;">{{ $brand['name'] }}</div>
       @endif
       <div class="bh-unit">A Unit of Albino Stay Pvt Ltd</div>
     </div>
     <div class="bh-right">
-      <div class="bh-brand-name">VISIT KASHI</div>
+      <div class="bh-brand-name">{{ strtoupper($brand['name']) }}</div>
       @if(websiteSetupValue('address'))
       <div class="bh-addr">{{ websiteSetupValue('address') }}</div>
       @endif
@@ -502,7 +505,7 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
           <li>This voucher must be presented to the driver at the time of pickup.</li>
           <li>Toll taxes, parking, and state entry fees are included as per the fare breakdown.</li>
           <li>Cancellations within <strong>24 hours</strong> of pickup are <strong>Non-Refundable</strong>.</li>
-          <li>Visit Kashi is not responsible for delays due to traffic, weather, or unforeseen circumstances.</li>
+          <li>{{ $brand['name'] }} is not responsible for delays due to traffic, weather, or unforeseen circumstances.</li>
         </ul>
       </div>
 
@@ -513,7 +516,7 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
   <div class="inv-footer">
     <div class="footer-left">
       <div>
-        <div style="color:#fff;font-weight:800;font-size:.9rem;margin-bottom:2px;">Thank you for choosing Visit Kashi! 🙏</div>
+        <div style="color:#fff;font-weight:800;font-size:.9rem;margin-bottom:2px;">Thank you for choosing {{ $brand['name'] }}! 🙏</div>
         <div class="footer-brand">📞 7080109917 &nbsp;|&nbsp; 7080109918 &nbsp;|&nbsp; 7080109919</div>
         <div class="footer-brand">✉️ info@visitkashi.in &nbsp;·&nbsp; 🌐 www.visitkashi.in</div>
       </div>

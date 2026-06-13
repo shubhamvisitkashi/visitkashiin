@@ -47,8 +47,6 @@ body.dark-mode .table-head        { border-color:#334155 !important; background:
 body.dark-mode .dk-table th       { background:#0F172A !important; color:#64748B !important; }
 body.dark-mode .dk-table td       { color:#F1F5F9 !important; border-color:#334155 !important; }
 body.dark-mode .dk-table tr:hover td { background:#263348 !important; }
-body.dark-mode .ql-btn            { background:#263348 !important; border-color:#334155 !important; color:#E2E8F0 !important; }
-body.dark-mode .ql-btn:hover      { background:#2D3F5A !important; border-color:#4F46E5 !important; color:#A5B4FC !important; }
 body.dark-mode .upcoming-item     { border-color:#334155 !important; }
 body.dark-mode .chart-title,
 body.dark-mode .table-title       { color:#F1F5F9 !important; }
@@ -206,18 +204,6 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 .sb-cab   { background:#FEF3C7; color:#B45309; }
 .sb-boat  { background:#E0F2FE; color:#0369A1; }
 
-/* ── Quick Create ─────────────────────────── */
-.ql-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:16px; box-sizing:border-box; }
-.ql-btn {
-  display:flex; align-items:center; gap:9px; padding:11px 12px;
-  background:#FAFBFF; border:1.5px solid var(--border); border-radius:12px;
-  text-decoration:none; transition:all var(--t); font-size:.8rem; font-weight:600; color:var(--text);
-  min-width:0; overflow:hidden;
-}
-.ql-btn span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.ql-btn:hover { background:#EEF2FF; border-color:#A5B4FC; color:var(--indigo); transform:translateY(-2px); box-shadow:0 4px 14px rgba(79,70,229,.12); }
-.ql-btn-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
-
 /* ── Upcoming ─────────────────────────────── */
 .upcoming-item {
   display:flex; align-items:center; gap:12px; padding:11px 20px;
@@ -249,11 +235,6 @@ body.dark-mode .kpi-icon          { opacity:.85; }
   .kpi-icon       { width:42px; height:42px; font-size:1.2rem; border-radius:11px; }
   .kpi-card       { padding:14px 14px; gap:12px; }
   .chart-body     { padding:10px 8px; }
-
-  /* Quick Create — full single column on mobile */
-  .ql-grid        { grid-template-columns:1fr; padding:12px; gap:8px; }
-  .ql-btn         { padding:12px 14px; font-size:.85rem; }
-  .ql-btn span    { white-space:normal; }
 
   /* Recent Bookings — hide less critical columns on mobile */
   .mob-hide       { display:none !important; }
@@ -713,7 +694,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="chart-card">
       <div class="chart-head">
         <div>
-          <div class="chart-title">📊 Daily Revenue — Last 7 Days</div>
+          <div class="chart-title">📊 Daily Revenue — Last 30 Days</div>
           <div class="chart-sub">All booking types combined</div>
         </div>
       </div>
@@ -727,38 +708,11 @@ body.dark-mode .kpi-icon          { opacity:.85; }
   {{-- RIGHT --}}
   <div>
 
-    {{-- Quick Create --}}
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">⚡ Quick Create</div>
-      </div>
-      <div class="ql-grid">
-        <a href="{{ route('bookings.create-stay') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#EEF2FF;">🏨</div><span>Stay Booking</span>
-        </a>
-        <a href="{{ route('cab-bookings.create') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#FEF3C7;">🚗</div><span>Cab Booking</span>
-        </a>
-        <a href="{{ route('tour-booking.create') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#EDE9FE;">🗺️</div><span>Tour Package</span>
-        </a>
-        <a href="{{ route('boat-booking.create') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#E0F2FE;">⛵</div><span>Boat Ride</span>
-        </a>
-        <a href="{{ route('bookings.calendar') }}" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#D1FAE5;">📅</div><span>Calendar</span>
-        </a>
-        <a href="{{ route('bookings.index') }}?has_due=1" class="ql-btn">
-          <div class="ql-btn-icon" style="background:#FEE2E2;">⚠️</div><span>Due Payments</span>
-        </a>
-      </div>
-    </div>
-
     {{-- Booking Mix --}}
     <div class="chart-card">
       <div class="chart-head">
         <div class="chart-title">🥧 Booking Mix</div>
-        <span style="font-size:.7rem;color:var(--muted);">All time</span>
+        <span style="font-size:.7rem;color:var(--muted);">This Month</span>
       </div>
       <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
         <div class="mix-donut" style="width:120px;flex-shrink:0;">
@@ -791,6 +745,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="chart-card">
       <div class="chart-head">
         <div class="chart-title">📊 Stay Booking Status</div>
+        <span style="font-size:.7rem;color:var(--muted);">This Month</span>
       </div>
       <div style="padding:16px 20px;">
         @php

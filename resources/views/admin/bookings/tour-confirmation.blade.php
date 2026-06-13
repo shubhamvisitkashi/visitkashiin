@@ -113,6 +113,9 @@ table.totals-table tr.grand td{font-size:1rem;}
   <div class="invoice-box">
 
     @php
+      $brand = invoiceBrand($booking->lead?->leadSource?->name);
+    @endphp
+    @php
       // Extract package name: first segment of short_plan before ' | '
       $pkgRaw  = $booking->lead->short_plan ?? '';
       $pkgName = trim(explode('|', $pkgRaw)[0]);
@@ -183,7 +186,7 @@ table.totals-table tr.grand td{font-size:1rem;}
 
     {{-- Company header --}}
     <div class="co-header">
-      <h1>{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }} - {{ $pkgName }}</h1>
+      <h1>{{ $brand['name'] }} - {{ $pkgName }}</h1>
       <p class="co-addr">Address: {{ websiteSetupValue('address') ?? 'Varanasi, Uttar Pradesh, India' }}</p>
       <p>Support: 7080109917, 7080109918, 7080109919</p>
       <p>Email: {{ websiteSetupValue('email') ?? 'info@visitkashi.in' }}</p>
@@ -397,8 +400,8 @@ table.totals-table tr.grand td{font-size:1rem;}
       </ul>
     </div>
 
-    <div class="thanks">Thank you for choosing {{ websiteSetupValue('site_name') ?? 'Visit Kashi' }} — We look forward to serving you!</div>
-    <div class="powered">Powered By Visit Kashi</div>
+    <div class="thanks">Thank you for choosing {{ $brand['name'] }} — We look forward to serving you!</div>
+    <div class="powered">Powered By {{ $brand['name'] }}</div>
 
   </div>{{-- /invoice-box --}}
 </div>

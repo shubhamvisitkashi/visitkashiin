@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Confirmation #{{ $booking->booking_number }} | Visit Kashi</title>
+    <title>Booking Confirmation #{{ $booking->booking_number }} | {{ $brand['name'] }}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -245,6 +245,7 @@
 
     $bkStatus  = ucwords(str_replace('_', ' ', $booking->booking_status ?? 'confirmed'));
     $cPhone    = preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917');
+    $brand     = invoiceBrand($booking->lead?->leadSource?->name);
 @endphp
 
 <div class="page-wrap">
@@ -253,13 +254,13 @@
     <div class="inv-header">
         <div class="inv-header-inner">
             <div class="inv-logo-area">
-                @if(websiteSetupValue('logo'))
-                    <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('logo')) }}" alt="Visit Kashi">
+                @if($brand['logo'])
+                    <img src="{{ asset('backend/admin/website_setup/'.$brand['logo']) }}" alt="{{ $brand['name'] }}">
                 @else
-                    <div class="inv-logo-fallback">visitKashi</div>
+                    <div class="inv-logo-fallback">{{ $brand['name'] }}</div>
                 @endif
                 <div>
-                    <div class="inv-company-name">{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}</div>
+                    <div class="inv-company-name">{{ $brand['name'] }}</div>
                     <div class="inv-company-sub">Varanasi's Most Trusted Travel Company</div>
                     <div class="inv-company-addr">B-21/19, Rathyatra Kamachha Road, Bhelupur, Varanasi – 221010</div>
                 </div>
@@ -276,7 +277,7 @@
     {{-- ══ STATUS BANNER ══ --}}
     <div class="inv-banner">
         <span class="inv-banner-icon">✓</span>
-        <span class="inv-banner-text">Booking Confirmed — Thank you for choosing Visit Kashi!</span>
+        <span class="inv-banner-text">Booking Confirmed — Thank you for choosing {{ $brand['name'] }}!</span>
         <span class="inv-banner-date">Issued: {{ $booking->booking_date->format('d M Y') }}</span>
     </div>
 
@@ -360,7 +361,7 @@
         <div class="inv-sec-title">Package Details</div>
         <div class="inv-pkg-card">
             <div class="inv-pkg-name">{{ $packageName }}</div>
-            <div class="inv-pkg-sub">{{ $stLabel }} · Visit Kashi</div>
+            <div class="inv-pkg-sub">{{ $stLabel }} · {{ $brand['name'] }}</div>
             <div class="inv-pkg-meta">
                 @if($startDate)
                 <span class="inv-pkg-tag">📅 {{ $startDate }}{{ $endDate ? ' – '.$endDate : '' }}</span>
@@ -527,7 +528,7 @@
                 <span class="inv-term-icon">🛡️</span>
                 <div>
                     <div class="inv-term-title">Liability</div>
-                    <div class="inv-term-desc">Visit Kashi is not liable for loss of personal belongings. Travel insurance recommended.</div>
+                    <div class="inv-term-desc">{{ $brand['name'] }} is not liable for loss of personal belongings. Travel insurance recommended.</div>
                 </div>
             </div>
         </div>
@@ -537,7 +538,7 @@
     {{-- ══ FOOTER ══ --}}
     <div class="inv-footer">
         <div class="inv-footer-left">
-            <div class="inv-footer-co">{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}</div>
+            <div class="inv-footer-co">{{ $brand['name'] }}</div>
             <div class="inv-footer-addr">
                 {{ websiteSetupValue('address') ?? 'Plot No. B-21, 19, Rathyatra Kamachha Rd, Bhelupur, Varanasi' }}<br>
                 📞 7080109917 &nbsp;|&nbsp; 7080109918 &nbsp;|&nbsp; 7080109919

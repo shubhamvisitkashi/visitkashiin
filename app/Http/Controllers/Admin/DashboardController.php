@@ -98,16 +98,20 @@ class DashboardController extends Controller
         $allTimeRevenue  = (clone $stayQ)->sum('total_amount') + (clone $cabQ)->sum('total_amount') + (clone $boatQ)->sum('final_amount');
         $allTimeBookings = (clone $stayQ)->count() + (clone $cabQ)->count() + (clone $boatQ)->count();
 
-        // ── Booking type distribution (donut) ─────────────────────
+        // ── Booking type distribution (donut, current month) ───────
         $typeLabels = ['Stay/Hotel', 'Cab', 'Boat'];
-        $typeData   = [(clone $stayQ)->count(), (clone $cabQ)->count(), (clone $boatQ)->count()];
+        $typeData   = [
+            (clone $stayQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->count(),
+            (clone $cabQ)->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)->count(),
+            (clone $boatQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->count(),
+        ];
 
-        // ── Daily revenue last 7 days ─────────────────────────────
+        // ── Daily revenue last 30 days ────────────────────────────
         $dailyLabels  = [];
         $dailyRevenue = [];
-        for ($i = 6; $i >= 0; $i--) {
+        for ($i = 29; $i >= 0; $i--) {
             $d = Carbon::today()->subDays($i);
-            $dailyLabels[]  = $d->format('D');
+            $dailyLabels[]  = $d->format('d M');
             $dailyRevenue[] = round(
                 (clone $stayQ)->whereDate('booking_date', $d)->sum('total_amount') +
                 (clone $cabQ)->whereDate('created_at', $d)->sum('total_amount') +
@@ -169,8 +173,10 @@ class DashboardController extends Controller
         // ── Enquiries ─────────────────────────────────────────────
         $enquiryCount = Enquiry::whereDate('created_at', $today)->count();
 
-        // ── Stay status breakdown ─────────────────────────────────
+        // ── Stay status breakdown (current month) ──────────────────
         $stayStatuses = (clone $stayQ)
+            ->whereMonth('booking_date', $thisMonth->month)
+            ->whereYear('booking_date', $thisMonth->year)
             ->select('booking_status', DB::raw('count(*) as cnt'))
             ->groupBy('booking_status')
             ->pluck('cnt', 'booking_status');
