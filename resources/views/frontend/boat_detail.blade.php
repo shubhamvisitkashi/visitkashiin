@@ -901,7 +901,7 @@
                                 <option {{ old('pickup_ghat')=='Shivala Ghat'?'selected':'' }}>Shivala Ghat</option>
                                 <option {{ old('pickup_ghat')=='Harishchandra Ghat'?'selected':'' }}>Harishchandra Ghat</option>
                                 <option {{ old('pickup_ghat')=='Kedar Ghat'?'selected':'' }}>Kedar Ghat</option>
-                                <option {{ old('pickup_ghat')=='Dashaswamedh Ghat'?'selected':'' }}>Dashaswamedh Ghat</option>
+                                <option {{ (old('pickup_ghat')=='Dashaswamedh Ghat') || !old('pickup_ghat') ?'selected':'' }}>Dashaswamedh Ghat</option>
                                 <option {{ old('pickup_ghat')=='Lalita Ghat'?'selected':'' }}>Lalita Ghat</option>
                                 <option {{ old('pickup_ghat')=='Manikarnika Ghat'?'selected':'' }}>Manikarnika Ghat</option>
                                 <option {{ old('pickup_ghat')=='Scindia Ghat'?'selected':'' }}>Scindia Ghat</option>

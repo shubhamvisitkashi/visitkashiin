@@ -436,11 +436,18 @@
                     $rcUrl = route('product.detail',[optional($rc->category)->slug??'cab',optional($rc->subCategory)->slug??'cab',$rc->slug]);
                     $rcP   = ($rc->discounted_price??0)>0?$rc->discounted_price:($rc->base_price??0);
                 @endphp
-                <a href="{{ $rcUrl }}" style="display:block;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;text-decoration:none;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-                    <img src="{{ $rcImg }}" alt="{{ $rc->name }}" style="width:100%;height:120px;object-fit:cover;display:block;" loading="lazy" onerror="this.src='{{ $fallback }}'">
-                    <div style="padding:10px 12px;">
-                        <div style="font-size:.82rem;font-weight:700;color:#111;margin-bottom:3px;line-height:1.3;">{{ Str::limit($rc->name,35) }}</div>
-                        @if($rcP>0)<div style="font-size:.78rem;font-weight:700;color:#0f3460;">₹{{ number_format($rcP) }}</div>@endif
+                <a href="{{ $rcUrl }}" class="ckbd-related-card">
+                    <div class="ckbd-related-img-wrap">
+                        <img src="{{ $rcImg }}" alt="{{ $rc->name }}" loading="lazy" onerror="this.src='{{ $fallback }}'">
+                    </div>
+                    <div class="ckbd-related-body">
+                        <div class="ckbd-related-name">{{ Str::limit($rc->name,38) }}</div>
+                        @if($rcP>0)
+                        <div class="ckbd-related-price"><span class="from">From</span> ₹{{ number_format($rcP) }} <span class="per">/ trip</span></div>
+                        @endif
+                        <span class="ckbd-related-cta">View Details
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </span>
                     </div>
                 </a>
                 @endforeach
@@ -530,7 +537,18 @@
             .cc-check-row input{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:#0f3460;}
             .cc-check-text{font-size:.81rem;color:#92400E;line-height:1.4;}
             .cc-check-text strong{display:block;font-weight:700;}
-            .ckbd-related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+            .ckbd-related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;}
+            .ckbd-related-card{display:flex;flex-direction:column;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #EEF1F5;box-shadow:0 1px 4px rgba(15,23,42,.05);text-decoration:none;transition:box-shadow .25s ease,transform .25s ease;}
+            .ckbd-related-card:hover{box-shadow:0 10px 24px rgba(15,23,42,.12);transform:translateY(-3px);}
+            .ckbd-related-img-wrap{position:relative;width:100%;aspect-ratio:4/3;background:#F1F5F9;overflow:hidden;}
+            .ckbd-related-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s ease;}
+            .ckbd-related-card:hover .ckbd-related-img-wrap img{transform:scale(1.06);}
+            .ckbd-related-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1;}
+            .ckbd-related-name{font-size:.85rem;font-weight:700;color:#111;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em;}
+            .ckbd-related-price{font-size:.95rem;font-weight:800;color:#0f3460;}
+            .ckbd-related-price .from{font-size:.66rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.4px;margin-right:3px;}
+            .ckbd-related-price .per{font-size:.7rem;font-weight:500;color:#94A3B8;}
+            .ckbd-related-cta{margin-top:auto;display:inline-flex;align-items:center;gap:5px;font-size:.75rem;font-weight:700;color:#16A34A;}
             @media(max-width:600px){.ckbd-related-grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
             @media(max-width:360px){.ckbd-related-grid{grid-template-columns:1fr;gap:8px;}}
             </style>
@@ -601,9 +619,10 @@
                         @php
                             $nf=strtolower($product->name??'');
                             if(preg_match('/(\d+)\s*seater/i',$product->name??'',$sm)){$maxS=(int)$sm[1];}
-                            elseif(str_contains($nf,'innova')||str_contains($nf,'crysta')){$maxS=7;}
-                            elseif(str_contains($nf,'sedan')||str_contains($nf,'etios')){$maxS=4;}
-                            elseif(str_contains($nf,'traveller')||str_contains($nf,'tempo')){$maxS=20;}
+                            elseif(str_contains($nf,'swift')||str_contains($nf,'dzire')||str_contains($nf,'sedan')||str_contains($nf,'etios')){$maxS=4;}
+                            elseif(str_contains($nf,'ertiga')||str_contains($nf,'innova')||str_contains($nf,'crysta')||str_contains($nf,'fortuner')||str_contains($nf,'scorpio')||str_contains($nf,'xuv')){$maxS=7;}
+                            elseif(str_contains($nf,'traveller')||str_contains($nf,'tempo')){$maxS=17;}
+                            elseif(str_contains($nf,'bus')||str_contains($nf,'coach')){$maxS=40;}
                             else{$maxS=7;}
                         @endphp
                         <div class="cc-row2">
@@ -655,8 +674,8 @@
                         </div>
 
                         <button type="submit" class="cc-submit">
-                            <svg width="18" height="18" viewBox="0 0 32 32" fill="currentColor"><path d="M16 3C8.82 3 3 8.82 3 16c0 2.43.65 4.7 1.78 6.67L3 29l6.55-1.72A13 13 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm6.4 17.72c-.27.76-1.58 1.45-2.16 1.54-.56.09-1.26.13-2.04-.13a18.7 18.7 0 0 1-1.85-.68C13.6 20.3 11.6 17.9 11.45 17.7c-.15-.2-1.22-1.62-1.22-3.1 0-1.47.77-2.2 1.05-2.5.27-.3.6-.37.8-.37l.57.01c.18 0 .43-.07.67.51.25.6.85 2.07.92 2.22.08.15.13.33.03.53-.1.2-.15.32-.3.5-.14.17-.3.38-.43.51-.14.14-.29.3-.12.58.17.28.74 1.22 1.59 1.97 1.09.97 2 1.27 2.29 1.41.28.14.45.12.61-.07.17-.2.72-.84.91-1.13.2-.28.39-.23.66-.14.27.09 1.71.8 2 .95.29.14.48.21.55.33.07.12.07.7-.2 1.46z"/></svg>
-                            Send Enquiry on WhatsApp
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+                            Submit Enquiry
                         </button>
                         <a href="tel:+91{{ $cPhone }}" class="cc-callback">📞 Request a Call Back</a>
                     </form>
