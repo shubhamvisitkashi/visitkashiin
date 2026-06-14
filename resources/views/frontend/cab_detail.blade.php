@@ -537,7 +537,7 @@
             .cc-check-row input{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:#0f3460;}
             .cc-check-text{font-size:.81rem;color:#92400E;line-height:1.4;}
             .cc-check-text strong{display:block;font-weight:700;}
-            .ckbd-related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;}
+            .ckbd-related-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
             .ckbd-related-card{display:flex;flex-direction:column;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #EEF1F5;box-shadow:0 1px 4px rgba(15,23,42,.05);text-decoration:none;transition:box-shadow .25s ease,transform .25s ease;}
             .ckbd-related-card:hover{box-shadow:0 10px 24px rgba(15,23,42,.12);transform:translateY(-3px);}
             .ckbd-related-img-wrap{position:relative;width:100%;aspect-ratio:4/3;background:#F1F5F9;overflow:hidden;}
