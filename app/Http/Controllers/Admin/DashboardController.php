@@ -119,34 +119,37 @@ class DashboardController extends Controller
         }
 
         // ── Recent bookings (all types merged) ────────────────────
-        $recentStay = (clone $stayQ)->with('lead')->latest()->limit(5)->get()->map(fn($b) => [
-            'type'   => 'stay', 'icon' => '🏨',
-            'number' => $b->booking_number,
-            'guest'  => $b->lead?->guest_name ?? '—',
-            'amount' => $b->total_amount,
-            'status' => $b->booking_status,
-            'date'   => $b->booking_date,
-            'url'    => route('bookings.show', $b->id),
+        $recentStay = (clone $stayQ)->with(['lead', 'createdBy:id,name'])->latest()->limit(5)->get()->map(fn($b) => [
+            'type'     => 'stay', 'icon' => '🏨',
+            'number'   => $b->booking_number,
+            'guest'    => $b->lead?->guest_name ?? '—',
+            'amount'   => $b->total_amount,
+            'status'   => $b->booking_status,
+            'date'     => $b->booking_date,
+            'added_by' => $b->createdBy?->name ?? '—',
+            'url'      => route('bookings.show', $b->id),
         ]);
 
-        $recentCab = (clone $cabQ)->latest()->limit(5)->get()->map(fn($b) => [
-            'type'   => 'cab', 'icon' => '🚗',
-            'number' => $b->booking_number,
-            'guest'  => $b->customer_name ?? '—',
-            'amount' => $b->total_amount,
-            'status' => $b->booking_status,
-            'date'   => $b->created_at,
-            'url'    => route('cab-bookings.show', $b->id),
+        $recentCab = (clone $cabQ)->with('createdBy:id,name')->latest()->limit(5)->get()->map(fn($b) => [
+            'type'     => 'cab', 'icon' => '🚗',
+            'number'   => $b->booking_number,
+            'guest'    => $b->customer_name ?? '—',
+            'amount'   => $b->total_amount,
+            'status'   => $b->booking_status,
+            'date'     => $b->created_at,
+            'added_by' => $b->createdBy?->name ?? '—',
+            'url'      => route('cab-bookings.show', $b->id),
         ]);
 
-        $recentBoat = (clone $boatQ)->latest()->limit(5)->get()->map(fn($b) => [
-            'type'   => 'boat', 'icon' => '⛵',
-            'number' => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
-            'guest'  => $b->name ?? '—',
-            'amount' => $b->final_amount,
-            'status' => $b->booking_status,
-            'date'   => $b->created_at,
-            'url'    => '#',
+        $recentBoat = (clone $boatQ)->with('createdBy:id,name')->latest()->limit(5)->get()->map(fn($b) => [
+            'type'     => 'boat', 'icon' => '⛵',
+            'number'   => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+            'guest'    => $b->name ?? '—',
+            'amount'   => $b->final_amount,
+            'status'   => $b->booking_status,
+            'date'     => $b->created_at,
+            'added_by' => $b->createdBy?->name ?? '—',
+            'url'      => '#',
         ]);
 
         $recentBookings = $recentStay->concat($recentCab)->concat($recentBoat)

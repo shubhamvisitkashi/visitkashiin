@@ -685,6 +685,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
             <th class="mob-hide">Type</th>
             <th>Amount</th>
             <th class="mob-hide">Status</th>
+            <th class="mob-hide">Added By</th>
             <th class="mob-hide">Date</th>
           </tr>
         </thead>
@@ -696,11 +697,12 @@ body.dark-mode .kpi-icon          { opacity:.85; }
             <td class="mob-hide"><span class="sb sb-{{ $b['type'] }}">{{ $b['icon'] }} {{ ucfirst($b['type']) }}</span></td>
             <td style="font-weight:700;color:var(--emerald);white-space:nowrap;">₹{{ number_format($b['amount']) }}</td>
             <td class="mob-hide"><span class="sb sb-{{ $b['status'] }}">{{ ucwords(str_replace('_',' ',$b['status'] ?? 'pending')) }}</span></td>
+            <td class="mob-hide" style="color:var(--sub);font-size:.77rem;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b['added_by'] }}</td>
             <td class="mob-hide" style="color:var(--muted);font-size:.77rem;">{{ $b['date'] ? \Carbon\Carbon::parse($b['date'])->format('d M') : '—' }}</td>
           </tr>
           @empty
           <tr>
-            <td colspan="6" style="text-align:center;padding:28px;color:var(--muted);">
+            <td colspan="7" style="text-align:center;padding:28px;color:var(--muted);">
               No bookings — <a href="{{ route('bookings.create-direct') }}" style="color:var(--indigo);font-weight:600;">create one</a>
             </td>
           </tr>
