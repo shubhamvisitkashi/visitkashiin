@@ -140,7 +140,7 @@
 
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:768px){
-  html,body{overflow-x:hidden !important;max-width:100%;}
+  html,body,.page-wrapper,.main-wrapper{overflow-x:hidden !important;max-width:100%;}
   .tb-page{padding:8px;padding-bottom:130px;overflow-x:hidden;}
   .tb-header{padding:12px 14px;margin-top:58px;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
   .tb-header h1{font-size:.95rem;}
