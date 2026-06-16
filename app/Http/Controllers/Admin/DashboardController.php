@@ -169,6 +169,64 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
+        // ── Today's bookings (all types) ──────────────────────────
+        $todayStay = (clone $stayQ)->with(['lead', 'quotation'])
+            ->whereDate('booking_date', $today)
+            ->where('booking_status', '!=', 'cancelled')
+            ->get()
+            ->map(function ($b) {
+                $isPackage = false;
+                if ($b->quotation && $b->quotation->notes) {
+                    $decoded   = json_decode($b->quotation->notes, true);
+                    $isPackage = is_array($decoded) && !empty($decoded['package_name']);
+                }
+                return [
+                    'type'   => $isPackage ? 'Package' : 'Stay',
+                    'icon'   => $isPackage ? '📦' : '🏨',
+                    'color'  => $isPackage ? '#7C3AED' : '#4F46E5',
+                    'bg'     => $isPackage ? '#EDE9FE' : '#EEF2FF',
+                    'number' => $b->booking_number,
+                    'guest'  => $b->lead?->guest_name ?? '—',
+                    'amount' => (int) $b->total_amount,
+                    'status' => $b->booking_status,
+                    'url'    => route('bookings.show', $b->id),
+                ];
+            });
+
+        $todayCab = (clone $cabQ)
+            ->whereDate('created_at', $today)
+            ->where('booking_status', '!=', 'cancelled')
+            ->get()
+            ->map(fn($b) => [
+                'type'   => 'Cab',
+                'icon'   => '🚗',
+                'color'  => '#F59E0B',
+                'bg'     => '#FEF3C7',
+                'number' => $b->booking_number,
+                'guest'  => $b->customer_name ?? '—',
+                'amount' => (int) $b->total_amount,
+                'status' => $b->booking_status,
+                'url'    => route('cab-bookings.show', $b->id),
+            ]);
+
+        $todayBoat = (clone $boatQ)
+            ->whereDate('booking_date', $today)
+            ->where('booking_status', '!=', 'cancelled')
+            ->get()
+            ->map(fn($b) => [
+                'type'   => 'Boat',
+                'icon'   => '⛵',
+                'color'  => '#0EA5E9',
+                'bg'     => '#E0F2FE',
+                'number' => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                'guest'  => $b->name ?? '—',
+                'amount' => (int) $b->final_amount,
+                'status' => $b->booking_status,
+                'url'    => route('boat-booking.show', $b->id),
+            ]);
+
+        $todayAllBookings = $todayStay->concat($todayCab)->concat($todayBoat)->values();
+
         // ── Enquiries ─────────────────────────────────────────────
         $enquiryCount = Enquiry::whereDate('created_at', $today)->count();
 
@@ -188,9 +246,9 @@ class DashboardController extends Controller
         if ($isAdmin) {
             $staffTargets = UserTarget::with('user')
                 ->currentMonth()
-                ->orderBy('target_margin', 'desc')
                 ->get();
             $staffTargets = $targetService->calculateMultipleTargets($staffTargets);
+            $staffTargets = $staffTargets->sortByDesc('achieved_margin')->values();
         } else {
             $myTarget = UserTarget::with('user')
                 ->currentMonth()
@@ -225,7 +283,7 @@ class DashboardController extends Controller
             'stayStatuses', 'staffTargets',
             'teamTotalTarget', 'teamTotalAchieved', 'teamTargetPct',
             'isAdmin', 'myTargetDetail',
-            'recentBookings', 'upcomingCheckins', 'upcomingCabs'
+            'recentBookings', 'upcomingCheckins', 'upcomingCabs', 'todayAllBookings'
         ), ['page_title' => 'Dashboard']);
     }
 

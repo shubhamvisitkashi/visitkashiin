@@ -382,31 +382,45 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     @endif
   </div>
 
-  {{-- Upcoming Cab Pickups --}}
+  {{-- Today's Bookings --}}
   <div class="chart-card" style="margin-bottom:0;">
     <div class="chart-head">
-      <div class="chart-title">🚗 Upcoming Pickups</div>
-      <span style="font-size:.7rem;color:var(--muted);">Next 7 days</span>
+      <div class="chart-title">📋 Today's Bookings</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        @php
+          $tStay = $todayAllBookings->where('type','Stay')->count();
+          $tPkg  = $todayAllBookings->where('type','Package')->count();
+          $tCab  = $todayAllBookings->where('type','Cab')->count();
+          $tBoat = $todayAllBookings->where('type','Boat')->count();
+        @endphp
+        @if($tStay)  <span style="font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:20px;background:#EEF2FF;color:#3730A3;">🏨 {{ $tStay }}</span> @endif
+        @if($tPkg)   <span style="font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:20px;background:#EDE9FE;color:#5B21B6;">📦 {{ $tPkg }}</span> @endif
+        @if($tCab)   <span style="font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:20px;background:#FEF3C7;color:#92400E;">🚗 {{ $tCab }}</span> @endif
+        @if($tBoat)  <span style="font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:20px;background:#E0F2FE;color:#0C4A6E;">⛵ {{ $tBoat }}</span> @endif
+      </div>
     </div>
-    @if($upcomingCabs->count())
-      @foreach($upcomingCabs as $c)
-      <div class="upcoming-item">
-        <div class="upcoming-date">
-          <div class="ud-day">{{ \Carbon\Carbon::parse($c->pickup_date)->format('d') }}</div>
-          <div class="ud-mon">{{ \Carbon\Carbon::parse($c->pickup_date)->format('M') }}</div>
+    @forelse($todayAllBookings as $tb)
+    <div class="upcoming-item">
+      <div style="width:36px;height:36px;border-radius:10px;background:{{ $tb['bg'] }};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">
+        {{ $tb['icon'] }}
+      </div>
+      <div class="upcoming-info">
+        <div class="upcoming-name">
+          <a href="{{ $tb['url'] }}" style="color:var(--text);text-decoration:none;" target="_blank">{{ $tb['guest'] }}</a>
         </div>
-        <div class="upcoming-info">
-          <div class="upcoming-name">{{ $c->customer_name }}</div>
-          <div class="upcoming-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($c->pickup_address,30) }} → {{ Str::limit($c->drop_address,20) }}</div>
-        </div>
-        <div class="upcoming-amt" style="font-size:.72rem;font-weight:600;">
-          {{ $c->pickup_time ? \Carbon\Carbon::parse($c->pickup_time)->format('h:i A') : '—' }}
+        <div class="upcoming-sub">
+          <a href="{{ $tb['url'] }}" style="color:var(--indigo);font-weight:700;text-decoration:none;font-family:monospace;font-size:.7rem;" target="_blank">{{ $tb['number'] }}</a>
+          &nbsp;·&nbsp;
+          <span style="font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:20px;background:{{ $tb['bg'] }};color:{{ $tb['color'] }};">{{ $tb['type'] }}</span>
+          &nbsp;·&nbsp;
+          <span class="sb sb-{{ $tb['status'] }}" style="font-size:.62rem;">{{ ucwords(str_replace('_',' ',$tb['status'])) }}</span>
         </div>
       </div>
-      @endforeach
-    @else
-      <div style="padding:26px;text-align:center;color:var(--muted);font-size:.82rem;">No cab pickups in next 7 days</div>
-    @endif
+      <div class="upcoming-amt">₹{{ number_format($tb['amount']) }}</div>
+    </div>
+    @empty
+    <div style="padding:28px;text-align:center;color:var(--muted);font-size:.82rem;">No bookings today</div>
+    @endforelse
   </div>
 
 </div>
@@ -427,19 +441,24 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       @endcan
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0;">
-      @foreach($staffTargets as $t)
+      @foreach($staffTargets as $rank => $t)
       @php
-        $pct     = $t->target_margin > 0 ? min(100, round($t->achieved_margin / $t->target_margin * 100)) : 0;
-        $remain  = max(0, $t->target_margin - $t->achieved_margin);
-        $color   = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
-        $bgColor = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
-        $txtColor= $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
+        $pct      = $t->target_margin > 0 ? min(100, round($t->achieved_margin / $t->target_margin * 100)) : 0;
+        $remain   = max(0, $t->target_margin - $t->achieved_margin);
+        $color    = $pct >= 100 ? '#10B981' : ($pct >= 60 ? '#4F46E5' : ($pct >= 30 ? '#F59E0B' : '#EF4444'));
+        $bgColor  = $pct >= 100 ? '#D1FAE5' : ($pct >= 60 ? '#EEF2FF' : ($pct >= 30 ? '#FEF3C7' : '#FEE2E2'));
+        $txtColor = $pct >= 100 ? '#065F46' : ($pct >= 60 ? '#3730A3' : ($pct >= 30 ? '#92400E' : '#991B1B'));
+        $rankNum  = $rank + 1;
+        $rankLabel = $rankNum === 1 ? '🥇' : ($rankNum === 2 ? '🥈' : ($rankNum === 3 ? '🥉' : '#'.$rankNum));
       @endphp
       <div style="padding:16px 20px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="openStaffModal({{ $t->user_id }}, '{{ addslashes($t->user->name ?? 'Staff') }}')" title="View {{ $t->user->name ?? 'Staff' }}'s bookings this month">
-            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;">
-              {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
+            <div style="position:relative;flex-shrink:0;">
+              <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;">
+                {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
+              </div>
+              <span style="position:absolute;top:-6px;left:-6px;font-size:.7rem;line-height:1;">{{ $rankLabel }}</span>
             </div>
             <div style="font-size:.82rem;font-weight:700;color:var(--indigo);text-decoration:underline;text-underline-offset:2px;">{{ $t->user->name ?? 'Staff' }}</div>
           </div>
