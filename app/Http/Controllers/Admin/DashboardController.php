@@ -229,6 +229,134 @@ class DashboardController extends Controller
         ), ['page_title' => 'Dashboard']);
     }
 
+    public function staffBookings(int $userId)
+    {
+        $isAdmin = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+        if (!$isAdmin) abort(403);
+
+        $month = Carbon::now()->month;
+        $year  = Carbon::now()->year;
+
+        $stayBookings = Booking::with('lead')
+            ->where('created_by', $userId)
+            ->whereYear('booking_date', $year)
+            ->whereMonth('booking_date', $month)
+            ->orderByDesc('booking_date')
+            ->get()
+            ->map(fn($b) => [
+                'type'           => 'Stay',
+                'icon'           => '🏨',
+                'number'         => $b->booking_number,
+                'guest'          => $b->lead?->guest_name ?? '—',
+                'total_amount'   => (int) $b->total_amount,
+                'paid_amount'    => (int) ($b->total_amount - $b->pending_amount),
+                'pending_amount' => (int) $b->pending_amount,
+                'status'         => $b->booking_status,
+                'date'           => $b->booking_date ? Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                'url'            => route('bookings.show', $b->id),
+            ]);
+
+        $cabBookings = CabBooking::where('created_by', $userId)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($b) => [
+                'type'           => 'Cab',
+                'icon'           => '🚗',
+                'number'         => $b->booking_number,
+                'guest'          => $b->customer_name ?? '—',
+                'total_amount'   => (int) $b->total_amount,
+                'paid_amount'    => (int) ($b->total_amount - $b->pending_amount),
+                'pending_amount' => (int) $b->pending_amount,
+                'status'         => $b->booking_status,
+                'date'           => $b->created_at ? Carbon::parse($b->created_at)->format('d M Y') : '—',
+                'url'            => route('cab-bookings.show', $b->id),
+            ]);
+
+        $boatBookings = BoatBooking::where('created_by', $userId)
+            ->whereYear('booking_date', $year)
+            ->whereMonth('booking_date', $month)
+            ->orderByDesc('booking_date')
+            ->get()
+            ->map(fn($b) => [
+                'type'           => 'Boat',
+                'icon'           => '⛵',
+                'number'         => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                'guest'          => $b->name ?? '—',
+                'total_amount'   => (int) $b->final_amount,
+                'paid_amount'    => (int) ($b->payment_status === 'paid' ? $b->final_amount : 0),
+                'pending_amount' => (int) ($b->payment_status !== 'paid' ? $b->final_amount : 0),
+                'status'         => $b->booking_status,
+                'date'           => $b->booking_date ? Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                'url'            => route('boat-booking.show', $b->id),
+            ]);
+
+        $bookings = $stayBookings->concat($cabBookings)->concat($boatBookings)
+            ->sortByDesc('date')
+            ->values();
+
+        return response()->json([
+            'bookings' => $bookings,
+            'summary'  => [
+                'stay'  => $stayBookings->count(),
+                'cab'   => $cabBookings->count(),
+                'boat'  => $boatBookings->count(),
+                'total' => $stayBookings->count() + $cabBookings->count() + $boatBookings->count(),
+                'revenue' => $stayBookings->sum('total_amount') + $cabBookings->sum('total_amount') + $boatBookings->sum('total_amount'),
+            ],
+        ]);
+    }
+
+    public function pendingBookings()
+    {
+        $isAdmin = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
+        $userId  = auth('admin')->id();
+
+        $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $cabQ  = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+
+        $stayPending = (clone $stayQ)->with('lead')
+            ->where('pending_amount', '>', 0)
+            ->orderByDesc('booking_date')
+            ->get()
+            ->map(fn($b) => [
+                'type'           => 'Stay',
+                'icon'           => '🏨',
+                'number'         => $b->booking_number,
+                'guest'          => $b->lead?->guest_name ?? '—',
+                'total_amount'   => (int) $b->total_amount,
+                'paid_amount'    => (int) ($b->total_amount - $b->pending_amount),
+                'pending_amount' => (int) $b->pending_amount,
+                'status'         => $b->booking_status,
+                'date'           => $b->booking_date ? \Carbon\Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                'url'            => route('bookings.show', $b->id),
+            ]);
+
+        $cabPending = (clone $cabQ)
+            ->where('pending_amount', '>', 0)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($b) => [
+                'type'           => 'Cab',
+                'icon'           => '🚗',
+                'number'         => $b->booking_number,
+                'guest'          => $b->customer_name ?? '—',
+                'total_amount'   => (int) $b->total_amount,
+                'paid_amount'    => (int) ($b->total_amount - $b->pending_amount),
+                'pending_amount' => (int) $b->pending_amount,
+                'status'         => $b->booking_status,
+                'date'           => $b->created_at ? \Carbon\Carbon::parse($b->created_at)->format('d M Y') : '—',
+                'url'            => route('cab-bookings.show', $b->id),
+            ]);
+
+        $bookings = $stayPending->concat($cabPending)
+            ->sortByDesc('pending_amount')
+            ->values();
+
+        return response()->json($bookings);
+    }
+
     public function changeTheme(Request $request)
     {
         if (isset($request->theme_change)) {

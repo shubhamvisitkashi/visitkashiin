@@ -312,12 +312,12 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     </div>
   </div>
 
-  <div class="kpi-card" style="--kpi-color:var(--amber);--kpi-bg:#FEF3C7;">
+  <div class="kpi-card" style="--kpi-color:var(--amber);--kpi-bg:#FEF3C7;cursor:pointer;" onclick="openPendingModal()" title="Click to view pending bookings">
     <div class="kpi-icon">⚠️</div>
     <div class="kpi-body">
       <div class="kpi-label">Pending Amount</div>
       <div class="kpi-value">₹{{ number_format($totalPending) }}</div>
-      <div class="kpi-sub">{{ $pendingPaymentsCount }} bookings have due balance</div>
+      <div class="kpi-sub">{{ $pendingPaymentsCount }} bookings have due balance <span style="color:var(--amber);font-weight:700;margin-left:4px;">→</span></div>
     </div>
   </div>
 
@@ -437,11 +437,11 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       @endphp
       <div style="padding:16px 20px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="openStaffModal({{ $t->user_id }}, '{{ addslashes($t->user->name ?? 'Staff') }}')" title="View {{ $t->user->name ?? 'Staff' }}'s bookings this month">
             <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;">
               {{ strtoupper(substr($t->user->name ?? 'S', 0, 1)) }}
             </div>
-            <div style="font-size:.82rem;font-weight:700;color:var(--text);">{{ $t->user->name ?? 'Staff' }}</div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--indigo);text-decoration:underline;text-underline-offset:2px;">{{ $t->user->name ?? 'Staff' }}</div>
           </div>
           <span style="font-size:.64rem;font-weight:800;padding:3px 9px;border-radius:20px;background:{{ $bgColor }};color:{{ $txtColor }};">
             {{ $pct >= 100 ? '🏆 Done' : $pct.'%' }}
@@ -860,6 +860,170 @@ new Chart(document.getElementById('dailyChart'), {
       y: { ...axisDefaults(), ticks:{ ...axisDefaults().ticks, callback: v => v>=1000 ? '₹'+(v/1000).toFixed(1)+'K' : '₹'+v }}
     }
   }
+});
+</script>
+
+{{-- ── Staff Bookings Modal ────────────────────────────────────── --}}
+<div id="staffModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;padding:20px;">
+  <div style="max-width:980px;margin:40px auto;background:var(--card);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.2);overflow:hidden;">
+    <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--card);">
+      <div>
+        <div id="staffModalTitle" style="font-size:1rem;font-weight:800;color:var(--text);">Staff Bookings</div>
+        <div id="staffModalSub" style="font-size:.75rem;color:var(--muted);margin-top:2px;">{{ now()->format('F Y') }}</div>
+      </div>
+      <button onclick="closeStaffModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1;padding:4px 10px;">&times;</button>
+    </div>
+    <div id="staffModalSummary" style="display:none;padding:12px 24px;border-bottom:1px solid var(--border);display:flex;gap:20px;flex-wrap:wrap;background:var(--card);"></div>
+    <div id="staffModalBody" style="padding:20px 0;">
+      <div style="text-align:center;padding:48px;color:var(--muted);">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const staffBookingsUrl = '{{ url("admin/dashboard/staff-bookings") }}';
+
+function openStaffModal(userId, name) {
+  const modal = document.getElementById('staffModal');
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('staffModalTitle').textContent = '📋 ' + name + ' — Bookings';
+  document.getElementById('staffModalSub').textContent = '{{ now()->format("F Y") }}';
+  document.getElementById('staffModalSummary').style.display = 'none';
+  document.getElementById('staffModalBody').innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted);">Loading…</div>';
+
+  fetch(staffBookingsUrl + '/' + userId)
+    .then(r => r.json())
+    .then(res => {
+      const { bookings, summary } = res;
+
+      // Summary bar
+      const sumEl = document.getElementById('staffModalSummary');
+      sumEl.style.display = 'flex';
+      sumEl.innerHTML =
+        `<span style="font-size:.75rem;color:var(--muted);">Total: <strong style="color:var(--text);">${summary.total}</strong></span>` +
+        (summary.stay  ? `<span style="font-size:.75rem;color:var(--muted);">🏨 Stay: <strong style="color:var(--text);">${summary.stay}</strong></span>` : '') +
+        (summary.cab   ? `<span style="font-size:.75rem;color:var(--muted);">🚗 Cab: <strong style="color:var(--text);">${summary.cab}</strong></span>` : '') +
+        (summary.boat  ? `<span style="font-size:.75rem;color:var(--muted);">⛵ Boat: <strong style="color:var(--text);">${summary.boat}</strong></span>` : '') +
+        `<span style="font-size:.75rem;color:var(--muted);margin-left:auto;">Revenue: <strong style="color:var(--emerald);">₹${summary.revenue.toLocaleString('en-IN')}</strong></span>`;
+
+      if (!bookings.length) {
+        document.getElementById('staffModalBody').innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted);">No bookings this month.</div>';
+        return;
+      }
+
+      let html = '<div style="overflow-x:auto;"><table class="dk-table" style="width:100%;min-width:680px;">'
+        + '<thead><tr>'
+        + '<th>Booking #</th><th>Guest</th><th>Type</th>'
+        + '<th>Total</th><th>Paid</th><th style="color:#EF4444;">Due</th>'
+        + '<th>Status</th><th>Date</th>'
+        + '</tr></thead><tbody>';
+
+      bookings.forEach(b => {
+        const statusCls = {'confirmed':'confirmed','completed':'completed','cancelled':'cancelled'}[b.status] || 'in_progress';
+        const pendingStyle = b.pending_amount > 0 ? 'color:#EF4444;font-weight:800;' : 'color:var(--emerald);font-weight:600;';
+        html += `<tr>
+          <td><a href="${b.url}" class="bk-link" target="_blank">${b.number}</a></td>
+          <td style="font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.guest}</td>
+          <td><span class="sb" style="background:#EEF2FF;color:#3730A3;">${b.icon} ${b.type}</span></td>
+          <td style="font-weight:600;white-space:nowrap;">₹${b.total_amount.toLocaleString('en-IN')}</td>
+          <td style="color:var(--emerald);font-weight:600;white-space:nowrap;">₹${b.paid_amount.toLocaleString('en-IN')}</td>
+          <td style="${pendingStyle}white-space:nowrap;">${b.pending_amount > 0 ? '₹' + b.pending_amount.toLocaleString('en-IN') : '—'}</td>
+          <td><span class="sb sb-${statusCls}">${b.status.replace(/_/g,' ')}</span></td>
+          <td style="color:var(--muted);font-size:.77rem;white-space:nowrap;">${b.date}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div>';
+      document.getElementById('staffModalBody').innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('staffModalBody').innerHTML = '<div style="text-align:center;padding:48px;color:#EF4444;">Failed to load. Please try again.</div>';
+    });
+}
+
+function closeStaffModal() {
+  document.getElementById('staffModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('staffModal').addEventListener('click', function(e) {
+  if (e.target === this) closeStaffModal();
+});
+</script>
+
+{{-- ── Pending Bookings Modal ──────────────────────────────────── --}}
+<div id="pendingModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;padding:20px;">
+  <div style="max-width:960px;margin:40px auto;background:var(--card);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.2);overflow:hidden;">
+    <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--card);">
+      <div>
+        <div style="font-size:1rem;font-weight:800;color:var(--text);">⚠️ Pending Payments</div>
+        <div id="pendingModalSub" style="font-size:.75rem;color:var(--muted);margin-top:2px;">Bookings with due balance</div>
+      </div>
+      <button onclick="closePendingModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1;padding:4px 10px;">&times;</button>
+    </div>
+    <div id="pendingModalBody" style="padding:20px 0;">
+      <div style="text-align:center;padding:48px;color:var(--muted);">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openPendingModal() {
+  const modal = document.getElementById('pendingModal');
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('pendingModalBody').innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted);">Loading…</div>';
+
+  fetch('{{ route("admin.dashboard.pending-bookings") }}')
+    .then(r => r.json())
+    .then(data => {
+      const sub = document.getElementById('pendingModalSub');
+      if (!data.length) {
+        sub.textContent = 'No pending payments';
+        document.getElementById('pendingModalBody').innerHTML = '<div style="text-align:center;padding:48px;color:var(--emerald);font-size:1.1rem;font-weight:700;">🎉 All clear — no pending payments!</div>';
+        return;
+      }
+      const totalPending = data.reduce((s, b) => s + b.pending_amount, 0);
+      sub.textContent = data.length + ' booking' + (data.length > 1 ? 's' : '') + ' · ₹' + totalPending.toLocaleString('en-IN') + ' total due';
+
+      let html = '<div style="overflow-x:auto;"><table class="dk-table" style="width:100%;min-width:680px;">'
+        + '<thead><tr>'
+        + '<th>Booking #</th><th>Guest</th><th>Type</th>'
+        + '<th>Total</th><th>Paid</th>'
+        + '<th style="color:#EF4444;">Due</th>'
+        + '<th>Status</th><th>Date</th>'
+        + '</tr></thead><tbody>';
+
+      data.forEach(b => {
+        const statusCls = {'confirmed':'confirmed','completed':'completed','cancelled':'cancelled'}[b.status] || 'in_progress';
+        html += `<tr>
+          <td><a href="${b.url}" class="bk-link" target="_blank">${b.number}</a></td>
+          <td style="font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.guest}</td>
+          <td><span class="sb" style="background:#FEF3C7;color:#92400E;">${b.icon} ${b.type}</span></td>
+          <td style="font-weight:600;white-space:nowrap;">₹${b.total_amount.toLocaleString('en-IN')}</td>
+          <td style="color:var(--emerald);font-weight:600;white-space:nowrap;">₹${b.paid_amount.toLocaleString('en-IN')}</td>
+          <td style="color:#EF4444;font-weight:800;white-space:nowrap;">₹${b.pending_amount.toLocaleString('en-IN')}</td>
+          <td><span class="sb sb-${statusCls}">${b.status.replace(/_/g,' ')}</span></td>
+          <td style="color:var(--muted);font-size:.77rem;white-space:nowrap;">${b.date}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div>';
+      document.getElementById('pendingModalBody').innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('pendingModalBody').innerHTML = '<div style="text-align:center;padding:48px;color:#EF4444;">Failed to load. Please try again.</div>';
+    });
+}
+
+function closePendingModal() {
+  document.getElementById('pendingModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('pendingModal').addEventListener('click', function(e) {
+  if (e.target === this) closePendingModal();
 });
 </script>
 

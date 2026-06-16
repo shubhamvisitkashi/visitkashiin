@@ -36,6 +36,8 @@ Route::group(['prefix' => 'admin'], function () {
 
     Route::middleware(['auth:admin'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('dashboard/pending-bookings', [DashboardController::class, 'pendingBookings'])->name('admin.dashboard.pending-bookings');
+        Route::get('dashboard/staff-bookings/{userId}', [DashboardController::class, 'staffBookings'])->name('admin.dashboard.staff-bookings');
         Route::get('customer-analytics', 'App\Http\Controllers\Admin\CustomerAnalyticsController@index')->name('customer.analytics');
         Route::post('change_theme', [DashboardController::class, 'changeTheme'])->name('admin.theme');
 
