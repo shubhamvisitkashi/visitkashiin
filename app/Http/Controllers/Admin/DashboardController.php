@@ -169,9 +169,13 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        // ── Today's bookings (all types) ──────────────────────────
+        // ── Today's bookings (running on today's date, not created today) ──
+        // Stay/Package: guest is currently checked in (lead.booking_start_date ≤ today ≤ lead.booking_end_date)
         $todayStay = (clone $stayQ)->with(['lead', 'quotation'])
-            ->whereDate('booking_date', $today)
+            ->whereHas('lead', fn($q) =>
+                $q->whereDate('booking_start_date', '<=', $today)
+                  ->whereDate('booking_end_date',   '>=', $today)
+            )
             ->where('booking_status', '!=', 'cancelled')
             ->get()
             ->map(function ($b) {
@@ -193,8 +197,15 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Cab: pickup is today OR multi-day trip spans today (pickup_date ≤ today ≤ return_date)
         $todayCab = (clone $cabQ)
-            ->whereDate('created_at', $today)
+            ->where(function ($q) use ($today) {
+                $q->whereDate('pickup_date', $today)
+                  ->orWhere(function ($q2) use ($today) {
+                      $q2->whereDate('pickup_date', '<=', $today)
+                         ->whereDate('return_date',  '>=', $today);
+                  });
+            })
             ->where('booking_status', '!=', 'cancelled')
             ->get()
             ->map(fn($b) => [
@@ -209,6 +220,7 @@ class DashboardController extends Controller
                 'url'    => route('cab-bookings.show', $b->id),
             ]);
 
+        // Boat: single-day event — show rides scheduled for today
         $todayBoat = (clone $boatQ)
             ->whereDate('booking_date', $today)
             ->where('booking_status', '!=', 'cancelled')
