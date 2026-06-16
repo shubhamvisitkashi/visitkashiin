@@ -873,7 +873,7 @@ class BookingController extends Controller
                 'lead_id', 'quotation_id', 'created_by'
             ])
             ->with([
-                'lead:id,guest_name,contact,pax,short_plan',
+                'lead:id,guest_name,contact,pax,short_plan,booking_start_date,booking_end_date',
                 'quotation:id',
                 'quotation.items' => function($query) use ($start, $end, $serviceTypeFilter) {
                     $query->select('id', 'quotation_id', 'service_template_id', 'service_date', 'quantity', 'total_price')
@@ -1011,12 +1011,18 @@ class BookingController extends Controller
                     ];
                 }
             } else {
-                // No service dates — fall back to booking_date so the booking still appears on the calendar
-                $fallbackDate = $booking->booking_date
-                    ? \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d')
-                    : $booking->created_at->format('Y-m-d');
+                // No service dates — use the actual travel/check-in date (booking_start_date),
+                // falling back to booking_date. Never use created_at (that's when the record was made).
+                $travelDate = $booking->lead?->booking_start_date;
+                $fallbackDate = $travelDate
+                    ? \Carbon\Carbon::parse($travelDate)->format('Y-m-d')
+                    : ($booking->booking_date
+                        ? \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d')
+                        : null);
 
-                // Only show in the month range it belongs to
+                if (!$fallbackDate) continue; // no usable date — skip
+
+                // Only show in the requested date range
                 if ($start && $fallbackDate < $start) continue;
                 if ($end   && $fallbackDate > $end)   continue;
 
