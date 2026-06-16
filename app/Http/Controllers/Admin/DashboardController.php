@@ -174,7 +174,7 @@ class DashboardController extends Controller
 
         // ── Today's bookings (running on today's date, not created today) ──
         // Stay/Package: guest is currently checked in (lead.booking_start_date ≤ today ≤ lead.booking_end_date)
-        $todayStay = (clone $stayQ)->with(['lead', 'quotation'])
+        $todayStay = (clone $stayQ)->with(['lead', 'quotation', 'createdBy:id,name'])
             ->whereHas('lead', fn($q) =>
                 $q->whereDate('booking_start_date', '<=', $today)
                   ->whereDate('booking_end_date',   '>=', $today)
@@ -188,20 +188,26 @@ class DashboardController extends Controller
                     $isPackage = is_array($decoded) && !empty($decoded['package_name']);
                 }
                 return [
-                    'type'   => $isPackage ? 'Package' : 'Stay',
-                    'icon'   => $isPackage ? '📦' : '🏨',
-                    'color'  => $isPackage ? '#7C3AED' : '#4F46E5',
-                    'bg'     => $isPackage ? '#EDE9FE' : '#EEF2FF',
-                    'number' => $b->booking_number,
-                    'guest'  => $b->lead?->guest_name ?? '—',
-                    'amount' => (int) $b->total_amount,
-                    'status' => $b->booking_status,
-                    'url'    => route('bookings.show', $b->id),
+                    'type'      => $isPackage ? 'Package' : 'Stay',
+                    'icon'      => $isPackage ? '📦' : '🏨',
+                    'color'     => $isPackage ? '#7C3AED' : '#4F46E5',
+                    'bg'        => $isPackage ? '#EDE9FE' : '#EEF2FF',
+                    'number'    => $b->booking_number,
+                    'guest'     => $b->lead?->guest_name ?? '—',
+                    'phone'     => $b->lead?->phone ?? '—',
+                    'date_from' => $b->lead?->booking_start_date ? \Carbon\Carbon::parse($b->lead->booking_start_date)->format('d M Y') : '—',
+                    'date_to'   => $b->lead?->booking_end_date   ? \Carbon\Carbon::parse($b->lead->booking_end_date)->format('d M Y')   : '—',
+                    'amount'    => (int) $b->total_amount,
+                    'paid'      => (int) $b->paid_amount,
+                    'pending'   => (int) $b->pending_amount,
+                    'status'    => $b->booking_status,
+                    'added_by'  => $b->createdBy?->name ?? '—',
+                    'url'       => route('bookings.show', $b->id),
                 ];
             });
 
         // Cab: pickup is today OR multi-day trip spans today (pickup_date ≤ today ≤ return_date)
-        $todayCab = (clone $cabQ)
+        $todayCab = (clone $cabQ)->with('createdBy:id,name')
             ->where(function ($q) use ($today) {
                 $q->whereDate('pickup_date', $today)
                   ->orWhere(function ($q2) use ($today) {
@@ -212,32 +218,44 @@ class DashboardController extends Controller
             ->where('booking_status', '!=', 'cancelled')
             ->get()
             ->map(fn($b) => [
-                'type'   => 'Cab',
-                'icon'   => '🚗',
-                'color'  => '#F59E0B',
-                'bg'     => '#FEF3C7',
-                'number' => $b->booking_number,
-                'guest'  => $b->customer_name ?? '—',
-                'amount' => (int) $b->total_amount,
-                'status' => $b->booking_status,
-                'url'    => route('cab-bookings.show', $b->id),
+                'type'      => 'Cab',
+                'icon'      => '🚗',
+                'color'     => '#F59E0B',
+                'bg'        => '#FEF3C7',
+                'number'    => $b->booking_number,
+                'guest'     => $b->customer_name ?? '—',
+                'phone'     => $b->customer_phone ?? '—',
+                'date_from' => $b->pickup_date  ? \Carbon\Carbon::parse($b->pickup_date)->format('d M Y')  : '—',
+                'date_to'   => $b->return_date  ? \Carbon\Carbon::parse($b->return_date)->format('d M Y')  : '—',
+                'amount'    => (int) $b->total_amount,
+                'paid'      => (int) ($b->total_amount - $b->pending_amount),
+                'pending'   => (int) $b->pending_amount,
+                'status'    => $b->booking_status,
+                'added_by'  => $b->createdBy?->name ?? '—',
+                'url'       => route('cab-bookings.show', $b->id),
             ]);
 
         // Boat: single-day event — show rides scheduled for today
-        $todayBoat = (clone $boatQ)
+        $todayBoat = (clone $boatQ)->with('createdBy:id,name')
             ->whereDate('booking_date', $today)
             ->where('booking_status', '!=', 'cancelled')
             ->get()
             ->map(fn($b) => [
-                'type'   => 'Boat',
-                'icon'   => '⛵',
-                'color'  => '#0EA5E9',
-                'bg'     => '#E0F2FE',
-                'number' => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
-                'guest'  => $b->name ?? '—',
-                'amount' => (int) $b->final_amount,
-                'status' => $b->booking_status,
-                'url'    => route('boat-booking.show', $b->id),
+                'type'      => 'Boat',
+                'icon'      => '⛵',
+                'color'     => '#0EA5E9',
+                'bg'        => '#E0F2FE',
+                'number'    => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                'guest'     => $b->name ?? '—',
+                'phone'     => $b->phone ?? '—',
+                'date_from' => $b->booking_date ? \Carbon\Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                'date_to'   => '—',
+                'amount'    => (int) $b->final_amount,
+                'paid'      => (int) $b->final_amount,
+                'pending'   => 0,
+                'status'    => $b->booking_status,
+                'added_by'  => $b->createdBy?->name ?? '—',
+                'url'       => route('boat-booking.show', $b->id),
             ]);
 
         $todayAllBookings = $todayStay->concat($todayCab)->concat($todayBoat)->values();

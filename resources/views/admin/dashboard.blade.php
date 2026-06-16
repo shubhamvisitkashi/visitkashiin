@@ -400,16 +400,15 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       </div>
     </div>
     @forelse($todayAllBookings as $tb)
-    <div class="upcoming-item">
+    <div class="upcoming-item" onclick="openTodayBookingModal({{ json_encode($tb) }})"
+         style="cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background=''">
       <div style="width:36px;height:36px;border-radius:10px;background:{{ $tb['bg'] }};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">
         {{ $tb['icon'] }}
       </div>
       <div class="upcoming-info">
-        <div class="upcoming-name">
-          <a href="{{ $tb['url'] }}" style="color:var(--text);text-decoration:none;" target="_blank">{{ $tb['guest'] }}</a>
-        </div>
+        <div class="upcoming-name">{{ $tb['guest'] }}</div>
         <div class="upcoming-sub">
-          <a href="{{ $tb['url'] }}" style="color:var(--indigo);font-weight:700;text-decoration:none;font-family:monospace;font-size:.7rem;" target="_blank">{{ $tb['number'] }}</a>
+          <span style="color:var(--indigo);font-weight:700;font-family:monospace;font-size:.7rem;">{{ $tb['number'] }}</span>
           &nbsp;·&nbsp;
           <span style="font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:20px;background:{{ $tb['bg'] }};color:{{ $tb['color'] }};">{{ $tb['type'] }}</span>
           &nbsp;·&nbsp;
@@ -421,6 +420,70 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     @empty
     <div style="padding:28px;text-align:center;color:var(--muted);font-size:.82rem;">No bookings today</div>
     @endforelse
+  </div>
+
+  {{-- Today's Booking Detail Modal --}}
+  <div id="todayBkModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1100;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden;">
+      {{-- Header --}}
+      <div id="tdBkHead" style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div id="tdBkIcon" style="width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;"></div>
+          <div>
+            <div id="tdBkNumber" style="font-size:.72rem;font-weight:800;color:#6366F1;font-family:monospace;"></div>
+            <div id="tdBkType" style="font-size:.65rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.04em;"></div>
+          </div>
+        </div>
+        <button onclick="closeTodayBkModal()" style="background:#F1F5F9;border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:1rem;color:#64748B;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+      {{-- Body --}}
+      <div style="padding:0 20px 20px;">
+        {{-- Guest row --}}
+        <div style="background:#F8FAFC;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+          <div style="font-size:.62rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Guest</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+            <div id="tdBkGuest" style="font-size:.95rem;font-weight:800;color:#0F172A;"></div>
+            <a id="tdBkPhone" href="#" style="font-size:.78rem;font-weight:700;color:#4F46E5;text-decoration:none;background:#EEF2FF;padding:3px 10px;border-radius:20px;"></a>
+          </div>
+        </div>
+        {{-- Dates row --}}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div style="background:#F0FDF4;border-radius:10px;padding:10px 12px;">
+            <div style="font-size:.6rem;font-weight:700;color:#16A34A;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">From</div>
+            <div id="tdBkFrom" style="font-size:.85rem;font-weight:700;color:#0F172A;"></div>
+          </div>
+          <div style="background:#FEF2F2;border-radius:10px;padding:10px 12px;">
+            <div style="font-size:.6rem;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">To</div>
+            <div id="tdBkTo" style="font-size:.85rem;font-weight:700;color:#0F172A;"></div>
+          </div>
+        </div>
+        {{-- Payment row --}}
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="text-align:center;background:#F8FAFC;border-radius:10px;padding:10px 8px;">
+            <div style="font-size:.58rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Total</div>
+            <div id="tdBkTotal" style="font-size:.88rem;font-weight:800;color:#0F172A;"></div>
+          </div>
+          <div style="text-align:center;background:#F0FDF4;border-radius:10px;padding:10px 8px;">
+            <div style="font-size:.58rem;font-weight:700;color:#16A34A;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Paid</div>
+            <div id="tdBkPaid" style="font-size:.88rem;font-weight:800;color:#16A34A;"></div>
+          </div>
+          <div style="text-align:center;background:#FEF2F2;border-radius:10px;padding:10px 8px;">
+            <div style="font-size:.58rem;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div>
+            <div id="tdBkDue" style="font-size:.88rem;font-weight:800;color:#DC2626;"></div>
+          </div>
+        </div>
+        {{-- Status + Added By --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div><span style="font-size:.62rem;color:#94A3B8;font-weight:600;">Status: </span><span id="tdBkStatus" style="font-weight:700;font-size:.78rem;"></span></div>
+          <div><span style="font-size:.62rem;color:#94A3B8;font-weight:600;">Added by: </span><span id="tdBkAdded" style="font-weight:700;font-size:.78rem;color:#4F46E5;"></span></div>
+        </div>
+        {{-- CTA --}}
+        <a id="tdBkUrl" href="#" target="_blank"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border-radius:10px;padding:11px;font-size:.85rem;font-weight:700;text-decoration:none;">
+          View Full Booking Details →
+        </a>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -1046,6 +1109,43 @@ function closePendingModal() {
 
 document.getElementById('pendingModal').addEventListener('click', function(e) {
   if (e.target === this) closePendingModal();
+});
+
+/* ── Today's Booking Detail Modal ── */
+function openTodayBookingModal(b) {
+  var fmt = function(n) { return '₹' + Number(n).toLocaleString('en-IN'); };
+  document.getElementById('tdBkIcon').textContent    = b.icon;
+  document.getElementById('tdBkIcon').style.background = b.bg;
+  document.getElementById('tdBkNumber').textContent  = b.number;
+  document.getElementById('tdBkType').textContent    = b.type;
+  document.getElementById('tdBkHead').style.background = b.bg;
+  document.getElementById('tdBkGuest').textContent   = b.guest;
+  var phoneEl = document.getElementById('tdBkPhone');
+  if (b.phone && b.phone !== '—') {
+    phoneEl.textContent = '📞 ' + b.phone;
+    phoneEl.href = 'tel:' + b.phone;
+    phoneEl.style.display = '';
+  } else {
+    phoneEl.style.display = 'none';
+  }
+  document.getElementById('tdBkFrom').textContent    = b.date_from;
+  document.getElementById('tdBkTo').textContent      = b.date_to !== '—' ? b.date_to : 'Same Day';
+  document.getElementById('tdBkTotal').textContent   = fmt(b.amount);
+  document.getElementById('tdBkPaid').textContent    = fmt(b.paid);
+  document.getElementById('tdBkDue').textContent     = fmt(b.pending);
+  document.getElementById('tdBkStatus').textContent  = b.status.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  document.getElementById('tdBkAdded').textContent   = b.added_by;
+  document.getElementById('tdBkUrl').href            = b.url;
+  var modal = document.getElementById('todayBkModal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeTodayBkModal() {
+  document.getElementById('todayBkModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('todayBkModal').addEventListener('click', function(e) {
+  if (e.target === this) closeTodayBkModal();
 });
 </script>
 
