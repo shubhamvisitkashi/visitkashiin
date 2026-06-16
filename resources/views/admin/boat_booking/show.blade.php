@@ -481,6 +481,12 @@
          class="qact" style="background:#EFF6FF;border-color:#BAE6FD;color:#0369A1;">
         ✏️ Edit Booking
       </a>
+      @if($bkStatus !== 'cancelled')
+      <button type="button" onclick="openCancelModal()"
+              class="qact" style="background:#FEF2F2;border-color:#FCA5A5;color:#DC2626;cursor:pointer;font-weight:700;">
+        ✕ Cancel Booking
+      </button>
+      @endif
       <form id="deleteBoatBookingForm" action="{{ route('boat-booking.destroy', $booking->booking_id) }}" method="POST">
         @csrf
         @method('DELETE')
@@ -522,8 +528,178 @@
       </script>
     </div>
 
+    {{-- Cancellation Details (only when cancelled) --}}
+    @if($bkStatus === 'cancelled')
+    <div class="sv-sb-card" style="border-top:3px solid #DC2626;">
+      <div class="sv-sb-title" style="color:#991B1B;">✕ Cancellation Details</div>
+      @if($booking->cancelled_at)
+      <div style="font-size:.7rem;color:#94A3B8;margin-bottom:10px;">
+        Cancelled on {{ $booking->cancelled_at->format('d M Y, h:i A') }}
+      </div>
+      @endif
+      @if($booking->cancel_reason)
+      <div style="background:#FEF2F2;border-left:3px solid #DC2626;border-radius:8px;padding:9px 12px;font-size:.81rem;color:#7F1D1D;line-height:1.5;margin-bottom:12px;">
+        {{ $booking->cancel_reason }}
+      </div>
+      @endif
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:9px;padding:10px;text-align:center;">
+          <div style="font-size:.65rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Refund</div>
+          <div style="font-size:.95rem;font-weight:800;color:#15803D;">₹{{ number_format($booking->refund_amount ?? 0, 2) }}</div>
+        </div>
+        <div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:9px;padding:10px;text-align:center;">
+          <div style="font-size:.65rem;font-weight:700;color:#991B1B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Non-Refund</div>
+          <div style="font-size:.95rem;font-weight:800;color:#DC2626;">₹{{ number_format($booking->non_refund_amount ?? 0, 2) }}</div>
+        </div>
+      </div>
+    </div>
+    @endif
+
   </div>{{-- /sidebar --}}
 </div>{{-- /layout --}}
 </div>{{-- /sv-page --}}
+
+{{-- Hidden cancel form --}}
+<form id="boatCancelForm" action="{{ route('boat-booking.cancel', $booking->booking_id) }}" method="POST" style="display:none">
+  @csrf
+  <input type="hidden" name="cancel_reason" id="boatCancelReason">
+  <input type="hidden" name="refund_amount" id="boatRefundAmt">
+  <input type="hidden" name="non_refund_amount" id="boatNonRefundAmt">
+</form>
+
+{{-- Cancellation Modal --}}
+<div class="modal fade" id="boatCancelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:20px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.18)">
+      <div class="modal-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;padding:18px 22px">
+        <h5 class="modal-title" style="font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:8px">
+          ✕ Cancel Boat Booking — {{ $booking->booking_id }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:22px">
+
+        {{-- Warning --}}
+        <div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:.83rem;color:#7F1D1D;line-height:1.5;">
+          ⚠️ This will permanently mark the booking as <strong>Cancelled</strong>. Please fill in the refund details.
+        </div>
+
+        {{-- Payment summary --}}
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+          <div style="font-size:.7rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Payment Summary</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+            <div>
+              <div style="font-size:.68rem;color:#94A3B8;margin-bottom:3px;">Final Amount</div>
+              <div style="font-size:.92rem;font-weight:800;color:#0F172A;">₹{{ number_format($finalAmt, 2) }}</div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;color:#94A3B8;margin-bottom:3px;">Amount Paid</div>
+              <div style="font-size:.92rem;font-weight:800;color:#059669;">₹{{ number_format($paidAmt, 2) }}</div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;color:#94A3B8;margin-bottom:3px;">Balance Due</div>
+              <div style="font-size:.92rem;font-weight:800;color:{{ $dueAmt > 0 ? '#DC2626' : '#059669' }};">₹{{ number_format($dueAmt, 2) }}</div>
+            </div>
+          </div>
+        </div>
+
+        {{-- Cancellation reason --}}
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:.84rem">Cancellation Reason <span class="text-danger">*</span></label>
+          <textarea id="boatCancelReasonInput" class="form-control" rows="3"
+            placeholder="e.g. Customer requested cancellation due to weather conditions..."
+            style="border-radius:10px;font-size:.85rem"></textarea>
+        </div>
+
+        {{-- Refund amounts --}}
+        <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:12px;padding:14px 16px;">
+          <div style="font-size:.7rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">💰 Refund Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label class="form-label fw-semibold" style="font-size:.82rem;color:#166534;">✅ Refund Amount (₹)</label>
+              <input type="number" id="boatRefundInput" class="form-control" step="0.01" min="0"
+                value="{{ number_format($paidAmt, 2, '.', '') }}"
+                style="border-radius:9px;font-size:.9rem;border-color:#86EFAC;"
+                oninput="boatSyncNonRefund()">
+              <div style="font-size:.7rem;color:#16A34A;margin-top:3px;">Amount to return to customer</div>
+            </div>
+            <div>
+              <label class="form-label fw-semibold" style="font-size:.82rem;color:#B91C1C;">❌ Non-Refund Amount (₹)</label>
+              <input type="number" id="boatNonRefundInput" class="form-control" step="0.01" min="0"
+                value="0.00"
+                style="border-radius:9px;font-size:.9rem;border-color:#FCA5A5;"
+                oninput="boatSyncRefund()">
+              <div style="font-size:.7rem;color:#DC2626;margin-top:3px;">Amount retained (penalty/charge)</div>
+            </div>
+          </div>
+          <div id="boatAmtWarning" style="display:none;margin-top:10px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;font-size:.78rem;color:#92400E;"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #F1F5F9;padding:14px 22px;gap:10px;">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:10px;font-size:.85rem">
+          Keep Booking
+        </button>
+        <button type="button" class="btn btn-danger fw-semibold" onclick="submitBoatCancellation()" style="border-radius:10px;font-size:.85rem;padding:8px 20px;">
+          ✕ Confirm Cancellation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const boatPaidTotal = {{ (float)$paidAmt }};
+
+function openCancelModal() {
+  const modal = new bootstrap.Modal(document.getElementById('boatCancelModal'));
+  modal.show();
+}
+
+function boatSyncNonRefund() {
+  const refund = parseFloat(document.getElementById('boatRefundInput').value) || 0;
+  document.getElementById('boatNonRefundInput').value = Math.max(0, boatPaidTotal - refund).toFixed(2);
+  boatValidateAmts();
+}
+
+function boatSyncRefund() {
+  const nonRefund = parseFloat(document.getElementById('boatNonRefundInput').value) || 0;
+  document.getElementById('boatRefundInput').value = Math.max(0, boatPaidTotal - nonRefund).toFixed(2);
+  boatValidateAmts();
+}
+
+function boatValidateAmts() {
+  const refund    = parseFloat(document.getElementById('boatRefundInput').value) || 0;
+  const nonRefund = parseFloat(document.getElementById('boatNonRefundInput').value) || 0;
+  const warn      = document.getElementById('boatAmtWarning');
+  if (boatPaidTotal > 0 && Math.abs(refund + nonRefund - boatPaidTotal) > 0.01) {
+    warn.textContent = `⚠ Refund (₹${refund.toFixed(2)}) + Non-Refund (₹${nonRefund.toFixed(2)}) = ₹${(refund+nonRefund).toFixed(2)} — doesn't match paid amount ₹${boatPaidTotal.toFixed(2)}.`;
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+function submitBoatCancellation() {
+  const reason    = document.getElementById('boatCancelReasonInput').value.trim();
+  const refund    = parseFloat(document.getElementById('boatRefundInput').value) || 0;
+  const nonRefund = parseFloat(document.getElementById('boatNonRefundInput').value) || 0;
+
+  if (!reason) {
+    document.getElementById('boatCancelReasonInput').style.borderColor = '#EF4444';
+    document.getElementById('boatCancelReasonInput').focus();
+    return;
+  }
+  document.getElementById('boatCancelReasonInput').style.borderColor = '';
+
+  document.getElementById('boatCancelReason').value   = reason;
+  document.getElementById('boatRefundAmt').value      = refund.toFixed(2);
+  document.getElementById('boatNonRefundAmt').value   = nonRefund.toFixed(2);
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById('boatCancelModal'));
+  if (modal) modal.hide();
+  document.getElementById('boatCancelForm').submit();
+}
+</script>
 
 @endsection

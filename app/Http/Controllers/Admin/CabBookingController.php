@@ -364,9 +364,22 @@ class CabBookingController extends Controller
     {
         $booking = CabBooking::findOrFail($id);
         $validated = $request->validate([
-            'booking_status' => 'required|in:pending,confirmed,assigned,completed,cancelled',
+            'booking_status'    => 'required|in:pending,confirmed,assigned,completed,cancelled',
+            'cancel_reason'     => 'nullable|string|max:1000',
+            'refund_amount'     => 'nullable|numeric|min:0',
+            'non_refund_amount' => 'nullable|numeric|min:0',
         ]);
-        $booking->update($validated);
+
+        $updateData = ['booking_status' => $validated['booking_status']];
+
+        if ($validated['booking_status'] === 'cancelled') {
+            $updateData['cancel_reason']     = $validated['cancel_reason'] ?? null;
+            $updateData['refund_amount']     = $validated['refund_amount'] ?? 0;
+            $updateData['non_refund_amount'] = $validated['non_refund_amount'] ?? 0;
+            $updateData['cancelled_at']      = now();
+        }
+
+        $booking->update($updateData);
         return back()->with('success', 'Booking status updated to ' . ucfirst($validated['booking_status']) . '.');
     }
 

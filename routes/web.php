@@ -226,6 +226,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('boat-booking-requests', 'BoatBookingController@bookingRequest')->name('boat-booking.requests');
             Route::get('boat-booking-requests', 'BoatBookingController@bookingRequest')->name('boat-booking.requests');
             Route::post('/boat-booking-request/{booking_request_id}/cancel', 'BoatBookingController@cancelBookingRequest')->name('boat-booking-request.cancel');
+            Route::post('boat-booking/{booking_id}/cancel', 'BoatBookingController@cancelBooking')->name('boat-booking.cancel');
 
             // Service Management Routes
             // Service Types

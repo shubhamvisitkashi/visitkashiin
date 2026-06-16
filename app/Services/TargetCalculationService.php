@@ -38,12 +38,20 @@ class TargetCalculationService
         $pkgAmount  = 0; $pkgVendor  = 0; $pkgCount  = 0;
 
         foreach ($allBookings as $b) {
-            $totalAmount      = (float)($b->total_amount ?? 0);
-            $paymentsReceived = (float)($b->payments->sum('amount') ?? 0);
-            $vendorCost       = (float)($b->serviceAssignments->sum('assigned_cost') ?? 0);
+            $totalAmount  = (float)($b->total_amount ?? 0);
+            $vendorCost   = (float)($b->serviceAssignments->sum('assigned_cost') ?? 0);
+            $isCancelled  = $b->booking_status === 'cancelled';
+
+            // For cancelled bookings: only the non-refund amount counts as revenue
+            // (refund amount is returned to customer, so it reduces target revenue)
+            if ($isCancelled) {
+                $effectiveAmount = (float)($b->non_refund_amount ?? 0);
+            } else {
+                $effectiveAmount = (float)($b->payments->sum('amount') ?? 0);
+            }
 
             $propVendor = $totalAmount > 0
-                ? $vendorCost * ($paymentsReceived / $totalAmount)
+                ? $vendorCost * ($effectiveAmount / $totalAmount)
                 : 0;
 
             // Detect tour package by JSON package_name in quotation.notes
@@ -54,11 +62,11 @@ class TargetCalculationService
             }
 
             if ($isPackage) {
-                $pkgAmount += $paymentsReceived;
+                $pkgAmount += $effectiveAmount;
                 $pkgVendor += $propVendor;
                 $pkgCount++;
             } else {
-                $stayAmount += $paymentsReceived;
+                $stayAmount += $effectiveAmount;
                 $stayVendor += $propVendor;
                 $stayCount++;
             }
@@ -70,7 +78,13 @@ class TargetCalculationService
             ->whereMonth('created_at', $month)
             ->get();
 
-        $cabAmount = (float)$cabBookings->sum('total_amount');
+        // For cancelled cab bookings: non_refund_amount counts (refund_amount is excluded)
+        $cabAmount = (float)$cabBookings->sum(function ($b) {
+            if ($b->booking_status === 'cancelled') {
+                return (float)($b->non_refund_amount ?? 0);
+            }
+            return (float)($b->total_amount ?? 0);
+        });
         $cabVendor = (float)$cabBookings->sum('vendor_cost');
 
         // ── Boat Bookings ──────────────────────────────────────────
@@ -79,7 +93,13 @@ class TargetCalculationService
             ->whereMonth('booking_date', $month)
             ->get();
 
-        $boatAmount = (float)$boatBookings->sum('final_amount');
+        // For cancelled boat bookings: non_refund_amount counts (refund_amount is excluded)
+        $boatAmount = (float)$boatBookings->sum(function ($b) {
+            if ($b->booking_status === 'cancelled') {
+                return (float)($b->non_refund_amount ?? 0);
+            }
+            return (float)($b->final_amount ?? 0);
+        });
         $boatVendor = (float)$boatBookings->sum('vendor_cost');
 
         // ── Guide Bookings (reserved — no model yet) ───────────────

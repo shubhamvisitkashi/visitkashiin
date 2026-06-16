@@ -29,6 +29,14 @@ class BoatBooking extends Model
         'extra_per_person_rate', 'base_pax', 'created_by',
         // Staff
         'boatman_id',
+        // Cancellation
+        'cancel_reason', 'refund_amount', 'non_refund_amount', 'cancelled_at',
+    ];
+
+    protected $casts = [
+        'refund_amount'     => 'decimal:2',
+        'non_refund_amount' => 'decimal:2',
+        'cancelled_at'      => 'datetime',
     ];
 
     public function boat() {

@@ -695,6 +695,29 @@ class BoatBookingController extends Controller
         ), ['page_title' => 'Boat Booking Requests']);
     }
 
+    public function cancelBooking(Request $request, $booking_id)
+    {
+        $booking = BoatBooking::where('booking_id', $booking_id)->firstOrFail();
+
+        $validated = $request->validate([
+            'cancel_reason'     => 'required|string|max:1000',
+            'refund_amount'     => 'nullable|numeric|min:0',
+            'non_refund_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $booking->update([
+            'booking_status'    => 'cancelled',
+            'payment_status'    => 'cancelled',
+            'cancel_reason'     => $validated['cancel_reason'],
+            'refund_amount'     => $validated['refund_amount'] ?? 0,
+            'non_refund_amount' => $validated['non_refund_amount'] ?? 0,
+            'cancelled_at'      => now(),
+        ]);
+
+        return redirect()->route('boat-booking.show', $booking_id)
+            ->with('success', 'Booking cancelled successfully.');
+    }
+
     public function cancelBookingRequest($booking_request_id){
         try {
             $boat_booking_request = BoatBookingRequest::where('booking_request_id', $booking_request_id)->first();

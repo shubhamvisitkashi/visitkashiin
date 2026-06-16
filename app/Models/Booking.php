@@ -33,6 +33,10 @@ class Booking extends Model
         'gst_amount',
         'customer_gstin',
         'company_name',
+        'cancel_reason',
+        'refund_amount',
+        'non_refund_amount',
+        'cancelled_at',
     ];
 
     protected $casts = [
@@ -45,6 +49,9 @@ class Booking extends Model
         'gst_rate' => 'decimal:2',
         'taxable_amount' => 'decimal:2',
         'gst_amount' => 'decimal:2',
+        'refund_amount' => 'decimal:2',
+        'non_refund_amount' => 'decimal:2',
+        'cancelled_at' => 'datetime',
     ];
 
     protected static function boot()

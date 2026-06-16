@@ -26,12 +26,16 @@ class CabBooking extends Model
         'vendor_cost', 'discount', 'total_amount', 'advance_paid', 'pending_amount',
         'booking_status', 'payment_status',
         'lead_source_id', 'created_by', 'notes',
+        'cancel_reason', 'refund_amount', 'non_refund_amount', 'cancelled_at',
     ];
 
     protected $casts = [
-        'pickup_date'  => 'date',
-        'return_date'  => 'date',
-        'pickup_time'  => 'datetime:H:i',
+        'pickup_date'       => 'date',
+        'return_date'       => 'date',
+        'pickup_time'       => 'datetime:H:i',
+        'refund_amount'     => 'decimal:2',
+        'non_refund_amount' => 'decimal:2',
+        'cancelled_at'      => 'datetime',
     ];
 
     // ── Relations ─────────────────────────────────────────────────

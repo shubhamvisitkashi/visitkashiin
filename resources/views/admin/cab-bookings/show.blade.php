@@ -435,18 +435,26 @@
       </div>
 
       {{-- Update Status --}}
+      @if($booking->booking_status !== 'cancelled')
       <div class="cs-scard">
         <div style="font-size:.84rem;font-weight:700;color:#0F172A;margin-bottom:12px;">Update Status</div>
-        <form action="{{ route('cab-bookings.update-status', $booking->id) }}" method="POST">
-          @csrf
-          <select name="booking_status" class="status-select">
-            @foreach(['pending'=>'⏳ Pending','confirmed'=>'✅ Confirmed','assigned'=>'🔧 Assigned','completed'=>'✔️ Completed','cancelled'=>'❌ Cancelled'] as $v=>$l)
-              <option value="{{ $v }}" {{ $booking->booking_status == $v ? 'selected' : '' }}>{{ $l }}</option>
-            @endforeach
-          </select>
-          <button type="submit" class="status-btn">Update Status</button>
-        </form>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+          @foreach(['pending'=>'⏳ Pending','confirmed'=>'✅ Confirmed','assigned'=>'🔧 Assigned','completed'=>'✔️ Completed'] as $v=>$l)
+            @if($booking->booking_status !== $v)
+            <form action="{{ route('cab-bookings.update-status', $booking->id) }}" method="POST" style="margin:0;">
+              @csrf
+              <input type="hidden" name="booking_status" value="{{ $v }}">
+              <button type="submit" class="status-btn" style="padding:6px 12px;font-size:.76rem;width:auto;background:#F1F5F9;color:#334155;border:1.5px solid #E2E8F0;border-radius:8px;">{{ $l }}</button>
+            </form>
+            @endif
+          @endforeach
+        </div>
+        <button type="button" onclick="openCabCancelModal()"
+          style="width:100%;padding:9px;border:1.5px solid #FECACA;border-radius:9px;background:#FEF2F2;color:#DC2626;font-size:.83rem;font-weight:700;cursor:pointer;">
+          ✕ Cancel Booking
+        </button>
       </div>
+      @endif
 
       {{-- Quick Actions --}}
       <div class="cs-scard">
@@ -471,6 +479,29 @@
           </form>
         </div>
       </div>
+
+      {{-- Cancellation Details --}}
+      @if($booking->booking_status === 'cancelled')
+      <div class="cs-scard" style="border-top:3px solid #DC2626;">
+        <div style="font-size:.84rem;font-weight:700;color:#991B1B;margin-bottom:10px;">✕ Cancellation Details</div>
+        @if($booking->cancelled_at)
+        <div style="font-size:.7rem;color:#94A3B8;margin-bottom:10px;">Cancelled on {{ $booking->cancelled_at->format('d M Y, h:i A') }}</div>
+        @endif
+        @if($booking->cancel_reason)
+        <div style="background:#FEF2F2;border-left:3px solid #DC2626;border-radius:8px;padding:9px 12px;font-size:.81rem;color:#7F1D1D;line-height:1.5;margin-bottom:12px;">{{ $booking->cancel_reason }}</div>
+        @endif
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:9px;padding:10px;text-align:center;">
+            <div style="font-size:.65rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Refund</div>
+            <div style="font-size:.95rem;font-weight:800;color:#15803D;">₹{{ number_format($booking->refund_amount ?? 0, 2) }}</div>
+          </div>
+          <div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:9px;padding:10px;text-align:center;">
+            <div style="font-size:.65rem;font-weight:700;color:#991B1B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Non-Refund</div>
+            <div style="font-size:.95rem;font-weight:800;color:#DC2626;">₹{{ number_format($booking->non_refund_amount ?? 0, 2) }}</div>
+          </div>
+        </div>
+      </div>
+      @endif
 
     </div>{{-- /sidebar --}}
   </div>
@@ -520,5 +551,145 @@ function confirmDeleteCabBooking() {
         }
     });
 }
+
+// ── Cancellation Modal ──
+const cabPaidTotal = {{ (float)$paid }};
+
+function openCabCancelModal() {
+    const modal = new bootstrap.Modal(document.getElementById('cabCancelModal'));
+    modal.show();
+}
+
+function cabSyncNonRefund() {
+    const refund = parseFloat(document.getElementById('cabRefundInput').value) || 0;
+    document.getElementById('cabNonRefundInput').value = Math.max(0, cabPaidTotal - refund).toFixed(2);
+    cabValidateAmts();
+}
+
+function cabSyncRefund() {
+    const nonRefund = parseFloat(document.getElementById('cabNonRefundInput').value) || 0;
+    document.getElementById('cabRefundInput').value = Math.max(0, cabPaidTotal - nonRefund).toFixed(2);
+    cabValidateAmts();
+}
+
+function cabValidateAmts() {
+    const refund    = parseFloat(document.getElementById('cabRefundInput').value) || 0;
+    const nonRefund = parseFloat(document.getElementById('cabNonRefundInput').value) || 0;
+    const warn      = document.getElementById('cabAmtWarning');
+    if (cabPaidTotal > 0 && Math.abs(refund + nonRefund - cabPaidTotal) > 0.01) {
+        warn.textContent = `⚠ Refund (₹${refund.toFixed(2)}) + Non-Refund (₹${nonRefund.toFixed(2)}) = ₹${(refund+nonRefund).toFixed(2)} — doesn't match paid amount ₹${cabPaidTotal.toFixed(2)}.`;
+        warn.style.display = 'block';
+    } else {
+        warn.style.display = 'none';
+    }
+}
+
+function submitCabCancellation() {
+    const reason    = document.getElementById('cabCancelReasonInput').value.trim();
+    const refund    = parseFloat(document.getElementById('cabRefundInput').value) || 0;
+    const nonRefund = parseFloat(document.getElementById('cabNonRefundInput').value) || 0;
+
+    if (!reason) {
+        document.getElementById('cabCancelReasonInput').style.borderColor = '#EF4444';
+        document.getElementById('cabCancelReasonInput').focus();
+        return;
+    }
+    document.getElementById('cabCancelReasonInput').style.borderColor = '';
+    document.getElementById('cabCancelReasonHidden').value    = reason;
+    document.getElementById('cabRefundAmtHidden').value       = refund.toFixed(2);
+    document.getElementById('cabNonRefundAmtHidden').value    = nonRefund.toFixed(2);
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('cabCancelModal'));
+    if (modal) modal.hide();
+    document.getElementById('cabCancelForm').submit();
+}
 </script>
+
+{{-- Hidden cancellation form --}}
+<form id="cabCancelForm" action="{{ route('cab-bookings.update-status', $booking->id) }}" method="POST" style="display:none">
+  @csrf
+  <input type="hidden" name="booking_status" value="cancelled">
+  <input type="hidden" name="cancel_reason" id="cabCancelReasonHidden">
+  <input type="hidden" name="refund_amount" id="cabRefundAmtHidden">
+  <input type="hidden" name="non_refund_amount" id="cabNonRefundAmtHidden">
+</form>
+
+{{-- Cancellation Modal --}}
+<div class="modal fade" id="cabCancelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:20px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.18)">
+      <div class="modal-header" style="background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;border:none;padding:18px 22px">
+        <h5 class="modal-title" style="font-weight:700;font-size:.95rem;">
+          ✕ Cancel Cab Booking — {{ $booking->booking_number }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:22px">
+
+        <div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:.83rem;color:#7F1D1D;line-height:1.5;">
+          ⚠️ This will mark the booking as <strong>Cancelled</strong>. Please fill in the refund details.
+        </div>
+
+        {{-- Payment summary --}}
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+          <div style="font-size:.7rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Payment Summary</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+            <div>
+              <div style="font-size:.68rem;color:#94A3B8;margin-bottom:3px;">Total Fare</div>
+              <div style="font-size:.92rem;font-weight:800;color:#0F172A;">₹{{ number_format($booking->total_amount, 2) }}</div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;color:#94A3B8;margin-bottom:3px;">Amount Paid</div>
+              <div style="font-size:.92rem;font-weight:800;color:#059669;">₹{{ number_format($paid, 2) }}</div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;color:#94A3B8;margin-bottom:3px;">Balance Due</div>
+              <div style="font-size:.92rem;font-weight:800;color:{{ $due > 0 ? '#DC2626' : '#059669' }};">₹{{ number_format($due, 2) }}</div>
+            </div>
+          </div>
+        </div>
+
+        {{-- Reason --}}
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:.84rem">Cancellation Reason <span class="text-danger">*</span></label>
+          <textarea id="cabCancelReasonInput" class="form-control" rows="3"
+            placeholder="e.g. Customer cancelled due to change in travel plans..."
+            style="border-radius:10px;font-size:.85rem"></textarea>
+        </div>
+
+        {{-- Refund amounts --}}
+        <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:12px;padding:14px 16px;">
+          <div style="font-size:.7rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">💰 Refund Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label class="form-label fw-semibold" style="font-size:.82rem;color:#166534;">✅ Refund Amount (₹)</label>
+              <input type="number" id="cabRefundInput" class="form-control" step="0.01" min="0"
+                value="{{ number_format($paid, 2, '.', '') }}"
+                style="border-radius:9px;font-size:.9rem;border-color:#86EFAC;"
+                oninput="cabSyncNonRefund()">
+              <div style="font-size:.7rem;color:#16A34A;margin-top:3px;">Amount to return to customer</div>
+            </div>
+            <div>
+              <label class="form-label fw-semibold" style="font-size:.82rem;color:#B91C1C;">❌ Non-Refund Amount (₹)</label>
+              <input type="number" id="cabNonRefundInput" class="form-control" step="0.01" min="0"
+                value="0.00"
+                style="border-radius:9px;font-size:.9rem;border-color:#FCA5A5;"
+                oninput="cabSyncRefund()">
+              <div style="font-size:.7rem;color:#DC2626;margin-top:3px;">Amount retained (penalty/charge)</div>
+            </div>
+          </div>
+          <div id="cabAmtWarning" style="display:none;margin-top:10px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;font-size:.78rem;color:#92400E;"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #F1F5F9;padding:14px 22px;gap:10px;">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:10px;font-size:.85rem">Keep Booking</button>
+        <button type="button" class="btn btn-danger fw-semibold" onclick="submitCabCancellation()" style="border-radius:10px;font-size:.85rem;padding:8px 20px;">
+          ✕ Confirm Cancellation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection

@@ -571,12 +571,24 @@ class BookingController extends Controller
         $booking = Booking::findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'required|in:confirmed,in_progress,completed,cancelled',
+            'status'           => 'required|in:confirmed,in_progress,completed,cancelled',
+            'cancel_reason'    => 'nullable|string|max:1000',
+            'refund_amount'    => 'nullable|numeric|min:0',
+            'non_refund_amount'=> 'nullable|numeric|min:0',
         ]);
 
-        $booking->update(['booking_status' => $validated['status']]);
+        $updateData = ['booking_status' => $validated['status']];
 
-        return back()->with('success', 'Booking status updated to ' . ucfirst($validated['status']));
+        if ($validated['status'] === 'cancelled') {
+            $updateData['cancel_reason']     = $validated['cancel_reason'] ?? null;
+            $updateData['refund_amount']     = $validated['refund_amount'] ?? 0;
+            $updateData['non_refund_amount'] = $validated['non_refund_amount'] ?? 0;
+            $updateData['cancelled_at']      = now();
+        }
+
+        $booking->update($updateData);
+
+        return back()->with('success', 'Booking status updated to ' . ucfirst(str_replace('_', ' ', $validated['status'])));
     }
 
     public function assignService(Request $request, $id)

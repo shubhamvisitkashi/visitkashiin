@@ -1350,6 +1350,33 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                 </div>
             </div>
 
+            {{-- Booking Status Actions --}}
+            @if($booking->booking_status !== 'cancelled')
+            <div class="pk-card">
+                <div class="pk-card-head">
+                    <h6 class="pk-card-title"><i data-feather="activity"></i> Update Status</h6>
+                </div>
+                <div class="pk-card-body" style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        @if($booking->booking_status !== 'confirmed')
+                        <button type="button" class="pk-stt-btn confirmed" onclick="updateStatus('confirmed')">✓ Confirmed</button>
+                        @endif
+                        @if($booking->booking_status !== 'in_progress')
+                        <button type="button" class="pk-stt-btn in_progress" onclick="updateStatus('in_progress')">⟳ Ongoing</button>
+                        @endif
+                        @if($booking->booking_status !== 'completed')
+                        <button type="button" class="pk-stt-btn completed" onclick="updateStatus('completed')">✔ Completed</button>
+                        @endif
+                    </div>
+                    <button type="button" class="pk-btn" style="justify-content:center;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;font-weight:700;font-size:.82rem;border-radius:10px;"
+                        onclick="updateStatus('cancelled')">
+                        <i data-feather="x-circle" style="width:14px;height:14px"></i>
+                        Cancel This Booking
+                    </button>
+                </div>
+            </div>
+            @endif
+
             {{-- Downloads --}}
             <div class="pk-card">
                 <div class="pk-card-head">
@@ -1369,6 +1396,40 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                     @endif
                 </div>
             </div>
+
+            {{-- Cancellation Details (shown only when cancelled) --}}
+            @if($booking->booking_status === 'cancelled')
+            <div class="pk-card" style="border-top:3px solid #DC2626;">
+                <div class="pk-card-head" style="background:linear-gradient(to right,#FEF2F2,#fff);">
+                    <h6 class="pk-card-title" style="color:#991B1B;">
+                        <i data-feather="x-circle"></i> Cancellation Details
+                    </h6>
+                    @if($booking->cancelled_at)
+                    <span style="font-size:.7rem;color:#DC2626;font-weight:600;">
+                        {{ $booking->cancelled_at->format('d M Y') }}
+                    </span>
+                    @endif
+                </div>
+                <div class="pk-card-body">
+                    @if($booking->cancel_reason)
+                    <div style="margin-bottom:14px;">
+                        <div style="font-size:.7rem;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Reason</div>
+                        <div style="font-size:.85rem;color:#374151;background:#FEF2F2;border-radius:9px;padding:10px 12px;border-left:3px solid #DC2626;line-height:1.5;">{{ $booking->cancel_reason }}</div>
+                    </div>
+                    @endif
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:10px;padding:12px;text-align:center;">
+                            <div style="font-size:.68rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">Refund Amount</div>
+                            <div style="font-size:1.05rem;font-weight:800;color:#15803D;">₹{{ number_format($booking->refund_amount ?? 0, 2) }}</div>
+                        </div>
+                        <div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:10px;padding:12px;text-align:center;">
+                            <div style="font-size:.68rem;font-weight:700;color:#991B1B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">Non-Refund Amount</div>
+                            <div style="font-size:1.05rem;font-weight:800;color:#DC2626;">₹{{ number_format($booking->non_refund_amount ?? 0, 2) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
 
         </div>
         </div>{{-- /sidebar --}}
@@ -1548,6 +1609,110 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
     </div>
 </div>
 
+{{-- Hidden Status Form (used by updateStatus JS) --}}
+<form id="statusForm" action="{{ route('bookings.update-status', $booking->id) }}" method="POST" style="display:none">
+    @csrf
+    <input type="hidden" name="status" id="statusVal">
+    <input type="hidden" name="cancel_reason" id="cancelReasonVal">
+    <input type="hidden" name="refund_amount" id="refundAmountVal">
+    <input type="hidden" name="non_refund_amount" id="nonRefundAmountVal">
+</form>
+
+{{-- Cancellation Modal --}}
+<div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:20px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.18)">
+            <div class="modal-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;padding:18px 22px">
+                <h5 class="modal-title" style="font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:8px">
+                    <i data-feather="x-circle" style="width:16px;height:16px"></i>
+                    Cancel Booking — {{ $booking->booking_number }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:22px">
+
+                {{-- Warning banner --}}
+                <div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;">
+                    <i data-feather="alert-triangle" style="width:16px;height:16px;color:#DC2626;margin-top:1px;flex-shrink:0"></i>
+                    <div style="font-size:.83rem;color:#7F1D1D;line-height:1.5;">
+                        This will mark the booking as <strong>Cancelled</strong>. Please fill in the refund details below.
+                    </div>
+                </div>
+
+                {{-- Payment summary --}}
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+                    <div style="font-size:.72rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Payment Summary</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+                        <div>
+                            <div style="font-size:.7rem;color:#94A3B8;margin-bottom:3px;">Total Amount</div>
+                            <div style="font-size:.95rem;font-weight:800;color:#0F172A;">₹{{ number_format($netTotal, 2) }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:.7rem;color:#94A3B8;margin-bottom:3px;">Amount Paid</div>
+                            <div style="font-size:.95rem;font-weight:800;color:#059669;">₹{{ number_format($paidAmt, 2) }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:.7rem;color:#94A3B8;margin-bottom:3px;">Balance Due</div>
+                            <div style="font-size:.95rem;font-weight:800;color:{{ $pendAmt > 0 ? '#DC2626' : '#059669' }};">₹{{ number_format($pendAmt, 2) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Cancellation reason --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="font-size:.84rem">Cancellation Reason <span class="text-danger">*</span></label>
+                    <textarea id="cancelReasonInput" class="form-control" rows="3" placeholder="e.g. Customer requested cancellation due to schedule change..." style="border-radius:10px;font-size:.85rem"></textarea>
+                </div>
+
+                {{-- Refund amounts --}}
+                <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+                    <div style="font-size:.72rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                        <i data-feather="refresh-cw" style="width:12px;height:12px"></i> Refund Details
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div>
+                            <label class="form-label fw-semibold" style="font-size:.82rem;color:#166534;">
+                                <i data-feather="check-circle" style="width:12px;height:12px;color:#22C55E"></i>
+                                Refund Amount (₹)
+                            </label>
+                            <input type="number" id="refundAmountInput" class="form-control" step="0.01" min="0"
+                                value="{{ number_format($paidAmt, 2, '.', '') }}"
+                                placeholder="0.00" style="border-radius:9px;font-size:.9rem;border-color:#86EFAC;"
+                                oninput="syncNonRefund()">
+                            <div style="font-size:.7rem;color:#16A34A;margin-top:3px;">Amount to be returned to customer</div>
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold" style="font-size:.82rem;color:#B91C1C;">
+                                <i data-feather="x-circle" style="width:12px;height:12px;color:#EF4444"></i>
+                                Non-Refund Amount (₹)
+                            </label>
+                            <input type="number" id="nonRefundAmountInput" class="form-control" step="0.01" min="0"
+                                value="0.00"
+                                placeholder="0.00" style="border-radius:9px;font-size:.9rem;border-color:#FCA5A5;"
+                                oninput="syncRefund()">
+                            <div style="font-size:.7rem;color:#DC2626;margin-top:3px;">Amount retained (deduction/penalty)</div>
+                        </div>
+                    </div>
+                    <div id="cancelAmountWarning" style="display:none;margin-top:10px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;font-size:.78rem;color:#92400E;">
+                        <i data-feather="alert-triangle" style="width:12px;height:12px"></i>
+                        <span id="cancelAmountWarningText"></span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="border-top:1px solid #F1F5F9;padding:14px 22px;gap:10px;">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:10px;font-size:.85rem">
+                    Keep Booking
+                </button>
+                <button type="button" class="btn btn-danger fw-semibold" onclick="submitCancellation()" style="border-radius:10px;font-size:.85rem;padding:8px 20px;">
+                    <i data-feather="x-circle" style="width:14px;height:14px"></i>
+                    Confirm Cancellation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- ═══════════════════════════════ JS ═══════════════════════════════ --}}
 <script>
 // ── Dark Mode ──
@@ -1601,19 +1766,85 @@ function shareWA() {
 
 // ── Status Update ──
 function updateStatus(status) {
-    const nm = {pending:'Pending',in_progress:'Ongoing',completed:'Completed',cancelled:'Cancelled'};
+    if (status === 'cancelled') {
+        // Show the dedicated cancellation modal
+        const modal = new bootstrap.Modal(document.getElementById('cancelBookingModal'));
+        modal.show();
+        return;
+    }
+    const nm = {pending:'Pending',in_progress:'Ongoing',completed:'Completed',confirmed:'Confirmed'};
     Swal.fire({
         title: 'Update Status?',
-        html: `<p>Change to <strong>${nm[status]}</strong>?</p>`,
+        html: `<p>Change booking status to <strong>${nm[status] ?? status}</strong>?</p>`,
         icon: 'question', showCancelButton: true,
         confirmButtonColor: '#6366f1', cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, update!'
+        confirmButtonText: 'Yes, update!', cancelButtonText: 'No, keep current'
     }).then(r => {
         if (r.isConfirmed) {
             document.getElementById('statusVal').value = status;
+            document.getElementById('cancelReasonVal').value = '';
+            document.getElementById('refundAmountVal').value = '';
+            document.getElementById('nonRefundAmountVal').value = '';
             document.getElementById('statusForm').submit();
         }
     });
+}
+
+// ── Cancellation Modal Helpers ──
+const paidTotal = {{ (float)$paidAmt }};
+
+function syncNonRefund() {
+    const refund = parseFloat(document.getElementById('refundAmountInput').value) || 0;
+    const nonRefund = Math.max(0, paidTotal - refund);
+    document.getElementById('nonRefundAmountInput').value = nonRefund.toFixed(2);
+    validateCancelAmounts();
+}
+
+function syncRefund() {
+    const nonRefund = parseFloat(document.getElementById('nonRefundAmountInput').value) || 0;
+    const refund = Math.max(0, paidTotal - nonRefund);
+    document.getElementById('refundAmountInput').value = refund.toFixed(2);
+    validateCancelAmounts();
+}
+
+function validateCancelAmounts() {
+    const refund    = parseFloat(document.getElementById('refundAmountInput').value) || 0;
+    const nonRefund = parseFloat(document.getElementById('nonRefundAmountInput').value) || 0;
+    const warn      = document.getElementById('cancelAmountWarning');
+    const warnTxt   = document.getElementById('cancelAmountWarningText');
+    const total     = refund + nonRefund;
+
+    if (Math.abs(total - paidTotal) > 0.01 && paidTotal > 0) {
+        warnTxt.textContent = `Refund (₹${refund.toFixed(2)}) + Non-Refund (₹${nonRefund.toFixed(2)}) = ₹${total.toFixed(2)}, which doesn't match the paid amount ₹${paidTotal.toFixed(2)}.`;
+        warn.style.display = 'flex';
+        warn.style.alignItems = 'center';
+        warn.style.gap = '6px';
+    } else {
+        warn.style.display = 'none';
+    }
+}
+
+function submitCancellation() {
+    const reason    = document.getElementById('cancelReasonInput').value.trim();
+    const refund    = parseFloat(document.getElementById('refundAmountInput').value) || 0;
+    const nonRefund = parseFloat(document.getElementById('nonRefundAmountInput').value) || 0;
+
+    if (!reason) {
+        document.getElementById('cancelReasonInput').style.borderColor = '#EF4444';
+        document.getElementById('cancelReasonInput').focus();
+        return;
+    }
+    document.getElementById('cancelReasonInput').style.borderColor = '';
+
+    document.getElementById('statusVal').value          = 'cancelled';
+    document.getElementById('cancelReasonVal').value    = reason;
+    document.getElementById('refundAmountVal').value    = refund.toFixed(2);
+    document.getElementById('nonRefundAmountVal').value = nonRefund.toFixed(2);
+
+    // Hide modal first, then submit
+    const modal = bootstrap.Modal.getInstance(document.getElementById('cancelBookingModal'));
+    if (modal) modal.hide();
+    document.getElementById('statusForm').submit();
 }
 
 // ── Delete Booking ──
@@ -1814,6 +2045,11 @@ function submitEdit() {
     if (isStay) buildEditShortPlan();
     document.getElementById('editBookingForm').submit();
 }
+
+// Re-render feather icons when cancellation modal opens
+document.getElementById('cancelBookingModal').addEventListener('shown.bs.modal', function() {
+    feather.replace();
+});
 </script>
 
 @endsection
