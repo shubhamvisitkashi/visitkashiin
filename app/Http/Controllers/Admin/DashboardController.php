@@ -316,7 +316,7 @@ class DashboardController extends Controller
         $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
         $cabQ  = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
-        $stayPending = (clone $stayQ)->with('lead')
+        $stayPending = (clone $stayQ)->with(['lead', 'createdBy'])
             ->where('pending_amount', '>', 0)
             ->orderByDesc('booking_date')
             ->get()
@@ -325,6 +325,7 @@ class DashboardController extends Controller
                 'icon'           => '🏨',
                 'number'         => $b->booking_number,
                 'guest'          => $b->lead?->guest_name ?? '—',
+                'added_by'       => $b->createdBy?->name ?? '—',
                 'total_amount'   => (int) $b->total_amount,
                 'paid_amount'    => (int) ($b->total_amount - $b->pending_amount),
                 'pending_amount' => (int) $b->pending_amount,
@@ -333,7 +334,7 @@ class DashboardController extends Controller
                 'url'            => route('bookings.show', $b->id),
             ]);
 
-        $cabPending = (clone $cabQ)
+        $cabPending = (clone $cabQ)->with('createdBy')
             ->where('pending_amount', '>', 0)
             ->orderByDesc('created_at')
             ->get()
@@ -342,6 +343,7 @@ class DashboardController extends Controller
                 'icon'           => '🚗',
                 'number'         => $b->booking_number,
                 'guest'          => $b->customer_name ?? '—',
+                'added_by'       => $b->createdBy?->name ?? '—',
                 'total_amount'   => (int) $b->total_amount,
                 'paid_amount'    => (int) ($b->total_amount - $b->pending_amount),
                 'pending_amount' => (int) $b->pending_amount,

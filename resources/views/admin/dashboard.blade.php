@@ -987,24 +987,25 @@ function openPendingModal() {
       const totalPending = data.reduce((s, b) => s + b.pending_amount, 0);
       sub.textContent = data.length + ' booking' + (data.length > 1 ? 's' : '') + ' · ₹' + totalPending.toLocaleString('en-IN') + ' total due';
 
-      let html = '<div style="overflow-x:auto;"><table class="dk-table" style="width:100%;min-width:680px;">'
+      let html = '<div style="overflow-x:auto;"><table class="dk-table" style="width:100%;min-width:760px;">'
         + '<thead><tr>'
         + '<th>Booking #</th><th>Guest</th><th>Type</th>'
         + '<th>Total</th><th>Paid</th>'
         + '<th style="color:#EF4444;">Due</th>'
-        + '<th>Status</th><th>Date</th>'
+        + '<th>Status</th><th>Added By</th><th>Date</th>'
         + '</tr></thead><tbody>';
 
       data.forEach(b => {
         const statusCls = {'confirmed':'confirmed','completed':'completed','cancelled':'cancelled'}[b.status] || 'in_progress';
         html += `<tr>
           <td><a href="${b.url}" class="bk-link" target="_blank">${b.number}</a></td>
-          <td style="font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.guest}</td>
+          <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.guest}</td>
           <td><span class="sb" style="background:#FEF3C7;color:#92400E;">${b.icon} ${b.type}</span></td>
           <td style="font-weight:600;white-space:nowrap;">₹${b.total_amount.toLocaleString('en-IN')}</td>
           <td style="color:var(--emerald);font-weight:600;white-space:nowrap;">₹${b.paid_amount.toLocaleString('en-IN')}</td>
           <td style="color:#EF4444;font-weight:800;white-space:nowrap;">₹${b.pending_amount.toLocaleString('en-IN')}</td>
           <td><span class="sb sb-${statusCls}">${b.status.replace(/_/g,' ')}</span></td>
+          <td style="font-size:.77rem;color:var(--sub);font-weight:600;white-space:nowrap;">${b.added_by}</td>
           <td style="color:var(--muted);font-size:.77rem;white-space:nowrap;">${b.date}</td>
         </tr>`;
       });
