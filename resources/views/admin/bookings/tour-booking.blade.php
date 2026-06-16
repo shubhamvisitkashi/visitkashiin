@@ -133,20 +133,23 @@
 
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:768px){
-  .tb-page{padding:10px;padding-bottom:130px;overflow-x:hidden;}
-  .tb-header{padding:12px 14px;margin-top:58px;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  html,body{overflow-x:hidden !important;max-width:100vw;}
+  .tb-page{padding:8px;padding-bottom:130px;overflow-x:hidden;}
+  .tb-header{padding:12px 14px;margin-top:58px;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
   .tb-header h1{font-size:.95rem;}
   .tb-header p{font-size:.7rem;}
   .tb-back{padding:6px 10px;font-size:.73rem;}
-  .tb-card{margin-bottom:12px;border-radius:12px;overflow:hidden;}
-  .tb-card-head{padding:10px 14px;}
+  .tb-card{margin-bottom:10px;border-radius:12px;overflow:hidden;}
+  .tb-card-head{padding:10px 12px;}
   .tb-card-title{font-size:.82rem;}
-  .tb-card-body{padding:12px 14px;}
+  .tb-card-body{padding:10px 12px;}
   .tb-icon{width:26px;height:26px;font-size:.85rem;}
   .tb-label{font-size:.65rem;margin-bottom:4px;}
   .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;max-width:100%;box-sizing:border-box;}
-  .tb-svc-body{padding:10px 12px;}
-  .tb-svc-head{padding:8px 12px;}
+  .tb-svc-body{padding:8px 10px;}
+  .tb-svc-head{padding:8px 10px;}
+  /* hotel row inner box — override inline style padding */
+  .tb-hotel-row{padding:10px 10px !important;}
   /* Fully neutralize Bootstrap row gutter — the CSS var drives both the negative margin and col padding */
   .tb-card-body .row,.tb-svc-body .row{--bs-gutter-x:0 !important;margin-left:0 !important;margin-right:0 !important;}
   .tb-card-body .row>[class*="col"],.tb-svc-body .row>[class*="col"]{--bs-gutter-x:0 !important;padding-left:4px !important;padding-right:4px !important;}
@@ -891,7 +894,8 @@ function tbAddHotelRow() {
   var idx  = _hotelRowCount++;
   var wrap = document.getElementById('hotel-rows');
   var div  = document.createElement('div');
-  div.id   = 'hotel-row-' + idx;
+  div.id        = 'hotel-row-' + idx;
+  div.className = 'tb-hotel-row';
   div.style.cssText = 'border:1px solid #E2E8F0;border-radius:10px;padding:12px 14px;margin-bottom:10px;background:#FAFBFF;position:relative;';
 
   div.innerHTML = `
