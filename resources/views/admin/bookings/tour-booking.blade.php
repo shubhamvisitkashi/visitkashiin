@@ -222,6 +222,12 @@
   .tb-mob-submit svg{width:15px;height:15px;stroke:#fff;}
 }
 
+/* ── CKEditor: prevent horizontal overflow ── */
+.ck.ck-editor{max-width:100% !important;width:100% !important;}
+.ck-sticky-panel,.ck-sticky-panel__content{max-width:100% !important;width:100% !important;box-sizing:border-box !important;}
+.ck.ck-toolbar{flex-wrap:wrap !important;}
+.ck.ck-editor__editable_inline{min-height:180px;max-width:100% !important;overflow-x:hidden;}
+
 /* ── Alert ── */
 .tb-alert{display:flex;align-items:center;gap:10px;border-radius:11px;padding:11px 16px;margin-bottom:18px;font-size:.83rem;font-weight:600;}
 .tb-alert-err{background:#FEF2F2;border:1.5px solid #FECACA;color:#991B1B;}
@@ -1185,9 +1191,9 @@ document.addEventListener('DOMContentLoaded', function () {
   ClassicEditor
     .create(document.getElementById('tb-itinerary-editor'), {
       toolbar: [
-        'heading','|','bold','italic','underline','|',
+        'heading','|','bold','italic','|',
         'bulletedList','numberedList','|',
-        'blockQuote','horizontalLine','|',
+        'blockQuote','|',
         'undo','redo'
       ],
       placeholder: 'Day 1: Arrival at Varanasi...\nDay 2: Kashi Vishwanath & Ganga Aarti...\nDay 3: Departure...',
