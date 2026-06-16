@@ -9,7 +9,7 @@
 }
 
 /* ── Page ── */
-.tb-page{padding:24px;background:#F1F5F9;min-height:100vh;}
+.tb-page{padding:24px;background:#5a9ee1;min-height:100vh;}
 
 /* ── Header ── */
 .tb-header{background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:var(--t-r);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;margin-top:50px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(79,70,229,.25);}
@@ -147,9 +147,9 @@
   .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;max-width:100%;box-sizing:border-box;}
   .tb-svc-body{padding:10px 12px;}
   .tb-svc-head{padding:8px 12px;}
-  /* Fix Bootstrap row negative-margin overflow */
-  .tb-svc-body .row,.tb-card-body .row{margin-left:0;margin-right:0;}
-  .tb-svc-body .row>[class*="col"],.tb-card-body .row>[class*="col"]{padding-left:5px;padding-right:5px;}
+  /* Fully neutralize Bootstrap row gutter — the CSS var drives both the negative margin and col padding */
+  .tb-card-body .row,.tb-svc-body .row{--bs-gutter-x:0 !important;margin-left:0 !important;margin-right:0 !important;}
+  .tb-card-body .row>[class*="col"],.tb-svc-body .row>[class*="col"]{--bs-gutter-x:0 !important;padding-left:4px !important;padding-right:4px !important;}
   .tb-sidebar-card{padding:14px;border-radius:12px;margin-bottom:12px;}
   .tb-sidebar-title{font-size:.82rem;margin-bottom:10px;padding-bottom:8px;}
   /* hide in-page submit on mobile — sticky bar handles it */
@@ -163,9 +163,13 @@
   .tb-hotel-row-grid-2>*:nth-child(2){grid-column:1/-1;} /* check-out full width */
   .tb-hotel-row-grid-2>*:nth-child(3){grid-column:1/2;}  /* nights half */
   .tb-hotel-row-grid-2>*:nth-child(4){grid-column:2/3;}  /* B2B half */
+  /* inclusions grid: contain pills inside card */
+  .incl-grid{max-width:100%;box-sizing:border-box;}
+  .incl-pill{font-size:.72rem;padding:5px 10px;}
   /* custom inclusion add row */
-  .tb-incl-add-row{flex-wrap:nowrap;}
-  .tb-incl-add-btn{padding:8px 12px !important;font-size:.75rem !important;flex-shrink:0;}
+  .tb-incl-add-row{flex-wrap:nowrap;max-width:100%;box-sizing:border-box;}
+  .tb-incl-add-row input{min-width:0;flex:1 1 0;}
+  .tb-incl-add-btn{padding:8px 12px !important;font-size:.75rem !important;flex-shrink:0;white-space:nowrap;}
   /* counter steppers: compact for col-4 */
   .tb-stepper{padding:4px 5px !important;gap:0 !important;}
   .tb-stepper-btn{width:26px !important;height:26px !important;font-size:1rem !important;}
