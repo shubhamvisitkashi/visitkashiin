@@ -1064,6 +1064,7 @@ class BookingController extends Controller
                 'booking_status', 'payment_status', 'total_amount', 'final_amount',
                 'created_by',
             ])
+            ->with('createdBy:id,name,email')
             ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
             ->when($start, fn($q) => $q->where('booking_date', '>=', $start))
             ->when($end,   fn($q) => $q->where('booking_date', '<=', $end))
@@ -1104,8 +1105,8 @@ class BookingController extends Controller
                     'services'           => '⛵ Boat Booking',
                     'service_types'      => [['name' => 'Boat', 'icon' => '⛵', 'color' => ['background' => '#0891B2', 'border' => '#0E7490']]],
                     'short_plan'         => 'N/A',
-                    'created_by'         => 'Staff',
-                    'created_by_email'   => 'N/A',
+                    'created_by'         => $boat->createdBy?->name ?? '—',
+                    'created_by_email'   => $boat->createdBy?->email ?? 'N/A',
                     'service_date'       => $date,
                     'booking_type'       => 'boat',
                     'url'                => route('boat-booking.show', $boat->booking_id),
@@ -1120,6 +1121,7 @@ class BookingController extends Controller
                 'total_amount', 'advance_paid', 'pending_amount',
                 'vehicle_name', 'trip_type', 'created_by',
             ])
+            ->with('createdBy:id,name,email')
             ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId))
             ->when($start, fn($q) => $q->where('pickup_date', '>=', $start))
             ->when($end,   fn($q) => $q->where('pickup_date', '<=', $end))
@@ -1161,8 +1163,8 @@ class BookingController extends Controller
                     'services'           => '🚗 ' . ($cab->vehicle_name ?? 'Cab') . ' — ' . ($cab->trip_type ?? ''),
                     'service_types'      => [['name' => 'Cab', 'icon' => '🚗', 'color' => ['background' => '#16A34A', 'border' => '#15803D']]],
                     'short_plan'         => $cab->trip_type ?? 'N/A',
-                    'created_by'         => 'Staff',
-                    'created_by_email'   => 'N/A',
+                    'created_by'         => $cab->createdBy?->name ?? '—',
+                    'created_by_email'   => $cab->createdBy?->email ?? 'N/A',
                     'service_date'       => $date,
                     'booking_type'       => 'cab',
                     'url'                => route('cab-bookings.show', $cab->id),

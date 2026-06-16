@@ -141,25 +141,35 @@
   .tb-card{margin-bottom:12px;border-radius:12px;overflow:hidden;}
   .tb-card-head{padding:10px 14px;}
   .tb-card-title{font-size:.82rem;}
-  .tb-card-body{padding:12px 14px;overflow-x:hidden;}
+  .tb-card-body{padding:12px 14px;}
   .tb-icon{width:26px;height:26px;font-size:.85rem;}
   .tb-label{font-size:.65rem;margin-bottom:4px;}
-  .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;max-width:100%;}
-  .tb-svc-body{padding:10px 12px;overflow-x:hidden;}
+  .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;max-width:100%;box-sizing:border-box;}
+  .tb-svc-body{padding:10px 12px;}
   .tb-svc-head{padding:8px 12px;}
   /* Fix Bootstrap row negative-margin overflow */
   .tb-svc-body .row,.tb-card-body .row{margin-left:0;margin-right:0;}
-  .tb-svc-body .row>[class*="col"],.tb-card-body .row>[class*="col"]{padding-left:6px;padding-right:6px;}
+  .tb-svc-body .row>[class*="col"],.tb-card-body .row>[class*="col"]{padding-left:5px;padding-right:5px;}
   .tb-sidebar-card{padding:14px;border-radius:12px;margin-bottom:12px;}
   .tb-sidebar-title{font-size:.82rem;margin-bottom:10px;padding-bottom:8px;}
   /* hide in-page submit on mobile — sticky bar handles it */
   .tb-sidebar .tb-submit{display:none;}
-  /* hotel row grids stack on mobile — fully single-column */
+  /* hotel row grid 1: fully single-column */
   .tb-hotel-row-grid-1{grid-template-columns:1fr !important;}
-  .tb-hotel-row-grid-2{grid-template-columns:1fr 1fr !important;overflow:hidden;}
-  .tb-hotel-row-grid-2>*{min-width:0;overflow:hidden;}
-  .tb-hotel-row-grid-2>*:nth-child(3){grid-column:1 / 2;}
-  .tb-hotel-row-grid-2>*:nth-child(4){grid-column:2 / 3;}
+  /* hotel row grid 2: check-in + check-out each full-width; nights + B2B side-by-side */
+  .tb-hotel-row-grid-2{grid-template-columns:1fr 1fr !important;}
+  .tb-hotel-row-grid-2>*{min-width:0;}
+  .tb-hotel-row-grid-2>*:nth-child(1){grid-column:1/-1;} /* check-in full width */
+  .tb-hotel-row-grid-2>*:nth-child(2){grid-column:1/-1;} /* check-out full width */
+  .tb-hotel-row-grid-2>*:nth-child(3){grid-column:1/2;}  /* nights half */
+  .tb-hotel-row-grid-2>*:nth-child(4){grid-column:2/3;}  /* B2B half */
+  /* custom inclusion add row */
+  .tb-incl-add-row{flex-wrap:nowrap;}
+  .tb-incl-add-btn{padding:8px 12px !important;font-size:.75rem !important;flex-shrink:0;}
+  /* counter steppers: compact for col-4 */
+  .tb-stepper{padding:4px 5px !important;gap:0 !important;}
+  .tb-stepper-btn{width:26px !important;height:26px !important;font-size:1rem !important;}
+  .tb-stepper-val{font-size:1rem !important;min-width:20px !important;}
   /* rupee wrap smaller on mobile */
   .tb-rupee{padding:0 8px 0 10px;font-size:.78rem;}
   .tb-input-rs{padding:8px 10px !important;font-size:.82rem !important;}
@@ -311,53 +321,53 @@
           <label class="tb-label">Package Name <span class="req">*</span></label>
           <input type="text" name="package_name" id="tb-pkg-name" class="tb-input" required placeholder="e.g. Kashi Darshan 3D/2N" oninput="tbBuildSummary()" value="{{ old('package_name') }}">
         </div>
-        <div class="col-6 col-md-2">
+        <div class="col-4 col-md-2">
           <label class="tb-label">Adults</label>
-          <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid var(--t-border);border-radius:9px;padding:5px 8px;">
-            <button type="button" onclick="tbAdj('adults',-1)"
+          <div class="tb-stepper" style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid var(--t-border);border-radius:9px;padding:5px 8px;">
+            <button type="button" onclick="tbAdj('adults',-1)" class="tb-stepper-btn"
                     style="width:28px;height:28px;border-radius:7px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">−</button>
-            <span id="tb-adults-dis" style="font-size:1.2rem;font-weight:800;color:var(--t-indigo);min-width:24px;text-align:center;">{{ old('adults',2) }}</span>
-            <button type="button" onclick="tbAdj('adults',1)"
+            <span id="tb-adults-dis" class="tb-stepper-val" style="font-size:1.2rem;font-weight:800;color:var(--t-indigo);min-width:24px;text-align:center;">{{ old('adults',2) }}</span>
+            <button type="button" onclick="tbAdj('adults',1)" class="tb-stepper-btn"
                     style="width:28px;height:28px;border-radius:7px;border:1.5px solid var(--t-indigo);background:var(--t-indigo);font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">+</button>
           </div>
           <input type="hidden" name="adults" id="tb-adults" value="{{ old('adults',2) }}">
         </div>
-        <div class="col-6 col-md-2">
+        <div class="col-4 col-md-2">
           <label class="tb-label">Children</label>
-          <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid var(--t-border);border-radius:9px;padding:5px 8px;">
-            <button type="button" onclick="tbAdj('children',-1)"
+          <div class="tb-stepper" style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid var(--t-border);border-radius:9px;padding:5px 8px;">
+            <button type="button" onclick="tbAdj('children',-1)" class="tb-stepper-btn"
                     style="width:28px;height:28px;border-radius:7px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">−</button>
-            <span id="tb-children-dis" style="font-size:1.2rem;font-weight:800;color:var(--t-violet);min-width:24px;text-align:center;">{{ old('children',0) }}</span>
-            <button type="button" onclick="tbAdj('children',1)"
+            <span id="tb-children-dis" class="tb-stepper-val" style="font-size:1.2rem;font-weight:800;color:var(--t-violet);min-width:24px;text-align:center;">{{ old('children',0) }}</span>
+            <button type="button" onclick="tbAdj('children',1)" class="tb-stepper-btn"
                     style="width:28px;height:28px;border-radius:7px;border:1.5px solid var(--t-violet);background:var(--t-violet);font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">+</button>
           </div>
           <input type="hidden" name="children" id="tb-children" value="{{ old('children',0) }}">
         </div>
-        <div class="col-6 col-md-2">
+        <div class="col-4 col-md-2">
           <label class="tb-label">Infants</label>
-          <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid var(--t-border);border-radius:9px;padding:5px 8px;">
-            <button type="button" onclick="tbAdj('infants',-1)"
+          <div class="tb-stepper" style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid var(--t-border);border-radius:9px;padding:5px 8px;">
+            <button type="button" onclick="tbAdj('infants',-1)" class="tb-stepper-btn"
                     style="width:28px;height:28px;border-radius:7px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">−</button>
-            <span id="tb-infants-dis" style="font-size:1.2rem;font-weight:800;color:#F59E0B;min-width:24px;text-align:center;">{{ old('infants',0) }}</span>
-            <button type="button" onclick="tbAdj('infants',1)"
+            <span id="tb-infants-dis" class="tb-stepper-val" style="font-size:1.2rem;font-weight:800;color:#F59E0B;min-width:24px;text-align:center;">{{ old('infants',0) }}</span>
+            <button type="button" onclick="tbAdj('infants',1)" class="tb-stepper-btn"
                     style="width:28px;height:28px;border-radius:7px;border:1.5px solid #F59E0B;background:#F59E0B;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">+</button>
           </div>
           <input type="hidden" name="infants" id="tb-infants" value="{{ old('infants',0) }}">
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <label class="tb-label">Travel Date <span class="req">*</span></label>
           <input type="date" name="tour_start" id="tb-tour-start" class="tb-input" required
                  value="{{ old('tour_start', date('Y-m-d')) }}" oninput="tbBuildSummary()">
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <label class="tb-label">Return Date</label>
           <input type="date" name="tour_end" id="tb-tour-end" class="tb-input" value="{{ old('tour_end') }}" oninput="tbBuildSummary()">
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <label class="tb-label">Pickup Point</label>
           <input type="text" name="pickup_point" class="tb-input" placeholder="e.g. Varanasi Airport / Hotel" value="{{ old('pickup_point') }}">
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <label class="tb-label">Drop Point</label>
           <input type="text" name="drop_point" class="tb-input" placeholder="e.g. Railway Station" value="{{ old('drop_point') }}">
         </div>
@@ -382,11 +392,11 @@
           </div>
 
           {{-- Custom / Other --}}
-          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-            <input type="text" id="tb-incl-custom" class="tb-input" style="flex:1;"
+          <div class="tb-incl-add-row" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <input type="text" id="tb-incl-custom" class="tb-input" style="flex:1;min-width:0;"
                    placeholder="Add custom inclusion…">
-            <button type="button" onclick="addCustomIncl()"
-                    style="background:var(--t-indigo);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;">
+            <button type="button" onclick="addCustomIncl()" class="tb-incl-add-btn"
+                    style="background:var(--t-indigo);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">
               + Add
             </button>
           </div>
