@@ -21,7 +21,16 @@
 
 /* ── Layout ── */
 .tb-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
-@media(max-width:1100px){.tb-layout{grid-template-columns:1fr;}}
+@media(max-width:1100px){
+  .tb-layout{grid-template-columns:1fr;}
+  .tb-sidebar{position:static;top:auto;}   /* remove sticky in stacked layout */
+}
+/* ── Tablet (769px–1100px): single-column but desktop spacing ── */
+@media(max-width:1100px) and (min-width:769px){
+  .tb-page{padding:16px;}
+  .tb-card-body{padding:14px 16px;}
+  .tb-svc-body{padding:10px 12px;}
+}
 
 /* ── Card ── */
 .tb-card{background:#fff;border-radius:var(--t-r);border:1px solid var(--t-border);box-shadow:var(--t-s);margin-bottom:16px;overflow:hidden;}
@@ -39,9 +48,6 @@
 .tb-prefix-wrap{position:relative;}
 .tb-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.8rem;font-weight:600;color:var(--t-sub);pointer-events:none;}
 .tb-input-pl{padding-left:40px !important;}
-.tb-rupee-wrap{position:relative;}
-.tb-rupee{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:.82rem;font-weight:600;color:var(--t-sub);pointer-events:none;}
-.tb-input-rs{padding-left:26px !important;}
 
 /* ── Service blocks ── */
 .tb-svc{border:1.5px solid var(--t-border);border-radius:11px;margin-bottom:10px;overflow:hidden;}
@@ -53,14 +59,14 @@
 
 /* ── Expense bar ── */
 .tb-exp-bar{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:11px;padding:12px 16px;margin-top:14px;align-items:center;}
-@media(max-width:600px){
+@media(max-width:768px){
   .tb-exp-bar{grid-template-columns:1fr 1fr;}
   .tb-exp-total{grid-column:1 / -1;}
 }
 
 /* ── Hotel row responsive grids (used by JS template) ── */
 .tb-hotel-row-grid-1{display:grid;grid-template-columns:160px 1fr 140px;gap:8px;margin-bottom:8px;}
-.tb-hotel-row-grid-2{display:grid;grid-template-columns:1fr 1fr 70px 1fr;gap:8px;align-items:end;}
+.tb-hotel-row-grid-2{display:grid;grid-template-columns:1fr 1fr 80px 1fr;gap:8px;align-items:end;}
 .tb-hotel-row-grid-1>*,.tb-hotel-row-grid-2>*{min-width:0;}
 
 /* ── Rupee prefix — flex input-group (no overlap) ── */
@@ -127,13 +133,14 @@
 .incl-pill:hover{border-color:var(--t-indigo);color:var(--t-indigo);background:#EEF2FF;}
 .incl-pill.active{border-color:var(--t-indigo);background:var(--t-indigo);color:#fff;}
 .incl-pill input{display:none;}
+.tb-incl-add-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
 
 /* ── Sticky mobile action bar (hidden on desktop) ── */
 .tb-mob-bar{display:none;}
 
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:768px){
-  html,body{overflow-x:hidden !important;max-width:100vw;}
+  html,body{overflow-x:hidden !important;max-width:100%;}
   .tb-page{padding:8px;padding-bottom:130px;overflow-x:hidden;}
   .tb-header{padding:12px 14px;margin-top:58px;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
   .tb-header h1{font-size:.95rem;}
@@ -324,7 +331,7 @@
     </div>
     <div class="tb-card-body">
       <div class="row g-3">
-        <div class="col-md-5">
+        <div class="col-md-6">
           <label class="tb-label">Package Name <span class="req">*</span></label>
           <input type="text" name="package_name" id="tb-pkg-name" class="tb-input" required placeholder="e.g. Kashi Darshan 3D/2N" oninput="tbBuildSummary()" value="{{ old('package_name') }}">
         </div>
@@ -392,14 +399,16 @@
             ] as $incl)
             @php $slug = preg_replace('/[^a-z0-9]/i','-', strtolower($incl)); @endphp
             <label class="incl-pill {{ collect(explode(',', old('inclusions','')))->map(fn($v)=>trim($v))->contains($incl) ? 'active' : '' }}"
-                   onclick="toggleIncl('{{ addslashes($incl) }}', this)">
+                   role="button" tabindex="0"
+                   onclick="toggleIncl('{{ addslashes($incl) }}', this)"
+                   onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleIncl('{{ addslashes($incl) }}',this);}">
               {{ $incl }}
             </label>
             @endforeach
           </div>
 
           {{-- Custom / Other --}}
-          <div class="tb-incl-add-row" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <div class="tb-incl-add-row">
             <input type="text" id="tb-incl-custom" class="tb-input" style="flex:1;min-width:0;"
                    placeholder="Add custom inclusion…">
             <button type="button" onclick="addCustomIncl()" class="tb-incl-add-btn"
@@ -408,8 +417,6 @@
             </button>
           </div>
 
-          {{-- Preview --}}
-          <div id="incl-preview" style="display:none;margin-top:8px;background:#EEF2FF;border-radius:8px;padding:7px 12px;font-size:.76rem;color:#4338CA;font-weight:600;"></div>
         </div>
       </div>
     </div>
@@ -455,7 +462,7 @@
           <span class="tb-svc-badge" id="tb-cab-badge">₹0</span>
         </div>
         <div class="tb-svc-body">
-          <div class="row g-2">
+          <div class="row g-3">
             <div class="col-6 col-md-3">
               <label class="tb-label">Vehicle Type</label>
               <select name="cab_type" class="tb-select">
@@ -508,7 +515,7 @@
           <span class="tb-svc-badge" id="tb-boat-badge">₹0</span>
         </div>
         <div class="tb-svc-body">
-          <div class="row g-2">
+          <div class="row g-3">
             <div class="col-6 col-md-3">
               <label class="tb-label">Boat Type</label>
               <select name="boat_type" class="tb-select">
@@ -555,7 +562,7 @@
           <span class="tb-svc-badge" id="tb-guide-badge">₹0</span>
         </div>
         <div class="tb-svc-body">
-          <div class="row g-2">
+          <div class="row g-3">
             <div class="col-12 col-md-4">
               <label class="tb-label">Guide Name</label>
               <input type="text" name="guide_name" class="tb-input" placeholder="e.g. Ramesh Kumar">
@@ -738,7 +745,7 @@
           Apply GST
         </label>
       </div>
-      <div id="tb-gst-fields" style="{{ old('is_gst_invoice') ? '' : 'display:none;' }}">
+      <div id="tb-gst-fields"{{ old('is_gst_invoice') ? '' : ' style="display:none;"' }}>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <div>
             <label class="tb-label">GST Rate</label>
@@ -830,51 +837,6 @@
 /* ── Hotel city/name data (from DB via PHP) ─── */
 var _hotelData = @json($hotelsByCity);
 
-function tbLoadHotels() {
-  var city    = document.getElementById('tb-hotel-city').value;
-  var sel     = document.getElementById('tb-hotel-select');
-  var nameInp = document.getElementById('tb-hotel-name');
-
-  // Clear name input
-  nameInp.value = '';
-
-  if (!city || city === 'Other' || !_hotelData[city]) {
-    sel.style.display = 'none';
-    nameInp.style.display = '';
-    nameInp.placeholder = 'Type hotel name…';
-    return;
-  }
-
-  // Rebuild options
-  sel.innerHTML = '<option value="">— Select hotel —</option>';
-  _hotelData[city].forEach(function(h) {
-    var opt = document.createElement('option');
-    opt.value = h; opt.textContent = h;
-    sel.appendChild(opt);
-  });
-  // Add custom option
-  var custom = document.createElement('option');
-  custom.value = '__custom__'; custom.textContent = '✏️ Type custom hotel name…';
-  sel.appendChild(custom);
-
-  sel.style.display = '';
-  nameInp.style.display = 'none';
-  nameInp.placeholder = 'Hotel name';
-}
-
-function tbOnHotelSelect() {
-  var sel     = document.getElementById('tb-hotel-select');
-  var nameInp = document.getElementById('tb-hotel-name');
-  if (sel.value === '__custom__') {
-    nameInp.style.display = '';
-    nameInp.value = '';
-    nameInp.focus();
-  } else if (sel.value) {
-    nameInp.value = sel.value;
-    nameInp.style.display = 'none';
-  }
-}
-
 /* ── Adults / Children counters ─────────────── */
 function tbAdj(field, delta) {
   var hidden = document.getElementById('tb-' + field);
@@ -888,7 +850,6 @@ function tbAdj(field, delta) {
 
 /* ── Multi-hotel rows ────────────────────────── */
 var _hotelRowCount = 0;
-var _today = '{{ date("Y-m-d") }}';
 
 function tbAddHotelRow() {
   var idx  = _hotelRowCount++;
@@ -1026,12 +987,6 @@ function tbSumHotels() {
   tbCalcExpense();
 }
 
-// Backward-compat stubs (old single-hotel functions no longer needed)
-function tbLoadHotels()   {}
-function tbOnHotelSelect(){}
-
-/* ── Calc nights (legacy stub) ────────────────── */
-function tbCalcNights() {}
 
 /* ── Format ₹ ────────────────────────────────── */
 function fmt(v) {
@@ -1170,7 +1125,10 @@ function addCustomIncl() {
     var lbl = document.createElement('label');
     lbl.className = 'incl-pill active';
     lbl.textContent = val;
+    lbl.setAttribute('role', 'button');
+    lbl.setAttribute('tabindex', '0');
     lbl.setAttribute('onclick', "toggleIncl('" + val.replace(/'/g,"\\'") + "', this)");
+    lbl.setAttribute('onkeydown', "if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleIncl('" + val.replace(/'/g,"\\'") + "',this);}");
     document.getElementById('incl-pills').appendChild(lbl);
   }
   inp.value = '';
@@ -1180,17 +1138,6 @@ function addCustomIncl() {
 function _syncIncl() {
   var csv = Array.from(_inclSet).join(', ');
   document.getElementById('tb-inclusions-hidden').value = csv;
-  // Update preview
-  var prev = document.getElementById('incl-preview');
-  if (csv) {
-    prev.style.display = '';
-    prev.textContent   = '✓ ' + csv;
-  } else {
-    prev.style.display = 'none';
-  }
-  // Also keep tb-inclusions in sync for tbBuildSummary
-  var legacyInp = document.getElementById('tb-inclusions');
-  if (legacyInp) legacyInp.value = csv;
   tbBuildSummary();
 }
 
@@ -1228,6 +1175,13 @@ document.addEventListener('DOMContentLoaded', tbStatusStyle);
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  if (typeof ClassicEditor === 'undefined') {
+    var ta = document.getElementById('tb-itinerary');
+    var ed = document.getElementById('tb-itinerary-editor');
+    if (ta) { ta.style.cssText = 'display:block;width:100%;min-height:180px;'; }
+    if (ed) { ed.style.display = 'none'; }
+    return;
+  }
   ClassicEditor
     .create(document.getElementById('tb-itinerary-editor'), {
       toolbar: [
