@@ -61,6 +61,7 @@
 /* ── Hotel row responsive grids (used by JS template) ── */
 .tb-hotel-row-grid-1{display:grid;grid-template-columns:160px 1fr 140px;gap:8px;margin-bottom:8px;}
 .tb-hotel-row-grid-2{display:grid;grid-template-columns:1fr 1fr 70px 1fr;gap:8px;align-items:end;}
+.tb-hotel-row-grid-1>*,.tb-hotel-row-grid-2>*{min-width:0;}
 
 /* ── Rupee prefix — flex input-group (no overlap) ── */
 .tb-rupee-wrap{
@@ -132,28 +133,33 @@
 
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:768px){
-  .tb-page{padding:10px;padding-bottom:130px;}
+  .tb-page{padding:10px;padding-bottom:130px;overflow-x:hidden;}
   .tb-header{padding:12px 14px;margin-top:58px;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
   .tb-header h1{font-size:.95rem;}
   .tb-header p{font-size:.7rem;}
   .tb-back{padding:6px 10px;font-size:.73rem;}
-  .tb-card{margin-bottom:12px;border-radius:12px;}
+  .tb-card{margin-bottom:12px;border-radius:12px;overflow:hidden;}
   .tb-card-head{padding:10px 14px;}
   .tb-card-title{font-size:.82rem;}
-  .tb-card-body{padding:12px 14px;}
+  .tb-card-body{padding:12px 14px;overflow-x:hidden;}
   .tb-icon{width:26px;height:26px;font-size:.85rem;}
   .tb-label{font-size:.65rem;margin-bottom:4px;}
-  .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;}
-  .tb-svc-body{padding:10px 12px;}
+  .tb-input,.tb-select,.tb-textarea{padding:8px 11px;font-size:.82rem;max-width:100%;}
+  .tb-svc-body{padding:10px 12px;overflow-x:hidden;}
   .tb-svc-head{padding:8px 12px;}
+  /* Fix Bootstrap row negative-margin overflow */
+  .tb-svc-body .row,.tb-card-body .row{margin-left:0;margin-right:0;}
+  .tb-svc-body .row>[class*="col"],.tb-card-body .row>[class*="col"]{padding-left:6px;padding-right:6px;}
   .tb-sidebar-card{padding:14px;border-radius:12px;margin-bottom:12px;}
   .tb-sidebar-title{font-size:.82rem;margin-bottom:10px;padding-bottom:8px;}
   /* hide in-page submit on mobile — sticky bar handles it */
   .tb-sidebar .tb-submit{display:none;}
-  /* hotel row grids stack on mobile */
+  /* hotel row grids stack on mobile — fully single-column */
   .tb-hotel-row-grid-1{grid-template-columns:1fr !important;}
-  .tb-hotel-row-grid-2{grid-template-columns:1fr 1fr !important;}
-  .tb-hotel-row-grid-2>div:last-child{grid-column:1 / -1;}
+  .tb-hotel-row-grid-2{grid-template-columns:1fr 1fr !important;overflow:hidden;}
+  .tb-hotel-row-grid-2>*{min-width:0;overflow:hidden;}
+  .tb-hotel-row-grid-2>*:nth-child(3){grid-column:1 / 2;}
+  .tb-hotel-row-grid-2>*:nth-child(4){grid-column:2 / 3;}
   /* rupee wrap smaller on mobile */
   .tb-rupee{padding:0 8px 0 10px;font-size:.78rem;}
   .tb-input-rs{padding:8px 10px !important;font-size:.82rem !important;}
@@ -341,12 +347,11 @@
         <div class="col-md-3">
           <label class="tb-label">Travel Date <span class="req">*</span></label>
           <input type="date" name="tour_start" id="tb-tour-start" class="tb-input" required
-                 min="{{ date('Y-m-d') }}"
                  value="{{ old('tour_start', date('Y-m-d')) }}" oninput="tbBuildSummary()">
         </div>
         <div class="col-md-3">
           <label class="tb-label">Return Date</label>
-          <input type="date" name="tour_end" id="tb-tour-end" class="tb-input" min="{{ date('Y-m-d') }}" value="{{ old('tour_end') }}" oninput="tbBuildSummary()">
+          <input type="date" name="tour_end" id="tb-tour-end" class="tb-input" value="{{ old('tour_end') }}" oninput="tbBuildSummary()">
         </div>
         <div class="col-md-3">
           <label class="tb-label">Pickup Point</label>
@@ -434,7 +439,7 @@
         </div>
         <div class="tb-svc-body">
           <div class="row g-2">
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <label class="tb-label">Vehicle Type</label>
               <select name="cab_type" class="tb-select">
                 <option>Sedan / Swift Dzire</option>
@@ -447,27 +452,27 @@
                 <option>Other</option>
               </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <label class="tb-label">Route</label>
               <input type="text" name="cab_route" class="tb-input" placeholder="e.g. Airport → Hotel">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">From Date</label>
-              <input type="date" name="cab_from" class="tb-input" min="{{ date('Y-m-d') }}">
+              <input type="date" name="cab_from" class="tb-input">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">To Date</label>
-              <input type="date" name="cab_to" class="tb-input" min="{{ date('Y-m-d') }}">
+              <input type="date" name="cab_to" class="tb-input">
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <label class="tb-label">Driver Name</label>
               <input type="text" name="driver_name" class="tb-input" placeholder="e.g. Ramesh Singh">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">Pickup Time</label>
               <input type="time" name="cab_pickup_time" class="tb-input">
             </div>
-            <div class="col-md-2">
+            <div class="col-12 col-md-2">
               <label class="tb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
               <div class="tb-rupee-wrap">
                 <span class="tb-rupee">₹</span>
@@ -487,7 +492,7 @@
         </div>
         <div class="tb-svc-body">
           <div class="row g-2">
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <label class="tb-label">Boat Type</label>
               <select name="boat_type" class="tb-select">
                 <option>Normal Motor Boat</option>
@@ -498,7 +503,7 @@
                 <option>Cruise</option>
               </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <label class="tb-label">Ride Type</label>
               <select name="boat_ride" class="tb-select">
                 <option>Morning Boat Ride</option>
@@ -506,15 +511,15 @@
                 <option>Ganga Aarti Evening</option>
               </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">Date</label>
-              <input type="date" name="boat_date" class="tb-input" min="{{ date('Y-m-d') }}">
+              <input type="date" name="boat_date" class="tb-input">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">Time</label>
               <input type="time" name="boat_time" class="tb-input">
             </div>
-            <div class="col-md-2">
+            <div class="col-12 col-md-2">
               <label class="tb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
               <div class="tb-rupee-wrap">
                 <span class="tb-rupee">₹</span>
@@ -534,25 +539,25 @@
         </div>
         <div class="tb-svc-body">
           <div class="row g-2">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
               <label class="tb-label">Guide Name</label>
               <input type="text" name="guide_name" class="tb-input" placeholder="e.g. Ramesh Kumar">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">From Date</label>
-              <input type="date" name="guide_from" class="tb-input" min="{{ date('Y-m-d') }}">
+              <input type="date" name="guide_from" class="tb-input">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">To Date</label>
-              <input type="date" name="guide_to" class="tb-input" min="{{ date('Y-m-d') }}">
+              <input type="date" name="guide_to" class="tb-input">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label">Language</label>
               <select name="guide_lang" class="tb-select">
                 <option>Hindi</option><option>English</option><option>Hindi + English</option><option>Foreign Language</option>
               </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="tb-label" style="color:#D97706;font-weight:800;">B2B Expense (₹)</label>
               <div class="tb-rupee-wrap">
                 <span class="tb-rupee">₹</span>
@@ -923,11 +928,11 @@ function tbAddHotelRow() {
     <div class="tb-hotel-row-grid-2">
       <div>
         <label class="tb-label">Check-in</label>
-        <input type="date" name="hotels[${idx}][checkin]" id="hotel-ci-${idx}" class="tb-input" min="${_today}" oninput="tbCalcRowNights(${idx})">
+        <input type="date" name="hotels[${idx}][checkin]" id="hotel-ci-${idx}" class="tb-input" oninput="tbCalcRowNights(${idx})">
       </div>
       <div>
         <label class="tb-label">Check-out</label>
-        <input type="date" name="hotels[${idx}][checkout]" id="hotel-co-${idx}" class="tb-input" min="${_today}" oninput="tbCalcRowNights(${idx})">
+        <input type="date" name="hotels[${idx}][checkout]" id="hotel-co-${idx}" class="tb-input" oninput="tbCalcRowNights(${idx})">
       </div>
       <div>
         <label class="tb-label">Nights</label>
