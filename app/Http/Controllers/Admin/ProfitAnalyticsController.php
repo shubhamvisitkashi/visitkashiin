@@ -108,26 +108,22 @@ class ProfitAnalyticsController extends Controller
 
     private function tourMetrics($start, $end): array
     {
-        $rev = (float) Lead::where('booking_status', 'confirm')
+        $leadsQ = Lead::where('booking_status', 'confirm')
             ->whereNotNull('booking_start_date')
-            ->whereBetween('booking_start_date', [$start, $end])
-            ->sum('total_amount');
+            ->whereBetween('booking_start_date', [$start, $end]);
 
-        $cnt = (int) Lead::where('booking_status', 'confirm')
-            ->whereNotNull('booking_start_date')
-            ->whereBetween('booking_start_date', [$start, $end])
-            ->count();
+        $cnt = (int) (clone $leadsQ)->count();
 
-        $withExp = Lead::where('booking_status', 'confirm')
-            ->whereNotNull('booking_start_date')
-            ->whereBetween('booking_start_date', [$start, $end])
-            ->where('total_expense', '>', 0)
+        // Revenue counts only what's been collected, not the full sale value.
+        $rev = (clone $leadsQ)->withSum('leadPayments', 'paid_amount')
+            ->get()
+            ->sum(fn ($l) => min((float) $l->total_amount, (float) ($l->lead_payments_sum_paid_amount ?? 0)));
+
+        $withExp = (clone $leadsQ)->where('total_expense', '>', 0)
             ->selectRaw('SUM(total_expense) as exp')
             ->value('exp');
 
-        $noExpRev = Lead::where('booking_status', 'confirm')
-            ->whereNotNull('booking_start_date')
-            ->whereBetween('booking_start_date', [$start, $end])
+        $noExpRev = (clone $leadsQ)
             ->where(function ($q) { $q->whereNull('total_expense')->orWhere('total_expense', 0); })
             ->sum('total_amount');
 
@@ -141,29 +137,31 @@ class ProfitAnalyticsController extends Controller
         $data = CabBooking::where('booking_status', 'confirmed')
             ->whereNotNull('pickup_date')
             ->whereBetween('pickup_date', [$start, $end])
-            ->selectRaw('COUNT(*) as cnt, SUM(total_amount) as rev, SUM(vendor_cost) as exp')
+            ->selectRaw('COUNT(*) as cnt, SUM(total_amount) as sale, SUM(pending_amount) as pending, SUM(vendor_cost) as exp')
             ->first();
 
-        $rev = (float)($data->rev ?? 0);
-        $exp = (float)($data->exp ?? 0);
-        if ($exp == 0 && $rev > 0) $exp = round($rev * 0.30);
+        $sale = (float)($data->sale ?? 0);
+        $rev  = $sale - (float)($data->pending ?? 0);
+        $exp  = (float)($data->exp ?? 0);
+        if ($exp == 0 && $sale > 0) $exp = round($sale * 0.30);
 
         return [$rev, $exp, (int)($data->cnt ?? 0)];
     }
 
     private function boatMetrics($start, $end): array
     {
-        $data = BoatBooking::where('booking_status', 'confirmed')
+        $rows = BoatBooking::where('booking_status', 'confirmed')
             ->whereNotNull('booking_date')
             ->whereBetween('booking_date', [$start, $end])
-            ->selectRaw('COUNT(*) as cnt, SUM(final_amount) as rev, SUM(vendor_cost) as exp')
-            ->first();
+            ->withSum('payments', 'amount')
+            ->get();
 
-        $rev = (float)($data->rev ?? 0);
-        $exp = (float)($data->exp ?? 0);
-        if ($exp == 0 && $rev > 0) $exp = round($rev * 0.30);
+        $sale = (float) $rows->sum('final_amount');
+        $rev  = (float) $rows->sum(fn ($b) => min((float) $b->final_amount, (float) ($b->payments_sum_amount ?? 0)));
+        $exp  = (float) $rows->sum('vendor_cost');
+        if ($exp == 0 && $sale > 0) $exp = round($sale * 0.30);
 
-        return [$rev, $exp, (int)($data->cnt ?? 0)];
+        return [$rev, $exp, $rows->count()];
     }
 
     private function packageMetrics($start, $end): array
@@ -171,11 +169,12 @@ class ProfitAnalyticsController extends Controller
         $data = Booking::where('booking_status', 'confirmed')
             ->whereNotNull('booking_date')
             ->whereBetween('booking_date', [$start, $end])
-            ->selectRaw('COUNT(*) as cnt, SUM(total_amount) as rev')
+            ->selectRaw('COUNT(*) as cnt, SUM(total_amount) as sale, SUM(pending_amount) as pending')
             ->first();
 
-        $rev = (float)($data->rev ?? 0);
-        $exp = round($rev * 0.30);
+        $sale = (float)($data->sale ?? 0);
+        $rev  = $sale - (float)($data->pending ?? 0);
+        $exp  = round($sale * 0.30);
 
         return [$rev, $exp, (int)($data->cnt ?? 0)];
     }
@@ -186,46 +185,16 @@ class ProfitAnalyticsController extends Controller
         $anchorMonth = Carbon::parse($anchor)->startOfMonth();
 
         for ($i = 5; $i >= 0; $i--) {
-            $m  = $anchorMonth->copy()->subMonths($i);
-            $yr = $m->year;
-            $mo = $m->month;
+            $m     = $anchorMonth->copy()->subMonths($i);
+            $start = $m->copy()->startOfMonth();
+            $end   = $m->copy()->endOfMonth();
 
-            // Tours
-            $tourRev  = (float) Lead::where('booking_status', 'confirm')
-                ->whereYear('booking_start_date', $yr)->whereMonth('booking_start_date', $mo)
-                ->sum('total_amount');
-            $tourExpW = (float) Lead::where('booking_status', 'confirm')
-                ->where('total_expense', '>', 0)
-                ->whereYear('booking_start_date', $yr)->whereMonth('booking_start_date', $mo)
-                ->sum('total_expense');
-            $tourExpN = (float) Lead::where('booking_status', 'confirm')
-                ->where(function ($q) { $q->whereNull('total_expense')->orWhere('total_expense', 0); })
-                ->whereYear('booking_start_date', $yr)->whereMonth('booking_start_date', $mo)
-                ->sum('total_amount');
-            $tourExp  = $tourExpW + round($tourExpN * 0.30);
+            [$tourRev, $tourExp] = $this->tourMetrics($start, $end);
+            [$cabRev,  $cabExp]  = $this->cabMetrics($start, $end);
+            [$boatRev, $boatExp] = $this->boatMetrics($start, $end);
+            [$pkgRev,  $pkgExp]  = $this->packageMetrics($start, $end);
 
-            // Cabs
-            $cab    = CabBooking::where('booking_status', 'confirmed')
-                ->whereYear('pickup_date', $yr)->whereMonth('pickup_date', $mo)
-                ->selectRaw('SUM(total_amount) as rev, SUM(vendor_cost) as exp')->first();
-            $cabRev = (float)($cab->rev ?? 0);
-            $cabExp = (float)($cab->exp ?? 0) ?: round($cabRev * 0.30);
-
-            // Boats
-            $boat    = BoatBooking::where('booking_status', 'confirmed')
-                ->whereYear('booking_date', $yr)->whereMonth('booking_date', $mo)
-                ->selectRaw('SUM(final_amount) as rev, SUM(vendor_cost) as exp')->first();
-            $boatRev = (float)($boat->rev ?? 0);
-            $boatExp = (float)($boat->exp ?? 0) ?: round($boatRev * 0.30);
-
-            // Packages
-            $pkg    = Booking::where('booking_status', 'confirmed')
-                ->whereYear('booking_date', $yr)->whereMonth('booking_date', $mo)
-                ->selectRaw('SUM(total_amount) as rev')->first();
-            $pkgRev = (float)($pkg->rev ?? 0);
-            $pkgExp = round($pkgRev * 0.30);
-
-            $manualExp = (float) Expense::whereYear('expense_date', $yr)->whereMonth('expense_date', $mo)->sum('amount');
+            $manualExp = (float) Expense::whereBetween('expense_date', [$start, $end])->sum('amount');
 
             $mRev = $tourRev + $cabRev + $boatRev + $pkgRev;
             $mExp = $tourExp + $cabExp + $boatExp + $pkgExp + $manualExp;
@@ -244,34 +213,30 @@ class ProfitAnalyticsController extends Controller
     private function buildSourceBreakdown($start, $end, float $totalRevenue): \Illuminate\Support\Collection
     {
         $merged = [];
+        $add = function ($key, $rev) use (&$merged) {
+            $key = $key ?? 0;
+            if (!isset($merged[$key])) $merged[$key] = ['lead_source_id' => $key ?: null, 'cnt' => 0, 'revenue' => 0.0];
+            $merged[$key]['cnt']++;
+            $merged[$key]['revenue'] += $rev;
+        };
 
-        $groups = [
-            Lead::where('booking_status', 'confirm')->whereNotNull('booking_start_date')
-                ->whereBetween('booking_start_date', [$start, $end])
-                ->select('lead_source_id', DB::raw('COUNT(*) as cnt'), DB::raw('SUM(total_amount) as revenue'))
-                ->groupBy('lead_source_id')->get(),
+        // Revenue here is collected amount, not gross sale value.
+        Lead::where('booking_status', 'confirm')->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->withSum('leadPayments', 'paid_amount')
+            ->get(['id', 'lead_source_id', 'total_amount'])
+            ->each(fn ($l) => $add($l->lead_source_id, min((float) $l->total_amount, (float) ($l->lead_payments_sum_paid_amount ?? 0))));
 
-            CabBooking::where('booking_status', 'confirmed')->whereNotNull('pickup_date')
-                ->whereBetween('pickup_date', [$start, $end])
-                ->select('lead_source_id', DB::raw('COUNT(*) as cnt'), DB::raw('SUM(total_amount) as revenue'))
-                ->groupBy('lead_source_id')->get(),
+        CabBooking::where('booking_status', 'confirmed')->whereNotNull('pickup_date')
+            ->whereBetween('pickup_date', [$start, $end])
+            ->get(['id', 'lead_source_id', 'total_amount', 'pending_amount'])
+            ->each(fn ($b) => $add($b->lead_source_id, (float) $b->total_amount - (float) $b->pending_amount));
 
-            BoatBooking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
-                ->whereBetween('booking_date', [$start, $end])
-                ->select('lead_source_id', DB::raw('COUNT(*) as cnt'), DB::raw('SUM(final_amount) as revenue'))
-                ->groupBy('lead_source_id')->get(),
-        ];
-
-        foreach ($groups as $rows) {
-            foreach ($rows as $r) {
-                $key = $r->lead_source_id ?? 0;
-                if (!isset($merged[$key])) {
-                    $merged[$key] = ['lead_source_id' => $r->lead_source_id, 'cnt' => 0, 'revenue' => 0.0];
-                }
-                $merged[$key]['cnt']     += $r->cnt;
-                $merged[$key]['revenue'] += (float)$r->revenue;
-            }
-        }
+        BoatBooking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
+            ->whereBetween('booking_date', [$start, $end])
+            ->withSum('payments', 'amount')
+            ->get(['id', 'lead_source_id', 'final_amount'])
+            ->each(fn ($b) => $add($b->lead_source_id, min((float) $b->final_amount, (float) ($b->payments_sum_amount ?? 0))));
 
         return collect(array_values($merged))
             ->sortByDesc('revenue')
@@ -289,39 +254,35 @@ class ProfitAnalyticsController extends Controller
     private function buildStaffBreakdown($start, $end): \Illuminate\Support\Collection
     {
         $staffData = [];
+        $add = function ($key, $rev) use (&$staffData) {
+            $key = $key ?? 0;
+            if (!isset($staffData[$key])) $staffData[$key] = ['staff_id' => $key ?: null, 'cnt' => 0, 'revenue' => 0.0];
+            $staffData[$key]['cnt']++;
+            $staffData[$key]['revenue'] += $rev;
+        };
 
-        $groups = [
-            Lead::where('booking_status', 'confirm')->whereNotNull('booking_start_date')
-                ->whereBetween('booking_start_date', [$start, $end])
-                ->select('added_by as staff_id', DB::raw('COUNT(*) as cnt'), DB::raw('SUM(total_amount) as revenue'))
-                ->groupBy('added_by')->get(),
+        // Revenue here is collected amount, not gross sale value.
+        Lead::where('booking_status', 'confirm')->whereNotNull('booking_start_date')
+            ->whereBetween('booking_start_date', [$start, $end])
+            ->withSum('leadPayments', 'paid_amount')
+            ->get(['id', 'added_by', 'total_amount'])
+            ->each(fn ($l) => $add($l->added_by, min((float) $l->total_amount, (float) ($l->lead_payments_sum_paid_amount ?? 0))));
 
-            CabBooking::where('booking_status', 'confirmed')->whereNotNull('pickup_date')
-                ->whereBetween('pickup_date', [$start, $end])
-                ->select('created_by as staff_id', DB::raw('COUNT(*) as cnt'), DB::raw('SUM(total_amount) as revenue'))
-                ->groupBy('created_by')->get(),
+        CabBooking::where('booking_status', 'confirmed')->whereNotNull('pickup_date')
+            ->whereBetween('pickup_date', [$start, $end])
+            ->get(['id', 'created_by', 'total_amount', 'pending_amount'])
+            ->each(fn ($b) => $add($b->created_by, (float) $b->total_amount - (float) $b->pending_amount));
 
-            BoatBooking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
-                ->whereBetween('booking_date', [$start, $end])
-                ->select('created_by as staff_id', DB::raw('COUNT(*) as cnt'), DB::raw('SUM(final_amount) as revenue'))
-                ->groupBy('created_by')->get(),
+        BoatBooking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
+            ->whereBetween('booking_date', [$start, $end])
+            ->withSum('payments', 'amount')
+            ->get(['id', 'created_by', 'final_amount'])
+            ->each(fn ($b) => $add($b->created_by, min((float) $b->final_amount, (float) ($b->payments_sum_amount ?? 0))));
 
-            Booking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
-                ->whereBetween('booking_date', [$start, $end])
-                ->select('created_by as staff_id', DB::raw('COUNT(*) as cnt'), DB::raw('SUM(total_amount) as revenue'))
-                ->groupBy('created_by')->get(),
-        ];
-
-        foreach ($groups as $rows) {
-            foreach ($rows as $r) {
-                $key = $r->staff_id ?? 0;
-                if (!isset($staffData[$key])) {
-                    $staffData[$key] = ['staff_id' => $r->staff_id, 'cnt' => 0, 'revenue' => 0.0];
-                }
-                $staffData[$key]['cnt']     += $r->cnt;
-                $staffData[$key]['revenue'] += (float)$r->revenue;
-            }
-        }
+        Booking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
+            ->whereBetween('booking_date', [$start, $end])
+            ->get(['id', 'created_by', 'total_amount', 'pending_amount'])
+            ->each(fn ($b) => $add($b->created_by, (float) $b->total_amount - (float) $b->pending_amount));
 
         return collect(array_values($staffData))
             ->sortByDesc('revenue')
@@ -340,36 +301,43 @@ class ProfitAnalyticsController extends Controller
     {
         $all = collect();
 
+        // Ranked by gross sale value (the biggest deals); displayed amount/profit
+        // are collected-basis.
         Lead::where('booking_status', 'confirm')->whereNotNull('booking_start_date')
             ->whereBetween('booking_start_date', [$start, $end])
             ->orderByDesc('total_amount')->limit(10)
+            ->withSum('leadPayments', 'paid_amount')
             ->get(['id','guest_name','contact','total_amount','total_expense','booking_start_date','short_plan'])
             ->each(function ($b) use (&$all) {
                 $exp = ($b->total_expense > 0) ? (float)$b->total_expense : round($b->total_amount * 0.3);
+                $collected = min((float) $b->total_amount, (float) ($b->lead_payments_sum_paid_amount ?? 0));
                 $all->push(['type'=>'Tour','name'=>$b->guest_name,'contact'=>$b->contact,
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,'profit'=>(float)$b->total_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->booking_start_date,'plan'=>$b->short_plan]);
             });
 
         CabBooking::where('booking_status', 'confirmed')->whereNotNull('pickup_date')
             ->whereBetween('pickup_date', [$start, $end])
             ->orderByDesc('total_amount')->limit(10)
-            ->get(['id','customer_name','customer_phone','total_amount','vendor_cost','pickup_date','vehicle_name'])
+            ->get(['id','customer_name','customer_phone','total_amount','pending_amount','vendor_cost','pickup_date','vehicle_name'])
             ->each(function ($b) use (&$all) {
                 $exp = ($b->vendor_cost > 0) ? (float)$b->vendor_cost : round($b->total_amount * 0.3);
+                $collected = (float) $b->total_amount - (float) $b->pending_amount;
                 $all->push(['type'=>'Cab','name'=>$b->customer_name,'contact'=>$b->customer_phone,
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,'profit'=>(float)$b->total_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->pickup_date,'plan'=>$b->vehicle_name]);
             });
 
         BoatBooking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
             ->whereBetween('booking_date', [$start, $end])
             ->orderByDesc('final_amount')->limit(10)
+            ->withSum('payments', 'amount')
             ->get(['id','name','phone','final_amount','vendor_cost','booking_date','booking_type'])
             ->each(function ($b) use (&$all) {
                 $exp = ($b->vendor_cost > 0) ? (float)$b->vendor_cost : round($b->final_amount * 0.3);
+                $collected = min((float) $b->final_amount, (float) ($b->payments_sum_amount ?? 0));
                 $all->push(['type'=>'Boat','name'=>$b->name,'contact'=>$b->phone,
-                    'amount'=>(float)$b->final_amount,'expense'=>$exp,'profit'=>(float)$b->final_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->booking_date,'plan'=>$b->booking_type]);
             });
 
@@ -377,11 +345,12 @@ class ProfitAnalyticsController extends Controller
             ->whereBetween('booking_date', [$start, $end])
             ->orderByDesc('total_amount')->limit(10)
             ->with('lead')
-            ->get(['id','lead_id','total_amount','booking_date','booking_number'])
+            ->get(['id','lead_id','total_amount','pending_amount','booking_date','booking_number'])
             ->each(function ($b) use (&$all) {
                 $exp = round($b->total_amount * 0.3);
+                $collected = (float) $b->total_amount - (float) $b->pending_amount;
                 $all->push(['type'=>'Package','name'=>$b->lead?->guest_name ?: 'Guest','contact'=>'',
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,'profit'=>(float)$b->total_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->booking_date,'plan'=>$b->booking_number]);
             });
 
@@ -395,12 +364,13 @@ class ProfitAnalyticsController extends Controller
         Lead::where('booking_status', 'confirm')->whereNotNull('booking_start_date')
             ->whereBetween('booking_start_date', [$start, $end])
             ->orderByDesc('booking_start_date')->limit(15)
+            ->withSum('leadPayments', 'paid_amount')
             ->get(['id','guest_name','contact','total_amount','total_expense','booking_start_date','short_plan','added_by'])
             ->each(function ($b) use (&$all) {
                 $exp   = ($b->total_expense > 0) ? (float)$b->total_expense : round($b->total_amount * 0.3);
                 $admin = Admin::find($b->added_by);
                 $all->push(['type'=>'Tour','name'=>$b->guest_name,'contact'=>$b->contact,
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,
+                    'amount'=>min((float) $b->total_amount, (float) ($b->lead_payments_sum_paid_amount ?? 0)),'expense'=>$exp,
                     'date'=>$b->booking_start_date,'plan'=>$b->short_plan,
                     'staff'=>$admin ? $admin->name : '—']);
             });
@@ -408,12 +378,12 @@ class ProfitAnalyticsController extends Controller
         CabBooking::where('booking_status', 'confirmed')->whereNotNull('pickup_date')
             ->whereBetween('pickup_date', [$start, $end])
             ->orderByDesc('pickup_date')->limit(15)
-            ->get(['id','customer_name','customer_phone','total_amount','vendor_cost','pickup_date','vehicle_name','created_by'])
+            ->get(['id','customer_name','customer_phone','total_amount','pending_amount','vendor_cost','pickup_date','vehicle_name','created_by'])
             ->each(function ($b) use (&$all) {
                 $exp   = ($b->vendor_cost > 0) ? (float)$b->vendor_cost : round($b->total_amount * 0.3);
                 $admin = Admin::find($b->created_by);
                 $all->push(['type'=>'Cab','name'=>$b->customer_name,'contact'=>$b->customer_phone,
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,
+                    'amount'=>(float)$b->total_amount - (float)$b->pending_amount,'expense'=>$exp,
                     'date'=>$b->pickup_date,'plan'=>$b->vehicle_name,
                     'staff'=>$admin ? $admin->name : '—']);
             });
@@ -421,12 +391,13 @@ class ProfitAnalyticsController extends Controller
         BoatBooking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
             ->whereBetween('booking_date', [$start, $end])
             ->orderByDesc('booking_date')->limit(15)
+            ->withSum('payments', 'amount')
             ->get(['id','name','phone','final_amount','vendor_cost','booking_date','booking_type','created_by'])
             ->each(function ($b) use (&$all) {
                 $exp   = ($b->vendor_cost > 0) ? (float)$b->vendor_cost : round($b->final_amount * 0.3);
                 $admin = Admin::find($b->created_by);
                 $all->push(['type'=>'Boat','name'=>$b->name,'contact'=>$b->phone,
-                    'amount'=>(float)$b->final_amount,'expense'=>$exp,
+                    'amount'=>min((float) $b->final_amount, (float) ($b->payments_sum_amount ?? 0)),'expense'=>$exp,
                     'date'=>$b->booking_date,'plan'=>$b->booking_type,
                     'staff'=>$admin ? $admin->name : '—']);
             });
@@ -435,12 +406,12 @@ class ProfitAnalyticsController extends Controller
             ->whereBetween('booking_date', [$start, $end])
             ->orderByDesc('booking_date')->limit(15)
             ->with('lead')
-            ->get(['id','lead_id','total_amount','booking_date','booking_number','created_by'])
+            ->get(['id','lead_id','total_amount','pending_amount','booking_date','booking_number','created_by'])
             ->each(function ($b) use (&$all) {
                 $exp   = round($b->total_amount * 0.3);
                 $admin = Admin::find($b->created_by);
                 $all->push(['type'=>'Package','name'=>$b->lead?->guest_name ?: 'Guest','contact'=>'',
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,
+                    'amount'=>(float)$b->total_amount - (float)$b->pending_amount,'expense'=>$exp,
                     'date'=>$b->booking_date,'plan'=>$b->booking_number,
                     'staff'=>$admin ? $admin->name : '—']);
             });
@@ -454,42 +425,48 @@ class ProfitAnalyticsController extends Controller
 
         Lead::where('booking_status', 'confirm')->whereNotNull('booking_start_date')
             ->whereBetween('booking_start_date', [$start, $end])
+            ->withSum('leadPayments', 'paid_amount')
             ->get(['id','guest_name','contact','total_amount','total_expense','booking_start_date','short_plan'])
             ->each(function ($b) use (&$all) {
                 $exp = ($b->total_expense > 0) ? (float)$b->total_expense : round($b->total_amount * 0.3);
+                $collected = min((float) $b->total_amount, (float) ($b->lead_payments_sum_paid_amount ?? 0));
                 $all->push(['type'=>'Tour','name'=>$b->guest_name,'contact'=>$b->contact,
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,'profit'=>(float)$b->total_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->booking_start_date,'plan'=>$b->short_plan]);
             });
 
         CabBooking::where('booking_status', 'confirmed')->whereNotNull('pickup_date')
             ->whereBetween('pickup_date', [$start, $end])
-            ->get(['id','customer_name','customer_phone','total_amount','vendor_cost','pickup_date','vehicle_name'])
+            ->get(['id','customer_name','customer_phone','total_amount','pending_amount','vendor_cost','pickup_date','vehicle_name'])
             ->each(function ($b) use (&$all) {
                 $exp = ($b->vendor_cost > 0) ? (float)$b->vendor_cost : round($b->total_amount * 0.3);
+                $collected = (float) $b->total_amount - (float) $b->pending_amount;
                 $all->push(['type'=>'Cab','name'=>$b->customer_name,'contact'=>$b->customer_phone,
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,'profit'=>(float)$b->total_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->pickup_date,'plan'=>$b->vehicle_name]);
             });
 
         BoatBooking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
             ->whereBetween('booking_date', [$start, $end])
+            ->withSum('payments', 'amount')
             ->get(['id','name','phone','final_amount','vendor_cost','booking_date','booking_type'])
             ->each(function ($b) use (&$all) {
                 $exp = ($b->vendor_cost > 0) ? (float)$b->vendor_cost : round($b->final_amount * 0.3);
+                $collected = min((float) $b->final_amount, (float) ($b->payments_sum_amount ?? 0));
                 $all->push(['type'=>'Boat','name'=>$b->name,'contact'=>$b->phone,
-                    'amount'=>(float)$b->final_amount,'expense'=>$exp,'profit'=>(float)$b->final_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->booking_date,'plan'=>$b->booking_type]);
             });
 
         Booking::where('booking_status', 'confirmed')->whereNotNull('booking_date')
             ->whereBetween('booking_date', [$start, $end])
             ->with('lead')
-            ->get(['id','lead_id','total_amount','booking_date','booking_number'])
+            ->get(['id','lead_id','total_amount','pending_amount','booking_date','booking_number'])
             ->each(function ($b) use (&$all) {
                 $exp = round($b->total_amount * 0.3);
+                $collected = (float) $b->total_amount - (float) $b->pending_amount;
                 $all->push(['type'=>'Package','name'=>$b->lead?->guest_name ?: 'Guest','contact'=>'',
-                    'amount'=>(float)$b->total_amount,'expense'=>$exp,'profit'=>(float)$b->total_amount - $exp,
+                    'amount'=>$collected,'expense'=>$exp,'profit'=>$collected - $exp,
                     'date'=>$b->booking_date,'plan'=>$b->booking_number]);
             });
 

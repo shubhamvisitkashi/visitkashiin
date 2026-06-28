@@ -39,13 +39,24 @@ class MonthlyReportController extends Controller
         $monthOptions = $this->buildMonthOptions();
         $bookingsList = $this->buildBookingsList($selectedMonth, $isAdmin, $userId);
 
+        $staffBreakdown = $bookingsList
+            ->groupBy('added_by')
+            ->map(fn ($rows, $name) => [
+                'name'    => $name,
+                'cnt'     => $rows->count(),
+                'revenue' => $rows->sum('collected'),
+            ])
+            ->sortByDesc('revenue')
+            ->values();
+
         return view('admin.monthly-report.index', array_merge($metrics, [
-            'selectedMonth' => $selectedMonth,
-            'prevMonth'     => $prevMonth,
-            'nextMonth'     => $nextMonth,
-            'monthOptions'  => $monthOptions,
-            'revenueGrowth' => $revenueGrowth,
-            'bookingsList'  => $bookingsList,
+            'selectedMonth'   => $selectedMonth,
+            'prevMonth'       => $prevMonth,
+            'nextMonth'       => $nextMonth,
+            'monthOptions'    => $monthOptions,
+            'revenueGrowth'   => $revenueGrowth,
+            'bookingsList'    => $bookingsList,
+            'staffBreakdown'  => $staffBreakdown,
         ]), ['page_title' => 'Monthly Report']);
     }
 
@@ -66,15 +77,16 @@ class MonthlyReportController extends Controller
             ->get()
             ->each(function ($b) use (&$all) {
                 $all->push([
-                    'type'     => 'Stay', 'icon' => '🏨',
-                    'number'   => $b->booking_number,
-                    'guest'    => $b->lead?->guest_name ?? '—',
-                    'amount'   => (float) $b->total_amount,
-                    'pending'  => (float) $b->pending_amount,
-                    'status'   => $b->booking_status,
-                    'date'     => $b->lead?->booking_start_date,
-                    'added_by' => $b->createdBy?->name ?? '—',
-                    'url'      => route('bookings.show', $b->id),
+                    'type'      => 'Stay', 'icon' => '🏨',
+                    'number'    => $b->booking_number,
+                    'guest'     => $b->lead?->guest_name ?? '—',
+                    'amount'    => (float) $b->total_amount,
+                    'pending'   => (float) $b->pending_amount,
+                    'collected' => (float) $b->total_amount - (float) $b->pending_amount,
+                    'status'    => $b->booking_status,
+                    'date'      => $b->lead?->booking_start_date,
+                    'added_by'  => $b->createdBy?->name ?? '—',
+                    'url'       => route('bookings.show', $b->id),
                 ]);
             });
 
@@ -83,15 +95,16 @@ class MonthlyReportController extends Controller
             ->get()
             ->each(function ($b) use (&$all) {
                 $all->push([
-                    'type'     => 'Cab', 'icon' => '🚗',
-                    'number'   => $b->booking_number,
-                    'guest'    => $b->customer_name ?? '—',
-                    'amount'   => (float) $b->total_amount,
-                    'pending'  => (float) $b->pending_amount,
-                    'status'   => $b->booking_status,
-                    'date'     => $b->pickup_date,
-                    'added_by' => $b->createdBy?->name ?? '—',
-                    'url'      => route('cab-bookings.show', $b->id),
+                    'type'      => 'Cab', 'icon' => '🚗',
+                    'number'    => $b->booking_number,
+                    'guest'     => $b->customer_name ?? '—',
+                    'amount'    => (float) $b->total_amount,
+                    'pending'   => (float) $b->pending_amount,
+                    'collected' => (float) $b->total_amount - (float) $b->pending_amount,
+                    'status'    => $b->booking_status,
+                    'date'      => $b->pickup_date,
+                    'added_by'  => $b->createdBy?->name ?? '—',
+                    'url'       => route('cab-bookings.show', $b->id),
                 ]);
             });
 
@@ -102,15 +115,16 @@ class MonthlyReportController extends Controller
             ->each(function ($b) use (&$all) {
                 $paid = (float) ($b->payments_sum_amount ?? 0);
                 $all->push([
-                    'type'     => 'Boat', 'icon' => '⛵',
-                    'number'   => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
-                    'guest'    => $b->name ?? '—',
-                    'amount'   => (float) $b->final_amount,
-                    'pending'  => max($b->final_amount - $paid, 0),
-                    'status'   => $b->booking_status,
-                    'date'     => $b->booking_date,
-                    'added_by' => $b->createdBy?->name ?? '—',
-                    'url'      => route('boat-booking.show', $b->id),
+                    'type'      => 'Boat', 'icon' => '⛵',
+                    'number'    => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                    'guest'     => $b->name ?? '—',
+                    'amount'    => (float) $b->final_amount,
+                    'pending'   => max($b->final_amount - $paid, 0),
+                    'collected' => min($paid, $b->final_amount),
+                    'status'    => $b->booking_status,
+                    'date'      => $b->booking_date,
+                    'added_by'  => $b->createdBy?->name ?? '—',
+                    'url'       => route('boat-booking.show', $b->id),
                 ]);
             });
 

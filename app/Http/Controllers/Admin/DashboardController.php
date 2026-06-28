@@ -94,11 +94,19 @@ class DashboardController extends Controller
         $dailyLabels  = [];
         $dailyRevenue = [];
         for ($d = Carbon::today()->startOfMonth(); $d->lte(Carbon::today()); $d->addDay()) {
-            $dailyLabels[]  = $d->format('d M');
+            $dailyLabels[] = $d->format('d M');
+
+            $dayStay = (clone $stayQ)->whereHas('lead', fn($q) => $q->whereDate('booking_start_date', $d))
+                ->selectRaw('SUM(total_amount) as sale, SUM(pending_amount) as pending')->first();
+            $dayCab = (clone $cabQ)->whereDate('pickup_date', $d)
+                ->selectRaw('SUM(total_amount) as sale, SUM(pending_amount) as pending')->first();
+            $dayBoatRows = (clone $boatQ)->whereDate('booking_date', $d)->withSum('payments', 'amount')->get();
+            $dayBoatCollected = $dayBoatRows->sum(fn($b) => min($b->final_amount, $b->payments_sum_amount ?? 0));
+
             $dailyRevenue[] = round(
-                (clone $stayQ)->whereHas('lead', fn($q) => $q->whereDate('booking_start_date', $d))->sum('total_amount') +
-                (clone $cabQ)->whereDate('pickup_date', $d)->sum('total_amount') +
-                (clone $boatQ)->whereDate('booking_date', $d)->sum('final_amount')
+                ((float)($dayStay->sale ?? 0) - (float)($dayStay->pending ?? 0)) +
+                ((float)($dayCab->sale ?? 0) - (float)($dayCab->pending ?? 0)) +
+                $dayBoatCollected
             );
         }
 

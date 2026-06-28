@@ -93,6 +93,9 @@ body.dark-mode .month-select  { background:#1E293B !important; color:#F1F5F9 !im
 @media(max-width:1300px){.dk-pie-row{grid-template-columns:1fr 1fr;}}
 @media(max-width:700px){.dk-pie-row{grid-template-columns:1fr;}}
 
+.dk-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+@media(max-width:900px){.dk-row-2{grid-template-columns:1fr;}}
+
 .chart-card {
   background:var(--card); border-radius:var(--r); border:1px solid var(--border);
   box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px; transition:background .3s,border-color .3s;
@@ -154,7 +157,7 @@ body.dark-mode .dk-table tfoot td { background:#0F172A !important; border-color:
 <div class="dk-hero">
   <div class="dk-hero-left">
     <h1>📅 Monthly Report</h1>
-    <p>Figures scoped by service date (check-in / pickup / ride date), not the date the sale was made.</p>
+    <p>Scoped by service date (check-in / pickup / ride date). Revenue counts only the amount actually collected, not the full sale value.</p>
   </div>
   <form class="month-switcher" method="GET" action="{{ route('monthly-report.index') }}">
     <a class="month-arrow" href="{{ route('monthly-report.index', ['month' => $prevMonth->format('Y-m')]) }}" title="Previous month">←</a>
@@ -316,6 +319,79 @@ body.dark-mode .dk-table tfoot td { background:#0F172A !important; border-color:
   </div>
 </div>
 
+{{-- ══ STAFF PERFORMANCE + REVENUE BY SERVICE ══ --}}
+<div class="dk-row-2">
+  <div class="table-card">
+    <div class="table-head">
+      <div class="table-title">🧑‍💼 Staff Performance — {{ $selectedMonth->format('M Y') }}</div>
+    </div>
+    <table class="dk-table">
+      <thead>
+        <tr>
+          <th>Staff</th>
+          <th style="text-align:right;">Bookings</th>
+          <th style="text-align:right;">Revenue</th>
+          <th style="text-align:right;">Share</th>
+        </tr>
+      </thead>
+      <tbody>
+        @php $staffRevTotal = max($staffBreakdown->sum('revenue'), 1); @endphp
+        @forelse($staffBreakdown as $s)
+        <tr>
+          <td>{{ $s['name'] }}</td>
+          <td style="text-align:right;">{{ $s['cnt'] }}</td>
+          <td style="text-align:right;font-weight:700;">₹{{ number_format($s['revenue']) }}</td>
+          <td style="text-align:right;color:var(--muted);">{{ round($s['revenue'] / $staffRevTotal * 100) }}%</td>
+        </tr>
+        @empty
+        <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted);">No bookings this month.</td></tr>
+        @endforelse
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <div class="table-title">🧾 Revenue by Service — {{ $selectedMonth->format('M Y') }}</div>
+    </div>
+    <table class="dk-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th style="text-align:right;">Bookings</th>
+          <th style="text-align:right;">Revenue</th>
+          <th style="text-align:right;">Expense</th>
+          <th style="text-align:right;">Profit</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach([
+          ['icon' => '🏨', 'label' => 'Stay',  'cnt' => $stayMonth, 'rev' => $stayRevMonth, 'exp' => $stayExpMonth],
+          ['icon' => '🚗', 'label' => 'Cab',   'cnt' => $cabMonth,  'rev' => $cabRevMonth,  'exp' => $cabExpMonth],
+          ['icon' => '⛵', 'label' => 'Boat',  'cnt' => $boatMonth, 'rev' => $boatRevMonth, 'exp' => $boatExpMonth],
+        ] as $row)
+        <tr>
+          <td>{{ $row['icon'] }} {{ $row['label'] }}</td>
+          <td style="text-align:right;">{{ $row['cnt'] }}</td>
+          <td style="text-align:right;font-weight:700;">₹{{ number_format($row['rev']) }}</td>
+          <td style="text-align:right;color:#F43F5E;">₹{{ number_format($row['exp']) }}</td>
+          <td style="text-align:right;color:#10B981;font-weight:700;">₹{{ number_format($row['rev'] - $row['exp']) }}</td>
+        </tr>
+        @endforeach
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td style="text-align:right;">{{ $totalBookingsMonth }}</td>
+          <td style="text-align:right;">₹{{ number_format($totalRevenueMonth) }}</td>
+          <td style="text-align:right;">₹{{ number_format($stayExpMonth + $cabExpMonth + $boatExpMonth) }}</td>
+          <td style="text-align:right;">₹{{ number_format($totalRevenueMonth - ($stayExpMonth + $cabExpMonth + $boatExpMonth)) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
 {{-- ══ BOOKINGS LIST ══ --}}
 <div class="table-card">
   <div class="table-head">
@@ -333,6 +409,7 @@ body.dark-mode .dk-table tfoot td { background:#0F172A !important; border-color:
           <th>Added By</th>
           <th>Status</th>
           <th style="text-align:right;">Amount</th>
+          <th style="text-align:right;">Collected</th>
           <th style="text-align:right;">Pending</th>
         </tr>
       </thead>
@@ -345,12 +422,13 @@ body.dark-mode .dk-table tfoot td { background:#0F172A !important; border-color:
           <td>{{ $b['date'] ? \Carbon\Carbon::parse($b['date'])->format('d M Y') : '—' }}</td>
           <td>{{ $b['added_by'] }}</td>
           <td><span class="sb sb-{{ $b['status'] }}">{{ str_replace('_',' ',$b['status']) }}</span></td>
-          <td style="text-align:right;font-weight:700;">₹{{ number_format($b['amount']) }}</td>
+          <td style="text-align:right;">₹{{ number_format($b['amount']) }}</td>
+          <td style="text-align:right;font-weight:700;color:#10B981;">₹{{ number_format($b['collected']) }}</td>
           <td style="text-align:right;{{ $b['pending'] > 0 ? 'color:#B45309;font-weight:700;' : '' }}">₹{{ number_format($b['pending']) }}</td>
         </tr>
         @empty
         <tr>
-          <td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">No bookings with a service date in {{ $selectedMonth->format('F Y') }}.</td>
+          <td colspan="9" style="text-align:center;padding:28px;color:var(--muted);">No bookings with a service date in {{ $selectedMonth->format('F Y') }}.</td>
         </tr>
         @endforelse
       </tbody>
@@ -359,6 +437,7 @@ body.dark-mode .dk-table tfoot td { background:#0F172A !important; border-color:
         <tr>
           <td colspan="6" style="text-align:right;">Total</td>
           <td style="text-align:right;">₹{{ number_format($bookingsList->sum('amount')) }}</td>
+          <td style="text-align:right;">₹{{ number_format($bookingsList->sum('collected')) }}</td>
           <td style="text-align:right;">₹{{ number_format($bookingsList->sum('pending')) }}</td>
         </tr>
       </tfoot>

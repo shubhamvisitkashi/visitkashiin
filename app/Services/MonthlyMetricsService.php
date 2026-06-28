@@ -13,7 +13,8 @@ class MonthlyMetricsService
     /**
      * Booking/Cab/Boat figures for a single calendar month, scoped by the date
      * the service is actually delivered (stay check-in, cab pickup, boat ride),
-     * not the date the sale was recorded.
+     * not the date the sale was recorded. "Revenue" (*RevMonth) is collected
+     * amount only — gross sale value is exposed separately as *SaleMonth.
      */
     public function compute(Carbon $month, bool $isAdmin, ?int $userId): array
     {
@@ -27,22 +28,27 @@ class MonthlyMetricsService
         $cabServiceMonth = fn($q) => $q->whereMonth('pickup_date', $month->month)->whereYear('pickup_date', $month->year);
         $boatServiceMonth = fn($q) => $q->whereMonth('booking_date', $month->month)->whereYear('booking_date', $month->year);
 
+        // Revenue counts only what's actually been collected — a ₹10,000 sale
+        // with ₹5,000 paid contributes ₹5,000, not the full sale value.
         $stayMonth    = $stayServiceMonth((clone $stayQ))->count();
-        $stayRevMonth = $stayServiceMonth((clone $stayQ))->sum('total_amount');
+        $staySaleMonth = $stayServiceMonth((clone $stayQ))->sum('total_amount');
         $stayPending  = $stayServiceMonth((clone $stayQ)->where('pending_amount', '>', 0))->sum('pending_amount');
+        $stayRevMonth = $staySaleMonth - $stayPending;
 
         $cabMonth    = $cabServiceMonth((clone $cabQ))->count();
-        $cabRevMonth = $cabServiceMonth((clone $cabQ))->sum('total_amount');
+        $cabSaleMonth = $cabServiceMonth((clone $cabQ))->sum('total_amount');
         $cabPending  = $cabServiceMonth((clone $cabQ)->where('pending_amount', '>', 0))->sum('pending_amount');
+        $cabRevMonth = $cabSaleMonth - $cabPending;
 
         $boatMonth    = $boatServiceMonth((clone $boatQ))->count();
-        $boatRevMonth = $boatServiceMonth((clone $boatQ))->sum('final_amount');
+        $boatSaleMonth = $boatServiceMonth((clone $boatQ))->sum('final_amount');
 
         $boatPendingRows = $boatServiceMonth((clone $boatQ)->where('payment_status', '!=', 'paid'))
             ->withSum('payments', 'amount')
             ->get();
         $boatPendingAmount = $boatPendingRows->sum(fn($b) => max($b->final_amount - ($b->payments_sum_amount ?? 0), 0));
         $boatPendingCount  = $boatPendingRows->count();
+        $boatRevMonth = $boatSaleMonth - $boatPendingAmount;
 
         $totalBookingsMonth = $stayMonth + $cabMonth + $boatMonth;
         $totalRevenueMonth  = $stayRevMonth + $cabRevMonth + $boatRevMonth;
@@ -57,9 +63,11 @@ class MonthlyMetricsService
         $cabExpData  = $cabServiceMonth((clone $cabQ))->selectRaw('SUM(vendor_cost) as exp')->first();
         $boatExpData = $boatServiceMonth((clone $boatQ))->selectRaw('SUM(vendor_cost) as exp')->first();
 
-        $stayExpMonth = (float)($stayExpData->exp ?? 0) ?: round($stayRevMonth * 0.30);
-        $cabExpMonth  = (float)($cabExpData->exp ?? 0) ?: round($cabRevMonth * 0.30);
-        $boatExpMonth = (float)($boatExpData->exp ?? 0) ?: round($boatRevMonth * 0.30);
+        // Vendor cost is owed regardless of whether the customer has paid yet,
+        // so the 30% fallback is based on the gross sale, not collected revenue.
+        $stayExpMonth = (float)($stayExpData->exp ?? 0) ?: round($staySaleMonth * 0.30);
+        $cabExpMonth  = (float)($cabExpData->exp ?? 0) ?: round($cabSaleMonth * 0.30);
+        $boatExpMonth = (float)($boatExpData->exp ?? 0) ?: round($boatSaleMonth * 0.30);
 
         $totalExpenseMonth = $stayExpMonth + $cabExpMonth + $boatExpMonth + $manualExpenseMonth;
         $totalProfitMonth  = $totalRevenueMonth - $totalExpenseMonth;
@@ -74,8 +82,11 @@ class MonthlyMetricsService
         $typeLabels = ['Stay/Hotel', 'Cab', 'Boat'];
         $typeData   = [$stayMonth, $cabMonth, $boatMonth];
 
+        $totalSaleMonth = $staySaleMonth + $cabSaleMonth + $boatSaleMonth;
+
         return compact(
             'stayMonth', 'cabMonth', 'boatMonth', 'totalBookingsMonth',
+            'staySaleMonth', 'cabSaleMonth', 'boatSaleMonth', 'totalSaleMonth',
             'stayRevMonth', 'cabRevMonth', 'boatRevMonth', 'totalRevenueMonth',
             'stayPending', 'cabPending', 'boatPendingAmount', 'totalPending', 'pendingPaymentsCount',
             'stayExpMonth', 'cabExpMonth', 'boatExpMonth', 'manualExpenseMonth', 'totalExpenseMonth', 'totalProfitMonth',
