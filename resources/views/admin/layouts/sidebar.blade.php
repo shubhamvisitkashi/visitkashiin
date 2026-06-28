@@ -567,7 +567,7 @@
 
             {{-- All analytics collapsed into one parent --}}
             @canany(['dashboard-view', 'analytics-profit', 'analytics-customer', 'payment-view', 'activity-log-view', 'staff-list'])
-                <li class="nav-item @if (in_array(Route::currentRouteName(), ['executive-dashboard.index','sales-analytics.index','payment-analytics.index','customer.analytics','profit-analytics.index','activity-logs.index','targets.index','payment-accounts.index','payment-accounts.create','payment-accounts.show','payment-accounts.edit','vendor-settlements.index','vendor-settlements.show','ledger.index'])) active @endif">
+                <li class="nav-item @if (in_array(Route::currentRouteName(), ['executive-dashboard.index','sales-analytics.index','payment-analytics.index','customer.analytics','profit-analytics.index','monthly-report.index','activity-logs.index','targets.index','payment-accounts.index','payment-accounts.create','payment-accounts.show','payment-accounts.edit','vendor-settlements.index','vendor-settlements.show','ledger.index'])) active @endif">
                     <a class="nav-link" data-bs-toggle="collapse" href="#manageReports" role="button"
                         aria-expanded="@if (in_array(Route::currentRouteName(), ['executive-dashboard.index','sales-analytics.index','payment-analytics.index','customer.analytics','profit-analytics.index','activity-logs.index','targets.index'])) true @else false @endif"
                         aria-controls="manageReports">
@@ -575,7 +575,7 @@
                         <span class="link-title">Reports & Analytics</span>
                         <i class="link-arrow" data-feather="chevron-down"></i>
                     </a>
-                    <div class="collapse @if (in_array(Route::currentRouteName(), ['executive-dashboard.index','sales-analytics.index','payment-analytics.index','customer.analytics','profit-analytics.index','activity-logs.index','targets.index','payment-accounts.index','payment-accounts.create','payment-accounts.show','payment-accounts.edit','vendor-settlements.index','vendor-settlements.show','ledger.index'])) show @endif" id="manageReports">
+                    <div class="collapse @if (in_array(Route::currentRouteName(), ['executive-dashboard.index','sales-analytics.index','payment-analytics.index','customer.analytics','profit-analytics.index','monthly-report.index','activity-logs.index','targets.index','payment-accounts.index','payment-accounts.create','payment-accounts.show','payment-accounts.edit','vendor-settlements.index','vendor-settlements.show','ledger.index'])) show @endif" id="manageReports">
                         <ul class="nav sub-menu">
                             {{-- Payments moved here from Finance --}}
                             @canany(['payment-list', 'payment-view', 'payment-account-view'])
@@ -624,6 +624,12 @@
                                 <li class="nav-item">
                                     <a href="{{ route('profit-analytics.index') }}"
                                         class="nav-link @if (Route::currentRouteName() == 'profit-analytics.index') active @endif">Profit Analytics</a>
+                                </li>
+                            @endcanany
+                            @canany(['dashboard-view'])
+                                <li class="nav-item">
+                                    <a href="{{ route('monthly-report.index') }}"
+                                        class="nav-link @if (Route::currentRouteName() == 'monthly-report.index') active @endif">Monthly Report</a>
                                 </li>
                             @endcanany
                             @canany(['dashboard-view', 'staff-list'])

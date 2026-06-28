@@ -914,6 +914,19 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       </div>
     </div>
 
+    {{-- Daily Collection --}}
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">💰 Daily Collection — Last 30 Days</div>
+          <div class="chart-sub">Actual payments received, all booking types</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <canvas id="collectionChart" height="75"></canvas>
+      </div>
+    </div>
+
   </div>{{-- /left --}}
 </div>{{-- /main content --}}
 
@@ -1062,6 +1075,36 @@ new Chart(document.getElementById('dailyChart'), {
       fill: true,
       tension: 0.4,
       pointBackgroundColor: '#4F46E5',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:true,
+    plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ' ₹' + ctx.parsed.y.toLocaleString('en-IN') }}},
+    scales: {
+      x: { ...axisDefaults(), grid:{ display:false } },
+      y: { ...axisDefaults(), ticks:{ ...axisDefaults().ticks, callback: v => v>=1000 ? '₹'+(v/1000).toFixed(1)+'K' : '₹'+v }}
+    }
+  }
+});
+
+// ── Daily collection — last 30 days ──────────────────────
+new Chart(document.getElementById('collectionChart'), {
+  type: 'line',
+  data: {
+    labels: {!! json_encode($collectionLabels) !!},
+    datasets: [{
+      label: 'Collection',
+      data: {!! json_encode($dailyCollection) !!},
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16,185,129,.09)',
+      borderWidth: 2.5,
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: '#10B981',
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
       pointRadius: 5,
