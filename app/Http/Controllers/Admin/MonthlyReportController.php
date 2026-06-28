@@ -37,6 +37,7 @@ class MonthlyReportController extends Controller
             : ($metrics['totalRevenueMonth'] > 0 ? 100 : 0);
 
         $monthOptions = $this->buildMonthOptions();
+        $bookingsList = $this->buildBookingsList($selectedMonth, $isAdmin, $userId);
 
         return view('admin.monthly-report.index', array_merge($metrics, [
             'selectedMonth' => $selectedMonth,
@@ -44,7 +45,76 @@ class MonthlyReportController extends Controller
             'nextMonth'     => $nextMonth,
             'monthOptions'  => $monthOptions,
             'revenueGrowth' => $revenueGrowth,
+            'bookingsList'  => $bookingsList,
         ]), ['page_title' => 'Monthly Report']);
+    }
+
+    /**
+     * Every individual stay/cab/boat booking whose service date falls in the
+     * given month — lets you eyeball that the KPI totals above add up.
+     */
+    private function buildBookingsList(Carbon $month, bool $isAdmin, ?int $userId): \Illuminate\Support\Collection
+    {
+        $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $cabQ  = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $boatQ = BoatBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+
+        $all = collect();
+
+        (clone $stayQ)->with(['lead', 'createdBy:id,name'])
+            ->whereHas('lead', fn($q) => $q->whereMonth('booking_start_date', $month->month)->whereYear('booking_start_date', $month->year))
+            ->get()
+            ->each(function ($b) use (&$all) {
+                $all->push([
+                    'type'     => 'Stay', 'icon' => '🏨',
+                    'number'   => $b->booking_number,
+                    'guest'    => $b->lead?->guest_name ?? '—',
+                    'amount'   => (float) $b->total_amount,
+                    'pending'  => (float) $b->pending_amount,
+                    'status'   => $b->booking_status,
+                    'date'     => $b->lead?->booking_start_date,
+                    'added_by' => $b->createdBy?->name ?? '—',
+                    'url'      => route('bookings.show', $b->id),
+                ]);
+            });
+
+        (clone $cabQ)->with('createdBy:id,name')
+            ->whereMonth('pickup_date', $month->month)->whereYear('pickup_date', $month->year)
+            ->get()
+            ->each(function ($b) use (&$all) {
+                $all->push([
+                    'type'     => 'Cab', 'icon' => '🚗',
+                    'number'   => $b->booking_number,
+                    'guest'    => $b->customer_name ?? '—',
+                    'amount'   => (float) $b->total_amount,
+                    'pending'  => (float) $b->pending_amount,
+                    'status'   => $b->booking_status,
+                    'date'     => $b->pickup_date,
+                    'added_by' => $b->createdBy?->name ?? '—',
+                    'url'      => route('cab-bookings.show', $b->id),
+                ]);
+            });
+
+        (clone $boatQ)->with('createdBy:id,name')
+            ->whereMonth('booking_date', $month->month)->whereYear('booking_date', $month->year)
+            ->withSum('payments', 'amount')
+            ->get()
+            ->each(function ($b) use (&$all) {
+                $paid = (float) ($b->payments_sum_amount ?? 0);
+                $all->push([
+                    'type'     => 'Boat', 'icon' => '⛵',
+                    'number'   => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                    'guest'    => $b->name ?? '—',
+                    'amount'   => (float) $b->final_amount,
+                    'pending'  => max($b->final_amount - $paid, 0),
+                    'status'   => $b->booking_status,
+                    'date'     => $b->booking_date,
+                    'added_by' => $b->createdBy?->name ?? '—',
+                    'url'      => route('boat-booking.show', $b->id),
+                ]);
+            });
+
+        return $all->sortByDesc('date')->values();
     }
 
     private function buildMonthOptions(): array

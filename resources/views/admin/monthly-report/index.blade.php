@@ -108,6 +108,38 @@ body.dark-mode .month-select  { background:#1E293B !important; color:#F1F5F9 !im
 .prog-bar  { height:6px; background:#E2E8F0; border-radius:99px; overflow:hidden; margin-top:4px; }
 .prog-fill { height:100%; border-radius:99px; transition:width .5s ease; }
 
+.table-card {
+  background:var(--card); border-radius:var(--r); border:1px solid var(--border);
+  box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px;
+}
+.table-head {
+  padding:14px 20px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; background:var(--card);
+}
+.table-title { font-size:.9rem; font-weight:800; color:var(--text); }
+.dk-table { width:100%; border-collapse:collapse; }
+.dk-table th {
+  background:#F8FAFC; color:var(--muted); font-size:.68rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; text-align:left;
+}
+.dk-table td { padding:11px 16px; border-bottom:1px solid #F1F5F9; font-size:.82rem; color:var(--text); }
+.dk-table tr:last-child td { border-bottom:none; }
+.dk-table tr:hover td { background:#F8FAFF; }
+.dk-table tfoot td { font-weight:800; background:#F8FAFC; border-top:2px solid var(--border); }
+.bk-link { color:var(--indigo); font-weight:700; text-decoration:none; font-size:.8rem; font-family:monospace; }
+.bk-link:hover { text-decoration:underline; }
+.sb { display:inline-flex; align-items:center; font-size:.63rem; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em; white-space:nowrap; }
+.sb-confirmed { background:#DBEAFE; color:#1E40AF; }
+.sb-completed { background:#D1FAE5; color:#065F46; }
+.sb-cancelled { background:#FEE2E2; color:#991B1B; }
+.sb-pending   { background:#FEF9C3; color:#854D0E; }
+body.dark-mode .table-card { background:#1E293B !important; border-color:#334155 !important; }
+body.dark-mode .table-head { border-color:#334155 !important; background:#1E293B !important; }
+body.dark-mode .table-title{ color:#F1F5F9 !important; }
+body.dark-mode .dk-table th{ background:#0F172A !important; color:#64748B !important; }
+body.dark-mode .dk-table td{ color:#F1F5F9 !important; border-color:#334155 !important; }
+body.dark-mode .dk-table tfoot td { background:#0F172A !important; border-color:#334155 !important; }
+
 @media(max-width:767px){
   .dk-page     { padding:10px 10px 70px; }
   .dk-hero     { padding:16px 16px; margin-top:58px; border-radius:16px; flex-direction:column; align-items:stretch; }
@@ -281,6 +313,57 @@ body.dark-mode .month-select  { background:#1E293B !important; color:#F1F5F9 !im
         🏨 {{ $stayMonth }} Stay &nbsp;·&nbsp; 🚗 {{ $cabMonth }} Cab &nbsp;·&nbsp; ⛵ {{ $boatMonth }} Boat
       </div>
     </div>
+  </div>
+</div>
+
+{{-- ══ BOOKINGS LIST ══ --}}
+<div class="table-card">
+  <div class="table-head">
+    <div class="table-title">📋 Bookings — {{ $selectedMonth->format('F Y') }} ({{ $bookingsList->count() }})</div>
+    <span style="font-size:.7rem;color:var(--muted);">Sorted by service date</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="dk-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Booking #</th>
+          <th>Guest</th>
+          <th>Service Date</th>
+          <th>Added By</th>
+          <th>Status</th>
+          <th style="text-align:right;">Amount</th>
+          <th style="text-align:right;">Pending</th>
+        </tr>
+      </thead>
+      <tbody>
+        @forelse($bookingsList as $b)
+        <tr>
+          <td>{{ $b['icon'] }} {{ $b['type'] }}</td>
+          <td><a href="{{ $b['url'] }}" class="bk-link">{{ $b['number'] }}</a></td>
+          <td>{{ $b['guest'] }}</td>
+          <td>{{ $b['date'] ? \Carbon\Carbon::parse($b['date'])->format('d M Y') : '—' }}</td>
+          <td>{{ $b['added_by'] }}</td>
+          <td><span class="sb sb-{{ $b['status'] }}">{{ str_replace('_',' ',$b['status']) }}</span></td>
+          <td style="text-align:right;font-weight:700;">₹{{ number_format($b['amount']) }}</td>
+          <td style="text-align:right;{{ $b['pending'] > 0 ? 'color:#B45309;font-weight:700;' : '' }}">₹{{ number_format($b['pending']) }}</td>
+        </tr>
+        @empty
+        <tr>
+          <td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">No bookings with a service date in {{ $selectedMonth->format('F Y') }}.</td>
+        </tr>
+        @endforelse
+      </tbody>
+      @if($bookingsList->count())
+      <tfoot>
+        <tr>
+          <td colspan="6" style="text-align:right;">Total</td>
+          <td style="text-align:right;">₹{{ number_format($bookingsList->sum('amount')) }}</td>
+          <td style="text-align:right;">₹{{ number_format($bookingsList->sum('pending')) }}</td>
+        </tr>
+      </tfoot>
+      @endif
+    </table>
   </div>
 </div>
 
