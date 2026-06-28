@@ -248,6 +248,11 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('profit-analytics', 'ProfitAnalyticsController@index')->name('profit-analytics.index');
             Route::get('profit-analytics/export', 'ProfitAnalyticsController@exportReport')->name('profit-analytics.export');
 
+            // Manual Expenses (feeds into Profit Analytics totals)
+            Route::post('expenses', 'ExpenseController@store')->name('expenses.store');
+            Route::put('expenses/{expense}', 'ExpenseController@update')->name('expenses.update');
+            Route::delete('expenses/{expense}', 'ExpenseController@destroy')->name('expenses.destroy');
+
             // New Analytics Dashboards
             Route::get('sales-analytics', 'SalesAnalyticsController@index')->name('sales-analytics.index');
             Route::get('payment-analytics', 'PaymentAnalyticsController@index')->name('payment-analytics.index');

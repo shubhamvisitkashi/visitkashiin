@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use DB;
 use Carbon\Carbon;
 use App\Models\Lead;
 use App\Models\Booking;
 use App\Models\CabBooking;
 use App\Models\BoatBooking;
 use App\Models\Enquiry;
+use App\Models\Expense;
 use App\Models\UserTarget;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -31,7 +31,9 @@ class DashboardController extends Controller
         $stayToday     = (clone $stayQ)->whereDate('booking_date', $today)->count();
         $stayMonth     = (clone $stayQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->count();
         $stayRevMonth  = (clone $stayQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->sum('total_amount');
-        $stayPending   = (clone $stayQ)->where('pending_amount', '>', 0)->sum('pending_amount');
+        $stayPending   = (clone $stayQ)->where('pending_amount', '>', 0)
+            ->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)
+            ->sum('pending_amount');
         $stayConfirmed = (clone $stayQ)->where('booking_status', 'confirmed')->count();
         $stayCompleted = (clone $stayQ)->where('booking_status', 'completed')->count();
 
@@ -41,7 +43,9 @@ class DashboardController extends Controller
         $cabToday    = (clone $cabQ)->whereDate('created_at', $today)->count();
         $cabMonth    = (clone $cabQ)->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)->count();
         $cabRevMonth = (clone $cabQ)->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)->sum('total_amount');
-        $cabPending  = (clone $cabQ)->where('pending_amount', '>', 0)->sum('pending_amount');
+        $cabPending  = (clone $cabQ)->where('pending_amount', '>', 0)
+            ->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)
+            ->sum('pending_amount');
 
         // ── Boat Bookings ─────────────────────────────────────────
         $boatQ = BoatBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
@@ -51,13 +55,25 @@ class DashboardController extends Controller
         $boatRevMonth = (clone $boatQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)->sum('final_amount');
         $boatPending  = (clone $boatQ)->where('payment_status', '!=', 'paid')->count();
 
+        $boatPendingThisMonth = (clone $boatQ)->where('payment_status', '!=', 'paid')
+            ->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)
+            ->withSum('payments', 'amount')
+            ->get();
+        $boatPendingAmount = $boatPendingThisMonth->sum(fn($b) => max($b->final_amount - ($b->payments_sum_amount ?? 0), 0));
+        $boatPendingCount  = $boatPendingThisMonth->count();
+
         // ── Grand totals ──────────────────────────────────────────
         $totalBookingsToday = $stayToday + $cabToday + $boatToday;
         $totalBookingsMonth = $stayMonth + $cabMonth + $boatMonth;
         $totalRevenueMonth  = $stayRevMonth + $cabRevMonth + $boatRevMonth;
-        $totalPending       = $stayPending + $cabPending;
-        $pendingPaymentsCount = (clone $stayQ)->where('pending_amount', '>', 0)->count()
-            + (clone $cabQ)->where('pending_amount', '>', 0)->count();
+        $totalPending       = $stayPending + $cabPending + $boatPendingAmount;
+        $pendingPaymentsCount = (clone $stayQ)->where('pending_amount', '>', 0)
+                ->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)
+                ->count()
+            + (clone $cabQ)->where('pending_amount', '>', 0)
+                ->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)
+                ->count()
+            + $boatPendingCount;
 
         // ── Revenue growth vs last month ──────────────────────────
         $stayRevLast  = (clone $stayQ)->whereMonth('booking_date', $lastMonth->month)->whereYear('booking_date', $lastMonth->year)->sum('total_amount');
@@ -69,30 +85,72 @@ class DashboardController extends Controller
             : ($totalRevenueMonth > 0 ? 100 : 0);
 
         // ── 3-month revenue trend ─────────────────────────────────
-        $monthLabels   = [];
-        $stayRevTrend  = [];
-        $cabRevTrend   = [];
-        $boatRevTrend  = [];
-        $totalRevTrend = [];
-        $bookingsTrend = [];
+        $monthLabels    = [];
+        $stayRevTrend   = [];
+        $cabRevTrend    = [];
+        $boatRevTrend   = [];
+        $totalRevTrend  = [];
+        $bookingsTrend  = [];
+        $totalExpTrend  = [];
+        $totalProfitTrend = [];
 
         for ($i = 2; $i >= 0; $i--) {
             $m = Carbon::now()->subMonths($i);
             $monthLabels[] = $m->format('M');
 
-            $sr = (clone $stayQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->sum('total_amount');
-            $cr = (clone $cabQ)->whereMonth('created_at', $m->month)->whereYear('created_at', $m->year)->sum('total_amount');
-            $br = (clone $boatQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->sum('final_amount');
+            $sData = (clone $stayQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)
+                ->selectRaw('SUM(total_amount) as rev, SUM(vendor_cost) as exp')->first();
+            $cData = (clone $cabQ)->whereMonth('created_at', $m->month)->whereYear('created_at', $m->year)
+                ->selectRaw('SUM(total_amount) as rev, SUM(vendor_cost) as exp')->first();
+            $bData = (clone $boatQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)
+                ->selectRaw('SUM(final_amount) as rev, SUM(vendor_cost) as exp')->first();
+
+            $sr = (float)($sData->rev ?? 0);
+            $cr = (float)($cData->rev ?? 0);
+            $br = (float)($bData->rev ?? 0);
+
+            $se = (float)($sData->exp ?? 0) ?: round($sr * 0.30);
+            $ce = (float)($cData->exp ?? 0) ?: round($cr * 0.30);
+            $be = (float)($bData->exp ?? 0) ?: round($br * 0.30);
+
+            $manualExp = (float) Expense::whereMonth('expense_date', $m->month)->whereYear('expense_date', $m->year)->sum('amount');
+
             $bc = (clone $stayQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->count()
                + (clone $cabQ)->whereMonth('created_at', $m->month)->whereYear('created_at', $m->year)->count()
                + (clone $boatQ)->whereMonth('booking_date', $m->month)->whereYear('booking_date', $m->year)->count();
 
-            $stayRevTrend[]  = round($sr);
-            $cabRevTrend[]   = round($cr);
-            $boatRevTrend[]  = round($br);
-            $totalRevTrend[] = round($sr + $cr + $br);
-            $bookingsTrend[] = $bc;
+            $stayRevTrend[]     = round($sr);
+            $cabRevTrend[]      = round($cr);
+            $boatRevTrend[]     = round($br);
+            $totalRevTrend[]    = round($sr + $cr + $br);
+            $bookingsTrend[]    = $bc;
+            $totalExpTrend[]    = round($se + $ce + $be + $manualExp);
+            $totalProfitTrend[] = round($sr + $cr + $br - ($se + $ce + $be + $manualExp));
         }
+
+        // ── Revenue vs Expense (current month) ─────────────────────
+        $manualExpenseMonth = (float) Expense::whereMonth('expense_date', $thisMonth->month)->whereYear('expense_date', $thisMonth->year)->sum('amount');
+
+        $stayExpData = (clone $stayQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)
+            ->selectRaw('SUM(vendor_cost) as exp')->first();
+        $cabExpData = (clone $cabQ)->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)
+            ->selectRaw('SUM(vendor_cost) as exp')->first();
+        $boatExpData = (clone $boatQ)->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)
+            ->selectRaw('SUM(vendor_cost) as exp')->first();
+
+        $stayExpMonth = (float)($stayExpData->exp ?? 0) ?: round($stayRevMonth * 0.30);
+        $cabExpMonth  = (float)($cabExpData->exp ?? 0) ?: round($cabRevMonth * 0.30);
+        $boatExpMonth = (float)($boatExpData->exp ?? 0) ?: round($boatRevMonth * 0.30);
+
+        $totalExpenseMonth = $stayExpMonth + $cabExpMonth + $boatExpMonth + $manualExpenseMonth;
+        $totalProfitMonth  = $totalRevenueMonth - $totalExpenseMonth;
+
+        $expenseSplit = [
+            ['label' => 'Stay Cost',       'val' => $stayExpMonth],
+            ['label' => 'Cab Cost',        'val' => $cabExpMonth],
+            ['label' => 'Boat Cost',       'val' => $boatExpMonth],
+            ['label' => 'Manual Expenses', 'val' => $manualExpenseMonth],
+        ];
 
         // ── All-time stats ────────────────────────────────────────
         $allTimeRevenue  = (clone $stayQ)->sum('total_amount') + (clone $cabQ)->sum('total_amount') + (clone $boatQ)->sum('final_amount');
@@ -263,14 +321,6 @@ class DashboardController extends Controller
         // ── Enquiries ─────────────────────────────────────────────
         $enquiryCount = Enquiry::whereDate('created_at', $today)->count();
 
-        // ── Stay status breakdown (current month) ──────────────────
-        $stayStatuses = (clone $stayQ)
-            ->whereMonth('booking_date', $thisMonth->month)
-            ->whereYear('booking_date', $thisMonth->year)
-            ->select('booking_status', DB::raw('count(*) as cnt'))
-            ->groupBy('booking_status')
-            ->pluck('cnt', 'booking_status');
-
         // ── Staff Targets (current month) ─────────────────────────
         $targetService  = app(TargetCalculationService::class);
         $staffTargets   = collect();
@@ -310,10 +360,11 @@ class DashboardController extends Controller
             'stayRevMonth', 'cabRevMonth', 'boatRevMonth',
             'stayConfirmed', 'stayCompleted', 'boatPending',
             'monthLabels', 'stayRevTrend', 'cabRevTrend', 'boatRevTrend',
-            'totalRevTrend', 'bookingsTrend',
+            'totalRevTrend', 'bookingsTrend', 'totalExpTrend', 'totalProfitTrend',
+            'totalExpenseMonth', 'totalProfitMonth', 'expenseSplit',
             'typeLabels', 'typeData',
             'dailyLabels', 'dailyRevenue',
-            'stayStatuses', 'staffTargets',
+            'staffTargets',
             'teamTotalTarget', 'teamTotalAchieved', 'teamTargetPct',
             'isAdmin', 'myTargetDetail',
             'recentBookings', 'upcomingCheckins', 'upcomingCabs', 'todayAllBookings'
@@ -404,11 +455,15 @@ class DashboardController extends Controller
         $isAdmin = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
         $userId  = auth('admin')->id();
 
+        $thisMonth = Carbon::now();
+
         $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
         $cabQ  = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $boatQ = BoatBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
         $stayPending = (clone $stayQ)->with(['lead', 'createdBy'])
             ->where('pending_amount', '>', 0)
+            ->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)
             ->orderByDesc('booking_date')
             ->get()
             ->map(fn($b) => [
@@ -427,6 +482,7 @@ class DashboardController extends Controller
 
         $cabPending = (clone $cabQ)->with('createdBy')
             ->where('pending_amount', '>', 0)
+            ->whereMonth('created_at', $thisMonth->month)->whereYear('created_at', $thisMonth->year)
             ->orderByDesc('created_at')
             ->get()
             ->map(fn($b) => [
@@ -439,11 +495,37 @@ class DashboardController extends Controller
                 'paid_amount'    => (int) ($b->total_amount - $b->pending_amount),
                 'pending_amount' => (int) $b->pending_amount,
                 'status'         => $b->booking_status,
-                'date'           => $b->created_at ? \Carbon\Carbon::parse($b->created_at)->format('d M Y') : '—',
+                'date'           => $b->pickup_date ? \Carbon\Carbon::parse($b->pickup_date)->format('d M Y') : '—',
                 'url'            => route('cab-bookings.show', $b->id),
             ]);
 
-        $bookings = $stayPending->concat($cabPending)
+        $boatPending = (clone $boatQ)->with('createdBy')
+            ->where('payment_status', '!=', 'paid')
+            ->whereMonth('booking_date', $thisMonth->month)->whereYear('booking_date', $thisMonth->year)
+            ->withSum('payments', 'amount')
+            ->orderByDesc('booking_date')
+            ->get()
+            ->map(function ($b) {
+                $paid    = (float) ($b->payments_sum_amount ?? 0);
+                $pending = max($b->final_amount - $paid, 0);
+                return [
+                    'type'           => 'Boat',
+                    'icon'           => '🚤',
+                    'number'         => $b->booking_id,
+                    'guest'          => $b->name ?? '—',
+                    'added_by'       => $b->createdBy?->name ?? '—',
+                    'total_amount'   => (int) $b->final_amount,
+                    'paid_amount'    => (int) $paid,
+                    'pending_amount' => (int) $pending,
+                    'status'         => $b->booking_status,
+                    'date'           => $b->booking_date ? \Carbon\Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                    'url'            => route('boat-booking.show', $b->booking_id),
+                ];
+            })
+            ->filter(fn($b) => $b['pending_amount'] > 0)
+            ->values();
+
+        $bookings = $stayPending->concat($cabPending)->concat($boatPending)
             ->sortByDesc('pending_amount')
             ->values();
 

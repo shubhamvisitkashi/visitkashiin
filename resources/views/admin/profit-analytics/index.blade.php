@@ -68,6 +68,15 @@
 /* Chart wrap */
 .pan-chart-wrap{height:240px;position:relative;}
 
+/* Expense category cards */
+.exp-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:6px;}
+.exp-cat-card{background:#FAFBFF;border:1px solid var(--pb);border-radius:10px;padding:10px 12px;}
+.exp-cat-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.exp-cat-card-type{font-size:.62rem;font-weight:700;color:#fff;border-radius:5px;padding:2px 6px;text-transform:uppercase;letter-spacing:.03em;}
+.exp-cat-card-cnt{font-size:.68rem;color:var(--pm);background:#F1F5F9;border-radius:20px;padding:1px 7px;}
+.exp-cat-card-name{font-size:.78rem;font-weight:700;color:var(--pt);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exp-cat-card-amt{font-size:.95rem;font-weight:800;color:#991B1B;}
+
 /* Responsive */
 @media(max-width:1100px){.pan-kpi{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:768px){
@@ -87,10 +96,17 @@
         <h1>📊 Profit Analytics</h1>
         <p>Real revenue, expense & profit from completed bookings</p>
     </div>
-    <div class="pan-data-note">
-        📅 {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} – {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+    <div style="position:relative;z-index:1;display:flex;gap:10px;align-items:center;">
+        <div class="pan-data-note">
+            📅 {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} – {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+        </div>
+        <button type="button" onclick="openExpenseModal()" style="height:34px;padding:0 16px;border-radius:9px;border:none;background:#fff;color:#4F46E5;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">+ Add Expense</button>
     </div>
 </div>
+
+@if(session('success'))
+<div style="background:#DCFCE7;color:#166534;border:1px solid #A7F3D0;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:.83rem;font-weight:600;">{{ session('success') }}</div>
+@endif
 
 {{-- Filters --}}
 <form method="GET" action="{{ route('profit-analytics.index') }}" class="pan-filter">
@@ -108,17 +124,17 @@
 
 {{-- KPI Cards --}}
 <div class="pan-kpi">
-    <div class="pan-kpi-card kpi-revenue">
+    <div class="pan-kpi-card kpi-revenue" onclick="openAllBookingsModal('revenue')" style="cursor:pointer;" title="Click to view all bookings">
         <div class="pan-kpi-icon"><i data-feather="trending-up"></i></div>
         <div class="pan-kpi-val">₹{{ number_format($totalRevenue,0) }}</div>
         <div class="pan-kpi-lbl">Total Revenue</div>
     </div>
-    <div class="pan-kpi-card kpi-expense">
+    <div class="pan-kpi-card kpi-expense" onclick="openTotalExpenseModal()" style="cursor:pointer;" title="Click to view all expenses">
         <div class="pan-kpi-icon"><i data-feather="trending-down"></i></div>
         <div class="pan-kpi-val">₹{{ number_format($totalExpense,0) }}</div>
         <div class="pan-kpi-lbl">Total Expenses</div>
     </div>
-    <div class="pan-kpi-card kpi-profit">
+    <div class="pan-kpi-card kpi-profit" onclick="openAllBookingsModal('profit')" style="cursor:pointer;" title="Click to view all bookings">
         <div class="pan-kpi-icon"><i data-feather="dollar-sign"></i></div>
         <div class="pan-kpi-val">₹{{ number_format($totalProfit,0) }}</div>
         <div class="pan-kpi-lbl">Net Profit</div>
@@ -165,6 +181,32 @@
             @empty
             <p style="color:var(--pm);font-size:.83rem;text-align:center;padding:20px 0;">No data for selected period</p>
             @endforelse
+        </div>
+    </div>
+</div>
+
+{{-- Revenue vs Expense Pie --}}
+<div class="pan-grid-2">
+    <div class="pan-card">
+        <div class="pan-card-head">
+            <div class="pan-card-title"><i data-feather="pie-chart"></i> Revenue vs Expense</div>
+        </div>
+        <div class="pan-card-body">
+            <div class="pan-chart-wrap" style="height:220px;">
+                <canvas id="revExpPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{-- Expense Cost Split --}}
+    <div class="pan-card">
+        <div class="pan-card-head">
+            <div class="pan-card-title"><i data-feather="pie-chart"></i> Expense Cost Split</div>
+        </div>
+        <div class="pan-card-body">
+            <div class="pan-chart-wrap" style="height:220px;">
+                <canvas id="expenseSplitPieChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -221,7 +263,7 @@
 
 {{-- Top Bookings Table --}}
 @php
-$typeBadge = ['Tour'=>'#4F46E5','Cab'=>'#0369A1','Boat'=>'#0891B2','Package'=>'#059669'];
+$typeBadge = ['Tour'=>'#4F46E5','Cab'=>'#0369A1','Boat'=>'#0891B2','Package'=>'#059669','Stay'=>'#059669','General'=>'#7C3AED'];
 @endphp
 <div class="pan-card">
     <div class="pan-card-head">
@@ -265,10 +307,398 @@ $typeBadge = ['Tour'=>'#4F46E5','Cab'=>'#0369A1','Boat'=>'#0891B2','Package'=>'#
     </div>
 </div>
 
+{{-- Expense Management --}}
+<div class="pan-card">
+    <div class="pan-card-head">
+        <div class="pan-card-title"><i data-feather="credit-card"></i> Expense Management</div>
+        <span style="font-size:.73rem;color:var(--pm);">{{ $categoryBreakdown->sum('cnt') }} entries · ₹{{ number_format($categoryBreakdown->sum('total'),0) }} total</span>
+    </div>
+    <div class="pan-card-body" style="padding-bottom:6px;">
+        {{-- Category summary cards --}}
+        <div class="exp-cat-grid">
+            @forelse($categoryBreakdown as $cat)
+            @php $catColor = $typeBadge[\App\Models\Expense::TYPES[$cat->type] ?? $cat->type] ?? '#64748B'; @endphp
+            <div class="exp-cat-card" style="border-left:4px solid {{ $catColor }};">
+                <div class="exp-cat-card-top">
+                    <span class="exp-cat-card-type" style="background:{{ $catColor }};">{{ \App\Models\Expense::TYPES[$cat->type] ?? $cat->type }}</span>
+                    <span class="exp-cat-card-cnt">{{ $cat->cnt }}</span>
+                </div>
+                <div class="exp-cat-card-name">{{ $cat->category }}</div>
+                <div class="exp-cat-card-amt">₹{{ number_format($cat->total,0) }}</div>
+            </div>
+            @empty
+            <p style="color:var(--pm);font-size:.83rem;padding:8px 0;">No expenses recorded for this period yet.</p>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- Filters --}}
+    <div style="padding:0 20px 14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <select id="expFilterType" onchange="filterExpenseTable()" style="border:1.5px solid var(--pb);border-radius:9px;padding:6px 10px;font-size:.78rem;height:34px;outline:none;background:#FAFBFF;">
+            <option value="">All Types</option>
+            @foreach(\App\Models\Expense::TYPES as $key => $label)
+            <option value="{{ $label }}">{{ $label }}</option>
+            @endforeach
+        </select>
+        <select id="expFilterCategory" onchange="filterExpenseTable()" style="border:1.5px solid var(--pb);border-radius:9px;padding:6px 10px;font-size:.78rem;height:34px;outline:none;background:#FAFBFF;">
+            <option value="">All Categories</option>
+            @foreach($expenseEntries->pluck('category')->unique()->sort() as $catName)
+            <option value="{{ $catName }}">{{ $catName }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="table-responsive">
+        <table class="pan-table" id="expenseTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Reference</th>
+                    <th>Notes</th>
+                    <th>Added By</th>
+                    <th class="text-end">Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($expenseEntries as $e)
+                @php $typeLabel = \App\Models\Expense::TYPES[$e->type] ?? $e->type; @endphp
+                <tr data-type="{{ $typeLabel }}" data-category="{{ $e->category }}">
+                    <td style="font-size:.78rem;white-space:nowrap;">{{ $e->expense_date->format('d M Y') }}</td>
+                    <td><span style="font-size:.68rem;font-weight:700;color:#fff;background:{{ $typeBadge[$typeLabel] ?? '#64748B' }};border-radius:5px;padding:2px 7px;">{{ $typeLabel }}</span></td>
+                    <td style="font-size:.83rem;font-weight:600;">{{ $e->category }}</td>
+                    <td style="font-size:.75rem;color:var(--pm);">{{ $e->staff?->name ?? $e->party_name ?? '—' }}</td>
+                    <td style="font-size:.75rem;color:var(--pm);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $e->notes ?? '—' }}</td>
+                    <td style="font-size:.75rem;color:var(--pm);">{{ $e->createdBy?->name ?? '—' }}</td>
+                    <td class="text-end pan-amt-neg">₹{{ number_format($e->amount,0) }}</td>
+                    <td class="text-end" style="white-space:nowrap;">
+                        <button type="button"
+                            onclick="editExpense({{ $e->id }}, '{{ $e->type }}', '{{ addslashes($e->category) }}', {{ $e->amount }}, '{{ $e->expense_date->format('Y-m-d') }}', '{{ addslashes($e->notes ?? '') }}', {{ $e->staff_id ?? 'null' }}, '{{ addslashes($e->party_name ?? '') }}')"
+                            style="border:none;background:none;color:#4F46E5;cursor:pointer;font-size:.75rem;font-weight:700;margin-right:10px;">Edit</button>
+                        <form method="POST" action="{{ route('expenses.destroy', $e->id) }}" onsubmit="return confirm('Delete this expense?');" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <input type="hidden" name="start_date" value="{{ $startDate }}">
+                            <input type="hidden" name="end_date" value="{{ $endDate }}">
+                            <button type="submit" style="border:none;background:none;color:#EF4444;cursor:pointer;font-size:.75rem;font-weight:700;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="8" style="text-align:center;padding:28px;color:var(--pm);">No manual expenses recorded for this period</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+        <p id="expenseEmptyState" style="display:none;text-align:center;padding:28px;color:var(--pm);font-size:.83rem;">No expenses match the selected filters</p>
+    </div>
+</div>
+
+</div>
+
+{{-- Add Expense Modal --}}
+<div id="expenseModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;padding:20px;">
+  <div style="max-width:460px;margin:60px auto;background:#fff;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.2);overflow:hidden;">
+    <div style="padding:18px 24px;border-bottom:1px solid var(--pb);display:flex;align-items:center;justify-content:space-between;">
+      <div id="expenseModalTitle" style="font-size:1rem;font-weight:800;color:var(--pt);">Add Expense</div>
+      <button type="button" onclick="closeExpenseModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--pm);line-height:1;padding:4px 10px;">&times;</button>
+    </div>
+    <form method="POST" id="expenseForm" action="{{ route('expenses.store') }}" style="padding:20px 24px;">
+      @csrf
+      <input type="hidden" name="_method" id="expenseMethod" value="POST">
+      <input type="hidden" name="start_date" value="{{ $startDate }}">
+      <input type="hidden" name="end_date" value="{{ $endDate }}">
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.72rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Type</label>
+        <select name="type" id="expenseType" onchange="updateExpenseCategories()" required style="width:100%;border:1.5px solid var(--pb);border-radius:9px;padding:8px 11px;font-size:.85rem;height:38px;outline:none;">
+          @foreach(\App\Models\Expense::TYPES as $key => $label)
+          <option value="{{ $key }}">{{ $label }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.72rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Category</label>
+        <select name="category" id="expenseCategory" onchange="updateExpenseRefFields()" required style="width:100%;border:1.5px solid var(--pb);border-radius:9px;padding:8px 11px;font-size:.85rem;height:38px;outline:none;"></select>
+      </div>
+
+      <div id="expenseStaffWrap" style="margin-bottom:14px;display:none;">
+        <label style="font-size:.72rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Staff</label>
+        <select name="staff_id" id="expenseStaff" style="width:100%;border:1.5px solid var(--pb);border-radius:9px;padding:8px 11px;font-size:.85rem;height:38px;outline:none;">
+          <option value="">Select staff</option>
+          @foreach($staffList as $staff)
+          <option value="{{ $staff->id }}">{{ $staff->name }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div id="expensePartyWrap" style="margin-bottom:14px;display:none;">
+        <label style="font-size:.72rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Hotel / Party Name</label>
+        <input type="text" name="party_name" id="expenseParty" style="width:100%;border:1.5px solid var(--pb);border-radius:9px;padding:8px 11px;font-size:.85rem;height:38px;outline:none;box-sizing:border-box;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.72rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Amount (₹)</label>
+        <input type="number" name="amount" id="expenseAmount" min="0.01" step="0.01" required style="width:100%;border:1.5px solid var(--pb);border-radius:9px;padding:8px 11px;font-size:.85rem;height:38px;outline:none;box-sizing:border-box;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:.72rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Date</label>
+        <input type="date" name="expense_date" id="expenseDate" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" required style="width:100%;border:1.5px solid var(--pb);border-radius:9px;padding:8px 11px;font-size:.85rem;height:38px;outline:none;box-sizing:border-box;">
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="font-size:.72rem;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px;">Notes (optional)</label>
+        <textarea name="notes" id="expenseNotes" rows="2" style="width:100%;border:1.5px solid var(--pb);border-radius:9px;padding:8px 11px;font-size:.85rem;outline:none;box-sizing:border-box;resize:vertical;"></textarea>
+      </div>
+
+      <button type="submit" id="expenseSubmitBtn" style="width:100%;height:40px;border-radius:9px;border:none;background:var(--pa);color:#fff;font-size:.86rem;font-weight:700;cursor:pointer;">Save Expense</button>
+    </form>
+  </div>
+</div>
+
+{{-- Total Expenses Modal --}}
+<div id="totalExpenseModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;padding:20px;">
+  <div style="max-width:900px;margin:40px auto;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.2);overflow:hidden;">
+    <div style="padding:18px 24px;border-bottom:1px solid var(--pb);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:1rem;font-weight:800;color:var(--pt);">📉 Total Expenses</div>
+        <div style="font-size:.75rem;color:var(--pm);margin-top:2px;">{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} – {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</div>
+      </div>
+      <button type="button" onclick="closeTotalExpenseModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--pm);line-height:1;padding:4px 10px;">&times;</button>
+    </div>
+    <div style="padding:20px 24px;max-height:75vh;overflow-y:auto;">
+      <div class="exp-cat-grid" style="margin-bottom:18px;">
+        @foreach($expenseBreakdown as $row)
+        <div class="exp-cat-card" style="border-left:4px solid #DC2626;">
+          <div class="exp-cat-card-name">{{ $row['label'] }}</div>
+          <div class="exp-cat-card-amt">₹{{ number_format($row['val'],0) }}</div>
+        </div>
+        @endforeach
+        <div class="exp-cat-card" style="border-left:4px solid #7C3AED;background:#F5F3FF;">
+          <div class="exp-cat-card-name">Total</div>
+          <div class="exp-cat-card-amt" style="color:#7C3AED;">₹{{ number_format($totalExpense,0) }}</div>
+        </div>
+      </div>
+
+      <div style="font-size:.85rem;font-weight:800;color:var(--pt);margin-bottom:10px;">Manual Expense Entries ({{ $expenseEntries->count() }})</div>
+      <div class="table-responsive">
+        <table class="pan-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Reference</th>
+              <th>Notes</th>
+              <th>Added By</th>
+              <th class="text-end">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($expenseEntries as $e)
+            @php $typeLabel = \App\Models\Expense::TYPES[$e->type] ?? $e->type; @endphp
+            <tr>
+              <td style="font-size:.78rem;white-space:nowrap;">{{ $e->expense_date->format('d M Y') }}</td>
+              <td><span style="font-size:.68rem;font-weight:700;color:#fff;background:{{ $typeBadge[$typeLabel] ?? '#64748B' }};border-radius:5px;padding:2px 7px;">{{ $typeLabel }}</span></td>
+              <td style="font-size:.83rem;font-weight:600;">{{ $e->category }}</td>
+              <td style="font-size:.75rem;color:var(--pm);">{{ $e->staff?->name ?? $e->party_name ?? '—' }}</td>
+              <td style="font-size:.75rem;color:var(--pm);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $e->notes ?? '—' }}</td>
+              <td style="font-size:.75rem;color:var(--pm);">{{ $e->createdBy?->name ?? '—' }}</td>
+              <td class="text-end pan-amt-neg">₹{{ number_format($e->amount,0) }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--pm);">No manual expenses recorded for this period</td></tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- All Bookings Modal (Total Revenue / Net Profit) --}}
+<div id="allBookingsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;padding:20px;">
+  <div style="max-width:980px;margin:40px auto;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.2);overflow:hidden;">
+    <div style="padding:18px 24px;border-bottom:1px solid var(--pb);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div id="allBookingsModalTitle" style="font-size:1rem;font-weight:800;color:var(--pt);">All Bookings</div>
+        <div id="allBookingsModalSub" style="font-size:.75rem;color:var(--pm);margin-top:2px;">{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} – {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</div>
+      </div>
+      <button type="button" onclick="closeAllBookingsModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--pm);line-height:1;padding:4px 10px;">&times;</button>
+    </div>
+    <div style="padding:20px 24px;max-height:75vh;overflow-y:auto;">
+      <div style="font-size:.85rem;font-weight:800;color:var(--pt);margin-bottom:10px;">{{ $allBookings->count() }} booking{{ $allBookings->count() == 1 ? '' : 's' }}</div>
+      <div class="table-responsive">
+        <table class="pan-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Guest</th>
+              <th>Detail</th>
+              <th class="text-end">Revenue</th>
+              <th class="text-end">Expense</th>
+              <th class="text-end">Profit</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($allBookings as $b)
+            <tr>
+              <td style="font-size:.78rem;white-space:nowrap;">{{ \Carbon\Carbon::parse($b['date'])->format('d M Y') }}</td>
+              <td><span style="font-size:.68rem;font-weight:700;color:#fff;background:{{ $typeBadge[$b['type']] ?? '#64748B' }};border-radius:5px;padding:2px 7px;">{{ $b['type'] }}</span></td>
+              <td style="font-size:.83rem;font-weight:600;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b['name'] ?: 'Guest' }}</td>
+              <td style="font-size:.75rem;color:var(--pm);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b['plan'] ?: '—' }}</td>
+              <td class="text-end" style="font-weight:700;color:#059669;white-space:nowrap;">₹{{ number_format($b['amount'],0) }}</td>
+              <td class="text-end" style="font-weight:600;color:#991B1B;white-space:nowrap;">₹{{ number_format($b['expense'],0) }}</td>
+              <td class="text-end" style="font-weight:800;white-space:nowrap;">₹{{ number_format($b['profit'],0) }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--pm);">No bookings recorded for this period</td></tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
+var expenseCategories = @json(\App\Models\Expense::CATEGORIES);
+var expenseStoreUrl   = "{{ route('expenses.store') }}";
+var expenseUpdateUrlTpl = "{{ route('expenses.update', ['expense' => '__ID__']) }}";
+
+function updateExpenseCategories(selected) {
+    var type = document.getElementById('expenseType').value;
+    var select = document.getElementById('expenseCategory');
+    var cats = expenseCategories[type] || [];
+    select.innerHTML = cats.map(c => `<option value="${c}"${c === selected ? ' selected' : ''}>${c}</option>`).join('');
+    if (selected && !cats.includes(selected)) {
+        select.insertAdjacentHTML('beforeend', `<option value="${selected}" selected>${selected}</option>`);
+    }
+    updateExpenseRefFields();
+}
+
+function updateExpenseRefFields() {
+    var category = (document.getElementById('expenseCategory').value || '').toLowerCase();
+    var isSalary = category.includes('salary');
+    var isHotel = category.includes('hotel');
+    var staffWrap = document.getElementById('expenseStaffWrap');
+    var partyWrap = document.getElementById('expensePartyWrap');
+    var staffSelect = document.getElementById('expenseStaff');
+    var partyInput = document.getElementById('expenseParty');
+    staffWrap.style.display = isSalary ? 'block' : 'none';
+    staffSelect.required = isSalary;
+    if (!isSalary) staffSelect.value = '';
+    partyWrap.style.display = isHotel ? 'block' : 'none';
+    partyInput.required = isHotel;
+    if (!isHotel) partyInput.value = '';
+}
+
+function openExpenseModal() {
+    document.getElementById('expenseModalTitle').textContent = 'Add Expense';
+    document.getElementById('expenseForm').action = expenseStoreUrl;
+    document.getElementById('expenseMethod').value = 'POST';
+    document.getElementById('expenseSubmitBtn').textContent = 'Save Expense';
+    document.getElementById('expenseType').value = 'stay';
+    document.getElementById('expenseAmount').value = '';
+    document.getElementById('expenseDate').value = '{{ \Carbon\Carbon::now()->format("Y-m-d") }}';
+    document.getElementById('expenseNotes').value = '';
+    document.getElementById('expenseStaff').value = '';
+    document.getElementById('expenseParty').value = '';
+    updateExpenseCategories();
+    document.getElementById('expenseModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function editExpense(id, type, category, amount, date, notes, staffId, partyName) {
+    document.getElementById('expenseModalTitle').textContent = 'Edit Expense';
+    document.getElementById('expenseForm').action = expenseUpdateUrlTpl.replace('__ID__', id);
+    document.getElementById('expenseMethod').value = 'PUT';
+    document.getElementById('expenseSubmitBtn').textContent = 'Update Expense';
+    document.getElementById('expenseType').value = type;
+    document.getElementById('expenseAmount').value = amount;
+    document.getElementById('expenseDate').value = date;
+    document.getElementById('expenseNotes').value = notes;
+    updateExpenseCategories(category);
+    document.getElementById('expenseStaff').value = staffId || '';
+    document.getElementById('expenseParty').value = partyName || '';
+    document.getElementById('expenseModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeExpenseModal() {
+    document.getElementById('expenseModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+document.getElementById('expenseModal').addEventListener('click', function(e) {
+    if (e.target === this) closeExpenseModal();
+});
+
+function openTotalExpenseModal() {
+    document.getElementById('totalExpenseModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeTotalExpenseModal() {
+    document.getElementById('totalExpenseModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+document.getElementById('totalExpenseModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTotalExpenseModal();
+});
+
+var allBookingsTotalRevenue = {{ $totalRevenue }};
+var allBookingsTotalProfit  = {{ $totalProfit }};
+
+function openAllBookingsModal(mode) {
+    var title = document.getElementById('allBookingsModalTitle');
+    var sub   = document.getElementById('allBookingsModalSub');
+    var range = '{{ \Carbon\Carbon::parse($startDate)->format("d M Y") }} – {{ \Carbon\Carbon::parse($endDate)->format("d M Y") }}';
+    if (mode === 'profit') {
+        title.textContent = '💰 Net Profit — ₹' + allBookingsTotalProfit.toLocaleString('en-IN');
+    } else {
+        title.textContent = '📈 Total Revenue — ₹' + allBookingsTotalRevenue.toLocaleString('en-IN');
+    }
+    sub.textContent = range;
+    document.getElementById('allBookingsModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAllBookingsModal() {
+    document.getElementById('allBookingsModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+document.getElementById('allBookingsModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAllBookingsModal();
+});
+
+function filterExpenseTable() {
+    var type = document.getElementById('expFilterType').value;
+    var category = document.getElementById('expFilterCategory').value;
+    var rows = document.querySelectorAll('#expenseTable tbody tr');
+    var visible = 0;
+    rows.forEach(function(row) {
+        if (!row.dataset.type) return; // skip empty-state row
+        var matchType = !type || row.dataset.type === type;
+        var matchCat  = !category || row.dataset.category === category;
+        var show = matchType && matchCat;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('expenseEmptyState').style.display = visible === 0 ? 'block' : 'none';
+}
+
+@if($errors->any())
+document.addEventListener('DOMContentLoaded', function() { openExpenseModal(); });
+@endif
+
 document.addEventListener('DOMContentLoaded', function() {
     feather.replace();
 
@@ -333,6 +763,58 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     },
                     x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    // Revenue vs Expense Pie
+    var pieCtx = document.getElementById('revExpPieChart');
+    if (pieCtx) {
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Revenue', 'Expense'],
+                datasets: [{
+                    data: [{{ $totalRevenue }}, {{ $totalExpense }}],
+                    backgroundColor: ['#4F46E5', '#DC2626'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: c => ' ' + c.label + ': ₹' + c.parsed.toLocaleString('en-IN') } }
+                }
+            }
+        });
+    }
+
+    // Expense Cost Split Pie
+    var expSplitCtx = document.getElementById('expenseSplitPieChart');
+    if (expSplitCtx) {
+        var expBreakdown = @json($expenseBreakdown);
+        expBreakdown = expBreakdown.filter(r => r.val > 0);
+        new Chart(expSplitCtx, {
+            type: 'pie',
+            data: {
+                labels: expBreakdown.map(r => r.label),
+                datasets: [{
+                    data: expBreakdown.map(r => r.val),
+                    backgroundColor: ['#4F46E5', '#0369A1', '#0891B2', '#059669', '#B45309'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: c => ' ' + c.label + ': ₹' + c.parsed.toLocaleString('en-IN') } }
                 }
             }
         });

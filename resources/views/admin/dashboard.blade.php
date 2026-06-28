@@ -150,8 +150,14 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 .type-stat { font-size:.68rem; font-weight:600; padding:3px 9px; border-radius:20px; }
 
 /* ── Two-column layout ────────────────────── */
-.dk-cols { display:grid; grid-template-columns:1fr 370px; gap:20px; margin-bottom:20px; }
-@media(max-width:1100px){.dk-cols{grid-template-columns:1fr;}}
+/* ── Pie chart row (one line) ────────────── */
+.dk-pie-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:20px; }
+@media(max-width:1300px){.dk-pie-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:700px){.dk-pie-row{grid-template-columns:1fr;}}
+
+/* ── Two-column chart row ─────────────────── */
+.dk-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+@media(max-width:1100px){.dk-row-2{grid-template-columns:1fr;}}
 
 /* ── Chart card ───────────────────────────── */
 .chart-card {
@@ -279,6 +285,116 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <a href="{{ route('bookings.index') }}" class="dk-hero-btn primary">📋 All Bookings</a>
     <a href="{{ route('cab-bookings.create') }}" class="dk-hero-btn">🚗 Cab</a>
     <a href="{{ route('bookings.calendar') }}" class="dk-hero-btn">📅 Calendar</a>
+  </div>
+</div>
+
+{{-- ══ REVENUE / EXPENSE PIES ══ --}}
+<div class="dk-pie-row">
+  {{-- Booking Mix --}}
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">🥧 Booking Mix</div>
+      <span style="font-size:.7rem;color:var(--muted);">This Month</span>
+    </div>
+    <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
+      <div class="mix-donut" style="width:120px;flex-shrink:0;">
+        <canvas id="donutChart"></canvas>
+      </div>
+      <div style="flex:1;min-width:0;">
+        @php $typeTotal = array_sum($typeData); @endphp
+        @foreach($typeLabels as $i => $lbl)
+        @php
+          $pct    = $typeTotal > 0 ? round($typeData[$i] / $typeTotal * 100) : 0;
+          $colors = ['#4F46E5','#F59E0B','#0EA5E9'];
+          $bgs    = ['#EEF2FF','#FEF3C7','#E0F2FE'];
+          $icons  = ['🏨','🚗','⛵'];
+        @endphp
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
+            <span style="font-weight:700;color:var(--text);">{{ $icons[$i] ?? '' }} {{ $lbl }}</span>
+            <span style="color:var(--muted);font-size:.7rem;">{{ $typeData[$i] }} <span style="font-weight:700;color:{{ $colors[$i] }};">({{ $pct }}%)</span></span>
+          </div>
+          <div class="prog-bar">
+            <div class="prog-fill" style="width:{{ $pct }}%;background:{{ $colors[$i] ?? '#94A3B8' }};"></div>
+          </div>
+        </div>
+        @endforeach
+      </div>
+    </div>
+  </div>
+
+  {{-- Revenue vs Expense --}}
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">📊 Revenue vs Expense</div>
+      <span style="font-size:.7rem;color:var(--muted);">This Month</span>
+    </div>
+    <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
+      <div class="mix-donut" style="width:120px;flex-shrink:0;position:relative;">
+        <canvas id="revExpPieChart"></canvas>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+          <div style="font-size:.85rem;font-weight:900;color:var(--text);line-height:1;">{{ $totalProfitMonth >= 0 ? '+' : '' }}{{ $totalRevenueMonth > 0 ? round(($totalProfitMonth/$totalRevenueMonth)*100) : 0 }}%</div>
+          <div style="font-size:.58rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;">margin</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        @php
+          $revExpTotal = $totalRevenueMonth + $totalExpenseMonth;
+          $revPct = $revExpTotal > 0 ? round($totalRevenueMonth / $revExpTotal * 100) : 0;
+          $expPct = $revExpTotal > 0 ? round($totalExpenseMonth / $revExpTotal * 100) : 0;
+        @endphp
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
+            <span style="font-weight:700;color:var(--text);">💰 Revenue</span>
+            <span style="color:var(--muted);font-size:.7rem;">₹{{ number_format($totalRevenueMonth,0) }} <span style="font-weight:700;color:#4F46E5;">({{ $revPct }}%)</span></span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:{{ $revPct }}%;background:#4F46E5;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
+            <span style="font-weight:700;color:var(--text);">📉 Expense</span>
+            <span style="color:var(--muted);font-size:.7rem;">₹{{ number_format($totalExpenseMonth,0) }} <span style="font-weight:700;color:#F43F5E;">({{ $expPct }}%)</span></span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:{{ $expPct }}%;background:#F43F5E;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- Expense Cost Split --}}
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">📊 Expense Cost Split</div>
+      <span style="font-size:.7rem;color:var(--muted);">This Month</span>
+    </div>
+    <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
+      <div class="mix-donut" style="width:120px;flex-shrink:0;position:relative;">
+        <canvas id="expenseSplitPieChart"></canvas>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+          <div style="font-size:.78rem;font-weight:900;color:var(--text);line-height:1;">₹{{ $totalExpenseMonth >= 100000 ? round($totalExpenseMonth/100000,1).'L' : round($totalExpenseMonth/1000).'K' }}</div>
+          <div style="font-size:.58rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;">total</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        @php
+          $expSplitTotal = max(array_sum(array_column($expenseSplit, 'val')), 1);
+          $expColors = ['#4F46E5','#F59E0B','#0EA5E9','#B45309'];
+          $expIcons  = ['🏨','🚗','⛵','🧾'];
+        @endphp
+        @foreach($expenseSplit as $i => $row)
+        @if($row['val'] > 0)
+        @php $pct = round($row['val'] / $expSplitTotal * 100); @endphp
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
+            <span style="font-weight:700;color:var(--text);">{{ $expIcons[$i] ?? '' }} {{ $row['label'] }}</span>
+            <span style="color:var(--muted);font-size:.7rem;">₹{{ number_format($row['val'],0) }} <span style="font-weight:700;color:{{ $expColors[$i] ?? '#94A3B8' }};">({{ $pct }}%)</span></span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:{{ $pct }}%;background:{{ $expColors[$i] ?? '#94A3B8' }};"></div></div>
+        </div>
+        @endif
+        @endforeach
+      </div>
+    </div>
   </div>
 </div>
 
@@ -709,27 +825,38 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 </div>
 
 {{-- ══ MAIN CONTENT ══ --}}
-<div class="dk-cols">
+<div>
 
-  {{-- LEFT --}}
-  <div>
-
-    {{-- Revenue Trend Chart (admin only) --}}
+    {{-- Revenue Trend + 3-Month Trend (admin only) --}}
     @if($isAdmin)
-    <div class="chart-card">
-      <div class="chart-head">
-        <div>
-          <div class="chart-title">📈 Revenue Trend — Last 3 Months</div>
-          <div class="chart-sub">Stay · Cab · Boat breakdown</div>
+    <div class="dk-row-2">
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">📈 Revenue Trend — Last 3 Months</div>
+            <div class="chart-sub">Stay · Cab · Boat breakdown</div>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-dot" style="--lc:#4F46E5;">Stay</span>
+            <span class="legend-dot" style="--lc:#F59E0B;">Cab</span>
+            <span class="legend-dot" style="--lc:#0EA5E9;">Boat</span>
+          </div>
         </div>
-        <div class="chart-legend">
-          <span class="legend-dot" style="--lc:#4F46E5;">Stay</span>
-          <span class="legend-dot" style="--lc:#F59E0B;">Cab</span>
-          <span class="legend-dot" style="--lc:#0EA5E9;">Boat</span>
+        <div class="chart-body">
+          <canvas id="revenueChart" height="95"></canvas>
         </div>
       </div>
-      <div class="chart-body">
-        <canvas id="revenueChart" height="95"></canvas>
+
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">📊 3-Month Trend</div>
+            <div class="chart-sub">Revenue · Expense · Net Profit</div>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="dashTrendChart" height="95"></canvas>
+        </div>
       </div>
     </div>
     @endif
@@ -788,75 +915,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     </div>
 
   </div>{{-- /left --}}
-
-  {{-- RIGHT --}}
-  <div>
-
-    {{-- Booking Mix --}}
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">🥧 Booking Mix</div>
-        <span style="font-size:.7rem;color:var(--muted);">This Month</span>
-      </div>
-      <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
-        <div class="mix-donut" style="width:120px;flex-shrink:0;">
-          <canvas id="donutChart"></canvas>
-        </div>
-        <div style="flex:1;min-width:0;">
-          @php $typeTotal = array_sum($typeData); @endphp
-          @foreach($typeLabels as $i => $lbl)
-          @php
-            $pct    = $typeTotal > 0 ? round($typeData[$i] / $typeTotal * 100) : 0;
-            $colors = ['#4F46E5','#F59E0B','#0EA5E9'];
-            $bgs    = ['#EEF2FF','#FEF3C7','#E0F2FE'];
-            $icons  = ['🏨','🚗','⛵'];
-          @endphp
-          <div style="margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
-              <span style="font-weight:700;color:var(--text);">{{ $icons[$i] ?? '' }} {{ $lbl }}</span>
-              <span style="color:var(--muted);font-size:.7rem;">{{ $typeData[$i] }} <span style="font-weight:700;color:{{ $colors[$i] }};">({{ $pct }}%)</span></span>
-            </div>
-            <div class="prog-bar">
-              <div class="prog-fill" style="width:{{ $pct }}%;background:{{ $colors[$i] ?? '#94A3B8' }};"></div>
-            </div>
-          </div>
-          @endforeach
-        </div>
-      </div>
-    </div>
-
-    {{-- Stay Booking Status Breakdown --}}
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">📊 Stay Booking Status</div>
-        <span style="font-size:.7rem;color:var(--muted);">This Month</span>
-      </div>
-      <div style="padding:16px 20px;">
-        @php
-          $statuses = [
-            'confirmed'   => ['label'=>'Confirmed',   'bg'=>'#DBEAFE','c'=>'#1E40AF'],
-            'in_progress' => ['label'=>'In Progress', 'bg'=>'#FEF3C7','c'=>'#92400E'],
-            'completed'   => ['label'=>'Completed',   'bg'=>'#D1FAE5','c'=>'#065F46'],
-            'cancelled'   => ['label'=>'Cancelled',   'bg'=>'#FEE2E2','c'=>'#991B1B'],
-            'not_started' => ['label'=>'Not Started', 'bg'=>'#F1F5F9','c'=>'#475569'],
-          ];
-          $total = $stayStatuses->sum();
-        @endphp
-        @foreach($statuses as $key => $s)
-        @php $cnt = $stayStatuses[$key] ?? 0; $pct = $total > 0 ? round($cnt/$total*100) : 0; @endphp
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">
-          <span style="font-size:.7rem;font-weight:700;min-width:90px;padding:3px 9px;border-radius:20px;background:{{ $s['bg'] }};color:{{ $s['c'] }};text-align:center;">{{ $s['label'] }}</span>
-          <div class="prog-bar" style="flex:1;">
-            <div class="prog-fill" style="width:{{ $pct }}%;background:{{ $s['c'] }};"></div>
-          </div>
-          <span style="font-size:.72rem;font-weight:800;color:var(--text);min-width:24px;text-align:right;">{{ $cnt }}</span>
-        </div>
-        @endforeach
-      </div>
-    </div>
-
-  </div>{{-- /right --}}
-</div>{{-- /dk-cols --}}
+</div>{{-- /main content --}}
 
 </div>{{-- /dk-page --}}
 
@@ -893,6 +952,79 @@ if (document.getElementById('revenueChart')) new Chart(document.getElementById('
     }
   }
 });
+
+// ── Revenue / Expense / Profit trend ─────────────────────
+if (document.getElementById('dashTrendChart')) new Chart(document.getElementById('dashTrendChart'), {
+  type: 'bar',
+  data: {
+    labels: {!! json_encode($monthLabels) !!},
+    datasets: [
+      { label:'Revenue', data:{!! json_encode($totalRevTrend) !!}, backgroundColor:'rgba(79,70,229,.8)', borderRadius:7, order:2 },
+      { label:'Expense', data:{!! json_encode($totalExpTrend) !!}, backgroundColor:'rgba(239,68,68,.65)', borderRadius:7, order:3 },
+      { label:'Net Profit', data:{!! json_encode($totalProfitTrend) !!}, type:'line', borderColor:'#10B981',
+        backgroundColor:'rgba(16,185,129,.12)', borderWidth:2.5, fill:true, tension:.4,
+        pointRadius:4, pointBackgroundColor:'#10B981', pointBorderColor:'#fff', pointBorderWidth:2, order:1 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:true,
+    plugins: {
+      legend: { position:'top', labels:{ usePointStyle:true, padding:14, font:{ size:11 }, color: chartTextColor() } },
+      tooltip:{ callbacks:{ label: ctx => ' ' + ctx.dataset.label + ': ₹' + Math.abs(ctx.parsed.y).toLocaleString('en-IN') }}
+    },
+    scales: {
+      x: { ...axisDefaults(), grid:{ display:false } },
+      y: { ...axisDefaults(), beginAtZero:true, ticks:{ ...axisDefaults().ticks, callback: v => v>=100000 ? '₹'+(v/100000).toFixed(1)+'L' : '₹'+(v/1000).toFixed(0)+'K' }}
+    }
+  }
+});
+
+// ── Revenue vs Expense donut ──────────────────────────────
+if (document.getElementById('revExpPieChart')) new Chart(document.getElementById('revExpPieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Revenue', 'Expense'],
+    datasets: [{
+      data: [{{ $totalRevenueMonth }}, {{ $totalExpenseMonth }}],
+      backgroundColor: ['#4F46E5', '#F43F5E'],
+      borderWidth: 3,
+      borderColor: chartBgColor(),
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive:true, cutout:'72%',
+    plugins: {
+      legend:{ display:false },
+      tooltip:{ callbacks:{ label: ctx => ' ' + ctx.label + ': ₹' + ctx.parsed.toLocaleString('en-IN') }}
+    }
+  }
+});
+
+// ── Expense cost split donut ──────────────────────────────
+if (document.getElementById('expenseSplitPieChart')) {
+  var dashExpSplit = {!! json_encode($expenseSplit) !!}.filter(r => r.val > 0);
+  new Chart(document.getElementById('expenseSplitPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: dashExpSplit.map(r => r.label),
+      datasets: [{
+        data: dashExpSplit.map(r => r.val),
+        backgroundColor: ['#4F46E5','#F59E0B','#0EA5E9','#B45309'],
+        borderWidth: 3,
+        borderColor: chartBgColor(),
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive:true, cutout:'72%',
+      plugins: {
+        legend:{ display:false },
+        tooltip:{ callbacks:{ label: ctx => ' ' + ctx.label + ': ₹' + ctx.parsed.toLocaleString('en-IN') }}
+      }
+    }
+  });
+}
 
 // ── Donut chart ──────────────────────────────────────────
 new Chart(document.getElementById('donutChart'), {

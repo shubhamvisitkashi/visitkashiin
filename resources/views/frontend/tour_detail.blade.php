@@ -128,6 +128,33 @@
 .fest-sidebar__wa { display:flex; align-items:center; justify-content:center; gap:8px; background:#25D366; color:#fff; padding:12px; border-radius:10px; font-size:.88rem; font-weight:700; text-decoration:none !important; }
 .fest-sidebar__wa:hover { opacity:.9; }
 @media(max-width:991px){ .fest-sidebar { position:relative; top:auto; margin-bottom:24px; } }
+
+/* ── Full-width (no sidebar) content polish — things-to-do / sights ── */
+#content.col-lg-12 .content-wrapper { max-width:880px; margin:0 auto; }
+#content.col-lg-12 .detail-box { background:#fff; border:none; border-radius:14px; box-shadow:0 2px 16px rgba(0,0,0,.07); padding:26px 28px; margin-bottom:24px; }
+#content.col-lg-12 .detail-title { margin-bottom:14px; }
+#content.col-lg-12 .detail-title:after { display:none; }
+#content.col-lg-12 .description-content { border:none; padding:0; font-size:15.5px; line-height:1.85; color:#444; }
+#content.col-lg-12 .description-content p { margin-bottom:16px; }
+#content.col-lg-12 .description-content img { border-radius:10px; }
+#content.col-lg-12 .comments-form.detail-box iframe { border-radius:10px; display:block; }
+#content.col-lg-12 .map-frame { background:none; border:none; padding:0; border-radius:12px; overflow:hidden; }
+#content.col-lg-12 .map-frame iframe { height:380px; display:block; border-radius:12px; }
+@media(max-width:767px){
+    #content.col-lg-12 .detail-box { padding:18px 18px; border-radius:12px; }
+    #content.col-lg-12 .comments-form.detail-box iframe { height:240px; }
+}
+
+/* ── "Plan This Experience" CTA (things-to-do / sights, no sidebar) ── */
+.td-cta-box { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; background:linear-gradient(135deg,#fff7f3,#ffffff); border:1px solid #f7ddd2; border-radius:14px; padding:20px 24px; margin-bottom:26px; max-width:880px; margin-left:auto; margin-right:auto; }
+.td-cta-price { display:flex; align-items:baseline; gap:8px; margin-bottom:4px; flex-wrap:wrap; }
+.td-cta-price-label { font-size:.7rem; color:#888; text-transform:uppercase; letter-spacing:.04em; font-weight:700; }
+.td-cta-price-val { font-size:1.4rem; font-weight:800; color:#D94F2B; }
+.td-cta-price-old { font-size:.85rem; color:#aaa; text-decoration:line-through; }
+.td-cta-text { font-size:.85rem; color:#555; margin:0; max-width:420px; }
+.td-cta-wa { display:flex; align-items:center; gap:8px; background:#25D366; color:#fff; padding:12px 22px; border-radius:10px; font-size:.9rem; font-weight:700; text-decoration:none !important; white-space:nowrap; flex-shrink:0; }
+.td-cta-wa:hover { opacity:.9; }
+@media(max-width:575px){ .td-cta-box { flex-direction:column; align-items:stretch; text-align:center; } .td-cta-wa { justify-content:center; } }
 </style>
 @endpush
 
@@ -432,12 +459,42 @@
                             });
                         })();
                         </script>
+
+                        @if($hideSidebar)
+                        @php
+                            $tdPrice = ($product->discounted_price ?? 0) > 0 ? $product->discounted_price : ($product->base_price ?? 0);
+                            $tdHasStrike = ($product->discounted_price ?? 0) > 0 && ($product->base_price ?? 0) > $product->discounted_price;
+                        @endphp
+                        <div class="td-cta-box">
+                            <div class="td-cta-left">
+                                @if($tdPrice > 0)
+                                <div class="td-cta-price">
+                                    <span class="td-cta-price-label">Starting from</span>
+                                    <span class="td-cta-price-val">₹{{ number_format($tdPrice) }}</span>
+                                    @if($tdHasStrike)
+                                    <span class="td-cta-price-old">₹{{ number_format($product->base_price) }}</span>
+                                    @endif
+                                </div>
+                                @endif
+                                <p class="td-cta-text">Interested in this experience? Get in touch and we'll help you plan it.</p>
+                            </div>
+                            <a href="https://wa.me/{{ preg_replace('/\D/', '', websiteSetupValue('whats_app_number') ?? '917080109919') }}?text={{ urlencode('Hi, I am interested in ' . $product->name) }}"
+                               target="_blank" rel="noopener noreferrer" class="td-cta-wa">
+                                <img src="{{ asset('frontend/images/whatsapp.png') }}" alt="" width="22" height="22" loading="lazy" />
+                                Chat on WhatsApp
+                            </a>
+                        </div>
+                        @endif
+
                         <div class="description detail-box">
                             <div class="detail-title">
                                 <h2>About {{ $product->name }}</h2>
                                 @if ($product->address)
                                     <p><i class="fa fa-map-marker" aria-hidden="true"></i> {{ $product->address }}</p>
                                 @endif
+                            </div>
+                            <div class="description-content">
+                                {!! safe_html($product->description) !!}
                             </div>
                         </div>
                         @if ($product->youtube_link)
@@ -449,11 +506,6 @@
                                     height="500px"></iframe>
                             </div>
                         @endif
-                        <div class="description detail-box">
-                            <div class="description-content">
-                                {!! safe_html($product->description) !!}
-                            </div>
-                        </div>
                         @if ($product->map_location)
                             <div class="location-map detail-box">
                                 <div class="detail-title">
