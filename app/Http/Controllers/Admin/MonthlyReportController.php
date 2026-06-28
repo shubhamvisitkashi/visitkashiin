@@ -66,9 +66,12 @@ class MonthlyReportController extends Controller
      */
     private function buildBookingsList(Carbon $month, bool $isAdmin, ?int $userId): \Illuminate\Support\Collection
     {
-        $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
-        $cabQ  = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
-        $boatQ = BoatBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $stayQ = Booking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $cabQ  = CabBooking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $boatQ = BoatBooking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
         $all = collect();
 

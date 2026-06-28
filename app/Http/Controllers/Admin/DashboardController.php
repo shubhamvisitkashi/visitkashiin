@@ -96,11 +96,14 @@ class DashboardController extends Controller
         for ($d = Carbon::today()->startOfMonth(); $d->lte(Carbon::today()); $d->addDay()) {
             $dailyLabels[] = $d->format('d M');
 
-            $dayStay = (clone $stayQ)->whereHas('lead', fn($q) => $q->whereDate('booking_start_date', $d))
+            $dayStay = (clone $stayQ)->where('booking_status', '!=', 'cancelled')
+                ->whereHas('lead', fn($q) => $q->whereDate('booking_start_date', $d))
                 ->selectRaw('SUM(total_amount) as sale, SUM(pending_amount) as pending')->first();
-            $dayCab = (clone $cabQ)->whereDate('pickup_date', $d)
+            $dayCab = (clone $cabQ)->where('booking_status', '!=', 'cancelled')
+                ->whereDate('pickup_date', $d)
                 ->selectRaw('SUM(total_amount) as sale, SUM(pending_amount) as pending')->first();
-            $dayBoatRows = (clone $boatQ)->whereDate('booking_date', $d)->withSum('payments', 'amount')->get();
+            $dayBoatRows = (clone $boatQ)->where('booking_status', '!=', 'cancelled')
+                ->whereDate('booking_date', $d)->withSum('payments', 'amount')->get();
             $dayBoatCollected = $dayBoatRows->sum(fn($b) => min($b->final_amount, $b->payments_sum_amount ?? 0));
 
             $dailyRevenue[] = round(
@@ -411,9 +414,12 @@ class DashboardController extends Controller
 
         $thisMonth = Carbon::now();
 
-        $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
-        $cabQ  = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
-        $boatQ = BoatBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $stayQ = Booking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $cabQ  = CabBooking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $boatQ = BoatBooking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
         $stayPending = (clone $stayQ)->with(['lead', 'createdBy'])
             ->where('pending_amount', '>', 0)

@@ -18,9 +18,14 @@ class MonthlyMetricsService
      */
     public function compute(Carbon $month, bool $isAdmin, ?int $userId): array
     {
-        $stayQ = Booking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
-        $cabQ  = CabBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
-        $boatQ = BoatBooking::query()->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        // Cancelled bookings carry no revenue or pending obligation — exclude
+        // them at the base query so every figure below stays consistent.
+        $stayQ = Booking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $cabQ  = CabBooking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
+        $boatQ = BoatBooking::query()->where('booking_status', '!=', 'cancelled')
+            ->when(!$isAdmin, fn($q) => $q->where('created_by', $userId));
 
         $stayServiceMonth = fn($q) => $q->whereHas('lead', fn($q2) =>
             $q2->whereMonth('booking_start_date', $month->month)->whereYear('booking_start_date', $month->year)
