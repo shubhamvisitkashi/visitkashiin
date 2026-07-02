@@ -562,7 +562,8 @@
                 </div>
             </li>
 
-            {{-- ══════════════ ANALYTICS & REPORTS ══════════════ --}}
+            {{-- ══════════════ ANALYTICS & REPORTS (hidden for Staff) ══════════════ --}}
+            @unless(auth('admin')->user()?->hasRole('Staff'))
             <li class="nav-item nav-category">Analytics & Reports</li>
 
             {{-- All analytics collapsed into one parent --}}
@@ -660,6 +661,7 @@
                     </div>
                 </li>
             @endcanany
+            @endunless
 
             {{-- ══════════════ CONFIGURATION (Super Admin only) ══════════════ --}}
             @if(auth('admin')->user()?->hasRole('Super Admin'))
