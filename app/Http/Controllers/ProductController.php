@@ -13,6 +13,7 @@ use App\Models\Admin\SubCategory;
 use App\Models\BoatBookingRequest;
 use App\Models\YoutubeVideo;
 use App\Models\InstagramReel;
+use Illuminate\Support\Facades\Mail;
 
 class ProductController extends Controller
 {
@@ -201,6 +202,20 @@ class ProductController extends Controller
         $boat_booking_request->payment_status = 'unpaid';
         $boat_booking_request->save();
 
+        try {
+            $boat_booking_request->load('boat.boatType');
+            Mail::send('email.festival_boat_booking_mail', [
+                'booking'          => $boat_booking_request,
+                'paymentSubmitted' => false,
+            ], function ($message) use ($boat_booking_request) {
+                $message->to('help.visitkashi@gmail.com');
+                $message->cc('info.visitkashi@gmail.com');
+                $message->subject('New Festival Boat Booking — ' . $boat_booking_request->booking_request_id . ' | Visit Kashi');
+            });
+        } catch (\Throwable $th) {
+            // mail failure is non-fatal; booking is already saved
+        }
+
         return redirect()->route('festival.boat.booking.payment', $boat_booking_request->booking_request_id);
     }
 
@@ -240,8 +255,25 @@ class ProductController extends Controller
             'payment_screenshot'    => 'required|image|mimes:jpeg,png,jpg',
         ]);
 
-        $boat_booking_request->payment_detail = ['utr_number' => $request->utr_number, 'payment_screenshot' => $request->file('payment_screenshot')->store('payment_screenshots', 'public')];
+        $screenshotPath = $request->file('payment_screenshot')->store('payment_screenshots', 'public');
+        $boat_booking_request->payment_detail = ['utr_number' => $request->utr_number, 'payment_screenshot' => $screenshotPath];
         $boat_booking_request->save();
+
+        try {
+            $boat_booking_request->load('boat.boatType');
+            Mail::send('email.festival_boat_booking_mail', [
+                'booking'          => $boat_booking_request,
+                'paymentSubmitted' => true,
+                'utrNumber'        => $request->utr_number,
+                'screenshotUrl'    => \Illuminate\Support\Facades\Storage::url($screenshotPath),
+            ], function ($message) use ($boat_booking_request) {
+                $message->to('help.visitkashi@gmail.com');
+                $message->cc('info.visitkashi@gmail.com');
+                $message->subject('Payment Submitted — Festival Boat Booking ' . $boat_booking_request->booking_request_id . ' | Visit Kashi');
+            });
+        } catch (\Throwable $th) {
+            // mail failure is non-fatal; payment detail is already saved
+        }
 
         return redirect()->route('festival.boat.booking.payment.success', $boat_booking_request->booking_request_id);
     }

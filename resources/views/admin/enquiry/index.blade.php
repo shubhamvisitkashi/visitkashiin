@@ -187,10 +187,6 @@
     .btn-copy:hover { background: #dcfce7; }
     .btn-copy.copied { background: #15803d; color: #fff; border-color: #15803d; }
 
-    /* Resend Email button */
-    .btn-resend { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-    .btn-resend:hover { background: #ffedd5; }
-    .btn-resend:disabled { opacity: .6; cursor: not-allowed; }
 
     /* Price pill */
     .price-pill {
@@ -607,13 +603,6 @@
                                         <i data-feather="copy" style="width:14px;height:14px;"></i>
                                     </button>
 
-                                    <form action="{{ route('enquiry.resend', $enquiry->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="action-btn btn-resend me-1" title="Resend Email Notification" onclick="return confirm('Resend the lead notification email for this enquiry?');">
-                                            <i data-feather="mail" style="width:14px;height:14px;"></i>
-                                        </button>
-                                    </form>
-
                                     <form action="{{ route('enquiry.delete', $enquiry->id) }}" method="POST" style="display:inline;" class="delete-form">
                                         @method('DELETE')
                                         @csrf
@@ -759,13 +748,6 @@
                                         title="Copy Lead">
                                         <i data-feather="copy" style="width:14px;height:14px;"></i>
                                     </button>
-
-                                    <form action="{{ route('enquiry.resend', $enquiry->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="action-btn btn-resend me-1" title="Resend Email Notification" onclick="return confirm('Resend the lead notification email for this enquiry?');">
-                                            <i data-feather="mail" style="width:14px;height:14px;"></i>
-                                        </button>
-                                    </form>
 
                                     <form action="{{ route('enquiry.delete', $enquiry->id) }}" method="POST" style="display:inline;" class="delete-form">
                                         @method('DELETE')
@@ -938,13 +920,6 @@
                                         <i data-feather="copy" style="width:14px;height:14px;"></i>
                                     </button>
 
-                                    <form action="{{ route('enquiry.resend', $enquiry->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="action-btn btn-resend me-1" title="Resend Email Notification" onclick="return confirm('Resend the lead notification email for this enquiry?');">
-                                            <i data-feather="mail" style="width:14px;height:14px;"></i>
-                                        </button>
-                                    </form>
-
                                     <form action="{{ route('enquiry.delete', $enquiry->id) }}" method="POST" style="display:inline;" class="delete-form">
                                         @method('DELETE')
                                         @csrf
@@ -1081,13 +1056,6 @@
                                         title="Copy Lead">
                                         <i data-feather="copy" style="width:14px;height:14px;"></i>
                                     </button>
-
-                                    <form action="{{ route('enquiry.resend', $enquiry->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="action-btn btn-resend me-1" title="Resend Email Notification" onclick="return confirm('Resend the lead notification email for this enquiry?');">
-                                            <i data-feather="mail" style="width:14px;height:14px;"></i>
-                                        </button>
-                                    </form>
 
                                     <form action="{{ route('enquiry.delete', $enquiry->id) }}" method="POST" style="display:inline;" class="delete-form">
                                         @method('DELETE')

@@ -94,6 +94,7 @@ class Enquiry extends Model
             'enq_icon'       => $cat['icon'],
         ], function ($message) use ($cat) {
             $message->to('help.visitkashi@gmail.com');
+            $message->cc('info.visitkashi@gmail.com');
             $message->subject($cat['subject'] . ' — ' . $this->package_name . ' | Visit Kashi');
         });
     }

@@ -450,80 +450,6 @@
         </div>
       </div>
 
-      {{-- Passengers & Extras --}}
-      <div class="cn-card">
-        <div class="cn-card-head">
-          <div class="cn-card-icon" style="background:#FEF3C7;color:#B45309;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          </div>
-          <div class="cn-card-title">Passengers & Extras</div>
-          <span class="cn-step ms-auto" style="background:#B45309;">3</span>
-        </div>
-        <div class="cn-card-body">
-
-          {{-- Persons row --}}
-          <div class="row g-3" style="margin-bottom:16px;">
-            <div class="col-6 col-md-3">
-              <label class="cn-label">Adults <span class="cn-req">*</span></label>
-              <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
-                <button type="button" onclick="adjCount('no_of_adults',-1)"
-                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
-                <span id="no_of_adults_dis" style="font-size:1.3rem;font-weight:800;color:#4F46E5;min-width:28px;text-align:center;">1</span>
-                <button type="button" onclick="adjCount('no_of_adults',1)"
-                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #4F46E5;background:#4F46E5;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
-              </div>
-              <input type="hidden" name="no_of_adults" id="no_of_adults" value="{{ old('no_of_adults', 1) }}">
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="cn-label">Children</label>
-              <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
-                <button type="button" onclick="adjCount('no_of_children',-1)"
-                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
-                <span id="no_of_children_dis" style="font-size:1.3rem;font-weight:800;color:#7C3AED;min-width:28px;text-align:center;">0</span>
-                <button type="button" onclick="adjCount('no_of_children',1)"
-                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #7C3AED;background:#7C3AED;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
-              </div>
-              <input type="hidden" name="no_of_children" id="no_of_children" value="{{ old('no_of_children', 0) }}">
-            </div>
-            <div class="col-md-3">
-              <label class="cn-label">Flight / Train No.</label>
-              <input type="text" name="flight_train_number" class="form-control cn-input"
-                     placeholder="e.g. AI-202, 12345" value="{{ old('flight_train_number') }}">
-              <div class="cn-hint">For airport / station transfers</div>
-            </div>
-            <div class="col-md-3">
-              <label class="cn-label">Luggage Details</label>
-              <input type="text" name="luggage_details" class="form-control cn-input"
-                     placeholder="e.g. 2 large bags, 1 stroller" value="{{ old('luggage_details') }}">
-            </div>
-          </div>
-
-          {{-- Add-on toggles --}}
-          <label class="cn-label" style="margin-bottom:10px;">Add-ons & Special Requirements</label>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
-
-            @foreach([
-              'carrier_on_roof'       => ['🚗', 'Carrier on Roof',    'Roof luggage carrier needed'],
-              'child_seat'            => ['👶', 'Child Seat',          'Baby / child safety seat'],
-              'wheelchair_accessible' => ['♿', 'Wheelchair Access',   'Accessible vehicle needed'],
-              'ac_required'           => ['❄️', 'AC Required',         'Air-conditioned cab'],
-            ] as $field => [$icon, $label, $hint])
-            <label style="display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #E2E8F0;border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .18s;background:#fff;user-select:none;"
-                   id="addon-lbl-{{ $field }}"
-                   onclick="toggleAddon('{{ $field }}', this)">
-              <span style="font-size:1.5rem;line-height:1;">{{ $icon }}</span>
-              <span style="font-size:.76rem;font-weight:700;color:#374151;">{{ $label }}</span>
-              <span style="font-size:.65rem;color:#94A3B8;line-height:1.3;">{{ $hint }}</span>
-              <input type="hidden" name="{{ $field }}" id="addon-{{ $field }}"
-                     value="{{ old($field, $field === 'ac_required' ? '1' : '0') }}">
-            </label>
-            @endforeach
-
-          </div>
-
-        </div>
-      </div>
-
       {{-- Vehicle Selection --}}
       <div class="cn-card">
         <div class="cn-card-head">
@@ -531,7 +457,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           </div>
           <div class="cn-card-title">Vehicle Selection <span style="font-size:.72rem;font-weight:400;color:#EF4444;">* required</span></div>
-          <span class="cn-step ms-auto" style="background:#059669;">4</span>
+          <span class="cn-step ms-auto" style="background:#059669;">3</span>
         </div>
         <div class="cn-card-body">
           <div class="veh-grid" id="veh-cards-grid">
@@ -620,6 +546,82 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {{-- Passengers & Extras --}}
+      <div class="cn-card">
+        <div class="cn-card-head">
+          <div class="cn-card-icon" style="background:#FEF3C7;color:#B45309;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="cn-card-title">Passengers & Extras</div>
+          <span class="cn-step ms-auto" style="background:#B45309;">4</span>
+        </div>
+        <div class="cn-card-body">
+
+          {{-- Persons row --}}
+          <div class="row g-3" style="margin-bottom:6px;">
+            <div class="col-6 col-md-3">
+              <label class="cn-label">Adults <span class="cn-req">*</span></label>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
+                <button type="button" onclick="adjCount('no_of_adults',-1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+                <span id="no_of_adults_dis" style="font-size:1.3rem;font-weight:800;color:#4F46E5;min-width:28px;text-align:center;">1</span>
+                <button type="button" id="btn-adults-plus" onclick="adjCount('no_of_adults',1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #4F46E5;background:#4F46E5;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+              </div>
+              <input type="hidden" name="no_of_adults" id="no_of_adults" value="{{ old('no_of_adults', 1) }}">
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="cn-label">Children</label>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;padding:6px 10px;">
+                <button type="button" onclick="adjCount('no_of_children',-1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #CBD5E1;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+                <span id="no_of_children_dis" style="font-size:1.3rem;font-weight:800;color:#7C3AED;min-width:28px;text-align:center;">0</span>
+                <button type="button" id="btn-children-plus" onclick="adjCount('no_of_children',1)"
+                        style="width:30px;height:30px;border-radius:8px;border:1.5px solid #7C3AED;background:#7C3AED;font-size:1.1rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+              </div>
+              <input type="hidden" name="no_of_children" id="no_of_children" value="{{ old('no_of_children', 0) }}">
+            </div>
+            <div class="col-md-3">
+              <label class="cn-label">Flight / Train No.</label>
+              <input type="text" name="flight_train_number" class="form-control cn-input"
+                     placeholder="e.g. AI-202, 12345" value="{{ old('flight_train_number') }}">
+              <div class="cn-hint">For airport / station transfers</div>
+            </div>
+            <div class="col-md-3">
+              <label class="cn-label">Luggage Details</label>
+              <input type="text" name="luggage_details" class="form-control cn-input"
+                     placeholder="e.g. 2 large bags, 1 stroller" value="{{ old('luggage_details') }}">
+            </div>
+          </div>
+
+          <div class="cn-hint" id="pax-seat-hint" style="margin-bottom:16px;"></div>
+
+          {{-- Add-on toggles --}}
+          <label class="cn-label" style="margin-bottom:10px;">Add-ons & Special Requirements</label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+
+            @foreach([
+              'carrier_on_roof'       => ['🚗', 'Carrier on Roof',    'Roof luggage carrier needed'],
+              'child_seat'            => ['👶', 'Child Seat',          'Baby / child safety seat'],
+              'wheelchair_accessible' => ['♿', 'Wheelchair Access',   'Accessible vehicle needed'],
+              'ac_required'           => ['❄️', 'AC Required',         'Air-conditioned cab'],
+            ] as $field => [$icon, $label, $hint])
+            <label style="display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #E2E8F0;border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .18s;background:#fff;user-select:none;"
+                   id="addon-lbl-{{ $field }}"
+                   onclick="toggleAddon('{{ $field }}', this)">
+              <span style="font-size:1.5rem;line-height:1;">{{ $icon }}</span>
+              <span style="font-size:.76rem;font-weight:700;color:#374151;">{{ $label }}</span>
+              <span style="font-size:.65rem;color:#94A3B8;line-height:1.3;">{{ $hint }}</span>
+              <input type="hidden" name="{{ $field }}" id="addon-{{ $field }}"
+                     value="{{ old($field, $field === 'ac_required' ? '1' : '0') }}">
+            </label>
+            @endforeach
+
+          </div>
+
         </div>
       </div>
 
@@ -891,6 +893,7 @@ let isCustomVehicle = false;
 document.addEventListener('DOMContentLoaded', () => {
   feather.replace();
   recalcFare();
+  updatePaxSeatCap();
 
   @if(old('vehicle_id'))
   const prevCard = document.querySelector('.veh-card[data-id="{{ old("vehicle_id") }}"]');
@@ -1004,6 +1007,7 @@ function updateVehicleSelection() {
     document.getElementById('f_vehicle_name').value = '';
     document.getElementById('f_veh_seats').value    = '';
     document.getElementById('veh-details-row').style.display = 'none';
+    updatePaxSeatCap();
     return;
   }
   const ids = [], names = [];
@@ -1021,6 +1025,8 @@ function updateVehicleSelection() {
   document.getElementById('veh_name_display').value  = displayName;
   document.getElementById('veh_seats_display').value = totalSeats;
   document.getElementById('veh-details-row').style.display = '';
+  clampPaxToSeats(totalSeats);
+  updatePaxSeatCap();
 }
 
 function changeVehCount(delta) {
@@ -1032,7 +1038,25 @@ function changeVehCount(delta) {
 
 function onCustomVehName() {
   document.getElementById('f_vehicle_name').value = document.getElementById('custom_veh_name').value.trim();
-  document.getElementById('f_veh_seats').value    = document.getElementById('custom_veh_seats').value;
+  const seats = document.getElementById('custom_veh_seats').value;
+  document.getElementById('f_veh_seats').value = seats;
+  clampPaxToSeats(parseInt(seats) || 0);
+  updatePaxSeatCap();
+}
+
+// Trim adults/children down (adults first floor 1) if they now exceed the vehicle's seats
+function clampPaxToSeats(seats) {
+  if (!seats || seats <= 0) return;
+  const adultsEl   = document.getElementById('no_of_adults');
+  const childrenEl = document.getElementById('no_of_children');
+  let adults   = parseInt(adultsEl.value)   || 0;
+  let children = parseInt(childrenEl.value) || 0;
+  while (adults + children > seats && children > 0) children--;
+  while (adults + children > seats && adults > 1) adults--;
+  adultsEl.value = adults;
+  childrenEl.value = children;
+  document.getElementById('no_of_adults_dis').textContent   = adults;
+  document.getElementById('no_of_children_dis').textContent = children;
 }
 
 // ── Fare Recalc ───────────────────────────────────────────────────
@@ -1096,9 +1120,45 @@ function adjCount(field, delta) {
   const hidden = document.getElementById(field);
   const disp   = document.getElementById(field + '_dis');
   const min    = field === 'no_of_adults' ? 1 : 0;
-  const val    = Math.max(min, (parseInt(hidden.value) || 0) + delta);
+  let   val    = Math.max(min, (parseInt(hidden.value) || 0) + delta);
+
+  const seats = parseInt(document.getElementById('f_veh_seats')?.value) || 0;
+  if (seats > 0 && delta > 0) {
+    const other = field === 'no_of_adults'
+      ? (parseInt(document.getElementById('no_of_children').value) || 0)
+      : (parseInt(document.getElementById('no_of_adults').value) || 0);
+    val = Math.min(val, Math.max(min, seats - other));
+  }
+
   hidden.value = val;
   if (disp) disp.textContent = val;
+  updatePaxSeatCap();
+}
+
+// ── Cap passengers to selected vehicle's seating capacity ─────────
+function updatePaxSeatCap() {
+  const seats = parseInt(document.getElementById('f_veh_seats')?.value) || 0;
+  const hint  = document.getElementById('pax-seat-hint');
+  const adultsPlus   = document.getElementById('btn-adults-plus');
+  const childrenPlus = document.getElementById('btn-children-plus');
+  if (!hint) return;
+
+  if (seats <= 0) {
+    hint.textContent = '';
+    if (adultsPlus)   adultsPlus.disabled   = false;
+    if (childrenPlus) childrenPlus.disabled = false;
+    return;
+  }
+
+  const adults   = parseInt(document.getElementById('no_of_adults').value)   || 0;
+  const children = parseInt(document.getElementById('no_of_children').value) || 0;
+  const total    = adults + children;
+
+  hint.textContent = `Selected vehicle(s) seat ${seats} — currently ${total} passenger${total === 1 ? '' : 's'} (adults + children)`;
+  hint.style.color = total >= seats ? '#DC2626' : '#94A3B8';
+
+  if (adultsPlus)   adultsPlus.disabled   = total >= seats;
+  if (childrenPlus) childrenPlus.disabled = total >= seats;
 }
 
 // ── Add-on toggles ────────────────────────────────────────────────

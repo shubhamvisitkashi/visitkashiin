@@ -44,6 +44,7 @@ class ContactController extends Controller
                 'enquiry'      => $enquiry,
             ], function ($message) {
                 $message->to('help.visitkashi@gmail.com');
+                $message->cc('info.visitkashi@gmail.com');
                 $message->subject('New Contact Us Message — Visit Kashi');
             });
         } catch (\Throwable $th) {

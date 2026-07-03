@@ -41,6 +41,7 @@ class HotelEnquiryController extends Controller
         try {
             Mail::send('email.hotel_enquiry_mail', ['enquiry' => $enquiry], function ($message) {
                 $message->to('help.visitkashi@gmail.com')
+                        ->cc('info.visitkashi@gmail.com')
                         ->subject('New Hotel Enquiry — ' . request('hotel_name'));
             });
         } catch (\Throwable $th) {

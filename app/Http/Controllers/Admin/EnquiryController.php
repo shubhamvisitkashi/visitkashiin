@@ -128,19 +128,4 @@ class EnquiryController extends Controller
         return back()->with('error', 'No Enquiry Found!');
     }
 
-    public function resend($id)
-    {
-        $enquiry = Enquiry::find($id);
-        if (!$enquiry) {
-            return back()->with('error', 'No Enquiry Found!');
-        }
-
-        try {
-            $enquiry->sendLeadMail();
-            return back()->with('success', 'Lead notification email resent successfully!');
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Enquiry resend mail failed: ' . $e->getMessage());
-            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
-        }
-    }
 }
