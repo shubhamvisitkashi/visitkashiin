@@ -41,6 +41,7 @@ class CabBooking extends Model
     // ── Relations ─────────────────────────────────────────────────
     public function vehicle()       { return $this->belongsTo(Vehicle::class); }
     public function payments()      { return $this->hasMany(CabBookingPayment::class); }
+    public function legs()          { return $this->hasMany(CabBookingLeg::class)->orderBy('sequence'); }
     public function createdBy()     { return $this->belongsTo(Admin::class, 'created_by'); }
     public function leadSource()    { return $this->belongsTo(LeadSource::class); }
 

@@ -116,6 +116,11 @@ class CabBookingController extends Controller
             'booking_status'        => 'nullable|in:pending,confirmed,assigned,completed,cancelled',
             'lead_source_id'        => 'nullable|exists:lead_sources,id',
             'notes'                 => 'nullable|string',
+            'legs'                    => 'nullable|array',
+            'legs.*.leg_date'         => 'required_with:legs|date',
+            'legs.*.pickup_address'   => 'nullable|string',
+            'legs.*.drop_address'     => 'nullable|string',
+            'legs.*.fare'             => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -192,6 +197,16 @@ class CabBookingController extends Controller
                     'payment_date'       => now()->format('Y-m-d'),
                     'payment_account_id' => $isCash ? null : ($validated['payment_account_id'] ?? null),
                     'received_by'        => auth('admin')->id(),
+                ]);
+            }
+
+            foreach ($validated['legs'] ?? [] as $i => $leg) {
+                $booking->legs()->create([
+                    'sequence'       => $i,
+                    'leg_date'       => $leg['leg_date'],
+                    'pickup_address' => $leg['pickup_address'] ?? null,
+                    'drop_address'   => $leg['drop_address']   ?? null,
+                    'fare'           => $leg['fare']           ?? null,
                 ]);
             }
 

@@ -433,6 +433,20 @@
             </div>
           </div>
 
+          {{-- Trip Legs (date-wise) --}}
+          <div style="margin-top:18px;padding-top:16px;border-top:1px dashed #E2E8F0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+              <label class="cn-label" style="margin-bottom:0;">Additional Trip Legs <span style="font-size:.65rem;color:#94A3B8;font-weight:400;text-transform:none;">(optional — for multi-day / multi-stop trips)</span></label>
+            </div>
+            <div class="cn-hint" style="margin-top:0;margin-bottom:10px;">Add a row for each extra date with its own pickup / drop and fare</div>
+
+            <div id="legs_container"></div>
+
+            <button type="button" class="cn-back" style="background:#EEF2FF;border-color:#C7D2FE;color:#4F46E5;padding:8px 14px;font-size:.78rem;" onclick="addLeg()">
+              <i data-feather="plus" style="width:13px;height:13px;stroke:#4F46E5;"></i> Add More
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -818,6 +832,35 @@
   </div>{{-- /layout --}}
   </form>
 
+  <template id="leg_template">
+    <div class="row g-2 align-items-end leg-row" data-index="INDEX" style="margin-bottom:10px;">
+      <div class="col-6 col-md-2">
+        <label class="cn-label" style="font-size:.65rem;">Date <span class="cn-req">*</span></label>
+        <input type="date" name="legs[INDEX][leg_date]" class="form-control cn-input" required>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="cn-label" style="font-size:.65rem;">Pickup</label>
+        <input type="text" name="legs[INDEX][pickup_address]" class="form-control cn-input" placeholder="Pickup location">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="cn-label" style="font-size:.65rem;">Drop</label>
+        <input type="text" name="legs[INDEX][drop_address]" class="form-control cn-input" placeholder="Drop location">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="cn-label" style="font-size:.65rem;">Fare</label>
+        <div class="cn-rupee-wrap">
+          <span class="cn-rupee">₹</span>
+          <input type="number" name="legs[INDEX][fare]" class="form-control cn-input cn-rupee-input" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="col-12 col-md-1">
+        <button type="button" class="veh-card-del" style="position:static;display:flex;width:28px;height:28px;" onclick="removeLeg(INDEX)" title="Remove">
+          <i data-feather="trash-2" style="width:13px;height:13px;"></i>
+        </button>
+      </div>
+    </div>
+  </template>
+
 </div>
 
 <script>
@@ -853,6 +896,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const prevCard = document.querySelector('.veh-card[data-id="{{ old("vehicle_id") }}"]');
   if (prevCard) { prevCard.classList.add('selected'); updateVehicleSelection(); }
   @endif
+
+  @if(old('legs'))
+  @foreach(old('legs') as $leg)
+  addLeg();
+  (() => {
+    const row = document.querySelector(`.leg-row[data-index="${legIndex - 1}"]`);
+    row.querySelector('[name$="[leg_date]"]').value       = @json($leg['leg_date'] ?? '');
+    row.querySelector('[name$="[pickup_address]"]').value = @json($leg['pickup_address'] ?? '');
+    row.querySelector('[name$="[drop_address]"]').value   = @json($leg['drop_address'] ?? '');
+    row.querySelector('[name$="[fare]"]').value           = @json($leg['fare'] ?? '');
+  })();
+  @endforeach
+  @endif
 });
 
 // ── GST Toggle ────────────────────────────────────────────────────
@@ -880,6 +936,22 @@ function calcDays() {
     if (!co && !el.value) el.value = 1;
   }
   recalcFare();
+}
+
+// ── Trip Legs (date-wise) ────────────────────────────────────────
+let legIndex = 0;
+
+function addLeg() {
+  const tpl  = document.getElementById('leg_template').content.cloneNode(true);
+  let html = tpl.querySelector('.leg-row').outerHTML.replace(/INDEX/g, legIndex);
+  document.getElementById('legs_container').insertAdjacentHTML('beforeend', html);
+  legIndex++;
+  feather.replace();
+}
+
+function removeLeg(index) {
+  const row = document.querySelector(`.leg-row[data-index="${index}"]`);
+  if (row) row.remove();
 }
 
 // ── Vehicle Selection (multi) ─────────────────────────────────────
