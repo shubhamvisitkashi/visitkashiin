@@ -118,6 +118,12 @@ body.dark-mode .kpi-icon          { opacity:.85; }
   gap:15px; position:relative; overflow:hidden; transition:all var(--t);
 }
 .kpi-card:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,0,0,.12); }
+/* When the grid wraps with this card alone on the last row, span the full
+   row instead of leaving a large empty gap beside it. */
+.kpi-card-wide { grid-column:1 / -1; align-items:center; }
+.kpi-card-wide .kpi-body { display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+.kpi-card-wide .kpi-progress { flex:1; min-width:220px; }
+@media(max-width:600px){ .kpi-card-wide .kpi-body { flex-direction:column; align-items:flex-start; gap:10px; } }
 .kpi-card::after {
   content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
   background:var(--kpi-color, var(--indigo));
@@ -458,17 +464,21 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     $tkColor = $teamTargetPct >= 100 ? '#10B981' : ($teamTargetPct >= 60 ? '#4F46E5' : ($teamTargetPct >= 30 ? '#F59E0B' : '#EF4444'));
     $tkBg    = $teamTargetPct >= 100 ? '#D1FAE5' : ($teamTargetPct >= 60 ? '#EEF2FF' : ($teamTargetPct >= 30 ? '#FEF3C7' : '#FEE2E2'));
   @endphp
-  <div class="kpi-card" style="--kpi-color:{{ $tkColor }};--kpi-bg:{{ $tkBg }};">
+  <div class="kpi-card kpi-card-wide" style="--kpi-color:{{ $tkColor }};--kpi-bg:{{ $tkBg }};">
     <div class="kpi-icon">🎯</div>
     <div class="kpi-body">
-      <div class="kpi-label">Team Target — {{ now()->format('M Y') }}</div>
-      <div class="kpi-value" style="color:{{ $tkColor }};font-size:1.5rem;">{{ $teamTargetPct }}%</div>
-      <div style="height:5px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin:6px 0 4px;">
-        <div style="height:100%;width:{{ $teamTargetPct }}%;background:{{ $tkColor }};border-radius:99px;transition:width .5s;"></div>
+      <div style="flex-shrink:0;">
+        <div class="kpi-label">Team Target — {{ now()->format('M Y') }}</div>
+        <div class="kpi-value" style="color:{{ $tkColor }};font-size:1.5rem;">{{ $teamTargetPct }}%</div>
       </div>
-      <div class="kpi-sub" style="flex-direction:column;gap:1px;">
-        <span>Achieved: <strong style="color:{{ $tkColor }};">₹{{ number_format($teamTotalAchieved) }}</strong></span>
-        <span>Target: <strong>₹{{ number_format($teamTotalTarget) }}</strong></span>
+      <div class="kpi-progress">
+        <div style="height:5px;background:#E2E8F0;border-radius:99px;overflow:hidden;margin-bottom:6px;">
+          <div style="height:100%;width:{{ $teamTargetPct }}%;background:{{ $tkColor }};border-radius:99px;transition:width .5s;"></div>
+        </div>
+        <div class="kpi-sub" style="justify-content:space-between;">
+          <span>Achieved: <strong style="color:{{ $tkColor }};">₹{{ number_format($teamTotalAchieved) }}</strong></span>
+          <span>Target: <strong>₹{{ number_format($teamTotalTarget) }}</strong></span>
+        </div>
       </div>
     </div>
   </div>
