@@ -983,12 +983,12 @@
                                          : ($slug === 'cab'  ? 'cab'
                                          : ($slug === 'boat' ? 'boat' : 'tour'));
                                 $badgeCls = 'badge-pkg badge-'.$catKey;
-                                $catLabel = match($catKey) {
+                                $catLabel = html_entity_decode(match($catKey) {
                                     'hotel' => '&#127968; Hotel',
                                     'cab'   => '&#128663; Cab',
                                     'boat'  => '&#9971; Boat',
                                     default => '&#128506; Tour',
-                                };
+                                });
                             @endphp
                             <tr>
                                 <td class="text-muted fw-semibold" data-label="#">

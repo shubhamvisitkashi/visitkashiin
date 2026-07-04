@@ -55,6 +55,40 @@
   ];
   $headerTitle = $headerTitleMap[$enqType] ?? 'New Enquiry Received';
   $alertText   = $alertTextMap[$enqType]   ?? '⚡ Action Required — follow up promptly';
+
+  // The public enquiry forms bundle extra fields (pickup/drop, trip type, food plan,
+  // hotel category, luggage, roof carrier, notes, etc.) into one free-text `message`
+  // field as "Label: value" lines. Parse them generically here so any label from any
+  // form — current or future — shows up in the email instead of being silently dropped.
+  $msgRows = [];
+  if (!empty($messages) && trim($messages) !== '' && trim($messages) !== 'N/A') {
+      $msgIconMap = [
+          'trip type' => '🚗', 'pickup location' => '📍', 'pickup ghat' => '📍', 'pickup' => '📍',
+          'drop' => '🏁', 'persons' => '👥', 'adults' => '👨‍👩‍👧', 'children (<10 yrs)' => '👶',
+          'duration' => '📅', 'infants' => '🍼', 'date' => '🗓', 'time slot' => '⏰',
+          'hotel category' => '🏨', 'food plan' => '🍽️', 'cab type' => '🚕',
+          'luggage bags' => '🧳', 'roof carrier' => '📦', 'whatsapp' => '💬',
+          'notes' => '📝', 'special notes' => '📝',
+      ];
+      foreach (preg_split('/\r\n|\r|\n/', trim($messages)) as $line) {
+          $line = trim($line);
+          if ($line === '') continue;
+          if (str_contains($line, ':')) {
+              [$label, $value] = explode(':', $line, 2);
+              $label = trim($label);
+              $value = trim($value);
+          } else {
+              $label = '';
+              $value = $line;
+          }
+          if ($value === '') continue;
+          $msgRows[] = [
+              'icon'  => $msgIconMap[strtolower($label)] ?? '▪️',
+              'label' => $label ?: 'Note',
+              'value' => $value,
+          ];
+      }
+  }
 @endphp
 
 <!-- Email Wrapper -->
@@ -137,6 +171,34 @@
               @if(!empty($booking_amount) && $booking_amount > 0)
               <div style="margin-top:6px;color:#059669;font-size:13px;font-weight:600;">Starting from ₹{{ number_format($booking_amount) }}</div>
               @endif
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Quick Stat Cards -->
+      <div style="margin-bottom:20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="33%" style="padding-right:8px;">
+              <div style="background:linear-gradient(135deg,#0369A1,#0891B2);border-radius:10px;padding:14px;text-align:center;">
+                <div style="color:rgba(255,255,255,0.75);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Persons</div>
+                <div style="color:#fff;font-size:24px;font-weight:900;line-height:1;">{{ (!empty($no_of_person) && $no_of_person !== 'N/A') ? $no_of_person : '—' }}</div>
+                <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px;">{{ (isset($children_count) && $children_count > 0) ? '+' . $children_count . ' child' : 'Adults' }}</div>
+              </div>
+            </td>
+            <td width="34%" style="padding:0 4px;">
+              <div style="background:linear-gradient(135deg,{{ $typeColor }},{{ $typeColor }}CC);border-radius:10px;padding:14px;text-align:center;">
+                <div style="color:rgba(255,255,255,0.75);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Category</div>
+                <div style="color:#fff;font-size:18px;font-weight:800;line-height:1.2;">{{ $typeIcon }}</div>
+                <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px;">{{ $enqType }}</div>
+              </div>
+            </td>
+            <td width="33%" style="padding-left:8px;">
+              <div style="background:linear-gradient(135deg,#059669,#10B981);border-radius:10px;padding:14px;text-align:center;">
+                <div style="color:rgba(255,255,255,0.75);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Date</div>
+                <div style="color:#fff;font-size:15px;font-weight:800;line-height:1.3;margin-top:4px;">{{ (!empty($arrival_date) && $arrival_date !== 'N/A') ? $arrival_date : '—' }}</div>
+              </div>
             </td>
           </tr>
         </table>
@@ -232,6 +294,21 @@
           @endif
         </table>
       </div>
+
+      @if(count($msgRows))
+      <!-- Additional Details (parsed from the enquiry form's message field) -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#94a3b8;margin-bottom:10px;border-bottom:1px solid #f1f5f9;padding-bottom:6px;">🧾 ADDITIONAL DETAILS FROM FORM</div>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+          @foreach($msgRows as $i => $row)
+          <tr style="background:{{ $i % 2 === 0 ? '#fff' : '#f8fafc' }};">
+            <td width="38%" style="padding:10px 14px;font-size:12px;font-weight:600;color:#64748b;vertical-align:top;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}">{{ $row['icon'] }} {{ $row['label'] }}</td>
+            <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#0f172a;line-height:1.6;{{ !$loop->last ? 'border-bottom:1px solid #f1f5f9;' : '' }}">{!! nl2br(e($row['value'])) !!}</td>
+          </tr>
+          @endforeach
+        </table>
+      </div>
+      @endif
 
       <!-- Quick Actions -->
       <div style="margin-bottom:20px;">
