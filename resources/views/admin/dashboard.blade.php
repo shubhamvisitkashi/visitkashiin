@@ -102,10 +102,11 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 .dk-hero-btn.primary:hover { background:#fff; box-shadow:0 4px 16px rgba(255,255,255,.3); }
 
 /* ── KPI grid ─────────────────────────────── */
-.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:20px; }
-@media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:900px) {.kpi-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:500px) {.kpi-grid{grid-template-columns:1fr;}}
+/* auto-fit/minmax sizes columns off the grid's OWN rendered width (which already
+   accounts for the sidebar offset), instead of guessing from raw viewport width —
+   that mismatch was squeezing cards too narrow on common 1400-1600px laptop/scaled
+   screens and clipping values like "₹19,800" down to "₹19,8". */
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:20px; }
 
 .kpi-card {
   background:var(--card); border-radius:var(--r); border:1px solid var(--border);
@@ -124,16 +125,15 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 }
 .kpi-body { flex:1; min-width:0; }
 .kpi-label { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px; }
-.kpi-value { font-size:1.8rem; font-weight:900; color:var(--text); line-height:1; }
-.kpi-sub   { font-size:.72rem; color:var(--muted); margin-top:5px; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.kpi-value { font-size:1.8rem; font-weight:900; color:var(--text); line-height:1; overflow-wrap:break-word; }
+.kpi-sub   { font-size:.72rem; color:var(--muted); margin-top:5px; display:flex; align-items:center; gap:5px; flex-wrap:wrap; overflow-wrap:break-word; }
 .kpi-badge { font-size:.64rem; font-weight:700; padding:2px 8px; border-radius:20px; }
 .kpi-badge.up   { background:#D1FAE5; color:#065F46; }
 .kpi-badge.down { background:#FEE2E2; color:#991B1B; }
 .kpi-badge.neu  { background:#E0E7FF; color:#3730A3; }
 
 /* ── Type stats ───────────────────────────── */
-.type-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:22px; }
-@media(max-width:768px){.type-row{grid-template-columns:1fr;}}
+.type-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:22px; }
 
 .type-card {
   background:var(--card); border-radius:var(--r); border:1px solid var(--border);
@@ -144,8 +144,8 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 .type-card-icon { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
 .type-card-info { flex:1; }
 .type-card-label { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px; }
-.type-card-count { font-size:1.6rem; font-weight:900; color:var(--text); line-height:1; }
-.type-card-rev   { font-size:.76rem; color:var(--sub); font-weight:600; margin-top:4px; }
+.type-card-count { font-size:1.6rem; font-weight:900; color:var(--text); line-height:1; overflow-wrap:break-word; }
+.type-card-rev   { font-size:.76rem; color:var(--sub); font-weight:600; margin-top:4px; overflow-wrap:break-word; }
 .type-stat-row   { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
 .type-stat { font-size:.68rem; font-weight:600; padding:3px 9px; border-radius:20px; }
 
