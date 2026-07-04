@@ -68,7 +68,11 @@ body.dark-mode .af-meta           { color:#64748B !important; }
 body.dark-mode .kpi-icon          { opacity:.85; }
 
 /* ── Page ─────────────────────────────────── */
-.dk-page { background:var(--bg); min-height:100vh; padding:18px 22px 60px; transition:background .3s; }
+/* Force full-width on this page's container chain — belt-and-suspenders
+   guard against any parent layout rule that shrink-wraps instead of
+   stretching, which was leaving dead space on the right on some screens. */
+.page-wrapper, .page-content { width:100% !important; max-width:100% !important; }
+.dk-page { background:var(--bg); min-height:100vh; width:100%; box-sizing:border-box; padding:18px 22px 60px; transition:background .3s; }
 
 /* ── Hero ─────────────────────────────────── */
 .dk-hero {
