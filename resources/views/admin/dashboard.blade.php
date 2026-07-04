@@ -288,7 +288,8 @@ body.dark-mode .kpi-icon          { opacity:.85; }
   </div>
 </div>
 
-{{-- ══ REVENUE / EXPENSE PIES ══ --}}
+{{-- ══ REVENUE / EXPENSE PIES (hidden for Staff) ══ --}}
+@unless(auth('admin')->user()?->hasRole('Staff'))
 <div class="dk-pie-row">
   {{-- Booking Mix --}}
   <div class="chart-card">
@@ -397,6 +398,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     </div>
   </div>
 </div>
+@endunless
 
 {{-- ══ KPI CARDS ══ --}}
 <div class="kpi-grid">
@@ -901,6 +903,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       </table>
     </div>
 
+    @unless(auth('admin')->user()?->hasRole('Staff'))
     {{-- Daily Revenue --}}
     <div class="chart-card">
       <div class="chart-head">
@@ -926,6 +929,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         <canvas id="collectionChart" height="75"></canvas>
       </div>
     </div>
+    @endunless
 
   </div>{{-- /left --}}
 </div>{{-- /main content --}}
@@ -1040,7 +1044,7 @@ if (document.getElementById('expenseSplitPieChart')) {
 }
 
 // ── Donut chart ──────────────────────────────────────────
-new Chart(document.getElementById('donutChart'), {
+if (document.getElementById('donutChart')) new Chart(document.getElementById('donutChart'), {
   type: 'doughnut',
   data: {
     labels: {!! json_encode($typeLabels) !!},
@@ -1062,7 +1066,7 @@ new Chart(document.getElementById('donutChart'), {
 });
 
 // ── Daily revenue ────────────────────────────────────────
-new Chart(document.getElementById('dailyChart'), {
+if (document.getElementById('dailyChart')) new Chart(document.getElementById('dailyChart'), {
   type: 'line',
   data: {
     labels: {!! json_encode($dailyLabels) !!},
@@ -1092,7 +1096,7 @@ new Chart(document.getElementById('dailyChart'), {
 });
 
 // ── Daily collection — last 30 days ──────────────────────
-new Chart(document.getElementById('collectionChart'), {
+if (document.getElementById('collectionChart')) new Chart(document.getElementById('collectionChart'), {
   type: 'line',
   data: {
     labels: {!! json_encode($collectionLabels) !!},
