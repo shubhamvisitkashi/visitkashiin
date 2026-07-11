@@ -284,6 +284,10 @@ body.dark-mode .kpi-icon          { opacity:.85; }
   /* Chart — reduce canvas height */
   #revenueChart   { max-height:180px; }
   #dailyChart     { max-height:150px; }
+
+  /* Pie row (Booking Mix / Revenue vs Expense / Expense Cost Split) —
+     hide on mobile, too dense to be useful at this width. */
+  .dk-pie-row     { display:none; }
 }
 
 @media(max-width:400px){
