@@ -73,8 +73,8 @@
 
 /* ── Booking type card ─────────────────────── */
 .btype-card {
-  background: var(--hub-card);
-  border: 2px solid var(--hub-border);
+  background: linear-gradient(165deg, var(--tc-bg) 0%, #fff 58%);
+  border: 2px solid var(--tc-bg);
   border-radius: 20px;
   padding: 32px 28px;
   text-decoration: none;
@@ -91,24 +91,25 @@
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 4px;
+  height: 5px;
   background: var(--tc-gradient);
-  opacity: 0;
-  transition: opacity .25s;
+  opacity: .7;
+  transition: opacity .25s, height .25s;
 }
-.btype-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,.12); border-color: var(--tc-color); }
-.btype-card:hover::before { opacity: 1; }
+.btype-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,.14); border-color: var(--tc-color); }
+.btype-card:hover::before { opacity: 1; height: 6px; }
 
 .btype-icon-wrap {
   width: 72px; height: 72px;
   border-radius: 20px;
-  background: var(--tc-bg);
+  background: var(--tc-gradient);
+  box-shadow: 0 8px 20px -6px var(--tc-color);
   display: flex; align-items: center; justify-content: center;
   font-size: 2rem;
   margin-bottom: 18px;
   transition: transform .25s;
 }
-.btype-card:hover .btype-icon-wrap { transform: scale(1.08); }
+.btype-card:hover .btype-icon-wrap { transform: scale(1.08) rotate(-3deg); }
 
 .btype-label {
   font-size: 1.25rem;
@@ -185,17 +186,17 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #F8FAFC;
-  border: 1.5px solid var(--hub-border);
+  background: var(--qc-bg, #F8FAFC);
+  border: 1.5px solid var(--qc-border, var(--hub-border));
   border-radius: 10px;
   padding: 9px 16px;
   font-size: .8rem;
   font-weight: 600;
-  color: var(--hub-text);
+  color: var(--qc-color, var(--hub-text));
   text-decoration: none;
   transition: .18s;
 }
-.hub-quick-link:hover { background: #EEF2FF; border-color: #A5B4FC; color: #4F46E5; }
+.hub-quick-link:hover { filter: brightness(.97); transform: translateY(-1px); }
 
 /* Recent count badges */
 .btype-count {
@@ -243,62 +244,91 @@
     border-radius: 8px;
   }
 
-  /* Grid — 2 columns on mobile */
+  /* Grid — single column, readable rows on mobile */
   .hub-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 14px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
   }
 
-  /* Cards — compact app-style */
+  /* Cards — icon + title/desc side by side, tags & CTA span full width below */
   .btype-card {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    column-gap: 14px;
+    row-gap: 6px;
+    align-items: start;
     border-radius: 16px;
-    padding: 16px 14px;
+    padding: 16px 16px 14px;
     border-width: 1.5px;
   }
   .btype-card:hover { transform: none; }
-  .btype-card:active { transform: scale(.97); opacity: .92; }
+  .btype-card:active { transform: scale(.98); opacity: .93; }
 
-  /* Top badge — hide on mobile (use icon instead) */
-  .btype-count { display: none; }
+  /* Corner badge → small inline chip next to the icon instead of hidden */
+  .btype-count {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    margin-bottom: 2px;
+    font-size: .64rem;
+    padding: 3px 9px;
+  }
 
-  /* Icon — smaller */
+  /* Icon — spans the title+desc rows on the left */
   .btype-icon-wrap {
-    width: 52px; height: 52px;
+    grid-column: 1;
+    grid-row: 1 / 4;
+    width: 54px; height: 54px;
     border-radius: 14px;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 1.4rem;
+    margin-bottom: 0;
+    align-self: start;
   }
 
-  /* Label — slightly smaller */
+  /* Label */
   .btype-label {
-    font-size: .92rem;
-    margin-bottom: 4px;
-    line-height: 1.2;
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 1rem;
+    margin-bottom: 0;
+    line-height: 1.25;
   }
 
-  /* Description — hidden on mobile to save space */
-  .btype-desc { display: none; }
+  /* Description — kept visible on mobile for clarity */
+  .btype-desc {
+    display: block;
+    grid-column: 2;
+    grid-row: 3;
+    font-size: .76rem;
+    line-height: 1.45;
+    margin-bottom: 0;
+  }
 
-  /* Tags — show max 2 */
+  /* Tags — full width row beneath icon+text, all tags visible */
   .btype-tags {
-    gap: 4px;
-    margin-bottom: 12px;
+    grid-column: 1 / -1;
+    grid-row: 4;
+    gap: 5px;
+    margin-bottom: 10px;
+    margin-top: 2px;
   }
   .btype-tag {
-    font-size: .6rem;
-    padding: 2px 7px;
+    font-size: .64rem;
+    padding: 2px 8px;
   }
-  .btype-tags .btype-tag:nth-child(n+3) { display: none; }
 
-  /* CTA button — compact */
+  /* CTA button — full width row at the bottom */
   .btype-btn {
-    padding: 9px 10px;
-    font-size: .75rem;
+    grid-column: 1 / -1;
+    grid-row: 5;
+    padding: 10px 10px;
+    font-size: .78rem;
     border-radius: 10px;
-    gap: 5px;
+    gap: 6px;
   }
-  .btype-btn svg { width: 13px; height: 13px; }
+  .btype-btn svg { width: 14px; height: 14px; }
 
   /* Quick links — horizontal scroll */
   .hub-quick {
@@ -421,12 +451,12 @@
   <div class="hub-quick">
     <div class="hub-quick-title">Quick Actions</div>
     <div class="hub-quick-links">
-      <a href="{{ route('bookings.index') }}"      class="hub-quick-link">📋 All Bookings</a>
-      <a href="{{ route('cab-bookings.index') }}"  class="hub-quick-link">🚗 Cab Bookings</a>
-      <a href="{{ route('boat-booking.index') }}"  class="hub-quick-link">⛵ Boat Bookings</a>
-      <a href="{{ route('bookings.calendar') }}"   class="hub-quick-link">📅 Calendar View</a>
-      <a href="{{ route('customers.index') }}"     class="hub-quick-link">👥 Customer CRM</a>
-      <a href="{{ route('reports.index') }}"       class="hub-quick-link">📊 Reports</a>
+      <a href="{{ route('bookings.index') }}"      class="hub-quick-link" style="--qc-bg:#EEF2FF;--qc-border:#C7D2FE;--qc-color:#4338CA;">📋 All Bookings</a>
+      <a href="{{ route('cab-bookings.index') }}"  class="hub-quick-link" style="--qc-bg:#FEF3C7;--qc-border:#FDE68A;--qc-color:#92400E;">🚗 Cab Bookings</a>
+      <a href="{{ route('boat-booking.index') }}"  class="hub-quick-link" style="--qc-bg:#E0F2FE;--qc-border:#BAE6FD;--qc-color:#0369A1;">⛵ Boat Bookings</a>
+      <a href="{{ route('bookings.calendar') }}"   class="hub-quick-link" style="--qc-bg:#FCE7F3;--qc-border:#FBCFE8;--qc-color:#BE185D;">📅 Calendar View</a>
+      <a href="{{ route('customers.index') }}"     class="hub-quick-link" style="--qc-bg:#D1FAE5;--qc-border:#A7F3D0;--qc-color:#065F46;">👥 Customer CRM</a>
+      <a href="{{ route('reports.index') }}"       class="hub-quick-link" style="--qc-bg:#EDE9FE;--qc-border:#DDD6FE;--qc-color:#6D28D9;">📊 Reports</a>
     </div>
   </div>
 
