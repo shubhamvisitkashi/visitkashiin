@@ -247,13 +247,19 @@ class DirectBookingController extends Controller
             ]);
 
             // STEP 3: Create Quotation Items (services)
+            // This controller is only ever posted to by the Stay/Hotel booking form,
+            // so a custom (template-less) property is still always a stay booking.
+            $stayServiceTypeId = ServiceType::where(function ($q) {
+                $q->where('name', 'like', '%stay%')->orWhere('name', 'like', '%hotel%');
+            })->value('id');
+
             foreach ($validated['services'] as $service) {
                 $templateId = $service['service_template_id'] ?? null;
                 $template   = $templateId ? ServiceTemplate::find($templateId) : null;
 
                 QuotationItem::create([
                     'quotation_id'        => $quotation->id,
-                    'service_type_id'     => $template ? $template->service_type_id : null,
+                    'service_type_id'     => $template ? $template->service_type_id : $stayServiceTypeId,
                     'service_template_id' => $templateId,
                     'custom_name'         => $service['custom_name'] ?? null,
                     'quantity'            => $service['quantity'] ?? 1,

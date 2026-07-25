@@ -788,14 +788,18 @@ class BookingController extends Controller
         $booking = Booking::with([
             'lead',
             'quotation.items.serviceTemplate.serviceType',
+            'quotation.items.serviceType',
             'payments.paymentAccount',
             'createdBy'
         ])
         ->withSum('payments', 'amount')
         ->findOrFail($id);
 
-        $stName = strtolower($booking->quotation?->items?->first()?->serviceTemplate?->serviceType?->name ?? '');
-        $isStayBooking = str_contains($stName, 'stay') || str_contains($stName, 'hotel');
+        $firstItem = $booking->quotation?->items?->first();
+        $stName = strtolower($firstItem?->serviceTemplate?->serviceType?->name ?? $firstItem?->serviceType?->name ?? '');
+        $shortPlan = strtolower($booking->lead?->short_plan ?? '');
+        $isStayBooking = str_contains($stName, 'stay') || str_contains($stName, 'hotel')
+            || str_contains($shortPlan, 'check-in:');
 
         $view = $isStayBooking ? 'admin.bookings.invoice-hotel' : 'admin.bookings.invoice';
 
