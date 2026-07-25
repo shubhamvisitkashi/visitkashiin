@@ -34,9 +34,9 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('admin.login');
     Route::post('login', [LoginController::class, 'login'])->name('admin.login.submit')->middleware('throttle:10,1');
 
-    // Web app manifest — lets "Add to Home screen" on mobile use the site logo as an app icon
+    // Web app manifest — lets "Add to Home screen" on mobile use the app logo as an app icon
     Route::get('manifest.webmanifest', function () {
-        $logo = websiteSetupValue('logo');
+        $logo = websiteSetupValue('app_logo') ?: websiteSetupValue('logo');
         $iconUrl = $logo
             ? asset('backend/admin/website_setup/' . $logo)
             : asset('favicon.ico');
@@ -193,6 +193,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('enquiry-index','EnquiryController@index')->name('enquiry.index');
             Route::delete('enquiry-delete/{id}','EnquiryController@destroy')->name('enquiry.delete');
             Route::delete('hotel-enquiry-delete/{id}','EnquiryController@destroyHotel')->name('hotel-enquiry.admin.delete');
+            Route::get('enquiries/latest-check','EnquiryController@latestCheck')->name('enquiry.latest-check');
 
             // Website Setup Route
             Route::resource('web_setup', 'WebsiteSetupController');

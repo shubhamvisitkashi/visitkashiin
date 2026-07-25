@@ -8,9 +8,10 @@
 <nav class="navbar sa-navbar">
 
     {{-- Hamburger: .sidebar-toggler triggers existing sidebar open/close JS --}}
+    @php $navToggleLogo = websiteSetupValue('app_logo') ?: websiteSetupValue('logo'); @endphp
     <a href="#" class="sidebar-toggler sa-nav-toggle" aria-label="Toggle sidebar">
-        @if (websiteSetupValue('logo'))
-            <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
+        @if ($navToggleLogo)
+            <img src="{{ asset('backend/admin/website_setup/' . $navToggleLogo) }}"
                  alt="{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}"
                  style="max-width:26px;max-height:26px;object-fit:contain;">
         @else
@@ -37,6 +38,14 @@
 
     {{-- Right-side actions --}}
     <div class="sa-nav-actions">
+
+        {{-- Enquiry notifications --}}
+        @can('enquiry-list')
+        <a href="{{ route('enquiry.index') }}" class="sa-nav-btn" title="Enquiries" id="vkEnquiryBell">
+            <i data-feather="bell"></i>
+            <span class="sa-nav-badge" id="vkEnquiryBadge" style="display:none;"></span>
+        </a>
+        @endcan
 
         {{-- Theme toggle --}}
         <form action="{{ route('admin.theme') }}" method="post" id="change_theme_form">
@@ -111,3 +120,82 @@
         document.getElementById('change_theme_form').submit();
     }
 </script>
+
+@can('enquiry-list')
+<script>
+(function() {
+    var CHECK_URL   = @json(route('enquiry.latest-check'));
+    var IS_ENQUIRY_PAGE = @json(Route::currentRouteName() === 'enquiry.index');
+    var POLL_MS     = 25000;
+    var SEEN_ENQ_KEY   = 'vk_seen_enquiry_id';
+    var SEEN_HOTEL_KEY = 'vk_seen_hotel_id';
+
+    var lastKnownCount = null;
+    var audioCtx = null;
+
+    function playChime() {
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            var now = audioCtx.currentTime;
+            [880, 1174.66].forEach(function(freq, i) {
+                var osc  = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                var start = now + i * 0.12;
+                gain.gain.setValueAtTime(0, start);
+                gain.gain.linearRampToValueAtTime(0.25, start + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start(start);
+                osc.stop(start + 0.4);
+            });
+        } catch (e) {}
+    }
+
+    function updateBadge(count) {
+        var badge = document.getElementById('vkEnquiryBadge');
+        if (!badge) return;
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function checkEnquiries() {
+        var sinceEnq   = localStorage.getItem(SEEN_ENQ_KEY);
+        var sinceHotel = localStorage.getItem(SEEN_HOTEL_KEY);
+        var firstRun   = sinceEnq === null;
+
+        var url = CHECK_URL + '?since_enquiry_id=' + (sinceEnq || 0) + '&since_hotel_id=' + (sinceHotel || 0);
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(res) { return res.ok ? res.json() : null; })
+            .then(function(data) {
+                if (!data) return;
+
+                // First-ever check on this browser, or currently viewing the
+                // enquiry list: treat everything up to now as "seen", no alert.
+                if (firstRun || IS_ENQUIRY_PAGE) {
+                    localStorage.setItem(SEEN_ENQ_KEY, data.latest_enquiry_id);
+                    localStorage.setItem(SEEN_HOTEL_KEY, data.latest_hotel_id);
+                    lastKnownCount = 0;
+                    updateBadge(0);
+                    return;
+                }
+
+                updateBadge(data.new_count);
+                if (lastKnownCount !== null && data.new_count > lastKnownCount) {
+                    playChime();
+                }
+                lastKnownCount = data.new_count;
+            })
+            .catch(function() {});
+    }
+
+    checkEnquiries();
+    setInterval(checkEnquiries, POLL_MS);
+})();
+</script>
+@endcan

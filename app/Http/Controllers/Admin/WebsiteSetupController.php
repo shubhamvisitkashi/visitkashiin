@@ -32,6 +32,7 @@ class WebsiteSetupController extends Controller
     {
         $request->validate([
             'logo'           => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,svg|max:2048',
+            'app_logo'       => 'nullable|file|mimes:jpg,jpeg,png,webp|max:1024',
             'favicon'        => 'nullable|file|mimes:ico,png,jpg,jpeg|max:512',
             'banner'         => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'footer_logo'    => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,svg|max:2048',
@@ -41,7 +42,7 @@ class WebsiteSetupController extends Controller
             'kashiyatra_logo' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,svg|max:2048',
         ]);
 
-        $imageTypes = ['logo', 'favicon', 'banner', 'footer_logo', 'promo_banner', 'promo_banner_2', 'promo_banner_3', 'kashiyatra_logo'];
+        $imageTypes = ['logo', 'app_logo', 'favicon', 'banner', 'footer_logo', 'promo_banner', 'promo_banner_2', 'promo_banner_3', 'kashiyatra_logo'];
         $input      = $request->all();
 
         foreach ($input['type'] as $types) {

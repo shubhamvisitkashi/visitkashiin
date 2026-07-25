@@ -12,7 +12,7 @@ class EnquiryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:enquiry-list', ['only' => ['index']]);
+        $this->middleware('permission:enquiry-list', ['only' => ['index', 'latestCheck']]);
     }
 
     public function index(Request $request)
@@ -106,6 +106,29 @@ class EnquiryController extends Controller
         return view('admin.enquiry.index', compact(
             'enquires', 'hotelEnquiries', 'search_date_range', 'search_key', 'category', 'counts'
         ), ['page_title' => 'Enquiries']);
+    }
+
+    /**
+     * Polled admin-wide to detect new enquiries and trigger the navbar
+     * notification sound/badge. Client tracks the last-seen id per table
+     * (localStorage) and passes it back on each check.
+     */
+    public function latestCheck(Request $request)
+    {
+        $sinceEnquiryId = (int) $request->query('since_enquiry_id', 0);
+        $sinceHotelId   = (int) $request->query('since_hotel_id', 0);
+
+        $latestEnquiryId = (int) (Enquiry::max('id') ?? 0);
+        $latestHotelId   = (int) (HotelEnquiry::max('id') ?? 0);
+
+        $newCount = Enquiry::where('id', '>', $sinceEnquiryId)->count()
+            + HotelEnquiry::where('id', '>', $sinceHotelId)->count();
+
+        return response()->json([
+            'new_count'          => $newCount,
+            'latest_enquiry_id'  => $latestEnquiryId,
+            'latest_hotel_id'    => $latestHotelId,
+        ]);
     }
 
     public function destroy($id)

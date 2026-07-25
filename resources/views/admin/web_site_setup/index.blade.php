@@ -199,6 +199,21 @@
                     @endif
                 </div>
 
+                {{-- App Logo (mobile home-screen icon) --}}
+                <div class="ws-field">
+                    <label class="ws-label">App Logo</label>
+                    <input type="file" name="app_logo" class="ws-file" accept="image/*">
+                    <input type="hidden" name="type[]" value="app_logo">
+                    <p class="ws-hint">Square icon-only mark (no text), min 512×512 px. Used as the app icon when staff "Add to Home screen" on mobile.</p>
+                    @if(websiteSetupValue('app_logo'))
+                    <div class="ws-preview ws-preview-sq">
+                        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('app_logo')) }}"
+                             onerror="this.closest('.ws-preview').remove()">
+                        <span>Current app logo</span>
+                    </div>
+                    @endif
+                </div>
+
                 {{-- Favicon --}}
                 <div class="ws-field">
                     <label class="ws-label">Favicon</label>

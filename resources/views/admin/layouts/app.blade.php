@@ -14,7 +14,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="{{ websiteSetupValue('site_name') ?: 'Visit Kashi' }}">
-    @php $appIcon = websiteSetupValue('logo') ? asset('backend/admin/website_setup/' . websiteSetupValue('logo')) : asset('favicon.ico'); @endphp
+    @php
+        $appIconSource = websiteSetupValue('app_logo') ?: websiteSetupValue('logo');
+        $appIcon = $appIconSource ? asset('backend/admin/website_setup/' . $appIconSource) : asset('favicon.ico');
+    @endphp
     <link rel="icon" href="{{ $appIcon }}">
     <link rel="apple-touch-icon" href="{{ $appIcon }}">
 
