@@ -545,6 +545,25 @@
                        style="background:#F0FDF4 !important;font-weight:700;color:#059669 !important;">
               </div>
             </div>
+
+            <div class="row g-3" style="margin-top:12px;">
+              <div class="col-md-4">
+                <label class="cn-label">Cab / Vehicle Number</label>
+                <input type="text" name="vehicle_number" class="form-control cn-input"
+                       placeholder="e.g. UP65 AB 1234" value="{{ old('vehicle_number') }}"
+                       style="text-transform:uppercase;">
+              </div>
+              <div class="col-md-4">
+                <label class="cn-label">Driver Name</label>
+                <input type="text" name="driver_name" class="form-control cn-input"
+                       placeholder="e.g. Ramesh Singh" value="{{ old('driver_name') }}">
+              </div>
+              <div class="col-md-4">
+                <label class="cn-label">Driver Contact Number</label>
+                <input type="text" name="driver_contact" class="form-control cn-input"
+                       placeholder="e.g. 9876543210" maxlength="15" value="{{ old('driver_contact') }}">
+              </div>
+            </div>
           </div>
         </div>
       </div>

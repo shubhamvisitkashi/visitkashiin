@@ -265,6 +265,21 @@
                    oninput="document.getElementById('f_veh_seats').value=this.value">
           </div>
         </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <label class="cn-label">Driver Name</label>
+            <input type="text" name="driver_name" class="form-control cn-input"
+                   placeholder="e.g. Ramesh Singh"
+                   value="{{ old('driver_name',$booking->driver_name) }}">
+          </div>
+          <div class="col-md-6">
+            <label class="cn-label">Driver Contact Number</label>
+            <input type="text" name="driver_contact" class="form-control cn-input"
+                   placeholder="e.g. 9876543210" maxlength="15"
+                   value="{{ old('driver_contact',$booking->driver_contact) }}">
+          </div>
+        </div>
       </div>
     </div>
 

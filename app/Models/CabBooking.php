@@ -18,7 +18,7 @@ class CabBooking extends Model
         'pickup_address', 'drop_address',
         'trip_type', 'pickup_date', 'pickup_time',
         'return_date', 'total_days', 'total_km',
-        'vehicle_id', 'vehicle_name', 'vehicle_number', 'seating_capacity', 'vehicle_count',
+        'vehicle_id', 'vehicle_name', 'vehicle_number', 'driver_name', 'driver_contact', 'seating_capacity', 'vehicle_count',
         'no_of_adults', 'no_of_children', 'carrier_on_roof', 'child_seat',
         'wheelchair_accessible', 'ac_required', 'luggage_details', 'flight_train_number',
         'base_fare', 'driver_allowance', 'toll_tax', 'parking',

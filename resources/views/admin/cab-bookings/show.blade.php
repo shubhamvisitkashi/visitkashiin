@@ -283,6 +283,20 @@
               <div class="cs-info-val" style="font-family:monospace;letter-spacing:.05em;">{{ $booking->vehicle_number }}</div>
             </div>
             @endif
+            @if($booking->driver_name)
+            <div>
+              <div class="cs-info-lbl">Driver Name</div>
+              <div class="cs-info-val">{{ $booking->driver_name }}</div>
+            </div>
+            @endif
+            @if($booking->driver_contact)
+            <div>
+              <div class="cs-info-lbl">Driver Contact</div>
+              <div class="cs-info-val">
+                <a href="tel:{{ $booking->driver_contact }}" style="color:inherit;text-decoration:none;">{{ $booking->driver_contact }}</a>
+              </div>
+            </div>
+            @endif
             @if($booking->seating_capacity)
             <div>
               <div class="cs-info-lbl">Seating Capacity</div>

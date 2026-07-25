@@ -207,9 +207,13 @@
 
         var url = CHECK_URL + '?since_enquiry_id=' + (sinceEnq || 0) + '&since_hotel_id=' + (sinceHotel || 0);
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function(res) { return res.ok ? res.json() : null; })
+            .then(function(res) {
+                if (!res.ok) { console.warn('[vk-enquiry] check failed, HTTP', res.status); return null; }
+                return res.json();
+            })
             .then(function(data) {
                 if (!data) return;
+                console.log('[vk-enquiry] poll result', data, 'firstRun=', firstRun, 'isEnquiryPage=', IS_ENQUIRY_PAGE, 'lastKnownCount=', lastKnownCount);
 
                 // First-ever check on this browser, or currently viewing the
                 // enquiry list: treat everything up to now as "seen", no alert.
@@ -222,16 +226,36 @@
                 }
 
                 updateBadge(data.new_count);
-                if (lastKnownCount !== null && data.new_count > lastKnownCount) {
+                // Alert if the count grew since our last poll, OR this is the
+                // first poll of a fresh page load and there's already an
+                // unseen enquiry (e.g. it arrived while this tab was closed).
+                if (data.new_count > 0 && (lastKnownCount === null || data.new_count > lastKnownCount)) {
+                    console.log('[vk-enquiry] speaking alert');
                     speakNewEnquiry();
                 }
                 lastKnownCount = data.new_count;
             })
-            .catch(function() {});
+            .catch(function(e) { console.warn('[vk-enquiry] check errored', e); });
     }
 
     checkEnquiries();
     setInterval(checkEnquiries, POLL_MS);
+
+    // Browsers block auto-played speech/audio until the page has had a user
+    // gesture. Prime it silently on the first tap so a later automatic
+    // alert (triggered by the poll, not a click) isn't swallowed silently.
+    function unlockAudio() {
+        try {
+            if ('speechSynthesis' in window) {
+                var primer = new SpeechSynthesisUtterance(' ');
+                primer.volume = 0;
+                window.speechSynthesis.speak(primer);
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {}
+    }
+    document.addEventListener('click', unlockAudio, { once: true, passive: true });
+    document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
 })();
 </script>
 @endcan
