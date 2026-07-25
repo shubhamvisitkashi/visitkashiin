@@ -239,23 +239,30 @@
   .sb-page { padding:12px 12px 130px; }
   .sb-header { flex-direction:column; align-items:flex-start; gap:12px; margin-top:56px; }
 
-  /* Hotel cards → single-column compact list */
-  .hotel-list { grid-template-columns:1fr !important; gap:8px !important; }
+  /* Hotel cards → 2-column square grid */
+  .hotel-list { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
   .hotel-row {
-    flex-direction:row !important; text-align:left !important;
-    padding:10px 14px !important; gap:12px; align-items:center;
+    flex-direction:column !important; text-align:center !important;
+    justify-content:center !important;
+    aspect-ratio:1/1; padding:12px 10px !important; gap:0;
   }
   .hotel-row:hover, .hotel-row.selected { transform:none !important; }
   .hotel-row-icon {
-    width:40px !important; height:40px !important;
-    font-size:1.2rem !important; margin-bottom:0 !important;
+    width:38px !important; height:38px !important;
+    font-size:1.15rem !important; margin-bottom:8px !important;
     border-radius:10px !important; flex-shrink:0;
   }
-  .hotel-row-info { flex:1; min-width:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .hotel-row-name { font-size:.8rem; margin-bottom:0; }
-  .hotel-row-meta { margin-bottom:0; }
-  .hotel-row-price { margin-top:0; margin-left:auto; text-align:right; flex-shrink:0; }
-  .hotel-row-amt { font-size:.85rem; }
+  .hotel-row-info { width:100%; display:flex; flex-direction:column; align-items:center; }
+  .hotel-row-name {
+    font-size:.72rem; margin-bottom:4px; line-height:1.25;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  .hotel-row-meta { margin-bottom:4px; justify-content:center; }
+  .hotel-row-loc { font-size:.58rem; padding:2px 7px; }
+  .hotel-row-price { margin-top:2px; }
+  .hotel-row-amt { font-size:.8rem; }
+  .hotel-row-per { font-size:.56rem; }
 
   /* Check-in/out → checkin+nights on row1, checkout full-width on row2 */
   .sb-dates-row { flex-wrap:wrap !important; gap:8px !important; }
