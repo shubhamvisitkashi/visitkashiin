@@ -244,91 +244,45 @@
     border-radius: 8px;
   }
 
-  /* Grid — single column, readable rows on mobile */
+  /* Grid — 2-column square tiles on mobile */
   .hub-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 16px;
   }
 
-  /* Cards — icon + title/desc side by side, tags & CTA span full width below */
+  /* Cards — square tile, icon + label only */
   .btype-card {
-    display: grid;
-    grid-template-columns: 54px 1fr;
-    column-gap: 14px;
-    row-gap: 6px;
-    align-items: start;
+    aspect-ratio: 1 / 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     border-radius: 16px;
-    padding: 16px 16px 14px;
+    padding: 14px 10px;
     border-width: 1.5px;
   }
   .btype-card:hover { transform: none; }
-  .btype-card:active { transform: scale(.98); opacity: .93; }
+  .btype-card:active { transform: scale(.97); opacity: .93; }
 
-  /* Corner badge → small inline chip next to the icon instead of hidden */
-  .btype-count {
-    position: static;
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: start;
-    margin-bottom: 2px;
-    font-size: .64rem;
-    padding: 3px 9px;
-  }
+  /* Hide everything except the icon and label on mobile */
+  .btype-count,
+  .btype-desc,
+  .btype-tags,
+  .btype-btn { display: none; }
 
-  /* Icon — spans the title+desc rows on the left */
   .btype-icon-wrap {
-    grid-column: 1;
-    grid-row: 1 / 4;
-    width: 54px; height: 54px;
+    width: 50px; height: 50px;
     border-radius: 14px;
-    font-size: 1.4rem;
-    margin-bottom: 0;
-    align-self: start;
-  }
-
-  /* Label */
-  .btype-label {
-    grid-column: 2;
-    grid-row: 2;
-    font-size: 1rem;
-    margin-bottom: 0;
-    line-height: 1.25;
-  }
-
-  /* Description — kept visible on mobile for clarity */
-  .btype-desc {
-    display: block;
-    grid-column: 2;
-    grid-row: 3;
-    font-size: .76rem;
-    line-height: 1.45;
-    margin-bottom: 0;
-  }
-
-  /* Tags — full width row beneath icon+text, all tags visible */
-  .btype-tags {
-    grid-column: 1 / -1;
-    grid-row: 4;
-    gap: 5px;
+    font-size: 1.35rem;
     margin-bottom: 10px;
-    margin-top: 2px;
-  }
-  .btype-tag {
-    font-size: .64rem;
-    padding: 2px 8px;
   }
 
-  /* CTA button — full width row at the bottom */
-  .btype-btn {
-    grid-column: 1 / -1;
-    grid-row: 5;
-    padding: 10px 10px;
-    font-size: .78rem;
-    border-radius: 10px;
-    gap: 6px;
+  .btype-label {
+    font-size: .85rem;
+    margin-bottom: 0;
+    line-height: 1.3;
   }
-  .btype-btn svg { width: 14px; height: 14px; }
 
   /* Quick links — horizontal scroll */
   .hub-quick {
