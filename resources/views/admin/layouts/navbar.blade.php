@@ -153,6 +153,42 @@
         } catch (e) {}
     }
 
+    // ── Spoken alert ("Hi, new booking enquiry received. Call now.") ──
+    var cachedVoices = [];
+    function loadVoices() {
+        if ('speechSynthesis' in window) cachedVoices = window.speechSynthesis.getVoices();
+    }
+    if ('speechSynthesis' in window) {
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function pickFemaleVoice() {
+        if (!cachedVoices.length) return null;
+        var byName = cachedVoices.find(function(v) {
+            return /female|zira|samantha|susan|karen|victoria|moira|tessa|veena|google uk english female/i.test(v.name);
+        });
+        if (byName) return byName;
+        var english = cachedVoices.find(function(v) { return /^en/i.test(v.lang); });
+        return english || cachedVoices[0];
+    }
+
+    function speakNewEnquiry() {
+        try {
+            if (!('speechSynthesis' in window)) { playChime(); return; }
+            var utter = new SpeechSynthesisUtterance('Hi, new booking enquiry received. Call now.');
+            var voice = pickFemaleVoice();
+            if (voice) utter.voice = voice;
+            utter.rate   = 1;
+            utter.pitch  = 1.15;
+            utter.volume = 1;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utter);
+        } catch (e) {
+            playChime();
+        }
+    }
+
     function updateBadge(count) {
         var badge = document.getElementById('vkEnquiryBadge');
         if (!badge) return;
@@ -187,7 +223,7 @@
 
                 updateBadge(data.new_count);
                 if (lastKnownCount !== null && data.new_count > lastKnownCount) {
-                    playChime();
+                    speakNewEnquiry();
                 }
                 lastKnownCount = data.new_count;
             })

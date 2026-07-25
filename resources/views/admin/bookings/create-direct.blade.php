@@ -217,13 +217,15 @@
 
   /* Grid — 2-column square tiles on mobile */
   .hub-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 16px;
   }
 
   /* Cards — square tile, icon + label only */
   .btype-card {
+    min-width: 0;
+    max-width: 100%;
     aspect-ratio: 1 / 1;
     flex-direction: column;
     align-items: center;

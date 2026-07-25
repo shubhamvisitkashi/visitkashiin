@@ -240,8 +240,9 @@
   .sb-header { flex-direction:column; align-items:flex-start; gap:12px; margin-top:56px; }
 
   /* Hotel cards → 2-column square grid */
-  .hotel-list { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
+  .hotel-list { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px !important; }
   .hotel-row {
+    min-width:0; max-width:100%;
     flex-direction:column !important; text-align:center !important;
     justify-content:center !important;
     aspect-ratio:1/1; padding:12px 10px !important; gap:0;
