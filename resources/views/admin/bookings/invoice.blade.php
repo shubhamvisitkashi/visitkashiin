@@ -1,3 +1,6 @@
+@php
+    $brand = invoiceBrand($booking->lead?->leadSource?->name);
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -203,7 +206,7 @@
     $packageName  = null;
     if ($booking->quotation && $booking->quotation->items && $booking->quotation->items->count()) {
         $serviceItems = $booking->quotation->items;
-        $packageName  = $serviceItems->first()->serviceTemplate->name ?? null;
+        $packageName  = $serviceItems->first()?->serviceTemplate?->name ?? null;
     }
     if (!$packageName && $booking->lead?->short_plan) {
         $packageName = Str::limit(strip_tags($booking->lead->short_plan), 80);
@@ -245,7 +248,6 @@
 
     $bkStatus  = ucwords(str_replace('_', ' ', $booking->booking_status ?? 'confirmed'));
     $cPhone    = preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917');
-    $brand     = invoiceBrand($booking->lead?->leadSource?->name);
 @endphp
 
 <div class="page-wrap">
@@ -397,7 +399,7 @@
                 @php $unitPrice = $item->unit_price ?? $item->selling_price ?? 0; @endphp
                 <tr>
                     <td>
-                        <div class="inv-svc-name">{{ $item->serviceTemplate->name ?? 'Service' }}</div>
+                        <div class="inv-svc-name">{{ $item->custom_name ?? $item->serviceTemplate?->name ?? 'Service' }}</div>
                         @if($item->notes)<div class="inv-svc-sub">{{ $item->notes }}</div>@endif
                     </td>
                     <td>

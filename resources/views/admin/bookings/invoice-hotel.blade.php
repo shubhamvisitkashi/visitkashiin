@@ -172,10 +172,10 @@
     $cPhone = preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917');
 
     // ── Property name (the hotel/stay being booked) ──
-    $propertyName = $serviceItems->first()->serviceTemplate->name ?? $brand['name'];
-    $propertyAddress = $serviceItems->first()->serviceTemplate->address ?? null;
-    $propertyType = $serviceItems->first()->serviceTemplate->property_type ?? null;
-    $bhkType = $serviceItems->first()->serviceTemplate->bhk_type ?? null;
+    $propertyName = $serviceItems->first()?->custom_name ?? $serviceItems->first()?->serviceTemplate?->name ?? $brand['name'];
+    $propertyAddress = $serviceItems->first()?->serviceTemplate?->address ?? null;
+    $propertyType = $serviceItems->first()?->serviceTemplate?->property_type ?? null;
+    $bhkType = $serviceItems->first()?->serviceTemplate?->bhk_type ?? null;
     $siteName = $brand['name'];
     $companyName = websiteSetupValue('company_legal_name') ?: $siteName;
 
@@ -304,7 +304,7 @@
                 @endphp
                 <tr>
                     <td>
-                        <strong>{{ $item->serviceTemplate->name ?? 'Room' }}</strong> (Accomodation Only)
+                        <strong>{{ $item->custom_name ?? $item->serviceTemplate?->name ?? 'Room' }}</strong> (Accomodation Only)
                         <div class="room-sub">{{ $adults ?? 0 }} Adults and {{ $children ?? 0 }} Childs</div>
                     </td>
                     <td>{{ $item->serviceTemplate?->hsn_sac ?? '996311' }}</td>

@@ -55,7 +55,14 @@
 .hotel-row-info { width:100%; }
 .hotel-row-name { font-size:.78rem; font-weight:700; color:#0F172A; margin-bottom:5px; line-height:1.35; }
 .hotel-row-meta { display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:6px; flex-wrap:wrap; }
-.hotel-row-loc { font-size:.66rem; color:#64748B; font-weight:600; }
+.hotel-row-loc {
+  font-size:.62rem; font-weight:700; padding:2px 8px; border-radius:20px;
+  background:#F1F5F9; color:#64748B;
+}
+.hotel-row-loc.city-varanasi  { background:#FEF3C7; color:#B45309; }
+.hotel-row-loc.city-ayodhya   { background:#FFE4E6; color:#BE123C; }
+.hotel-row-loc.city-lucknow   { background:#E0E7FF; color:#4338CA; }
+.hotel-row-loc.city-prayagraj { background:#DBEAFE; color:#1D4ED8; }
 .hotel-row-stars { color:#F59E0B; font-size:.65rem; }
 .hotel-row-price { text-align:center; margin-top:4px; }
 .hotel-row-amt { font-size:1rem; font-weight:800; color:#0D9488; display:block; }
@@ -399,11 +406,15 @@
                 }
                 function getHotelLocation($name) {
                   $n = strtolower($name);
-                  if (str_contains($n,'varanasi') || str_contains($n,'kashi') || str_contains($n,'saket') || str_contains($n,'mahmoorganj') || str_contains($n,'ganga')) return 'Varanasi';
+                  if (str_contains($n,'varanasi') || str_contains($n,'kashi') || str_contains($n,'saket') || str_contains($n,'mahmoorganj') || str_contains($n,'ganga') || str_contains($n,'shivala') || str_contains($n,'namastubhyam') || str_contains($n,'vinayak')) return 'Varanasi';
                   if (str_contains($n,'ayodh')) return 'Ayodhya';
                   if (str_contains($n,'lucknow')) return 'Lucknow';
                   if (str_contains($n,'prayagraj')) return 'Prayagraj';
                   return 'Property';
+                }
+                function getHotelLocationClass($name) {
+                  $loc = getHotelLocation($name);
+                  return $loc === 'Property' ? '' : 'city-'.strtolower($loc);
                 }
                 function getStars($name) {
                   $n = strtolower($name);
@@ -424,7 +435,7 @@
                 <div class="hotel-row-info">
                   <div class="hotel-row-name">{{ $t->name }}</div>
                   <div class="hotel-row-meta">
-                    <span class="hotel-row-loc">📍 {{ getHotelLocation($t->name) }}</span>
+                    <span class="hotel-row-loc {{ getHotelLocationClass($t->name) }}">📍 {{ getHotelLocation($t->name) }}</span>
                     @if(getStars($t->name))
                     <span class="hotel-row-stars">{{ getStars($t->name) }}</span>
                     @endif
@@ -486,6 +497,7 @@
             </div>
 
             <input type="hidden" name="services[0][service_template_id]" id="hotelTplId">
+            <input type="hidden" name="services[0][custom_name]" id="hotelCustomName">
           </div>
         </div>
 
@@ -1065,6 +1077,9 @@ document.getElementById('stayForm').addEventListener('submit', function() {
   const adults = parseInt(document.getElementById('adultsVal').value) || 1;
   const kids   = parseInt(document.getElementById('kidsVal').value) || 0;
   document.getElementById('paxHidden').value = adults + kids;
+  document.getElementById('hotelCustomName').value = isCustomHotel
+    ? (document.getElementById('customHotelName')?.value.trim() || '')
+    : '';
 });
 
 document.addEventListener('DOMContentLoaded', () => {

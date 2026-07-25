@@ -46,12 +46,60 @@ class DirectBookingController extends Controller
             return str_contains(strtolower($t->name), 'hotel') || str_contains(strtolower($t->name), 'stay');
         });
         $stayTemplates   = $stayServiceType?->serviceTemplates ?? collect();
+        $stayTemplates   = $this->sortStayTemplates($stayTemplates);
         $paymentAccounts = PaymentAccount::where('is_active', 1)->orderBy('account_name')->get();
         $leadSources     = LeadSource::orderBy('name')->get();
 
         return view('admin.bookings.create-stay', compact('stayTemplates', 'paymentAccounts', 'leadSources'), [
             'page_title' => 'New Stay Booking',
         ]);
+    }
+
+    /**
+     * Pin a few featured properties first (in a fixed order), then group the
+     * rest by city and sort alphabetically within each city.
+     */
+    private function sortStayTemplates($stayTemplates)
+    {
+        $pinnedOrder = ['kashi paradise', 'shivala grand', 'namastubhyam'];
+        $cityKeywords = [
+            'Varanasi'  => ['varanasi', 'kashi', 'saket', 'mahmoorganj', 'ganga', 'shivala', 'namastubhyam', 'vinayak'],
+            'Ayodhya'   => ['ayodh'],
+            'Lucknow'   => ['lucknow'],
+            'Prayagraj' => ['prayagraj'],
+        ];
+        $cityOrder = array_keys($cityKeywords);
+
+        $pinIndex = function ($name) use ($pinnedOrder) {
+            $n = strtolower($name);
+            foreach ($pinnedOrder as $i => $needle) {
+                if (str_contains($n, $needle)) return $i;
+            }
+            return null;
+        };
+        $cityIndex = function ($name) use ($cityKeywords, $cityOrder) {
+            $n = strtolower($name);
+            foreach ($cityKeywords as $city => $keywords) {
+                foreach ($keywords as $kw) {
+                    if (str_contains($n, $kw)) return array_search($city, $cityOrder);
+                }
+            }
+            return count($cityOrder);
+        };
+
+        return $stayTemplates->sort(function ($a, $b) use ($pinIndex, $cityIndex) {
+            $aPin = $pinIndex($a->name);
+            $bPin = $pinIndex($b->name);
+            if ($aPin !== null || $bPin !== null) {
+                return ($aPin ?? PHP_INT_MAX) <=> ($bPin ?? PHP_INT_MAX);
+            }
+
+            $aCity = $cityIndex($a->name);
+            $bCity = $cityIndex($b->name);
+            if ($aCity !== $bCity) return $aCity <=> $bCity;
+
+            return strcasecmp($a->name, $b->name);
+        })->values();
     }
 
     /** OLD unified create — kept for backward compat (redirects to hub) */
@@ -108,6 +156,7 @@ class DirectBookingController extends Controller
                 // Services (Required)
                 'services'                          => 'required|array|min:1',
                 'services.*.service_template_id'    => 'nullable|exists:service_templates,id',
+                'services.*.custom_name'             => 'nullable|string|max:255',
                 'services.*.quantity'               => 'nullable|integer|min:1',
                 'services.*.unit_price'             => 'required|numeric|min:0',
                 'services.*.service_date'           => 'nullable|date',
@@ -206,6 +255,7 @@ class DirectBookingController extends Controller
                     'quotation_id'        => $quotation->id,
                     'service_type_id'     => $template ? $template->service_type_id : null,
                     'service_template_id' => $templateId,
+                    'custom_name'         => $service['custom_name'] ?? null,
                     'quantity'            => $service['quantity'] ?? 1,
                     'unit_price'          => $service['unit_price'],
                     'total_price'         => ($service['quantity'] ?? 1) * $service['unit_price'],
