@@ -7,6 +7,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <title>{{ config('app.name') }} | {{ isset($page_title) ? $page_title : '' }}</title>
+
+    <!-- Home screen / app icon (for "Add to Home screen" on mobile) -->
+    <link rel="manifest" href="{{ route('admin.manifest') }}">
+    <meta name="theme-color" content="#0F172A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="{{ websiteSetupValue('site_name') ?: 'Visit Kashi' }}">
+    @php $appIcon = websiteSetupValue('logo') ? asset('backend/admin/website_setup/' . websiteSetupValue('logo')) : asset('favicon.ico'); @endphp
+    <link rel="icon" href="{{ $appIcon }}">
+    <link rel="apple-touch-icon" href="{{ $appIcon }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>

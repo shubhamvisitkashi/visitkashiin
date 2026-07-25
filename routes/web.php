@@ -34,6 +34,27 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('admin.login');
     Route::post('login', [LoginController::class, 'login'])->name('admin.login.submit')->middleware('throttle:10,1');
 
+    // Web app manifest — lets "Add to Home screen" on mobile use the site logo as an app icon
+    Route::get('manifest.webmanifest', function () {
+        $logo = websiteSetupValue('logo');
+        $iconUrl = $logo
+            ? asset('backend/admin/website_setup/' . $logo)
+            : asset('favicon.ico');
+        $siteName = websiteSetupValue('site_name') ?: 'Visit Kashi';
+
+        return response()->json([
+            'name' => $siteName . ' Admin',
+            'short_name' => $siteName,
+            'start_url' => route('admin.dashboard'),
+            'display' => 'standalone',
+            'background_color' => '#0F172A',
+            'theme_color' => '#0F172A',
+            'icons' => [
+                ['src' => $iconUrl, 'sizes' => 'any', 'purpose' => 'any maskable'],
+            ],
+        ])->header('Content-Type', 'application/manifest+json');
+    })->name('admin.manifest');
+
     Route::middleware(['auth:admin'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('dashboard/pending-bookings', [DashboardController::class, 'pendingBookings'])->name('admin.dashboard.pending-bookings');
