@@ -9,7 +9,13 @@
 
     {{-- Hamburger: .sidebar-toggler triggers existing sidebar open/close JS --}}
     <a href="#" class="sidebar-toggler sa-nav-toggle" aria-label="Toggle sidebar">
-        <i data-feather="menu"></i>
+        @if (websiteSetupValue('logo'))
+            <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
+                 alt="{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}"
+                 style="max-width:26px;max-height:26px;object-fit:contain;">
+        @else
+            <i data-feather="menu"></i>
+        @endif
     </a>
 
     {{-- Breadcrumb --}}
