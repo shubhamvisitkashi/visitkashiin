@@ -65,22 +65,24 @@
 /* ── Grid ──────────────────────────────────── */
 .hub-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  max-width: 900px;
+  max-width: 1140px;
   margin: 0 auto 32px;
 }
 
 /* ── Booking type card ─────────────────────── */
+/* Compact tile: icon + label only, no desc/tags/button/badge */
 .btype-card {
   background: linear-gradient(165deg, var(--tc-bg) 0%, #fff 58%);
   border: 2px solid var(--tc-bg);
   border-radius: 20px;
-  padding: 32px 28px;
+  padding: 30px 20px;
   text-decoration: none;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: 0;
   transition: all .25s ease;
   position: relative;
@@ -99,65 +101,34 @@
 .btype-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,.14); border-color: var(--tc-color); }
 .btype-card:hover::before { opacity: 1; height: 6px; }
 
+.btype-count,
+.btype-desc,
+.btype-tags,
+.btype-btn { display: none; }
+
 .btype-icon-wrap {
-  width: 72px; height: 72px;
-  border-radius: 20px;
+  width: 64px; height: 64px;
+  border-radius: 18px;
   background: var(--tc-gradient);
   box-shadow: 0 8px 20px -6px var(--tc-color);
   display: flex; align-items: center; justify-content: center;
-  font-size: 2rem;
-  margin-bottom: 18px;
+  font-size: 1.8rem;
+  margin-bottom: 14px;
   transition: transform .25s;
 }
 .btype-card:hover .btype-icon-wrap { transform: scale(1.08) rotate(-3deg); }
 
 .btype-label {
-  font-size: 1.25rem;
+  font-size: .95rem;
   font-weight: 800;
   color: var(--hub-text);
-  margin-bottom: 6px;
+  margin-bottom: 0;
   letter-spacing: -.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
-.btype-desc {
-  font-size: .83rem;
-  color: var(--hub-muted);
-  line-height: 1.55;
-  margin-bottom: 20px;
-  flex: 1;
-}
-.btype-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 20px;
-}
-.btype-tag {
-  background: var(--tc-bg);
-  color: var(--tc-color);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-.btype-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--tc-gradient);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 22px;
-  font-size: .85rem;
-  font-weight: 700;
-  transition: opacity .18s, transform .18s;
-  text-decoration: none;
-  width: 100%;
-  justify-content: center;
-}
-.btype-btn:hover { opacity: .88; transform: translateY(-1px); color: #fff; }
-.btype-btn svg { width: 16px; height: 16px; stroke: #fff; }
 
 /* ── Quick links ───────────────────────────── */
 .hub-quick {
@@ -265,12 +236,6 @@
   .btype-card:hover { transform: none; }
   .btype-card:active { transform: scale(.97); opacity: .93; }
 
-  /* Hide everything except the icon and label on mobile */
-  .btype-count,
-  .btype-desc,
-  .btype-tags,
-  .btype-btn { display: none; }
-
   .btype-icon-wrap {
     width: 50px; height: 50px;
     border-radius: 14px;
@@ -282,6 +247,7 @@
     font-size: .85rem;
     margin-bottom: 0;
     line-height: 1.3;
+    white-space: normal;
   }
 
   /* Quick links — horizontal scroll */
