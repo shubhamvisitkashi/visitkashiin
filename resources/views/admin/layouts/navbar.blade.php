@@ -157,10 +157,19 @@
     var cachedVoices = [];
     function loadVoices() {
         if ('speechSynthesis' in window) cachedVoices = window.speechSynthesis.getVoices();
+        return cachedVoices.length;
     }
     if ('speechSynthesis' in window) {
         loadVoices();
         window.speechSynthesis.onvoiceschanged = loadVoices;
+        // Android Chrome frequently never fires onvoiceschanged and/or returns
+        // an empty list on the first few calls. Retry a few times on a timer
+        // as a fallback so we're not stuck with zero voices indefinitely.
+        var voiceRetries = 0;
+        var voiceRetryTimer = setInterval(function() {
+            voiceRetries++;
+            if (loadVoices() > 0 || voiceRetries >= 10) clearInterval(voiceRetryTimer);
+        }, 300);
     }
 
     function pickFemaleVoice() {
@@ -175,16 +184,36 @@
 
     function speakNewEnquiry() {
         try {
-            if (!('speechSynthesis' in window)) { playChime(); return; }
+            if (!('speechSynthesis' in window)) { console.warn('[vk-enquiry] speechSynthesis unsupported, using chime'); playChime(); return; }
+
+            // Chrome has a long-standing bug where the speech queue gets stuck
+            // "paused" after the tab/installed-app is backgrounded and then
+            // resumed — resume() before every speak() works around it.
+            window.speechSynthesis.resume();
+            window.speechSynthesis.cancel();
+
             var utter = new SpeechSynthesisUtterance('Hi, new booking enquiry received. Call now.');
             var voice = pickFemaleVoice();
             if (voice) utter.voice = voice;
             utter.rate   = 1;
             utter.pitch  = 1.15;
             utter.volume = 1;
-            window.speechSynthesis.cancel();
+            utter.onstart = function() { console.log('[vk-enquiry] speech started, voice=', voice && voice.name); };
+            utter.onerror = function(e) { console.warn('[vk-enquiry] speech error', e.error, '- falling back to chime'); playChime(); };
+
             window.speechSynthesis.speak(utter);
+
+            // Some Android builds silently drop speak() calls made while the
+            // page was backgrounded; a short delayed nudge recovers those.
+            setTimeout(function() {
+                if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+                    console.warn('[vk-enquiry] speech did not start, retrying once');
+                    window.speechSynthesis.resume();
+                    window.speechSynthesis.speak(utter);
+                }
+            }, 250);
         } catch (e) {
+            console.warn('[vk-enquiry] speakNewEnquiry threw', e);
             playChime();
         }
     }
@@ -256,6 +285,16 @@
     }
     document.addEventListener('click', unlockAudio, { once: true, passive: true });
     document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+
+    // When the installed app is brought back to the foreground (switched away
+    // to take a call, another app, etc. and back), background timers may have
+    // been throttled and speechSynthesis can be left in a stuck "paused"
+    // state. Re-sync immediately and un-stick speech on every resume.
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState !== 'visible') return;
+        try { if ('speechSynthesis' in window) window.speechSynthesis.resume(); } catch (e) {}
+        checkEnquiries();
+    });
 })();
 </script>
 @endcan
