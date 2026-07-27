@@ -212,7 +212,7 @@
 /* ── Mobile sticky bar ─────────────────────────── */
 .sb-mob-bar {
   display:none;
-  position:fixed; bottom:58px; left:0; right:0; z-index:999;
+  position:fixed; bottom:var(--sa-mob-nav-h, 68px); left:0; right:0; z-index:1001;
   background:#fff; border-top:2px solid #E2E8F0;
   padding:10px 16px; box-shadow:0 -4px 20px rgba(0,0,0,.12);
   align-items:center; gap:12px;

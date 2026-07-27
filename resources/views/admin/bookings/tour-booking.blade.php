@@ -198,12 +198,12 @@
   /* ── Sticky bottom action bar ── */
   .tb-mob-bar{
     display:flex;
-    position:fixed;bottom:58px;left:0;right:0;
+    position:fixed;bottom:var(--sa-mob-nav-h, 68px);left:0;right:0;
     background:#fff;
     border-top:1.5px solid #E2E8F0;
     padding:10px 14px 10px;
     gap:12px;align-items:center;
-    z-index:998;
+    z-index:1001;
     box-shadow:0 -6px 20px rgba(0,0,0,.10);
   }
   .tb-mob-bar-info{flex:1;min-width:0;}
