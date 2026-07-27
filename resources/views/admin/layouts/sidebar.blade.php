@@ -317,10 +317,20 @@
     /* ══ Mobile Sidebar ═══════════════════════════════════════════ */
     @media (max-width: 991px) {
 
-        /* Slide in from left */
+        /* Slide in from left
+           NOTE: the base theme CSS (demo1/style.min.css) still ships its own
+           legacy off-canvas rule for `.sidebar` at this breakpoint —
+           margin-left:-240px + visibility:hidden, revealed only via a
+           `body.sidebar-open` class that this custom JS never sets (it
+           toggles `.sidebar.active` instead). Left un-neutralized, the
+           drawer stays shifted off-screen and hidden even when "active".
+           Cancel both here so the transform-based slide is the only thing
+           controlling visibility. */
         .sidebar {
             width: 270px;
             background: #2c2c54;
+            margin-left: 0 !important;
+            visibility: visible !important;
             transform: translateX(-100%) translateZ(0);
             transition: transform 0.28s ease;
             border-radius: 0;
@@ -356,7 +366,9 @@
         }
 
         /* Classic touch targets on mobile */
-        .sidebar-body { padding-top: 4px; }
+        /* Reserve space so the last menu items (e.g. Website Settings) aren't
+           hidden behind the fixed bottom nav bar (z-index above the sidebar) */
+        .sidebar-body { padding-top: 4px; padding-bottom: calc(var(--sa-mob-nav-h, 68px) + 16px); }
         .nav-item { margin: 0; }
         .nav-link { padding: 12px 18px; min-height: 46px; font-size: 14px; border-radius: 0; }
         .nav-link .link-title { font-size: 14px; }
