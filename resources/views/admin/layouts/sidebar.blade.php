@@ -39,7 +39,7 @@
         padding: 0 25px !important;
         border-right: 1px solid #e9ecef !important;
         z-index: 999 !important;
-        width: 240px !important;
+        width: 100% !important;
         -webkit-transition: width 0.1s ease !important;
         transition: width 0.1s ease !important;
         gap: 10px;
