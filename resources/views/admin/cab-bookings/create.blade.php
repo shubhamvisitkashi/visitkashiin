@@ -233,6 +233,10 @@
     .trip-tabs { gap: 5px; }
     .trip-tab { padding: 7px 10px; font-size: .72rem; }
 }
+/* Clear the fixed mobile bottom nav so the submit button isn't hidden under it */
+@media(max-width:991px){
+    .cn-page { padding-bottom: calc(32px + var(--sa-mob-nav-h, 68px)); }
+}
 </style>
 
 <style>
