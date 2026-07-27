@@ -23,6 +23,7 @@
 
 /* ── Layout ───────────────────────────────────── */
 .sb-layout { display:grid; grid-template-columns:1fr 360px; gap:20px; align-items:start; }
+.sb-layout>* { min-width:0; }
 @media(max-width:1100px){ .sb-layout { grid-template-columns:1fr; } }
 
 /* ── Card ─────────────────────────────────────── */

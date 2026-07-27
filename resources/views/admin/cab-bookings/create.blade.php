@@ -60,6 +60,7 @@
 .cn-back:hover{background:rgba(255,255,255,.28);color:#fff;}
 
 .cn-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
+.cn-layout>*{min-width:0;}
 @media(max-width:1100px){.cn-layout{grid-template-columns:1fr;}}
 
 .cn-card{background:#fff;border-radius:16px;border:1px solid #E8ECF4;box-shadow:0 1px 3px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.04);margin-bottom:16px;overflow:hidden;}

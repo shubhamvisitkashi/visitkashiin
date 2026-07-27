@@ -21,6 +21,7 @@
 
 /* ── Layout ── */
 .tb-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
+.tb-layout>*{min-width:0;}
 @media(max-width:1100px){
   .tb-layout{grid-template-columns:1fr;}
   .tb-sidebar{position:static;top:auto;}   /* remove sticky in stacked layout */
