@@ -401,8 +401,6 @@
             @foreach([
               '🏨 Hotel / Stay', '🚕 Cab / Transport', '⛵ Boat Ride',
               '🧭 Guide', '🍳 Breakfast', '🍱 Lunch', '🍽 Dinner',
-              '🪔 Puja / Aarti', '📸 Photography', '✈️ Air Tickets',
-              '🚂 Train Tickets', '🎯 Sightseeing', '💐 Flowers / Garland',
             ] as $incl)
             @php $slug = preg_replace('/[^a-z0-9]/i','-', strtolower($incl)); @endphp
             <label class="incl-pill {{ collect(explode(',', old('inclusions','')))->map(fn($v)=>trim($v))->contains($incl) ? 'active' : '' }}"
