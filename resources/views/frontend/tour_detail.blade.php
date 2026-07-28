@@ -130,6 +130,31 @@
 .fest-sidebar__wa img { width:20px !important; height:20px !important; flex-shrink:0; }
 @media(max-width:991px){ .fest-sidebar { position:relative; top:auto; margin-bottom:24px; } }
 
+/* ── Popular Packages slider (shown right before "Why Travelers Choose") ──
+   Reuses the homepage's .vk-pkg-card visuals under page-local class names,
+   since homepage.css (where .vk-pkg-card lives) isn't loaded on this page.
+   The slider itself needs no JS here — main.min.js already runs
+   $('.package-slider').slick({...}) globally on every page. ── */
+.td-pkg-section { padding:40px 0 10px; }
+.td-pkg-section .vk-section__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:12px; flex-wrap:nowrap; }
+.td-pkg-card { display:flex; flex-direction:column; border-radius:12px; overflow:hidden; text-decoration:none !important; background:#fff; transition:transform .2s ease; cursor:pointer; }
+.td-pkg-card:hover { transform:translateY(-2px); }
+.td-pkg-card__img-wrap { position:relative; overflow:hidden; border-radius:12px; aspect-ratio:4/3; flex-shrink:0; background:#e8e8e8; }
+.td-pkg-card__img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .4s ease; display:block; }
+.td-pkg-card:hover .td-pkg-card__img { transform:scale(1.04); }
+.td-pkg-card__overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.28) 0%, transparent 55%); }
+.td-pkg-card__body { padding:12px 2px 6px; flex:1; display:flex; flex-direction:column; gap:3px; }
+.td-pkg-card__title { font-family:'Plus Jakarta Sans',sans-serif; color:#222 !important; font-size:14px; font-weight:600; margin:0; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.td-pkg-card__price { color:#717171 !important; font-size:13px; margin:0; font-family:'Plus Jakarta Sans',sans-serif; font-weight:400; }
+.td-pkg-card__price strong { color:#222 !important; font-weight:600; font-size:13px; }
+.td-pkg-card__per { font-size:12px; color:#717171; margin-left:2px; }
+.td-pkg-section .slick-prev, .td-pkg-section .slick-next { width:32px; height:32px; background:#fff; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.05); border:1px solid #ddd; z-index:10; transition:box-shadow .2s ease, transform .2s ease; top:-48px; }
+.td-pkg-section .slick-prev { right:48px; left:auto; }
+.td-pkg-section .slick-next { right:8px; }
+.td-pkg-section .slick-prev:hover, .td-pkg-section .slick-next:hover { box-shadow:0 2px 4px rgba(0,0,0,.18); transform:scale(1.04); }
+.td-pkg-section .slick-prev:before, .td-pkg-section .slick-next:before { color:#222; font-size:12px; }
+@media(max-width:767px){ .td-pkg-section{ padding:24px 0 4px; } .td-pkg-section .vk-section__header{margin-bottom:14px;} }
+
 /* ── Full-width (no sidebar) content polish — things-to-do / sights ── */
 #content.col-lg-12 .content-wrapper { max-width:880px; margin:0 auto; }
 #content.col-lg-12 .detail-box { background:#fff; border:none; border-radius:14px; box-shadow:0 2px 16px rgba(0,0,0,.07); padding:26px 28px; margin-bottom:24px; }
@@ -1581,4 +1606,53 @@
             </div>
         </div>
     </section>
+
+    {{-- ============================================================
+         POPULAR PACKAGES — slider, shown right before the shared
+         "Why Travelers Choose Visit Kashi" section (app.blade.php
+         yields this content, then includes _before_footer next).
+    ============================================================ --}}
+    @if($popularPackages->count())
+    <section class="vk-section td-pkg-section">
+        <div class="container">
+            <div class="vk-section__header">
+                <h2 class="vk-section__title">Popular Packages</h2>
+                <a class="vk-btn vk-btn--outline" href="{{ route('product.list', 'packages') }}" aria-label="View all packages">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+            <div class="row package-slider slider-button">
+                @foreach($popularPackages as $pkg)
+                <div class="col-lg-4">
+                    <a @if($pkg->subCategory)
+                           href="{{ route('product.detail', [$pkg->category->slug, $pkg->subCategory->slug, $pkg->slug]) }}"
+                       @else
+                           href="{{ route('product.detail', [$pkg->category->slug, 'varanasi', $pkg->slug]) }}"
+                       @endif
+                       class="td-pkg-card">
+                        <div class="td-pkg-card__img-wrap">
+                            <img src="{{ asset(!empty($pkg->images) ? 'backend/admin/product_images/' . array_values($pkg->images)[0] : 'backend/assets/images/placeholder.jpg') }}"
+                                 alt="{{ $pkg->name }}"
+                                 class="td-pkg-card__img"
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="600" height="400" />
+                            <div class="td-pkg-card__overlay" aria-hidden="true"></div>
+                        </div>
+                        <div class="td-pkg-card__body">
+                            <h3 class="td-pkg-card__title">{{ $pkg->name }}</h3>
+                            @if($pkg->discounted_price)
+                            <p class="td-pkg-card__price">
+                                from <strong><span class="vk-rupee">₹</span>{{ number_format($pkg->discounted_price) }}</strong>
+                                <span class="td-pkg-card__per">/ person</span>
+                            </p>
+                            @endif
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
 @endsection

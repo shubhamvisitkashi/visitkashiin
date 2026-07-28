@@ -162,7 +162,14 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('frontend.tour_detail', compact('product', 'relatedFestivals', 'relatedExperiences'));
+        // Popular Packages slider shown near the bottom of the page
+        $popularPackages = Product::where('is_active', 'active')
+            ->whereHas('category', fn($q) => $q->where('slug', 'packages'))
+            ->with(['category', 'subCategory'])
+            ->limit(10)
+            ->get();
+
+        return view('frontend.tour_detail', compact('product', 'relatedFestivals', 'relatedExperiences', 'popularPackages'));
     }
 
     public function productSearch(Request $request){
