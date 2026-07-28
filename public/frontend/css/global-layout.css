@@ -842,6 +842,23 @@ footer .footer-upper { background: #0F1B30; }
   transform: scale(1.10) translateY(-3px);
   box-shadow: 0 8px 30px rgba(0,0,0,0.30);
 }
+/* Hide on pages that already ship their own full-width WhatsApp CTA
+   in a mobile sticky bar (cab & hotel detail pages) to avoid a
+   redundant second WhatsApp button stacked on top of it. */
+body:has(.ckbd-sticky-bar) .whatsapp,
+body:has(.hkbd-sticky-bar) .whatsapp {
+  display: none;
+}
+/* Clear the fixed bottom app-nav (.vk-mob-nav, ~45-60px incl. safe-area,
+   shown ≤767px in mobile-app.css) so the button floats above it instead
+   of overlapping its top edge. */
+@media (max-width: 767px) {
+  .whatsapp { bottom: calc(60px + env(safe-area-inset-bottom)) !important; }
+}
+@media (max-width: 575px) {
+  .whatsapp { right: 16px; }
+  .whatsapp img { width: 46px; height: 46px; }
+}
 
 #back-to-top {
   position: fixed;

@@ -127,6 +127,7 @@
 .fest-sidebar__cta { padding:0 18px 18px; }
 .fest-sidebar__wa { display:flex; align-items:center; justify-content:center; gap:8px; background:#25D366; color:#fff; padding:12px; border-radius:10px; font-size:.88rem; font-weight:700; text-decoration:none !important; }
 .fest-sidebar__wa:hover { opacity:.9; }
+.fest-sidebar__wa img { width:20px !important; height:20px !important; flex-shrink:0; }
 @media(max-width:991px){ .fest-sidebar { position:relative; top:auto; margin-bottom:24px; } }
 
 /* ── Full-width (no sidebar) content polish — things-to-do / sights ── */
@@ -154,6 +155,10 @@
 .td-cta-text { font-size:.85rem; color:#555; margin:0; max-width:420px; }
 .td-cta-wa { display:flex; align-items:center; gap:8px; background:#25D366; color:#fff; padding:12px 22px; border-radius:10px; font-size:.9rem; font-weight:700; text-decoration:none !important; white-space:nowrap; flex-shrink:0; }
 .td-cta-wa:hover { opacity:.9; }
+/* Without this, the global `img{width:100%}` rule (style.css) resolves against
+   this flex item's indefinite container width and renders the icon at its
+   full 512x512 natural size instead of the intended 22x22 icon. */
+.td-cta-wa img { width:22px !important; height:22px !important; flex-shrink:0; }
 @media(max-width:575px){ .td-cta-box { flex-direction:column; align-items:stretch; text-align:center; } .td-cta-wa { justify-content:center; } }
 </style>
 @endpush
@@ -478,11 +483,6 @@
                                 @endif
                                 <p class="td-cta-text">Interested in this experience? Get in touch and we'll help you plan it.</p>
                             </div>
-                            <a href="https://wa.me/{{ preg_replace('/\D/', '', websiteSetupValue('whats_app_number') ?? '917080109919') }}?text={{ urlencode('Hi, I am interested in ' . $product->name) }}"
-                               target="_blank" rel="noopener noreferrer" class="td-cta-wa">
-                                <img src="{{ asset('frontend/images/whatsapp.png') }}" alt="" width="22" height="22" loading="lazy" />
-                                Chat on WhatsApp
-                            </a>
                         </div>
                         @endif
 
@@ -1414,7 +1414,7 @@
                             </div>
                             <span class="fest-sidebar__divider">Plan your visit</span>
                             <div class="fest-sidebar__cta">
-                                <a href="https://wa.me/{{ preg_replace('/\D/', '', websiteSetupValue('whats_app_number') ?? '917080109919') }}"
+                                <a href="https://wa.me/{{ whatsAppNumber() }}"
                                    target="_blank" rel="noopener noreferrer"
                                    class="fest-sidebar__wa">
                                     <img src="{{ asset('frontend/images/whatsapp.png') }}" alt="" width="20" height="20" loading="lazy" />
@@ -1537,7 +1537,7 @@
                             <div class="sidebar-helpline-content">
                                 <h3>Any Questions?</h3>
                                 <p><i class="flaticon-phone-call"></i> <a
-                                        href="tel:{{ websiteSetupValue('whats_app_number') }}">{{ websiteSetupValue('whats_app_number') }}</a>
+                                        href="tel:+{{ whatsAppNumber() }}">+{{ whatsAppNumber() }}</a>
                                 </p>
                                 <p><i class="flaticon-mail"></i> <a
                                         href="mailto:{{ websiteSetupValue('email') }}">{{ websiteSetupValue('email') }}</a>

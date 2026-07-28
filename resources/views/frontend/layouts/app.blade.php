@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en-IN">
+<html lang="en-IN" translate="no" class="notranslate">
 
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#D94F2B" />
         <meta name="format-detection" content="telephone=no" />
+        <meta name="google" content="notranslate" />
 
         @yield('meta')
 
@@ -176,7 +177,15 @@
 
         @include('frontend.layouts.footer')
 
-
+        {{-- Global floating WhatsApp button — shown on every frontend page.
+             Uses the .whatsapp / .whatsapp img rules already defined in
+             global-layout.css; that CSS existed with no markup using it
+             until now. Suppressed on cab/hotel detail pages, which already
+             ship their own full-width WhatsApp CTA in a mobile sticky bar. --}}
+        <a href="https://wa.me/917080109919"
+           target="_blank" rel="noopener noreferrer" class="whatsapp" aria-label="Chat on WhatsApp">
+            <img src="{{ asset('frontend/images/whatsapp.png') }}" alt="Chat on WhatsApp" width="52" height="52" loading="lazy" />
+        </a>
 
       <!-- Modal -->
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">

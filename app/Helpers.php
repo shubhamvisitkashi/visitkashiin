@@ -14,6 +14,21 @@ if (!function_exists('websiteSetupValue')) {
     }
 }
 
+if (!function_exists('whatsAppNumber')) {
+    /**
+     * The 'whats_app_number' setting sometimes holds multiple comma-separated
+     * numbers (e.g. "7080109918, 7080109919") for display purposes. Callers
+     * that build a wa.me link need a single digits-only number — take the
+     * first one, not the whole string (a blind preg_replace('/\D/','',...)
+     * over the raw value concatenates every number in it into one).
+     */
+    function whatsAppNumber() {
+        $raw = websiteSetupValue('whats_app_number') ?: '917080109919';
+        $first = trim(explode(',', $raw)[0]);
+        return preg_replace('/\D/', '', $first) ?: '917080109919';
+    }
+}
+
 if (!function_exists('invoiceBrand')) {
     /**
      * Resolve invoice branding (name + logo) based on the lead source.
