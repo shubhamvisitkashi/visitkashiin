@@ -648,6 +648,55 @@
         </a>
     </div>
 </div>
+
+{{-- ============================================================
+     POPULAR PACKAGES — slider, shown right before the shared
+     "Why Travelers Choose Visit Kashi" section (app.blade.php
+     yields this content, then includes _before_footer next).
+============================================================ --}}
+@if($popularPackages->count())
+<section class="vk-section td-pkg-section">
+    <div class="container">
+        <div class="vk-section__header">
+            <h2 class="vk-section__title">Popular Packages</h2>
+            <a class="vk-btn vk-btn--outline" href="{{ route('product.list', 'packages') }}" aria-label="View all packages">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+        </div>
+        <div class="row package-slider slider-button">
+            @foreach($popularPackages as $pkg)
+            <div class="col-lg-4">
+                <a @if($pkg->subCategory)
+                       href="{{ route('product.detail', [$pkg->category->slug, $pkg->subCategory->slug, $pkg->slug]) }}"
+                   @else
+                       href="{{ route('product.detail', [$pkg->category->slug, 'varanasi', $pkg->slug]) }}"
+                   @endif
+                   class="td-pkg-card">
+                    <div class="td-pkg-card__img-wrap">
+                        <img src="{{ asset(!empty($pkg->images) ? 'backend/admin/product_images/' . array_values($pkg->images)[0] : 'backend/assets/images/placeholder.jpg') }}"
+                             alt="{{ $pkg->name }}"
+                             class="td-pkg-card__img"
+                             loading="lazy"
+                             decoding="async"
+                             width="600" height="400" />
+                        <div class="td-pkg-card__overlay" aria-hidden="true"></div>
+                    </div>
+                    <div class="td-pkg-card__body">
+                        <h3 class="td-pkg-card__title">{{ $pkg->name }}</h3>
+                        @if($pkg->discounted_price)
+                        <p class="td-pkg-card__price">
+                            from <strong><span class="vk-rupee">₹</span>{{ number_format($pkg->discounted_price) }}</strong>
+                            <span class="td-pkg-card__per">/ person</span>
+                        </p>
+                        @endif
+                    </div>
+                </a>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
 @endsection
 
 @push('scripts')

@@ -92,7 +92,13 @@ class ProductController extends Controller
 
         // Tour Packages → dedicated package detail page
         if ($category_slug === 'packages') {
-            return view('frontend.package_detail', compact('product'));
+            $popularPackages = Product::where('is_active', 'active')
+                ->whereHas('category', fn($q) => $q->where('slug', 'packages'))
+                ->where('id', '!=', $product->id)
+                ->with(['category', 'subCategory'])
+                ->limit(10)
+                ->get();
+            return view('frontend.package_detail', compact('product', 'popularPackages'));
         }
 
         // Boat → dedicated detail page with related boats
