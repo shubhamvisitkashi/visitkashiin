@@ -185,7 +185,7 @@
     <section class="main-content detail">
         <div class="container">
             <div class="row">
-                @php $hideSidebar = in_array(optional($product->category)->slug, ['things-to-do', 'sights']); @endphp
+                @php $hideSidebar = in_array(optional($product->category)->slug, ['sights']); @endphp
                 <div id="content" class="{{ $hideSidebar ? 'col-lg-12' : 'col-lg-8' }}">
                     <div class="detail-content content-wrapper">
                         {{-- <div class="detail-info">
@@ -1423,7 +1423,37 @@
                             </div>
                         </div>
                         @elseif(optional($product->category)->slug === 'things-to-do')
-                        {{-- No enquiry form for things-to-do category --}}
+                        {{-- ============================================================
+                             THINGS TO DO — Other Experiences Sidebar (no enquiry form)
+                        ============================================================ --}}
+                        <div class="fest-sidebar">
+                            <div class="fest-sidebar__head">
+                                <h3>Other Experiences</h3>
+                                <p>More things to do in Varanasi</p>
+                            </div>
+                            <div class="fest-sidebar__list">
+                                @forelse($relatedExperiences as $re)
+                                @php
+                                    $reSubSlug = optional($re->subCategory)->slug;
+                                    $reUrl = $reSubSlug
+                                        ? route('product.detail', [optional($re->category)->slug ?? 'things-to-do', $reSubSlug, $re->slug])
+                                        : route('product.detail', [optional($re->category)->slug ?? 'things-to-do', 'experiences', $re->slug]);
+                                    $reImg = (!empty($re->images) && is_array($re->images))
+                                        ? asset('backend/admin/product_images/' . $re->images[0])
+                                        : asset('backend/assets/images/placeholder.jpg');
+                                @endphp
+                                <a href="{{ $reUrl }}" class="fest-card">
+                                    <img src="{{ $reImg }}" alt="{{ $re->name }}" class="fest-card__img" loading="lazy" />
+                                    <div class="fest-card__body">
+                                        <div class="fest-card__name">{{ $re->name }}</div>
+                                        <div class="fest-card__sub">Things to Do</div>
+                                    </div>
+                                </a>
+                                @empty
+                                <p style="padding:16px 6px;font-size:.85rem;color:#888;text-align:center;">More experiences coming soon.</p>
+                                @endforelse
+                            </div>
+                        </div>
                         @else
                         {{-- ============================================================
                              ALL OTHER CATEGORIES — existing form (unchanged)

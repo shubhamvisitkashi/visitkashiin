@@ -150,7 +150,19 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('frontend.tour_detail', compact('product', 'relatedFestivals'));
+        // Things To Do → tour detail with other experiences (same sub-category) for the sidebar
+        $relatedExperiences = collect();
+        if ($category_slug === 'things-to-do') {
+            $relatedExperiences = Product::where('is_active', 'active')
+                ->where('category_id', $product->category_id)
+                ->where('subcategory_id', $product->subcategory_id)
+                ->where('id', '!=', $product->id)
+                ->with(['subCategory'])
+                ->limit(8)
+                ->get();
+        }
+
+        return view('frontend.tour_detail', compact('product', 'relatedFestivals', 'relatedExperiences'));
     }
 
     public function productSearch(Request $request){
