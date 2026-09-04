@@ -200,6 +200,60 @@
 .vkbd-description p { font-size: .9rem; color: #374151; line-height: 1.7; margin: 0 0 12px; }
 .vkbd-description strong { color: #111; }
 
+/* Description — CMS rich-text content (headings, contact banner, specs table, FAQ list) */
+.vkbd-description > h1 {
+    font-size: clamp(1.15rem, 2.6vw, 1.4rem); font-weight: 800; color: #0f2744;
+    line-height: 1.35; margin: 0 0 14px;
+}
+.vkbd-description > h2 {
+    font-size: 1.15rem; font-weight: 800; color: #111;
+    margin: 30px 0 16px; padding-top: 22px; border-top: 1px solid #e5e7eb;
+}
+.vkbd-description > h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.vkbd-description > h3 {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .92rem; font-weight: 700; color: #0f3460;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1.5px solid #bfdbfe; border-radius: 12px;
+    padding: 14px 18px; margin: 18px 0; line-height: 1.6;
+}
+.vkbd-description > h3::before { content: '📞'; font-size: 1.1rem; flex-shrink: 0; }
+
+/* CMS specs table */
+.vkbd-description table {
+    width: 100%; border-collapse: collapse; margin: 8px 0 22px;
+    font-size: .87rem; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;
+}
+.vkbd-description table tr { border-bottom: 1px solid #f0f0f0; }
+.vkbd-description table tr:last-child { border-bottom: none; }
+.vkbd-description table tr:nth-child(even) { background: #fafbfc; }
+.vkbd-description table th {
+    text-align: left; padding: 12px 16px; color: #6b7280; font-weight: 600;
+    width: 42%; vertical-align: top; background: #f8faff;
+}
+.vkbd-description table td { padding: 12px 16px; color: #1f2937; font-weight: 500; }
+.vkbd-description table td p { margin: 0 0 4px; font-size: .87rem; }
+.vkbd-description table td p:last-child { margin-bottom: 0; }
+@media (max-width: 560px) {
+    .vkbd-description table, .vkbd-description table tbody, .vkbd-description table tr,
+    .vkbd-description table th, .vkbd-description table td { display: block; width: 100%; }
+    .vkbd-description table th { padding-bottom: 2px; border-bottom: none; }
+    .vkbd-description table td { padding-top: 2px; padding-bottom: 14px; }
+}
+
+/* CMS FAQ list */
+.vkbd-description ul { list-style: none; padding: 0; margin: 0 0 20px; }
+.vkbd-description ul li { border-bottom: 1px solid #e5e7eb; padding: 16px 0; }
+.vkbd-description ul li:first-child { padding-top: 0; }
+.vkbd-description ul li:last-child { border-bottom: none; padding-bottom: 0; }
+.vkbd-description ul li h2 {
+    font-size: .95rem; font-weight: 700; color: #111; line-height: 1.5;
+    margin: 0 0 8px; padding: 0 0 0 14px; border: none;
+    border-left: 3px solid #d4850a;
+}
+.vkbd-description ul li p { font-size: .87rem; color: #4b5563; margin: 0; line-height: 1.65; }
+.vkbd-description ul li br { content: ''; display: block; margin-top: 6px; }
+
 /* Specs table */
 .vkbd-specs { width: 100%; border-collapse: collapse; font-size: .87rem; }
 .vkbd-specs tr { border-bottom: 1px solid #f0f0f0; }
@@ -688,3 +742,29 @@
 .vkbs-same-check input:checked + .vkbs-same-box::after {
     content: '✓'; color: #fff; font-size: .65rem; font-weight: 800; line-height: 1;
 }
+
+/* ══ Extracted from inline styles (CSS refactor) ══════════════════ */
+.vkbd-container { max-width: 1200px; padding-top: 8px; }
+.vkbd-price-amount { color: #d4850a; font-size: 16px; }
+.vkbd-price-strike { font-size: 12px; color: #6b7280; text-decoration: line-through; }
+.vkbd-text-muted { color: #6b7280; }
+.vkbd-align-right { text-align: right; }
+.vkbd-amber-gradient-bg { background: linear-gradient(135deg, #7c2d12, #b45309); }
+.vkbd-price-pill { display: inline-block; color: #fff; font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+.vkbd-hidden { display: none; }
+.vkbd-bottom-spacer { height: 48px; }
+.vkbd-rel-card { cursor: pointer; }
+.vkbd-mob-bar-badge { color: #fbbf24; font-size: .72rem; }
+
+/* Readonly booking-widget inputs — was inline on the Dev Diwali fixed-date field */
+.vkbs-input[readonly] { background: #f9f5f0; cursor: default; color: #374151; }
+/* Notes textarea needs auto height + vertical resize, unlike other .vkbs-input fields */
+textarea.vkbs-input { height: auto; resize: vertical; }
+/* Two-up Adults/Children row — child groups sit flush, no extra bottom margin */
+.vkbs-row2 .vkbs-group { margin-bottom: 0; }
+/* "<10 yrs" hint nested inside the uppercase .vkbs-label needs to opt back out */
+.vkbs-label .vkbs-cap-hint { font-size: .65rem; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.vkbs-price-extra { color: #C2410C; }
+/* Dev Diwali "Best Price Guaranteed" notice — amber variant of .vkbs-price-box */
+.vkbs-price-box--amber { background: linear-gradient(135deg, #fff7ed, #fef3c7); border: 1.5px solid #d97706; padding: 10px 14px; }
+.vkbs-best-price-text { font-weight: 700; color: #92400e; font-size: .86rem; }

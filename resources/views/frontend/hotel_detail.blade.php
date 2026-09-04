@@ -51,7 +51,7 @@
     {{-- ─── Hotel Header ──────────────────────────────────────── --}}
     <div class="hd-header" id="overview">
         <div class="hd-header-top">
-            <div style="flex:1;min-width:0;">
+            <div class="hd-header-info">
                 <div class="hd-type-badge">
                     &#127968;
                     {{ optional($product->category)->name ?? 'Hotel' }}
@@ -61,8 +61,8 @@
                 </div>
                 <h1 class="hd-name">{{ $product->name }}</h1>
                 <div class="hd-stars">
-                    &#9733;&#9733;&#9733;&#9733;<span style="color:#ccc;">&#9733;</span>
-                    <span style="font-size:.78rem;color:#555;font-weight:600;margin-left:4px;">4-Star Hotel</span>
+                    &#9733;&#9733;&#9733;&#9733;<span class="hd-star-empty">&#9733;</span>
+                    <span class="hd-star-label">4-Star Hotel</span>
                 </div>
                 @if(isset($product->address) && $product->address)
                 <p class="hd-address">
@@ -142,11 +142,11 @@
                 <div class="carousel-inner">
                     @forelse($images as $k => $img)
                     <div class="carousel-item @if($k===0) active @endif">
-                        <img loading="lazy" src="{{ $imgBase.'/'.$img }}" alt="{{ $product->name }}" class="d-block w-100" style="height:260px;object-fit:cover;">
+                        <img loading="lazy" src="{{ $imgBase.'/'.$img }}" alt="{{ $product->name }}" class="d-block w-100">
                     </div>
                     @empty
                     <div class="carousel-item active">
-                        <img loading="lazy" src="{{ $placeholder }}" alt="No image" class="d-block w-100" style="height:260px;object-fit:cover;">
+                        <img loading="lazy" src="{{ $placeholder }}" alt="No image" class="d-block w-100">
                     </div>
                     @endforelse
                 </div>
@@ -234,7 +234,7 @@
                         <span class="rule-value">Cash / UPI</span>
                     </div>
                 </div>
-                <div style="margin-top:14px;padding:12px 16px;background:#fff8e1;border-radius:8px;border-left:3px solid #f5a623;font-size:.83rem;color:#5a3e00;">
+                <div class="hd-notice">
                     &#9888; Guests are required to show a valid photo ID at check-in. All bookings are subject to availability. Contact us for group bookings or special requests.
                 </div>
             </div>
@@ -252,7 +252,7 @@
             <div class="hd-section hd-map" id="location">
                 <div class="hd-section-title">Location</div>
                 @if(optional($product->subCategory)->name)
-                <p style="font-size:.85rem;color:#555;margin-bottom:12px;">
+                <p class="hd-map-subtitle">
                     &#128205; {{ $product->subCategory->name }}, Varanasi, Uttar Pradesh, India
                 </p>
                 @endif
@@ -345,7 +345,7 @@
 
                             <div class="hc-row2">
                                 <div class="hc-field">
-                                    <label class="hc-label">Adults <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#888;">(18+ yrs)</span> *</label>
+                                    <label class="hc-label">Adults <span>(18+ yrs)</span> *</label>
                                     <div class="hc-stepper" id="adultsStepperWrap">
                                         <button type="button" class="hc-stepper-btn" id="adultsMinus" aria-label="Decrease adults">&#8722;</button>
                                         <span class="hc-stepper-val" id="adultsVal">{{ old('adults',1) }}</span>
@@ -354,7 +354,7 @@
                                     <input type="hidden" name="adults" id="adultsInput" value="{{ old('adults',1) }}">
                                 </div>
                                 <div class="hc-field">
-                                    <label class="hc-label">Children <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#888;">(5+ yrs)</span> *</label>
+                                    <label class="hc-label">Children <span>(5+ yrs)</span> *</label>
                                     <div class="hc-stepper" id="kidsStepperWrap">
                                         <button type="button" class="hc-stepper-btn" id="kidsMinus" aria-label="Decrease kids">&#8722;</button>
                                         <span class="hc-stepper-val" id="kidsVal">{{ old('kids',0) }}</span>
@@ -365,7 +365,7 @@
                             </div>
 
                             <div class="hc-field">
-                                <label class="hc-label">Check-In <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#888;">(12:00 PM)</span> *</label>
+                                <label class="hc-label">Check-In <span>(12:00 PM)</span> *</label>
                                 <input type="datetime-local" class="hc-input {{ $errors->has('checkin_datetime') ? 'is-invalid' : '' }}"
                                        name="checkin_datetime" id="hd_checkin"
                                        value="{{ old('checkin_datetime') }}"
@@ -374,7 +374,7 @@
                             </div>
 
                             <div class="hc-field">
-                                <label class="hc-label">Check-Out <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#888;">(11:00 AM)</span> *</label>
+                                <label class="hc-label">Check-Out <span>(11:00 AM)</span> *</label>
                                 <input type="datetime-local" class="hc-input {{ $errors->has('checkout_datetime') ? 'is-invalid' : '' }}"
                                        name="checkout_datetime" id="hd_checkout"
                                        value="{{ old('checkout_datetime') }}"
@@ -400,11 +400,11 @@
                 </div>
 
                 {{-- Trust badges ─────────────────────────────── --}}
-                <div style="background:#fff;border-radius:10px;padding:14px 18px;margin-top:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);">
-                    <div style="font-size:.75rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;">Why book with us?</div>
+                <div class="hd-trust-box">
+                    <div class="hd-trust-heading">Why book with us?</div>
                     @foreach(['No booking fees','Free cancellation','24/7 support','Secure payment'] as $trust)
-                    <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#222;margin-bottom:6px;">
-                        <span style="color:#008009;font-weight:700;">&#10003;</span> {{ $trust }}
+                    <div class="hd-trust-item">
+                        <span class="hd-trust-check">&#10003;</span> {{ $trust }}
                     </div>
                     @endforeach
                 </div>
@@ -424,7 +424,7 @@
     <div class="oh-inner">
         <div class="oh-header">
             <h2 class="oh-heading">Other Hotels &amp; Stays in Varanasi</h2>
-            <div style="display:flex;align-items:center;gap:10px;">
+            <div class="oh-header-actions">
                 <a href="{{ route('product.list', ['hotels']) }}" class="oh-see-all" aria-label="See all hotels">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>

@@ -1,5 +1,62 @@
 @extends('frontend.layouts.app')
 
+@php
+    $dd_now          = now();
+    $dd_devDiwaliEnd = \Carbon\Carbon::parse('2026-11-24')->endOfDay();
+    $isDevDiwali     = optional($sub_category)->slug === 'dev-diwali-booking'
+                       && $dd_now->lte($dd_devDiwaliEnd);
+
+    // Single source of truth for the Dev Diwali FAQ — used for both the
+    // visible on-page FAQ section and the FAQPage JSON-LD schema, so the
+    // two never drift out of sync.
+    $ddFaqs = $isDevDiwali ? [
+        [
+            'q' => 'What is Dev Diwali in Varanasi?',
+            'a' => 'Dev Diwali (Dev Deepawali) is celebrated on Kartik Purnima, fifteen days after Diwali, when the ghats of Varanasi are lit with lakhs of earthen diyas to welcome the gods to the banks of the Ganga. It is one of the most spectacular festivals in India, and a boat ride on the river is the best way to see the illuminated ghats.',
+        ],
+        [
+            'q' => 'When is Dev Diwali in Varanasi in 2026?',
+            'a' => 'Dev Diwali in Varanasi falls on 24 November 2026. Boat and cruise bookings for this fixed date are open now on VisitKashi, and seats fill up quickly as the day approaches.',
+        ],
+        [
+            'q' => 'What is the best time for a Dev Diwali boat ride?',
+            'a' => 'For Dev Diwali boat booking, the reporting time is 4:00 PM at Ravidas Ghat (we recommend arriving by 3:30 PM to complete boarding formalities), with the boat ride running from 5:00 PM to 8:00 PM, covering the evening Ganga Aarti and the peak diya illumination.',
+        ],
+        [
+            'q' => 'How much does Dev Diwali boat booking cost in Varanasi?',
+            'a' => 'Dev Diwali boat booking in Varanasi starts from ₹3,499 per person for a shared boat ride, with Bajra boats, cruise boats, private motor boats and luxury Maharaja boats available at higher price points depending on boat type, capacity and privacy. Exact pricing for each boat is shown on its booking page.',
+        ],
+        [
+            'q' => 'Which ghats can I see from the boat?',
+            'a' => 'Your Dev Diwali boat ride gives you a clear river view of the illuminated ghats of Varanasi and the evening Ganga Aarti performed on the steps — a view that is impossible to get from the crowded banks on this night.',
+        ],
+        [
+            'q' => 'Can I book a private boat for Dev Diwali?',
+            'a' => 'Yes. Along with shared and group boat rides, VisitKashi offers private boat options for Dev Diwali, including a private motor boat and a private Maharaja boat, so your group can enjoy the festival away from the crowd.',
+        ],
+        [
+            'q' => 'Can families and senior citizens book a Dev Diwali boat?',
+            'a' => 'Yes, Dev Diwali boat rides are suitable for families, couples and senior citizens. Every boat is operated by a licensed, experienced boatman and life jackets are provided for all passengers.',
+        ],
+        [
+            'q' => 'Where is the reporting point for Dev Diwali boat booking?',
+            'a' => 'The reporting point for Dev Diwali boat booking is Ravidas Ghat, Varanasi. Please arrive by 3:30 PM for the 4:00 PM reporting time so boarding can be completed before the boat departs.',
+        ],
+        [
+            'q' => 'How can I book a Dev Diwali boat online?',
+            'a' => 'You can book a Dev Diwali boat online on this page — choose a boat, fill in the enquiry form with your name, phone number and number of guests, and our team will confirm your booking by call or WhatsApp. You can also call or WhatsApp us directly at +91-7080109917 / 7080109918 / 7080109919.',
+        ],
+        [
+            'q' => 'Is Dev Diwali boat booking refundable?',
+            'a' => 'Because Dev Diwali falls on a single fixed date (24 November 2026) with very high demand, cancellation and rescheduling terms are confirmed at the time of booking. Please call or WhatsApp our team before booking to check the current cancellation policy for your chosen boat.',
+        ],
+        [
+            'q' => 'How early should I book my Dev Diwali boat?',
+            'a' => "It's best to confirm your Dev Diwali boat booking as early as possible. Seats across all boat categories fill up quickly in the weeks before 24 November, so early booking gives you the best choice of boat and price.",
+        ],
+    ] : [];
+@endphp
+
 {{-- ══ SEO META ══════════════════════════════════════════════════════════════ --}}
 @section('meta')
 @php
@@ -11,17 +68,27 @@
         ?? 'boat ride varanasi, ganga aarti boat, varanasi boat booking, motor boat varanasi, sunrise boat ride, ganga river tour';
     $pageUrl = url()->current();
     $ogImage = asset('frontend/images/logo1.png');
+    $canonicalUrl = $pageUrl;
+    $pageTitleTag = $blTitle . ' | Visit Kashi – Varanasi Boat Rides';
+
+    if ($isDevDiwali) {
+        $blTitle = 'Dev Diwali Varanasi Boat Booking 2026 | 24 November';
+        $blDesc  = 'Book your Dev Diwali Varanasi Boat Booking for 24 November 2026 with VisitKashi. Reserve a boat or cruise, view illuminated ghats and Ganga Aarti from the river';
+        $blKw    = 'dev diwali varanasi boat booking 2026, dev diwali boat booking varanasi, dev deepawali boat booking varanasi, dev diwali cruise booking varanasi, dev deepawali cruise booking 2026, varanasi dev diwali cruise booking, dev diwali boat ride varanasi, dev diwali ganga boat ride, dev diwali varanasi cruise, varanasi boat booking for dev diwali, dev diwali ganga cruise, dev diwali boat booking 2026, dev deepawali varanasi boat booking, varanasi dev diwali boat ride, dev diwali ganga aarti boat booking';
+        $canonicalUrl = 'https://visitkashi.com/boat/dev-diwali-booking';
+        $pageTitleTag = $blTitle;
+    }
 @endphp
 
-<link rel="canonical" href="{{ $pageUrl }}">
-<title>{{ $blTitle }} | Visit Kashi – Varanasi Boat Rides</title>
+<link rel="canonical" href="{{ $canonicalUrl }}">
+<title>{{ $pageTitleTag }}</title>
 <meta name="description" content="{{ $blDesc }}">
 <meta name="keywords" content="{{ $blKw }}">
 <meta name="robots" content="index, follow">
 
 {{-- Open Graph --}}
 <meta property="og:type"        content="website">
-<meta property="og:url"         content="{{ $pageUrl }}">
+<meta property="og:url"         content="{{ $canonicalUrl }}">
 <meta property="og:title"       content="{{ $blTitle }}">
 <meta property="og:description" content="{{ $blDesc }}">
 <meta property="og:image"       content="{{ $ogImage }}">
@@ -114,6 +181,21 @@
   }
 }
 </script>
+
+@if($isDevDiwali)
+{{-- JSON-LD: FAQPage — mirrors the visible FAQ section exactly --}}
+<script type="application/ld+json">
+{!! json_encode([
+    '@context'   => 'https://schema.org',
+    '@type'      => 'FAQPage',
+    'mainEntity' => array_map(fn($f) => [
+        '@type'          => 'Question',
+        'name'           => $f['q'],
+        'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f['a']],
+    ], $ddFaqs),
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
+@endif
 @endsection
 
 @push('styles')
@@ -138,7 +220,7 @@
 /* ── Improved card ── */
 .bl-card{border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;text-decoration:none;color:inherit;}
 .bl-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.14);text-decoration:none;color:inherit;}
-.bl-img-wrap{position:relative;aspect-ratio:4/3;overflow:hidden;background:#e0e8f0;}
+.bl-img-wrap{position:relative;aspect-ratio:4/3;overflow:hidden;background:#e0e8f0;display:block;text-decoration:none;}
 .bl-img-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);pointer-events:none;z-index:2;}
 .bl-img-slide img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
 .bl-card:hover .bl-img-slide img{transform:scale(1.06);}
@@ -158,6 +240,8 @@
 .bl-price-inline{display:flex;align-items:baseline;gap:4px;min-width:0;flex-wrap:wrap;}
 .bl-price{font-size:.92rem;font-weight:800;color:#222;}
 .bl-price-unit{font-size:.78rem;color:#717171;font-weight:400;}
+.bl-price-unit--muted{font-style:italic;color:#aaa;}
+.bl-price-call-now{font-size:.76rem;font-weight:700;color:#b45309;white-space:nowrap;}
 .bl-price-old{font-size:.78rem;color:#e74c3c;text-decoration:line-through;font-weight:500;}
 .bl-rating{display:flex;align-items:center;gap:3px;font-size:.78rem;font-weight:700;color:#1a1a1a;flex-shrink:0;white-space:nowrap;}
 .bl-rating svg{fill:#222;}
@@ -172,6 +256,11 @@
 .bl-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
 .bl-section-title{font-size:1.3rem;font-weight:800;color:#111;margin:0;letter-spacing:-.02em;}
 .bl-section-sub{font-size:.83rem;color:#888;margin:4px 0 0;}
+
+/* Extracted from inline styles (CSS refactor) */
+.bl-success-notice{background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 20px;text-align:center;color:#166534;font-size:.93rem;font-weight:700;margin-bottom:24px;}
+.bl-no-results{text-align:center;padding:48px;color:#999;font-size:.95rem;}
+.bl-show-all-btn{border:none;background:none;color:#0f3460;font-weight:700;cursor:pointer;font-size:.95rem;}
 
 /* Responsive */
 @media(max-width:767px){
@@ -207,7 +296,7 @@
             Ganga River · Varanasi
         </div>
 
-        <h1>{{ optional($sub_category)->name ?? 'Motor Boat Rides in Varanasi' }}</h1>
+        <h1>{{ $isDevDiwali ? 'Dev Diwali Varanasi Boat Booking 2026' : (optional($sub_category)->name ?? 'Motor Boat Rides in Varanasi') }}</h1>
 
         <div class="bl-hero-meta">
             <div class="bl-hero-meta-item">
@@ -268,14 +357,6 @@
     </div>
 </div>
 
-@php
-    $now            = now();
-    $devDiwaliEnd   = \Carbon\Carbon::parse('2026-11-24')->endOfDay();
-    $isDevDiwali    = optional($sub_category)->slug === 'dev-diwali-booking'
-                      && $now->lte($devDiwaliEnd);
-@endphp
-
-
 {{-- ══ DEV DIWALI ENQUIRY FORM ════════════════════════════════════════════════ --}}
 @if($isDevDiwali)
 <style>
@@ -293,26 +374,36 @@
 .dd-enq-date-pill{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#7c2d12,#b45309);color:#fff;font-size:.68rem;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:20px;letter-spacing:.04em;text-transform:uppercase;}
 .dd-enq-fld{margin-bottom:14px;}
 .dd-enq-fld label{display:block;font-size:.78rem;font-weight:700;color:#374151;margin-bottom:5px;}
-.dd-enq-fld input{width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:10px;font-size:.92rem;color:#1a1a1a;outline:none;transition:border-color .2s;}
+.dd-enq-fld-hint{font-size:.65rem;font-weight:400;color:#9ca3af;text-transform:none;letter-spacing:0;}
+.dd-enq-fld input{width:100%;box-sizing:border-box;padding:10px 13px;border:1.5px solid #d1d5db;border-radius:10px;font-size:.92rem;color:#1a1a1a;outline:none;transition:border-color .2s,box-shadow .2s;}
+.dd-enq-fld input:hover{border-color:#b8bfc9;}
 .dd-enq-fld input:focus{border-color:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,.12);}
 .dd-enq-fld input[readonly]{background:#f9f5f0;color:#555;cursor:default;}
-.dd-enq-counter{display:flex;align-items:center;border:1.5px solid #d1d5db;border-radius:10px;overflow:hidden;}
-.dd-enq-counter button{background:#f3f4f6;border:none;width:44px;height:44px;font-size:1.3rem;font-weight:700;cursor:pointer;color:#374151;transition:background .15s;flex-shrink:0;line-height:1;}
-.dd-enq-counter button:hover{background:#e5e7eb;}
-.dd-enq-counter input{flex:1;border:none;outline:none;text-align:center;font-size:1rem;font-weight:700;color:#1a1a1a;background:#fff;}
-.dd-enq-submit-btn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#b45309,#d97706);color:#fff;font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.02em;transition:opacity .2s,transform .2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
-.dd-enq-submit-btn:hover{opacity:.9;transform:translateY(-1px);}
+.dd-enq-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.dd-enq-row2 .dd-enq-fld{margin-bottom:0;}
+.dd-enq-counter{display:flex;align-items:center;border:1.5px solid #d1d5db;border-radius:10px;overflow:hidden;transition:border-color .2s;}
+.dd-enq-counter:focus-within{border-color:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,.12);}
+.dd-enq-counter button{background:#f3f4f6;border:none;width:38px;height:44px;font-size:1.2rem;font-weight:700;cursor:pointer;color:#374151;transition:background .15s,color .15s;flex-shrink:0;line-height:1;}
+.dd-enq-counter button:hover:not(:disabled){background:#fef3c7;color:#92400e;}
+.dd-enq-counter button:active:not(:disabled){transform:scale(.94);}
+.dd-enq-counter button:disabled{color:#d1d5db;cursor:default;}
+.dd-enq-counter input{flex:1;width:0;border:none;outline:none;text-align:center;font-size:1rem;font-weight:700;color:#1a1a1a;background:#fff;}
+.dd-enq-submit-btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#b45309,#d97706);color:#fff;font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.02em;transition:opacity .2s,transform .2s,box-shadow .2s;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 18px rgba(180,83,9,.3);}
+.dd-enq-submit-btn:hover{opacity:.94;transform:translateY(-1px);box-shadow:0 8px 22px rgba(180,83,9,.4);}
+.dd-enq-submit-btn:active{transform:translateY(0);}
+.dd-enq-note{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.72rem;color:#9ca3af;margin:10px 0 0;text-align:center;line-height:1.5;}
+.dd-enq-req{color:#dc2626;}
 .dd-enq-wa-link{display:flex;align-items:center;justify-content:center;gap:8px;color:rgba(255,255,255,.7);font-size:.8rem;text-decoration:none;font-weight:600;margin-top:14px;transition:color .2s;}
 .dd-enq-wa-link:hover{color:#fff;text-decoration:none;}
 @media(max-width:920px){.dd-enq-row{grid-template-columns:1fr;gap:28px;}.dd-enq-info-wrap{text-align:center;}.dd-enq-highlights{align-items:center;}}
-@media(max-width:480px){.dd-enq-section{padding:36px 0;}.dd-enq-form-card{padding:22px;}}
+@media(max-width:480px){.dd-enq-section{padding:36px 0;}.dd-enq-form-card{padding:22px;}.dd-enq-row2{grid-template-columns:1fr 1fr;gap:8px;}}
 </style>
 
-<section class="dd-enq-section">
+<section class="dd-enq-section" id="dd-book-form">
     <div class="container">
 
         @if(session('success'))
-        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 20px;text-align:center;color:#166534;font-size:.93rem;font-weight:700;margin-bottom:24px;">
+        <div class="bl-success-notice">
             ✓ {{ session('success') }}
         </div>
         @endif
@@ -347,23 +438,33 @@
                         <input type="hidden" name="time_slot"    value="">
 
                         <div class="dd-enq-fld">
-                            <label>Full Name <span style="color:#dc2626;">*</span></label>
+                            <label>Full Name <span class="dd-enq-req">*</span></label>
                             <input type="text" name="name" required placeholder="Your name" value="{{ old('name') }}">
                         </div>
                         <div class="dd-enq-fld">
-                            <label>Phone <span style="color:#dc2626;">*</span></label>
+                            <label>Phone <span class="dd-enq-req">*</span></label>
                             <input type="tel" name="phone" required placeholder="+91 XXXXX XXXXX" value="{{ old('phone') }}">
                         </div>
                         <div class="dd-enq-fld">
                             <label>Travel Date</label>
                             <input type="text" value="24 November 2026" readonly>
                         </div>
-                        <div class="dd-enq-fld">
-                            <label>Persons</label>
-                            <div class="dd-enq-counter">
-                                <button type="button" onclick="ddCount(-1)">&#8722;</button>
-                                <input type="number" name="no_of_person" id="ddPersons" value="2" min="1" max="200" readonly>
-                                <button type="button" onclick="ddCount(1)">&#43;</button>
+                        <div class="dd-enq-row2">
+                            <div class="dd-enq-fld">
+                                <label>Adults <span class="dd-enq-req">*</span></label>
+                                <div class="dd-enq-counter">
+                                    <button type="button" id="ddPersonsMinus" onclick="ddCount(-1)" aria-label="Decrease adults">&#8722;</button>
+                                    <input type="number" name="no_of_person" id="ddPersons" value="2" min="1" max="200" readonly>
+                                    <button type="button" id="ddPersonsPlus" onclick="ddCount(1)" aria-label="Increase adults">&#43;</button>
+                                </div>
+                            </div>
+                            <div class="dd-enq-fld">
+                                <label>Children <span class="dd-enq-fld-hint">&lt;10 yrs</span></label>
+                                <div class="dd-enq-counter">
+                                    <button type="button" id="ddChildrenMinus" onclick="ddChildCount(-1)" aria-label="Decrease children" disabled>&#8722;</button>
+                                    <input type="number" name="children_count" id="ddChildren" value="0" min="0" max="20" readonly>
+                                    <button type="button" id="ddChildrenPlus" onclick="ddChildCount(1)" aria-label="Increase children">&#43;</button>
+                                </div>
                             </div>
                         </div>
 
@@ -371,6 +472,7 @@
                             <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                             Submit Enquiry
                         </button>
+                        <p class="dd-enq-note">🔒 No payment now — we'll confirm availability by call or WhatsApp.</p>
                     </form>
                 </div>
 
@@ -450,7 +552,7 @@
                      itemscope itemtype="https://schema.org/Product">
 
                 {{-- Image Slider --}}
-                <a href="{{ $detailUrl }}" class="bl-img-wrap" data-cur="0" data-total="{{ count($imgUrls) }}" aria-label="{{ $product->name }} - boat ride photo" style="display:block;text-decoration:none;">
+                <a href="{{ $detailUrl }}" class="bl-img-wrap" data-cur="0" data-total="{{ count($imgUrls) }}" aria-label="{{ $product->name }} - boat ride photo">
                     <meta itemprop="image" content="{{ $imgUrls[0] }}">
 
                     <div class="bl-img-track">
@@ -491,7 +593,7 @@
                     <div class="bl-price-rating-row">
                         <div class="bl-price-inline">
                             @if($isDevDiwali)
-                                <span style="font-size:.76rem;font-weight:700;color:#b45309;white-space:nowrap;">📞 Call Now · Best Price Guaranteed</span>
+                                <span class="bl-price-call-now">📞 Call Now · Best Price Guaranteed</span>
                             @elseif(($product->discounted_price ?? 0) > 0)
                                 @if($hasDiscount)
                                 <span class="bl-price-old">₹{{ number_format($product->base_price) }}</span>
@@ -502,12 +604,12 @@
                                 <span class="bl-price" itemprop="price" content="{{ $product->base_price }}">₹{{ number_format($product->base_price) }}</span>
                                 <span class="bl-price-unit">/ trip</span>
                             @else
-                                <span class="bl-price-unit" style="font-style:italic;color:#aaa;">Price on request</span>
+                                <span class="bl-price-unit bl-price-unit--muted">Price on request</span>
                             @endif
                         </div>
-                        <div class="bl-rating" aria-label="Rating 4.8">
+                        <div class="bl-rating" aria-label="Rating 4.9">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="#222"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                            4.8
+                            4.9
                         </div>
                     </div>
 
@@ -523,17 +625,175 @@
             @endforelse
         </div>
 
-        <p id="blNoResults" style="display:none;text-align:center;padding:48px;color:#999;font-size:.95rem;">
-            No rides match this filter. <button onclick="blSetFilter('all')" style="border:none;background:none;color:#0f3460;font-weight:700;cursor:pointer;font-size:.95rem;">Show all →</button>
+        <p id="blNoResults" class="bl-no-results" style="display:none;">
+            No rides match this filter. <button onclick="blSetFilter('all')" class="bl-show-all-btn">Show all →</button>
         </p>
 
     </div>
 </div>
 
+{{-- ══ DEV DIWALI SEO CONTENT ═════════════════════════════════════════════════ --}}
+@if($isDevDiwali)
+<style>
+.dd-seo{background:#fff;border-top:1px solid #f0f0f0;padding:48px 0;}
+.dd-seo-intro{max-width:820px;margin:0 0 8px;}
+.dd-seo h2{font-size:1.3rem;font-weight:800;color:#111;letter-spacing:-.02em;margin:44px 0 14px;}
+.dd-seo > .dd-seo-intro h2{margin-top:0;}
+.dd-seo h3{font-size:.98rem;font-weight:700;color:#1a2b4c;margin:0 0 6px;padding-left:12px;border-left:3px solid #d4850a;}
+.dd-seo p{font-size:.92rem;color:#444;line-height:1.75;margin:0 0 12px;max-width:820px;}
+.dd-seo-block{margin-bottom:18px;}
+.dd-seo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 28px;margin-top:18px;}
+.dd-seo-grid.cols-2{grid-template-columns:repeat(2,1fr);}
+.dd-seo-grid.cols-5{grid-template-columns:repeat(5,1fr);}
+.dd-seo-grid .dd-seo-block p{margin-bottom:0;}
+.dd-seo-boat-card{background:#f9fafb;border:1px solid #eef1f5;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;}
+.dd-seo-boat-card h3{border-left:none;padding-left:0;}
+.dd-seo-boat-price{font-size:.86rem;font-weight:800;color:#0f3460;margin:6px 0 10px;}
+.dd-seo-boat-link{margin-top:auto;font-size:.8rem;font-weight:700;color:#b45309;text-decoration:none;}
+.dd-seo-boat-link:hover{text-decoration:underline;}
+.dd-seo-steps{counter-reset:dd-step;list-style:none;padding:0;margin:18px 0 0;display:flex;flex-direction:column;gap:16px;}
+.dd-seo-steps li{display:flex;gap:14px;align-items:flex-start;}
+.dd-seo-steps li::before{counter-increment:dd-step;content:counter(dd-step);flex-shrink:0;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#0f3460,#1a5276);color:#fff;font-size:.82rem;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.dd-seo-steps h3{margin:0 0 3px;border:none;padding:0;}
+.dd-seo-steps p{margin:0;}
+.dd-seo-cta{display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:11px 26px;background:linear-gradient(135deg,#7c2d12,#b45309,#d97706);color:#fff;border-radius:11px;font-size:.86rem;font-weight:800;text-decoration:none;letter-spacing:.02em;transition:opacity .2s,transform .2s;}
+.dd-seo-cta:hover{opacity:.9;transform:translateY(-1px);color:#fff;text-decoration:none;}
+.dd-seo-faq{max-width:900px;}
+.dd-seo-faq-item{border-bottom:1px solid #e5e7eb;padding:18px 0;}
+.dd-seo-faq-item:first-child{padding-top:0;}
+.dd-seo-faq-item:last-child{border-bottom:none;padding-bottom:0;}
+.dd-seo-faq-item h3{margin:0 0 8px;}
+.dd-seo-faq-item p{margin:0;max-width:none;}
+.dd-seo-mt{margin-top:12px;}
+@media(max-width:900px){.dd-seo-grid{grid-template-columns:repeat(2,1fr);}.dd-seo-grid.cols-5{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.dd-seo-grid,.dd-seo-grid.cols-2,.dd-seo-grid.cols-5{grid-template-columns:1fr;}}
+</style>
+
+<section class="dd-seo">
+    <div class="container">
+
+        {{-- Intro --}}
+        <div class="dd-seo-intro">
+            <h2>Dev Diwali Boat Booking in Varanasi – 24 November 2026</h2>
+            <p>Dev Diwali Varanasi boat booking for 2026 is now open with VisitKashi. On 24 November 2026, the ghats of Kashi are lit with lakhs of earthen diyas for Dev Deepawali, and a boat ride on the Ganga is the best way to watch the illuminated ghats, the evening Ganga Aarti and the fireworks from the river. Choose from motor boats, Bajra boats, cruise boats and private luxury boats and secure your Dev Diwali cruise booking below.</p>
+        </div>
+
+        {{-- Why book a boat --}}
+        <h2>Book Your Dev Diwali Cruise on the Ganga</h2>
+        <div class="dd-seo-grid cols-3">
+            <div class="dd-seo-block">
+                <h3>Why Book a Boat for Dev Diwali in Varanasi?</h3>
+                <p>A Dev Diwali boat ride gives you an open river view of the illuminated ghats without fighting the crowds that fill the banks that night — the closest and clearest way to experience Dev Deepawali in Varanasi.</p>
+            </div>
+            <div class="dd-seo-block">
+                <h3>Experience the Illuminated Ghats from the Ganga</h3>
+                <p>As your boat moves along the river, you'll see lakhs of diyas lit along the steps of the ghats, turning the entire riverfront into a glowing, golden skyline for one night of the year.</p>
+            </div>
+            <div class="dd-seo-block">
+                <h3>Enjoy Ganga Aarti, Fireworks and Dev Diwali Celebrations</h3>
+                <p>Your Dev Diwali boat ride is timed to cover the evening Ganga Aarti and the fireworks over the Ganga, so you experience the full Dev Diwali celebration from the water.</p>
+            </div>
+        </div>
+
+        {{-- Booking options — driven from real live products --}}
+        <h2>Dev Diwali Boat &amp; Cruise Booking Options</h2>
+        <div class="dd-seo-grid cols-3">
+            @php
+                $ddLabel = function($name) {
+                    $n = strtolower($name);
+                    if (str_contains($n, 'maharaja'))                              return 'Maharaja Boat — Luxury Private Boat';
+                    if (str_contains($n, 'cruise'))                                return 'Cruise Boat';
+                    if (str_contains($n, 'bajra'))                                 return 'Bajra Boat';
+                    if (str_contains($n, 'light motor') && str_contains($n,'group')) return 'Private Light Motor Boat (Group)';
+                    if (str_contains($n, 'light motor'))                           return 'Light Motor Boat';
+                    if (str_contains($n, 'private') && str_contains($n, 'motor'))  return 'Private Motor Boat';
+                    return 'Motor Boat';
+                };
+            @endphp
+            @foreach($products as $sp)
+            @php
+                $spPrice = ($sp->discounted_price ?? 0) > 0 ? $sp->discounted_price : ($sp->base_price ?? 0);
+                $spUrl   = route('product.detail', [optional($sp->category)->slug ?? 'boat', optional($sp->subCategory)->slug ?? 'dev-diwali-booking', $sp->slug]);
+            @endphp
+            <div class="dd-seo-boat-card">
+                <h3>{{ $ddLabel($sp->name) }}</h3>
+                <p>{{ Str::limit(strip_tags($sp->description ?? ''), 90) ?: 'Dev Diwali boat booking on the Ganga in Varanasi.' }}</p>
+                @if($spPrice > 0)
+                <div class="dd-seo-boat-price">From ₹{{ number_format($spPrice) }}</div>
+                @endif
+                <a href="{{ $spUrl }}" class="dd-seo-boat-link">View &amp; Book →</a>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- What's included --}}
+        <h2>What is Included in Dev Diwali Boat Booking?</h2>
+        <div class="dd-seo-grid cols-5">
+            <div class="dd-seo-block"><h3>Ganga Boat Ride</h3><p>A full boat ride on the Ganga during the Dev Diwali celebration.</p></div>
+            <div class="dd-seo-block"><h3>View of the Ghats</h3><p>An open river view of the illuminated ghats of Varanasi.</p></div>
+            <div class="dd-seo-block"><h3>Ganga Aarti</h3><p>The evening Ganga Aarti viewed live from your boat.</p></div>
+            <div class="dd-seo-block"><h3>Fireworks</h3><p>Fireworks over the Ganga as part of the Dev Diwali celebrations.</p></div>
+            <div class="dd-seo-block"><h3>1 Lakh+ Diya Illumination</h3><p>Lakhs of earthen diyas lit across the ghats of Kashi.</p></div>
+        </div>
+
+        {{-- Timings & reporting --}}
+        <h2>Dev Diwali Boat Booking Timings &amp; Reporting Point</h2>
+        <div class="dd-seo-grid cols-3">
+            <div class="dd-seo-block"><h3>Reporting Time</h3><p>4:00 PM at Ravidas Ghat — we recommend arriving by 3:30 PM to complete boarding formalities.</p></div>
+            <div class="dd-seo-block"><h3>Boat Ride Timing</h3><p>5:00 PM to 8:00 PM, covering the evening Ganga Aarti and peak diya illumination.</p></div>
+            <div class="dd-seo-block"><h3>Boarding Point</h3><p>Ravidas Ghat, Varanasi — the fixed boarding point for all Dev Diwali boat bookings.</p></div>
+        </div>
+
+        {{-- Pricing --}}
+        <h2>Dev Diwali Boat Booking Price in Varanasi</h2>
+        <div class="dd-seo-grid cols-3">
+            <div class="dd-seo-block"><h3>Group / Shared Boat Booking</h3><p>Shared Dev Diwali boat and light motor boat rides start from ₹3,499 per person.</p></div>
+            <div class="dd-seo-block"><h3>Premium Cruise Options</h3><p>Bajra boat and cruise boat bookings start from ₹9,999 per person.</p></div>
+            <div class="dd-seo-block"><h3>Private Boat Booking</h3><p>Private motor boats and the luxury Maharaja boat start from ₹45,000 for exclusive hire.</p></div>
+        </div>
+        <p class="dd-seo-mt">Exact Dev Diwali boat booking price for each boat type — including seat availability and group rates — is shown on the individual boat's booking page above.</p>
+
+        {{-- How to book --}}
+        <h2>How to Book a Boat for Dev Diwali in Varanasi?</h2>
+        <ol class="dd-seo-steps">
+            <li><div><h3>Step 1 – Select Your Boat</h3><p>Choose a Dev Diwali boat or cruise from the options above — motor boat, Bajra boat, cruise boat or a private luxury boat.</p></div></li>
+            <li><div><h3>Step 2 – Confirm Date and Number of Guests</h3><p>Dev Diwali is fixed for 24 November 2026 — just enter your name, phone number and number of guests in the enquiry form.</p></div></li>
+            <li><div><h3>Step 3 – Make Your Booking</h3><p>Submit the enquiry form or message us directly on WhatsApp to lock in your Dev Diwali boat booking.</p></div></li>
+            <li><div><h3>Step 4 – Receive Booking Confirmation</h3><p>Our team confirms your Dev Diwali boat booking by call or WhatsApp with your reporting time and boarding point.</p></div></li>
+        </ol>
+        <a href="#dd-book-form" class="dd-seo-cta">
+            <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Book Your Dev Diwali Boat
+        </a>
+
+        {{-- Why VisitKashi --}}
+        <h2>Why Choose VisitKashi for Dev Diwali Boat Booking?</h2>
+        <div class="dd-seo-grid cols-3">
+            <div class="dd-seo-block"><h3>Local Varanasi Travel Experts</h3><p>VisitKashi is based in Varanasi with first-hand knowledge of the ghats, the river and the Dev Diwali celebrations.</p></div>
+            <div class="dd-seo-block"><h3>Experienced Boat Booking Team</h3><p>5+ years of experience booking boat rides and Dev Diwali cruises on the Ganga for Indian and international travellers.</p></div>
+            <div class="dd-seo-block"><h3>Transparent Booking Assistance</h3><p>Clear pricing per boat type, with our team on call to help you pick the right boat for your group.</p></div>
+            <div class="dd-seo-block"><h3>Dedicated Customer Support</h3><p>Reach us anytime by call or WhatsApp at +91-7080109917, 7080109918 or 7080109919 for booking help.</p></div>
+        </div>
+
+        {{-- FAQ --}}
+        <h2 id="dd-faq">Dev Diwali Varanasi Boat Booking – Frequently Asked Questions</h2>
+        <div class="dd-seo-faq">
+            @foreach($ddFaqs as $faq)
+            <div class="dd-seo-faq-item">
+                <h3>{{ $faq['q'] }}</h3>
+                <p>{{ $faq['a'] }}</p>
+            </div>
+            @endforeach
+        </div>
+
+    </div>
+</section>
+@endif
+
 {{-- ── YouTube Shorts Section ── --}}
 @php
     use App\Models\YoutubeVideo;
-    $shortVideos = YoutubeVideo::active()->orderBy('sort_order')->orderByDesc('id')->limit(8)->get();
+    $shortVideos = YoutubeVideo::active()->orderBy('sort_order')->orderByDesc('id')->limit(12)->get()->filter(fn($v) => $v->video_id)->values();
 @endphp
 @if($shortVideos->isNotEmpty())
 <section class="bl-yt-section" aria-label="Boat ride videos">
@@ -553,29 +813,35 @@
                 Subscribe
             </a>
         </div>
-        <div class="bl-yt-grid">
-            @foreach($shortVideos as $vid)
-            @if($vid->video_id)
-            <div class="bl-yt-card" onclick="blYtOpen('{{ $vid->video_id }}', '{{ e($vid->title) }}')" role="button" tabindex="0" aria-label="Play {{ e($vid->title ?? 'boat ride video') }}">
-                <div class="bl-yt-thumb">
-                    <img src="https://img.youtube.com/vi/{{ $vid->video_id }}/hqdefault.jpg"
-                         alt="{{ e($vid->title ?? 'Varanasi boat ride video') }}"
-                         loading="lazy" width="300" height="533"
-                         onerror="this.src='https://img.youtube.com/vi/{{ $vid->video_id }}/default.jpg'">
-                    <div class="bl-yt-play-btn" aria-hidden="true">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+
+        <div class="bl-yt-slider-wrap">
+            <button type="button" class="bl-yt-nav prev" id="blYtPrev" aria-label="Scroll videos left" disabled>&#8249;</button>
+            <div class="bl-yt-grid" id="blYtTrack">
+                @foreach($shortVideos as $vid)
+                @php $vidTitle = $vid->title ?: 'Varanasi Boat Ride Video – Visit Kashi'; @endphp
+                <a href="https://www.youtube.com/shorts/{{ $vid->video_id }}"
+                   class="bl-yt-card"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Watch {{ e($vidTitle) }} on YouTube"
+                   onclick="return blYtOpen(event, '{{ $vid->video_id }}', '{{ e($vidTitle) }}')">
+                    <div class="bl-yt-thumb">
+                        <img src="{{ $vid->thumbnail }}"
+                             alt="{{ e($vidTitle) }} | Varanasi boat ride"
+                             loading="lazy" width="300" height="533"
+                             onerror="this.src='https://img.youtube.com/vi/{{ $vid->video_id }}/default.jpg'">
+                        <div class="bl-yt-play-btn" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <span class="bl-yt-shorts-badge" aria-hidden="true">
+                            <svg width="10" height="14" viewBox="0 0 10 14" fill="none"><path d="M5.8 0L0 7.5h4.2L4.2 14 10 6.5H5.8L5.8 0z" fill="#fff"/></svg>
+                            Shorts
+                        </span>
                     </div>
-                    <span class="bl-yt-shorts-badge" aria-hidden="true">
-                        <svg width="10" height="14" viewBox="0 0 10 14" fill="none"><path d="M5.8 0L0 7.5h4.2L4.2 14 10 6.5H5.8L5.8 0z" fill="#fff"/></svg>
-                        Shorts
-                    </span>
-                </div>
-                @if($vid->title)
-                <p class="bl-yt-caption">{{ $vid->title }}</p>
-                @endif
+                    <p class="bl-yt-caption">{{ $vidTitle }}</p>
+                </a>
+                @endforeach
             </div>
-            @endif
-            @endforeach
+            <button type="button" class="bl-yt-nav next" id="blYtNext" aria-label="Scroll videos right">&#8250;</button>
         </div>
     </div>
 </section>
@@ -590,6 +856,34 @@
         </div>
     </div>
 </div>
+
+{{-- JSON-LD: VideoObject list — mirrors the video cards above for Google video rich results --}}
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type'    => 'ItemList',
+    'itemListElement' => $shortVideos->map(function($v, $i) {
+        return [
+            '@type'    => 'ListItem',
+            'position' => $i + 1,
+            'item'     => [
+                '@type'        => 'VideoObject',
+                'name'         => $v->title ?: 'Varanasi Boat Ride Video – Visit Kashi',
+                'description'  => ($v->title ? $v->title . ' — ' : '') . 'Boat ride experience in Varanasi with Visit Kashi.',
+                'thumbnailUrl' => [$v->thumbnail],
+                'uploadDate'   => ($v->created_at ?? now())->toAtomString(),
+                'contentUrl'   => $v->youtube_url,
+                'embedUrl'     => $v->embed_url,
+                'publisher'    => [
+                    '@type' => 'Organization',
+                    'name'  => 'Visit Kashi',
+                    'logo'  => ['@type' => 'ImageObject', 'url' => asset('frontend/images/logo1.png')],
+                ],
+            ],
+        ];
+    })->values()->all(),
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
 @endif
 
 {{-- ── Instagram Reels Section ── --}}
@@ -611,9 +905,12 @@
 .bl-yt-sub{font-size:.83rem;color:#888;margin:0;}
 .bl-yt-subscribe{display:inline-flex;align-items:center;gap:7px;background:#FF0000;color:#fff;font-size:.83rem;font-weight:700;padding:9px 20px;border-radius:22px;text-decoration:none;transition:background .2s,transform .2s;white-space:nowrap;}
 .bl-yt-subscribe:hover{background:#cc0000;transform:translateY(-2px);color:#fff;text-decoration:none;}
-.bl-yt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.bl-yt-card{cursor:pointer;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 3px 14px rgba(0,0,0,.12);transition:transform .3s,box-shadow .3s;}
-.bl-yt-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(0,0,0,.22);}
+.bl-yt-slider-wrap{position:relative;}
+.bl-yt-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#e2e8f0 transparent;padding-bottom:8px;scroll-padding-left:4px;}
+.bl-yt-grid::-webkit-scrollbar{height:6px;}
+.bl-yt-grid::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:10px;}
+.bl-yt-card{flex:0 0 190px;scroll-snap-align:start;cursor:pointer;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 3px 14px rgba(0,0,0,.12);transition:transform .3s,box-shadow .3s;display:block;text-decoration:none;color:inherit;}
+.bl-yt-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(0,0,0,.22);text-decoration:none;color:inherit;}
 .bl-yt-thumb{position:relative;aspect-ratio:9/16;overflow:hidden;}
 .bl-yt-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s;}
 .bl-yt-card:hover .bl-yt-thumb img{transform:scale(1.06);}
@@ -621,6 +918,11 @@
 .bl-yt-card:hover .bl-yt-play-btn{transform:translate(-50%,-50%) scale(1.12);background:#ff0000;}
 .bl-yt-shorts-badge{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.7);color:#fff;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:4px;display:flex;align-items:center;gap:4px;letter-spacing:.04em;}
 .bl-yt-caption{font-size:.78rem;font-weight:600;color:#222;padding:9px 10px 10px;margin:0;background:#fff;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.bl-yt-nav{position:absolute;top:calc(50% - 26px);width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid #e5e7eb;box-shadow:0 4px 16px rgba(0,0,0,.16);color:#111;font-size:1.4rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;transition:opacity .2s,transform .2s;}
+.bl-yt-nav:hover{transform:scale(1.06);}
+.bl-yt-nav.prev{left:-14px;}
+.bl-yt-nav.next{right:-14px;}
+.bl-yt-nav[disabled]{opacity:0;pointer-events:none;}
 .bl-yt-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:10000;align-items:center;justify-content:center;}
 .bl-yt-modal.open{display:flex;}
 .bl-yt-modal-box{position:relative;width:90vw;max-width:420px;}
@@ -629,7 +931,8 @@
 .bl-yt-modal-title{color:#fff;font-size:.88rem;font-weight:600;margin:0 0 10px;text-align:center;padding:0 36px;}
 .bl-yt-iframe-wrap{position:relative;padding-bottom:177.78%;height:0;border-radius:12px;overflow:hidden;}
 .bl-yt-iframe-wrap iframe{position:absolute;inset:0;width:100%;height:100%;}
-@media(max-width:640px){.bl-yt-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
+@media(max-width:767px){.bl-yt-nav{display:none;}}
+@media(max-width:640px){.bl-yt-card{flex-basis:150px;}.bl-yt-grid{gap:8px;}}
 
 .bl-ig-section{padding:52px 0 44px;background:#fafafa;border-top:1px solid #efefef;}
 .bl-ig-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
@@ -671,6 +974,18 @@ window.ddCount = function(n) {
     if (!el) return;
     var v = Math.max(1, Math.min(200, (parseInt(el.value) || 1) + n));
     el.value = v;
+    var minus = document.getElementById('ddPersonsMinus'), plus = document.getElementById('ddPersonsPlus');
+    if (minus) minus.disabled = v <= 1;
+    if (plus)  plus.disabled  = v >= 200;
+};
+window.ddChildCount = function(n) {
+    var el = document.getElementById('ddChildren');
+    if (!el) return;
+    var v = Math.max(0, Math.min(20, (parseInt(el.value) || 0) + n));
+    el.value = v;
+    var minus = document.getElementById('ddChildrenMinus'), plus = document.getElementById('ddChildrenPlus');
+    if (minus) minus.disabled = v <= 0;
+    if (plus)  plus.disabled  = v >= 20;
 };
 @endif
 

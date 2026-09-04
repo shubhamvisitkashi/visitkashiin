@@ -78,6 +78,10 @@
         *,*::before,*::after{box-sizing:border-box}
         html{font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%}
         body{margin:0;padding:0;background:#fff;color:#333;font-size:15px;font-family:'Plus Jakarta Sans',Poppins,sans-serif;line-height:1.5;font-weight:300;overflow-x:hidden;width:100%;position:relative}
+        /* Force the site's intended font everywhere — overrides leftover
+           theme CSS (style.min.css) that still declares Poppins/Roboto/Josefin
+           Sans on body, headings and form inputs. */
+        body,h1,h2,h3,h4,h5,h6,input,textarea,select,button,.form-control{font-family:'Plus Jakarta Sans',Poppins,sans-serif!important}
         img{max-width:100%;height:auto}
         a{text-decoration:none!important}
         ul,ol{list-style:none;margin:0;padding:0}
@@ -91,7 +95,7 @@
         .pull-left{float:left!important}
         .clearfix::after{display:block;clear:both;content:''}
         /* Navigation — pure flexbox, !important overrides style.css floats */
-        .navigation{position:sticky;top:0;z-index:1000;background:rgba(26,43,76,0.98)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.18);padding:0!important;border-bottom:none!important}
+        .navigation{position:sticky;top:0;z-index:1000;background:linear-gradient(120deg,#4a0e57 0%,#701a75 55%,#8900a0 100%)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 2px 20px rgba(0,0,0,.18);padding:0!important;border-bottom:none!important}
         .navigation .navbar,.navigation .navbar.navbar-default{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;min-height:66px;padding:0!important;margin:0!important;border:none!important;background:transparent!important;float:none!important;width:100%!important;position:static!important}
         .navigation .logo,.navigation .logo.pull-left{float:none!important;width:auto!important;flex-shrink:0;padding:12px 32px 12px 0;display:flex!important;align-items:center}
         .navigation .logo a{display:flex;align-items:center}
@@ -136,11 +140,11 @@
         <link rel="preload" href="{{asset('frontend/css/style.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
         <noscript><link href="{{asset('frontend/css/style.min.css')}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="{{asset('frontend/css/global-layout.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link href="{{asset('frontend/css/global-layout.min.css')}}" rel="stylesheet" /></noscript>
+        <link rel="preload" href="{{asset('frontend/css/global-layout.min.css')}}?v={{filemtime(public_path('frontend/css/global-layout.min.css'))}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+        <noscript><link href="{{asset('frontend/css/global-layout.min.css')}}?v={{filemtime(public_path('frontend/css/global-layout.min.css'))}}" rel="stylesheet" /></noscript>
 
-        <link rel="preload" href="{{asset('frontend/css/mobile-app.min.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link href="{{asset('frontend/css/mobile-app.min.css')}}" rel="stylesheet" /></noscript>
+        <link rel="preload" href="{{asset('frontend/css/mobile-app.min.css')}}?v={{filemtime(public_path('frontend/css/mobile-app.min.css'))}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+        <noscript><link href="{{asset('frontend/css/mobile-app.min.css')}}?v={{filemtime(public_path('frontend/css/mobile-app.min.css'))}}" rel="stylesheet" /></noscript>
 
         <link rel="preload" href="{{asset('frontend/font/flaticon.css')}}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
         <noscript><link href="{{asset('frontend/font/flaticon.css')}}" rel="stylesheet" /></noscript>

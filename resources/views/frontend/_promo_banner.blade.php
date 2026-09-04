@@ -1,4 +1,7 @@
 {{-- Promo Banner — auto-slider if multiple images --}}
+@push('styles')
+<style>.vk-pb-sub{color:rgba(255,255,255,.85);}</style>
+@endpush
 @php
   $slides = array_filter([
     websiteSetupValue('promo_banner'),
@@ -79,7 +82,7 @@
       @endif
         <div class="vk-pb-title">{{ $promoBannerTitle }}</div>
         @if($promoBannerSubtitle)
-        <div class="vk-pb-sub" style="color:rgba(255,255,255,.85);">{{ $promoBannerSubtitle }}</div>
+        <div class="vk-pb-sub">{{ $promoBannerSubtitle }}</div>
         @endif
       @if($promoBannerLink)
       </a>

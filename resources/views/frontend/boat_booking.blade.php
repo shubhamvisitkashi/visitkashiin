@@ -23,6 +23,9 @@
     @endisset
 
 @endsection
+@push('styles')
+<style>.vk-rupee-sm{font-family:system-ui;padding-right:2px;}</style>
+@endpush
 @section('content')
     <section class="breadcrumb-outer text-center">
         <div class="container">
@@ -53,7 +56,7 @@
                                     </div>
                                     <div class="package-content">
                                         <h3>{{ $product->boatType->name }}</h3>
-                                        <p>from <b><span style="font-family: system-ui;padding-right: 2px;">₹</span><del>{{ number_format($product->price) }}</del> ₹{{ number_format($product->discounted_price) }}</b>/- Person</p>
+                                        <p>from <b><span class="vk-rupee-sm">₹</span><del>{{ number_format($product->price) }}</del> ₹{{ number_format($product->discounted_price) }}</b>/- Person</p>
                                         <a href="{{ route('festival.boat.booking', $product->boatType->slug) }}" class="btn btn-primary btn-block mt-2">Book Now</a>
                                     </div>
                                 </div>

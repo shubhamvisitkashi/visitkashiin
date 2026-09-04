@@ -82,13 +82,13 @@
             {{-- Hero image --}}
             <div class="pg-main">
                 @if($imgCount > 0)
-                    <img src="{{ asset('backend/admin/product_images/'.$images[0]) }}" alt="{{ $product->name }}" data-lb="0" style="cursor:zoom-in">
+                    <img src="{{ asset('backend/admin/product_images/'.$images[0]) }}" alt="{{ $product->name }}" data-lb="0">
                 @endif
             </div>
             {{-- Side images --}}
             @foreach(array_slice($images, 1, 4) as $i => $img)
                 <div class="pg-side">
-                    <img src="{{ asset('backend/admin/product_images/'.$img) }}" alt="{{ $product->name }} {{ $i+2 }}" data-lb="{{ $i+1 }}" style="cursor:zoom-in">
+                    <img src="{{ asset('backend/admin/product_images/'.$img) }}" alt="{{ $product->name }} {{ $i+2 }}" data-lb="{{ $i+1 }}">
                 </div>
             @endforeach
             @if($imgCount > 5)
@@ -116,7 +116,7 @@
             <div class="pkd-provider">
                 <div class="pkd-provider-logo">
                     <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
-                         alt="Visit Kashi" style="width:100%;height:100%;object-fit:contain;display:block;border-radius:10px;">
+                         alt="Visit Kashi">
                 </div>
                 <div>
                     <div class="pkd-provider-name">VisitKashi</div>
@@ -150,7 +150,7 @@
             </div>
 
             {{-- Description --}}
-            <div style="margin-bottom:24px">
+            <div class="pkd-section-sm">
                 <h2 class="pkd-section-title">📋 About This Package</h2>
                 <div class="pkd-desc">
                     {!! safe_html($product->description) !!}
@@ -158,7 +158,7 @@
             </div>
 
             {{-- Package Details --}}
-            <div style="margin-bottom:28px">
+            <div class="pkd-section">
                 <h2 class="pkd-section-title">📊 Package Details</h2>
                 <table class="pkd-specs">
                     <tr><td>Duration</td><td>{{ $product->duration ?: '1 Night / 2 Days' }}</td></tr>
@@ -168,8 +168,8 @@
                     @endif
                     <tr><td>Starting Price</td><td>
                         @if($discPrice > 0)
-                            <del style="color:#f20000;font-size:.9em">₹{{ number_format($basePrice) }}</del>
-                            &nbsp;<strong style="color:#16a34a">₹{{ number_format($discPrice) }}</strong> per person
+                            <del class="pkd-price-old">₹{{ number_format($basePrice) }}</del>
+                            &nbsp;<strong class="pkd-price-new">₹{{ number_format($discPrice) }}</strong> per person
                         @else
                             <strong>₹{{ number_format($basePrice) }}</strong> per person
                         @endif
@@ -181,7 +181,7 @@
             </div>
 
             {{-- What's Included / Excluded --}}
-            <div style="margin-bottom:28px">
+            <div class="pkd-section">
                 <h2 class="pkd-section-title">✅ Inclusions &amp; Exclusions</h2>
                 <div class="pkd-ie-grid">
                     <div class="pkd-ie-box inc">
@@ -282,7 +282,7 @@
             </div>
 
             {{-- Places Covered --}}
-            <div style="margin-bottom:28px">
+            <div class="pkd-section">
                 <h2 class="pkd-section-title">📍 Places Covered</h2>
                 <div class="pkd-places">
                     <span class="pkd-place-tag">Dashashwamedh Ghat</span>
@@ -300,20 +300,20 @@
 
             {{-- YouTube --}}
             @if($product->youtube_link)
-            <div style="margin-bottom:28px">
+            <div class="pkd-section">
                 <h2 class="pkd-section-title">🎬 Watch Highlights</h2>
-                <div style="position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden">
-                    <iframe src="{{ $product->youtube_link }}" frameborder="0" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%"></iframe>
+                <div class="pkd-video-wrap">
+                    <iframe src="{{ $product->youtube_link }}" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
             @endif
 
             {{-- Map --}}
             @if($product->map_location)
-            <div style="margin-bottom:28px">
+            <div class="pkd-section">
                 <h2 class="pkd-section-title">🗺️ Location</h2>
-                <div style="border-radius:12px;overflow:hidden;height:280px">
-                    <iframe src="{{ $product->map_location }}" width="100%" height="280" frameborder="0" style="border:0;display:block" allowfullscreen></iframe>
+                <div class="pkd-map-wrap">
+                    <iframe src="{{ $product->map_location }}" width="100%" height="280" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
             @endif
@@ -600,8 +600,8 @@
                         {{-- Notes --}}
                         <div class="vpc-section">
                             <div class="vpc-field">
-                                <label class="vpc-label">Special Requests <small style="font-weight:400;color:#94a3b8;text-transform:none">(optional)</small></label>
-                                <textarea class="vpc-input" id="pkg_notes" rows="2" placeholder="Any special requirements or preferences…" style="height:auto;resize:vertical"></textarea>
+                                <label class="vpc-label">Special Requests <small>(optional)</small></label>
+                                <textarea class="vpc-input" id="pkg_notes" rows="2" placeholder="Any special requirements or preferences…"></textarea>
                             </div>
                         </div>
 

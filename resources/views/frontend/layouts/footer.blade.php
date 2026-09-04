@@ -1,5 +1,5 @@
 {{--
-  Footer — Visit Kashi  (Light theme, redesigned)
+  Footer — Visit Kashi  (Dark navy theme)
 --}}
 
 {{-- ── SEO product link cloud ── --}}
@@ -154,7 +154,7 @@
 }
 .vkf-explore__title {
     font-size: 11px; font-weight: 800; letter-spacing: .1em;
-    text-transform: uppercase; color: #EA580C;
+    text-transform: uppercase; color: #8900a0;
     margin-bottom: 18px;
 }
 .vkf-explore__grid  { display: flex; flex-direction: column; gap: 12px; }
@@ -162,13 +162,14 @@
 .vkf-explore__cat   { font-size: 11.5px; font-weight: 700; color: #374151; white-space: nowrap; }
 .vkf-explore__links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .vkf-explore__links a { font-size: 12px; color: #6B7280; text-decoration: none; transition: color .2s; }
-.vkf-explore__links a:hover { color: #EA580C; }
+.vkf-explore__links a:hover { color: #8900a0; }
 .vkf-sep { color: #D1D5DB; font-size: 11px; }
 
 /* ── Outer footer ── */
 .vkf-footer {
-    background: #002351;
-    border-top: 1px solid #E5E7EB;
+    background: linear-gradient(165deg, #370640 0%, #5c1169 40%, #701a75 70%, #8900a0 100%);
+    border-top: 3px solid transparent;
+    border-image: linear-gradient(90deg, #F5A623, #FFD166, #F5A623) 1;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
@@ -181,33 +182,33 @@
     margin-bottom: 18px; display: block;
 }
 .vkf-tagline {
-    font-size: 13.5px; color: #6B7280;
+    font-size: 13.5px; color: rgba(255,255,255,.66);
     line-height: 1.75; margin-bottom: 20px;
     max-width: 300px;
 }
 
-/* Trust pills */
+/* Trust pills — glass chips (matches .vkbd-trust-pills on dark surfaces) */
 .vkf-trust { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
 .vkf-trust span {
-    font-size: 11.5px; font-weight: 600; color: #374151;
-    background: #F9FAFB; border: 1px solid #E5E7EB;
-    border-radius: 20px; padding: 4px 12px;
+    font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,.9);
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.16);
+    border-radius: 20px; padding: 5px 13px;
     display: inline-flex; align-items: center; gap: 5px;
 }
-.vkf-trust .fa { color: #EA580C; font-size: 11px; }
+.vkf-trust .fa { color: #F5A623; font-size: 11px; }
 
-/* Social icons */
+/* Social icons — glass chips */
 .vkf-social { display: flex; gap: 9px; margin-top: 2px; }
 .vkf-social a {
     width: 36px; height: 36px; border-radius: 10px;
-    background: #F3F4F6; border: 1px solid #E5E7EB;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
     display: flex; align-items: center; justify-content: center;
-    color: #6B7280; font-size: 14px; text-decoration: none;
+    color: rgba(255,255,255,.85); font-size: 14px; text-decoration: none;
     transition: background .2s, color .2s, border-color .2s, transform .2s;
 }
 .vkf-social a:hover {
-    background: #EA580C; color: #fff;
-    border-color: #EA580C;
+    background: #F5A623; color: #3a0a45;
+    border-color: #F5A623;
     transform: translateY(-2px);
 }
 
@@ -215,61 +216,61 @@
 .vkf-col__title {
     font-size: 12px; font-weight: 800;
     letter-spacing: .08em; text-transform: uppercase;
-    color: #a0a2a6; margin-bottom: 20px;
+    color: rgba(255,255,255,.5); margin-bottom: 20px;
     position: relative; padding-bottom: 10px;
 }
 .vkf-col__title::after {
     content: '';
     position: absolute; bottom: 0; left: 0;
     width: 28px; height: 2.5px;
-    background: #EA580C; border-radius: 2px;
+    background: #F5A623; border-radius: 2px;
 }
 
 /* Nav links */
 .vkf-links { list-style: none; padding: 0; margin: 0; }
 .vkf-links li { margin-bottom: 10px; }
 .vkf-links li a {
-    font-size: 13.5px; color: #6B7280;
+    font-size: 13.5px; color: rgba(255,255,255,.78);
     text-decoration: none;
     display: flex; align-items: center; gap: 6px;
     transition: color .18s, gap .18s;
 }
 .vkf-links li a::before {
-    content: '›'; color: #D1D5DB;
+    content: '›'; color: rgba(255,255,255,.32);
     font-size: 16px; line-height: 1;
     transition: color .18s;
     flex-shrink: 0;
 }
-.vkf-links li a:hover { color: #EA580C; gap: 9px; }
-.vkf-links li a:hover::before { color: #EA580C; }
+.vkf-links li a:hover { color: #F5A623; gap: 9px; }
+.vkf-links li a:hover::before { color: #F5A623; }
 
 /* Address / Contact */
 .vkf-address { font-style: normal; }
 .vkf-address__row {
     display: flex; align-items: flex-start; gap: 11px;
-    margin-bottom: 13px; font-size: 13px; color: #6B7280;
+    margin-bottom: 13px; font-size: 13px; color: rgba(255,255,255,.78);
     line-height: 1.6;
 }
-.vkf-address__row a { color: #6B7280; text-decoration: none; transition: color .18s; }
-.vkf-address__row a:hover { color: #EA580C; }
+.vkf-address__row a { color: rgba(255,255,255,.78); text-decoration: none; transition: color .18s; }
+.vkf-address__row a:hover { color: #F5A623; }
 .vkf-icon {
     width: 28px; height: 28px; border-radius: 7px;
-    background: #FFF7ED; border: 1px solid #FED7AA;
+    background: rgba(245,166,35,.16); border: 1px solid rgba(245,166,35,.35);
     display: flex; align-items: center; justify-content: center;
-    color: #EA580C; font-size: 13px;
+    color: #F5A623; font-size: 13px;
     flex-shrink: 0; margin-top: 1px;
 }
 
 /* Divider */
 .vkf-divider {
-    border: none; border-top: 1px solid #F3F4F6;
+    border: none; border-top: 1px solid rgba(255,255,255,.1);
     margin: 0;
 }
 
 /* ── Bottom bar ── */
 .vkf-bottom {
-    background: #F9FAFB;
-    border-top: 1px solid #E5E7EB;
+    background: #2c0834;
+    border-top: 1px solid rgba(255,255,255,.08);
     padding: 16px 0;
 }
 .vkf-bottom__inner {
@@ -279,17 +280,17 @@
 }
 .vkf-bottom__inner p {
     margin: 0; font-size: 12.5px;
-    color: #9CA3AF; font-weight: 500;
+    color: rgba(255,255,255,.45); font-weight: 500;
 }
 .vkf-payments {
     display: flex; align-items: center;
-    gap: 10px; font-size: 13px; color: #9CA3AF;
+    gap: 10px; font-size: 13px; color: rgba(255,255,255,.45);
 }
 .vkf-payments span {
     display: flex; align-items: center; gap: 4px;
     font-size: 12px; font-weight: 600;
 }
-.vkf-payments .fa { font-size: 18px; color: #D1D5DB; }
+.vkf-payments .fa { font-size: 18px; color: rgba(255,255,255,.3); }
 .vkf-payments .fa-lock { font-size: 12px; }
 
 /* ── Responsive ── */

@@ -108,6 +108,7 @@
     margin: 0 0 10px;
 }
 .vk-founder-info p:last-child { margin: 0; }
+.vk-founder-info p strong { color: #fff; }
 .vk-founder-tags {
     display: flex;
     flex-wrap: wrap;
@@ -239,7 +240,7 @@
                 <div class="vk-founder-info">
                     <h3 itemprop="name">Shubham Mishra</h3>
                     <span class="vk-founder-role" itemprop="jobTitle">Founder, Visit Kashi</span>
-                    <p>Founded Visit Kashi after years of understanding the true needs of travellers visiting Varanasi — from completing his <strong style="color:#fff">BCA from SMS Varanasi</strong> to working hands-on in the hotel industry as a receptionist, building every piece of this company from the ground up.</p>
+                    <p>Founded Visit Kashi after years of understanding the true needs of travellers visiting Varanasi — from completing his <strong>BCA from SMS Varanasi</strong> to working hands-on in the hotel industry as a receptionist, building every piece of this company from the ground up.</p>
                     <p>For over 5 years, Shubham personally handled on-ground operations, managed travel experiences, resolved real-time guest issues, and built a trusted network of local vendors, boatmen, drivers, and hotels across Varanasi.</p>
                     <div class="vk-founder-tags">
                         <span class="vk-founder-tag"><i class="fa fa-graduation-cap"></i> BCA – SMS Varanasi</span>

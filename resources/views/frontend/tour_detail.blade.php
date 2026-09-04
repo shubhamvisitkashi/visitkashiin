@@ -107,6 +107,7 @@
 .td-breadcrumb span { color:#bbb; }
 .td-hero-title { font-size:clamp(22px,3.5vw,40px); font-weight:800; color:#1a1a1a; margin:0 0 8px; line-height:1.15; letter-spacing:-.02em; }
 .td-hero-sub { font-size:14px; color:#555; margin:0; }
+.td-coming-soon { padding:16px 6px; font-size:.85rem; color:#888; text-align:center; }
 /* Content headings */
 .detail-title h2 { font-size:1.15rem; font-weight:700; color:#1a1a1a; margin:0 0 8px; }
 .detail-title h2.td-section { font-size:1.05rem; font-weight:700; color:#333; border-left:3px solid #D94F2B; padding-left:10px; margin:0 0 10px; }
@@ -537,7 +538,7 @@
                                     <h2 class="td-section">Location &amp; Map</h2>
                                 </div>
                                 <div class="map-frame">
-                                    <iframe src="{{ $product->map_location }}" style="border: 0" allowfullscreen></iframe>
+                                    <iframe src="{{ $product->map_location }}" allowfullscreen></iframe>
                                 </div>
                             </div>
                         @endif
@@ -1136,6 +1137,8 @@
                         .cc-input { width:100%;border:1.5px solid #e2e8f0;border-radius:9px;padding:10px 13px;font-size:.86rem;color:#111;background:#f9fafb;outline:none;transition:border-color .2s,box-shadow .2s,background .2s;-webkit-appearance:none;font-family:inherit; }
                         .cc-input:focus { border-color:#0f3460;box-shadow:0 0 0 3px rgba(15,52,96,.1);background:#fff; }
                         .cc-input.is-invalid { border-color:#ef4444; }
+                        textarea.cc-input { height:auto; resize:vertical; }
+                        .cc-label small { font-weight:400; text-transform:none; letter-spacing:0; color:#9ca3af; }
 
                         /* Phone prefix */
                         .cc-phone-wrap { position:relative; }
@@ -1144,6 +1147,7 @@
 
                         /* Row 2 */
                         .cc-row2 { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px; }
+                        .cc-row2 .cc-field { margin-bottom:0; }
 
                         /* Stepper */
                         .cc-stepper { display:flex;align-items:center;border:1.5px solid #e2e8f0;border-radius:9px;background:#f9fafb;height:42px;overflow:hidden;transition:border-color .2s; }
@@ -1278,16 +1282,16 @@
                                         elseif (str_contains($nameForSeats, 'bus') || str_contains($nameForSeats, 'coach'))         { $cabSeats = 40; }
                                     @endphp
                                     <div class="cc-row2">
-                                        <div class="cc-field" style="margin-bottom:0;">
-                                            <label class="cc-label">Persons <small style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af;">(max {{ $cabSeats }})</small></label>
+                                        <div class="cc-field">
+                                            <label class="cc-label">Persons <small>(max {{ $cabSeats }})</small></label>
                                             <div class="cc-stepper" data-max="{{ $cabSeats }}">
                                                 <button type="button" class="cc-stepper-btn" id="cabPMinus" aria-label="Decrease">−</button>
                                                 <span class="cc-stepper-val" id="cabPVal">1</span>
                                                 <button type="button" class="cc-stepper-btn" id="cabPPlus"  aria-label="Increase">+</button>
                                             </div>
                                         </div>
-                                        <div class="cc-field" style="margin-bottom:0;">
-                                            <label class="cc-label">Luggage <small style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af;">(bags)</small></label>
+                                        <div class="cc-field">
+                                            <label class="cc-label">Luggage <small>(bags)</small></label>
                                             <div class="cc-stepper">
                                                 <button type="button" class="cc-stepper-btn" id="cabLMinus" aria-label="Decrease">−</button>
                                                 <span class="cc-stepper-val" id="cabLVal">0</span>
@@ -1334,8 +1338,7 @@
                                     {{-- Special Instructions --}}
                                     <div class="cc-field">
                                         <label class="cc-label">Special Instructions</label>
-                                        <textarea class="cc-input" id="cab_message_visible" rows="2"
-                                                  style="height:auto;resize:vertical;">{{ old('message') }}</textarea>
+                                        <textarea class="cc-input" id="cab_message_visible" rows="2">{{ old('message') }}</textarea>
                                     </div>
 
                                     <button type="submit" class="cc-submit">
@@ -1434,7 +1437,7 @@
                                     </div>
                                 </a>
                                 @empty
-                                <p style="padding:16px 6px;font-size:.85rem;color:#888;text-align:center;">More festivals coming soon.</p>
+                                <p class="td-coming-soon">More festivals coming soon.</p>
                                 @endforelse
                             </div>
                             <span class="fest-sidebar__divider">Plan your visit</span>
@@ -1475,7 +1478,7 @@
                                     </div>
                                 </a>
                                 @empty
-                                <p style="padding:16px 6px;font-size:.85rem;color:#888;text-align:center;">More experiences coming soon.</p>
+                                <p class="td-coming-soon">More experiences coming soon.</p>
                                 @endforelse
                             </div>
                         </div>

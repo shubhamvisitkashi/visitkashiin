@@ -9,6 +9,10 @@
     <meta property="og:description" content="{{optional($boat_type)->seo_description}}">
     <meta property="og:keywords" content="{{optional($boat_type)->seo_keyword}}">
 @endsection
+@push('styles')
+<link rel="preload" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}"></noscript>
+@endpush
 @section('content')
     <section class="breadcrumb-outer text-center">
         <div class="container">
@@ -24,7 +28,7 @@
             <div class="row">
                 <div class="col-lg-8">
                     <div class="card">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
+                        <div class="card-header bbp-gray-gradient-bg">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h3 class="text-white mb-0">Booking Details</h3>
                                 <span class="text-white"><i class="fa fa-calendar"></i> 24 Nov 2026</span>
@@ -108,12 +112,12 @@
                 <div class="col-lg-4">
                     <!-- Boat Type Details -->
                     <div class="card mb-4">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
+                        <div class="card-header bbp-gray-gradient-bg">
                             <h4 class="text-white">Boat Details</h4>
                         </div>
                         <div class="card-body">
                             <div class="text-center mb-3">
-                                <img src="{{ $product->boatType->image }}" alt="{{ $product->boatType->name }}" class="img-fluid rounded" style="max-height: 200px;">
+                                <img src="{{ $product->boatType->image }}" alt="{{ $product->boatType->name }}" class="img-fluid rounded bbp-form-img">
                             </div>
                             <h5>{{ $product->boatType->name }}</h5>
                             @if($product->boatType->description)
@@ -130,7 +134,7 @@
 
                     <!-- Product Details -->
                     <div class="card">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
+                        <div class="card-header bbp-gray-gradient-bg">
                             <h4 class="text-white">Pricing Details</h4>
                         </div>
                         <div class="card-body">

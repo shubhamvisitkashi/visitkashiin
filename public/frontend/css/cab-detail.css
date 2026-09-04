@@ -121,3 +121,10 @@
 .ckbd-faq-q[aria-expanded="true"] .ckbd-faq-icon { transform:rotate(45deg); color:#0f3460; }
 .ckbd-faq-a { padding:0 18px 14px; background:#F8FAFF; }
 .ckbd-faq-a p { margin:0; font-size:.84rem; color:#4B5563; line-height:1.7; }
+
+/* ══ Extracted from inline styles (CSS refactor) ══════════════════ */
+.ckbd-container { max-width:1200px; padding-top:12px; padding-bottom:48px; }
+.ckbd-price-amount { color:#0f3460; font-size:16px; }
+.ckbd-price-strike { font-size:12px; color:#6b7280; text-decoration:line-through; margin-left:6px; }
+.ckbd-error-box { background:#fef2f2; border:1.5px solid #fca5a5; border-radius:9px; padding:11px 14px; margin-bottom:13px; font-size:.79rem; color:#991b1b; }
+.ckbd-error-box ul { margin:4px 0 0; padding-left:16px; }

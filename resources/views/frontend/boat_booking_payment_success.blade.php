@@ -5,15 +5,19 @@
     <meta name="description" content="Your boat booking payment has been completed successfully">
     <meta name="keywords" content="payment success, boat booking, confirmation">
 @endsection
+@push('styles')
+<link rel="preload" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}"></noscript>
+@endpush
 @section('content')
-    <section class="destinations py-5" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+    <section class="destinations py-5 bbp-hero-bg-success">
         <div class="container">
             <!-- Success Message -->
             <div class="row mb-5">
                 <div class="col-12">
                     <div class="text-center">
                         <div class="success-icon mb-4">
-                            <i class="fa fa-check-circle text-success" style="font-size: 5rem;"></i>
+                            <i class="fa fa-check-circle text-success bbp-icon-xl"></i>
                         </div>
                         <h1 class="text-success mb-3">Payment Successful!</h1>
                         <p class="lead text-muted">Your boat booking has been confirmed. You will receive a confirmation email shortly.</p>
@@ -24,8 +28,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <!-- Booking Confirmation Card -->
-                    <div class="card shadow-lg border-0 mb-4" style="border-radius: 15px;">
-                        <div class="card-header text-white" style="background: linear-gradient(135deg, #28a745, #20c997); padding: 1.5rem; border-radius: 15px 15px 0 0;">
+                    <div class="card shadow-lg border-0 mb-4 bbp-radius-15">
+                        <div class="card-header text-white bbp-success-gradient-bg bbp-card-header-pad bbp-card-header-top-radius">
                             <div class="text-center">
                                 <h3 class="mb-0"><i class="fa fa-ticket-alt me-2"></i>Booking Confirmation</h3>
                                 <p class="mb-0 mt-2">Booking ID: <strong>{{ $boat_booking_request->booking_request_id }}</strong></p>
@@ -144,7 +148,7 @@
                                     <div class="col-12">
                                         <h5 class="mb-3 text-info"><i class="fa fa-image me-2"></i>Payment Screenshot</h5>
                                         <div class="text-center">
-                                            <img src="{{ asset('storage/' . $paymentDetails['screenshot']) }}" alt="Payment Screenshot" class="img-fluid rounded border" style="max-height: 300px;">
+                                            <img src="{{ asset('storage/' . $paymentDetails['screenshot']) }}" alt="Payment Screenshot" class="img-fluid rounded border bbp-screenshot-preview">
                                         </div>
                                     </div>
                                 </div>
@@ -153,12 +157,12 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card shadow border-0 bbp-radius-15">
                         <div class="card-body text-center p-4">
                             <h5 class="mb-4">What's Next?</h5>
                             <div class="row">
                                 <div class="col-md-4 mb-3 m-auto">
-                                    <a href="{{ route('index') }}" class="btn btn-lg w-100" style="background: linear-gradient(135deg, #acbbcb, #6c757d); border: none; color: white;">
+                                    <a href="{{ route('index') }}" class="btn btn-lg w-100 bbp-gray-gradient-bg bbp-btn-gray-gradient">
                                         <i class="fa fa-home me-2"></i>Back to Home
                                     </a>
                                 </div>
@@ -167,7 +171,7 @@
                     </div>
 
                     <!-- Important Information -->
-                    <div class="alert alert-info mt-4" style="border-radius: 15px;">
+                    <div class="alert alert-info mt-4 bbp-radius-15">
                         <h6 class="alert-heading"><i class="fa fa-info-circle me-2"></i>Important Information</h6>
                         <ul class="mb-0">
                             <li>Reporting Time: 4:00 PM (Tentative)</li>

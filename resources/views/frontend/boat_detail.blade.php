@@ -52,7 +52,7 @@
             "aggregateRating": {
                 "@type": "AggregateRating",
                 "ratingValue": "4.9",
-                "reviewCount": "248",
+                "reviewCount": "600",
                 "bestRating": "5"
             }
         }
@@ -116,7 +116,7 @@
             "aggregateRating": {
                 "@type": "AggregateRating",
                 "ratingValue": "4.9",
-                "reviewCount": "248",
+                "reviewCount": "600",
                 "bestRating": "5"
             },
             "review": [
@@ -220,7 +220,7 @@
     </div>
 </div>
 
-<div class="container" style="max-width:1200px; padding-top: 8px;">
+<div class="container vkbd-container">
 
     {{-- Title row --}}
     <div class="vkbd-title-row">
@@ -228,8 +228,7 @@
         <div class="vkbd-meta">
             <span class="vkbd-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
             <span class="vkbd-rating">4.9</span>
-            <span class="vkbd-meta-dot">&middot;</span>
-            <span>248 Reviews</span>
+            <span>(600+ Reviews)</span>
             <span class="vkbd-meta-dot">&middot;</span>
             <a href="{{ route('product.sub.list', [$catSlug, $subSlug]) }}" class="vkbd-cat-link">{{ $subName }}</a>
             <span class="vkbd-meta-dot">&middot;</span>
@@ -338,6 +337,7 @@
                 @endif
             </div>
 
+            @if(!$isDevDiwali)
             <div class="vkbd-divider"></div>
 
             {{-- Specs table --}}
@@ -354,19 +354,15 @@
                 <tr>
                     <td class="vkbd-spec-label">Price</td>
                     <td class="vkbd-spec-val">
-                        @if($isDevDiwali)
-                            <a href="tel:+91{{ preg_replace('/\D/', '', websiteSetupValue('contact_number') ?? '7080109917') }}" style="color:#b45309;font-weight:700;text-decoration:none;">📞 Call Now for Best Price</a>
-                        @else
                         <i class="fa fa-inr"></i>
                         @if($displayPrice > 0)
-                            <strong style="color:#d4850a;font-size:16px;">₹{{ number_format($displayPrice) }}</strong>
+                            <strong class="vkbd-price-amount">₹{{ number_format($displayPrice) }}</strong>
                             @if($hasDiscount)
-                            &nbsp;<span style="font-size:12px;color:#6b7280;text-decoration:line-through;">₹{{ number_format($product->base_price) }}</span>
+                            &nbsp;<span class="vkbd-price-strike">₹{{ number_format($product->base_price) }}</span>
                             @endif
-                            &nbsp;<span style="font-size:12px;color:#6b7280;">private boat · up to 10 persons</span>
+                            &nbsp;<span class="vkbd-spec-note">private boat · up to 10 persons</span>
                         @else
-                            <span style="color:#6b7280;">Price on request</span>
-                        @endif
+                            <span class="vkbd-text-muted">Price on request</span>
                         @endif
                     </td>
                 </tr>
@@ -387,6 +383,7 @@
                     <td class="vkbd-spec-val"><i class="fa fa-credit-card"></i>UPI, GPay, PhonePe, NEFT, RTGS</td>
                 </tr>
             </table>
+            @endif
 
             <div class="vkbd-divider"></div>
 
@@ -395,7 +392,9 @@
             <ul class="vkbd-includes">
                 <li><i class="fa fa-check-circle"></i> Life Jackets for all passengers</li>
                 <li><i class="fa fa-check-circle"></i> Licensed &amp; experienced boatman</li>
+                @if(!$isDevDiwali)
                 <li><i class="fa fa-check-circle"></i> Private boat – no sharing</li>
+                @endif
                 <li><i class="fa fa-check-circle"></i> Full 84-Ghat Varanasi tour (Assi to NAMO)</li>
                 <li><i class="fa fa-check-circle"></i> Evening Ganga Aarti viewing from the Ganga</li>
                 <li><i class="fa fa-check-circle"></i> Photo stops at key scenic ghats</li>
@@ -413,7 +412,7 @@
             <div class="vkbd-divider"></div>
             <h2 class="vkbd-section-title">Location</h2>
             <div class="vkbd-video-wrap vkbd-map-wrap">
-                <iframe src="{{ $product->map_location }}" allowfullscreen style="border:0;"></iframe>
+                <iframe src="{{ $product->map_location }}" allowfullscreen></iframe>
             </div>
             @endif
 
@@ -703,8 +702,8 @@
                             <p>Fill the form — we'll confirm on WhatsApp</p>
                         </div>
                         @if($isDevDiwali)
-                        <div style="text-align:right;">
-                            <span style="display:inline-block;background:linear-gradient(135deg,#7c2d12,#b45309);color:#fff;font-size:.65rem;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;">🏷️ Best Price Guaranteed</span>
+                        <div class="vkbd-align-right">
+                            <span class="vkbd-price-pill vkbd-amber-gradient-bg">🏷️ Best Price Guaranteed</span>
                         </div>
                         @elseif($displayPrice > 0)
                         <div class="vkbd-card-price-wrap">
@@ -755,7 +754,7 @@
                         <div class="vkbs-group">
                             <label class="vkbs-label" for="vkbs_date">Travel Date <span class="vkbs-req">*</span></label>
                             @if($isDevDiwali)
-                            <input type="text" class="vkbs-input" value="24 November 2026" readonly style="background:#f9f5f0;cursor:default;color:#374151;">
+                            <input type="text" class="vkbs-input" value="24 November 2026" readonly>
                             <input type="hidden" name="arrival_date" value="2026-11-24">
                             @else
                             <input type="date" id="vkbs_date" name="arrival_date"
@@ -840,12 +839,12 @@
                         </div>
 
                         {{-- Dev Diwali: Best Price badge --}}
-                        <div class="vkbs-price-box" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #d97706;padding:10px 14px;">
-                            <span style="font-weight:700;color:#92400e;font-size:.86rem;">🏷️ Best Price Guaranteed · Enquiry sent to our team</span>
+                        <div class="vkbs-price-box vkbs-price-box--amber">
+                            <span class="vkbs-best-price-text">🏷️ Best Price Guaranteed · Enquiry sent to our team</span>
                         </div>
                         @else
                         <div class="vkbs-row2">
-                            <div class="vkbs-group" style="margin-bottom:0;">
+                            <div class="vkbs-group">
                                 <span class="vkbs-label">Adults <span class="vkbs-req">*</span></span>
                                 <div class="vkbs-counter" id="vkbs_persons_wrap">
                                     <button type="button" id="vkbs_pm" aria-label="Decrease">−</button>
@@ -854,8 +853,8 @@
                                 </div>
                                 <div class="vkbs-cap-hint" id="vkbs_cap_hint"></div>
                             </div>
-                            <div class="vkbs-group" style="margin-bottom:0;">
-                                <span class="vkbs-label">Children <span class="vkbs-cap-hint" style="font-size:.65rem;font-weight:400;color:#9ca3af;text-transform:none;letter-spacing:0;">&lt;10 yrs</span></span>
+                            <div class="vkbs-group">
+                                <span class="vkbs-label">Children <span class="vkbs-cap-hint">&lt;10 yrs</span></span>
                                 <div class="vkbs-counter">
                                     <button type="button" id="vkbs_cm" aria-label="Decrease">−</button>
                                     <input type="number" id="vkbs_children_disp" value="0" readonly>
@@ -876,9 +875,9 @@
                                 <span id="vkbs_pb_caption">Base fare (up to 10 persons)</span>
                                 <span id="vkbs_pb_base">₹{{ number_format($displayPrice) }}</span>
                             </div>
-                            <div class="vkbs-price-line" id="vkbs_pb_extra_row" style="display:none;">
+                            <div class="vkbs-price-line vkbd-hidden" id="vkbs_pb_extra_row">
                                 <span id="vkbs_pb_extra_label">Extra persons</span>
-                                <span id="vkbs_pb_extra" style="color:#C2410C;">₹0</span>
+                                <span id="vkbs_pb_extra" class="vkbs-price-extra">₹0</span>
                             </div>
                             <div class="vkbs-price-line vkbs-price-total">
                                 <span>Estimated Total</span>
@@ -913,13 +912,12 @@
                         {{-- 9. Special Requests --}}
                         <div class="vkbs-group">
                             <label class="vkbs-label" for="vkbs_notes">Special Requests</label>
-                            <textarea id="vkbs_notes" name="special_notes" class="vkbs-input" rows="2"
-                                      style="height:auto;resize:vertical;">{{ old('special_notes') }}</textarea>
+                            <textarea id="vkbs_notes" name="special_notes" class="vkbs-input" rows="2">{{ old('special_notes') }}</textarea>
                         </div>
 
                         {{-- Submit --}}
                         @if($isDevDiwali)
-                        <button type="submit" class="vkbs-btn-wa" id="vkbs_submit" style="background:linear-gradient(135deg,#7c2d12,#b45309);">
+                        <button type="submit" class="vkbs-btn-wa vkbd-amber-gradient-bg" id="vkbs_submit">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
                             Submit Enquiry
                         </button>
@@ -963,7 +961,7 @@
 
     </div>{{-- /.vkbd-layout --}}
 
-    <div style="height: 48px;"></div>
+    <div class="vkbd-bottom-spacer"></div>
 
     {{-- ── Related Boats Scroll Section ──────────────────── --}}
     @isset($relatedBoats)
@@ -984,7 +982,7 @@
                 $rbSlug  = optional($rb->subCategory)->slug ?? (optional($product->subCategory)->slug ?? 'motor-boat');
                 $rbCat   = optional($product->category)->slug ?? 'boat';
             @endphp
-            <article class="vkbd-rel-card" role="listitem" onclick="location.href='{{ route('product.detail', [$rbCat, $rbSlug, $rb->slug]) }}'" style="cursor:pointer;">
+            <article class="vkbd-rel-card" role="listitem" onclick="location.href='{{ route('product.detail', [$rbCat, $rbSlug, $rb->slug]) }}'">
                 <div class="vkbd-rel-img">
                     @if($rbImg)
                     <img src="{{ asset('backend/admin/product_images/'.$rbImg) }}"
@@ -1034,7 +1032,7 @@
     <div class="vkbd-mob-bar-info">
         <div class="vkbd-mob-bar-label">{{ Str::limit($product->name, 28) }}</div>
         @if($isDevDiwali)
-        <div class="vkbd-mob-bar-price" style="color:#fbbf24;font-size:.72rem;">Best Price Guaranteed</div>
+        <div class="vkbd-mob-bar-price vkbd-mob-bar-badge">Best Price Guaranteed</div>
         @elseif($displayPrice > 0)
         <div class="vkbd-mob-bar-price">From ₹{{ number_format($displayPrice) }}/-</div>
         @endif

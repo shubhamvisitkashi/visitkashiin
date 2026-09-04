@@ -5,15 +5,19 @@
     <meta name="description" content="Payment failed for your boat booking">
     <meta name="keywords" content="payment error, boat booking, failed transaction">
 @endsection
+@push('styles')
+<link rel="preload" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}"></noscript>
+@endpush
 @section('content')
-    <section class="destinations py-5" style="background: linear-gradient(135deg, #fff5f5, #fee2e2);">
+    <section class="destinations py-5 bbp-hero-bg-error">
         <div class="container">
             <!-- Error Message -->
             <div class="row mb-5">
                 <div class="col-12">
                     <div class="text-center">
                         <div class="error-icon mb-4">
-                            <i class="fa fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                            <i class="fa fa-times-circle text-danger bbp-icon-xl"></i>
                         </div>
                         <h1 class="text-danger mb-3">Payment Failed!</h1>
                         <p class="lead text-muted">Unfortunately, we couldn't process your payment. Please try again or contact support.</p>
@@ -25,7 +29,7 @@
             @if(session('error'))
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="alert alert-danger text-center" style="border-radius: 15px;">
+                        <div class="alert alert-danger text-center bbp-radius-15">
                             <h5 class="alert-heading"><i class="fa fa-exclamation-triangle me-2"></i>Error Details</h5>
                             <p class="mb-0">{{ session('error') }}</p>
                         </div>
@@ -36,8 +40,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <!-- Error Information Card -->
-                    <div class="card shadow-lg border-0 mb-4" style="border-radius: 15px;">
-                        <div class="card-header text-white" style="background: linear-gradient(135deg, #dc3545, #c82333); padding: 1.5rem; border-radius: 15px 15px 0 0;">
+                    <div class="card shadow-lg border-0 mb-4 bbp-radius-15">
+                        <div class="card-header text-white bbp-danger-gradient-bg bbp-card-header-pad bbp-card-header-top-radius">
                             <div class="text-center">
                                 <h3 class="mb-0"><i class="fa fa-exclamation-circle me-2"></i>Transaction Failed</h3>
                                 @if(isset($booking_request_id))
@@ -154,17 +158,17 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="card shadow border-0 mb-4" style="border-radius: 15px;">
+                    <div class="card shadow border-0 mb-4 bbp-radius-15">
                         <div class="card-body text-center p-4">
                             <h5 class="mb-4 text-primary">Choose Your Next Step</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <a href="{{ route('product.sub.list', ['festivals', 'dev-diwali-boat-booking']) }}" class="btn btn-lg w-100" style="background: linear-gradient(135deg, #28a745, #20c997); border: none; color: white; border-radius: 25px;">
+                                    <a href="{{ route('product.sub.list', ['festivals', 'dev-diwali-boat-booking']) }}" class="btn btn-lg w-100 bbp-success-gradient-bg bbp-btn-success-gradient bbp-radius-25">
                                         <i class="fa fa-redo me-2"></i>Try Again
                                     </a>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <a href="{{ route('index') }}" class="btn btn-outline-secondary btn-lg w-100" style="border-radius: 25px;">
+                                    <a href="{{ route('index') }}" class="btn btn-outline-secondary btn-lg w-100 bbp-radius-25">
                                         <i class="fa fa-home me-2"></i>Back to Home
                                     </a>
                                 </div>
@@ -173,15 +177,15 @@
                     </div>
 
                     <!-- Support Information -->
-                    <div class="card shadow border-0" style="border-radius: 15px;">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d); border-radius: 15px 15px 0 0;">
+                    <div class="card shadow border-0 bbp-radius-15">
+                        <div class="card-header bbp-gray-gradient-bg bbp-card-header-top-radius">
                             <h5 class="text-white mb-0"><i class="fa fa-phone me-2"></i>Need Immediate Help?</h5>
                         </div>
                         <div class="card-body p-4">
                             <div class="row">
                                 <div class="col-md-4 text-center mb-3">
                                     <div class="contact-method p-3">
-                                        <i class="fa fa-phone-alt text-primary mb-2" style="font-size: 2rem;"></i>
+                                        <i class="fa fa-phone-alt text-primary mb-2 bbp-icon-lg"></i>
                                         <h6>Call Us</h6>
                                         <p class="text-muted mb-2">+91 7080109917/18/19</p>
                                         <small class="text-muted">24/7 Support Available</small>
@@ -189,7 +193,7 @@
                                 </div>
                                 <div class="col-md-4 text-center mb-3">
                                     <div class="contact-method p-3">
-                                        <i class="fa fa-envelope text-primary mb-2" style="font-size: 2rem;"></i>
+                                        <i class="fa fa-envelope text-primary mb-2 bbp-icon-lg"></i>
                                         <h6>Email Us</h6>
                                         <p class="text-muted mb-2">support@visitkashi.com</p>
                                         <small class="text-muted">Response within 2 hours</small>
@@ -197,7 +201,7 @@
                                 </div>
                                 <div class="col-md-4 text-center mb-3">
                                     <div class="contact-method p-3">
-                                        <i class="fa fa-comments text-primary mb-2" style="font-size: 2rem;"></i>
+                                        <i class="fa fa-comments text-primary mb-2 bbp-icon-lg"></i>
                                         <h6>Live Chat</h6>
                                         <p class="text-muted mb-2">Available on website</p>
                                         <small class="text-muted">9 AM - 6 PM (Mon-Sun)</small>
@@ -208,7 +212,7 @@
                     </div>
 
                     <!-- FAQ Section -->
-                    <div class="alert alert-info mt-4" style="border-radius: 15px;">
+                    <div class="alert alert-info mt-4 bbp-radius-15">
                         <h6 class="alert-heading"><i class="fa fa-question-circle me-2"></i>Frequently Asked Questions</h6>
                         <div class="accordion" id="faqAccordion">
                             <div class="accordion-item border-0 mb-2">

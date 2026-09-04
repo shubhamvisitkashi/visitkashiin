@@ -23,49 +23,49 @@
   .navigation .logo img { height: 36px !important; }
   .navigation .navbar.navbar-default { min-height: 56px !important; }
 
-  /* ── Bottom Nav Bar (Mobile App) ── */
+  /* ── Bottom Nav Bar (iOS-style tab bar) ── */
   .vk-mob-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     z-index: 9999;
-    background: #fff;
-    border-top: 1px solid #E5E7EB;
+    background: rgba(255,255,255,.86);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-top: .5px solid rgba(0,0,0,.15);
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
-    box-shadow: 0 -4px 20px rgba(0,0,0,.10);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    padding: 6px 0 calc(3px + env(safe-area-inset-bottom));
+    box-shadow: none;
   }
   .vk-mob-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
     text-decoration: none !important;
     flex: 1;
-    padding: 0 4px;
+    padding: 2px 4px;
     min-width: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .15s ease;
   }
+  .vk-mob-nav-item:active { transform: scale(.90); }
   .vk-mob-nav-icon {
-    width: 26px; height: 26px;
+    width: 25px; height: 25px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 8px;
-    transition: background .2s;
   }
-  .vk-mob-nav-icon svg { width: 20px; height: 20px; stroke: #9CA3AF; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: stroke .2s; }
+  .vk-mob-nav-icon svg { width: 24px; height: 24px; stroke: #8E8E93; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke .15s, stroke-width .15s; }
   .vk-mob-nav-label {
-    font-size: 10px; font-weight: 600;
-    color: #9CA3AF; white-space: nowrap;
-    transition: color .2s;
-    letter-spacing: .01em;
+    font-size: 10px; font-weight: 500;
+    color: #8E8E93; white-space: nowrap;
+    transition: color .15s, font-weight .15s;
+    letter-spacing: -.01em;
   }
-  .vk-mob-nav-item.active .vk-mob-nav-icon { background: #FFF3E8; }
-  .vk-mob-nav-item.active .vk-mob-nav-icon svg { stroke: #C94B20; }
-  .vk-mob-nav-item.active .vk-mob-nav-label { color: #C94B20; font-weight: 700; }
-  .vk-mob-nav-item:hover .vk-mob-nav-label { color: #C94B20; }
-  .vk-mob-nav-item:hover .vk-mob-nav-icon svg { stroke: #C94B20; }
+  .vk-mob-nav-item.active .vk-mob-nav-icon svg { stroke: #8900a0; stroke-width: 2.3; }
+  .vk-mob-nav-item.active .vk-mob-nav-label { color: #8900a0; font-weight: 700; }
+  .vk-mob-nav-item:hover .vk-mob-nav-label { color: #8900a0; }
+  .vk-mob-nav-item:hover .vk-mob-nav-icon svg { stroke: #8900a0; }
 
   /* ── Body bottom padding for nav bar ── */
   footer, .vkf-footer { margin-bottom: 64px; }

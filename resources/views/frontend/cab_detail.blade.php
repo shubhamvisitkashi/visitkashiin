@@ -283,7 +283,7 @@
     </div>
 </div>
 
-<div class="container" style="max-width:1200px;padding-top:12px;padding-bottom:48px;">
+<div class="container ckbd-container">
 
     {{-- Title --}}
     <div class="ckbd-title-row">
@@ -390,8 +390,8 @@
                     <td class="ckbd-spec-label">Price</td>
                     <td class="ckbd-spec-val">
                         <i class="fa fa-inr"></i>
-                        <strong style="color:#0f3460;font-size:16px;">₹{{ number_format($displayP) }}</strong>
-                        @if($hasDiscount)<span style="font-size:12px;color:#6b7280;text-decoration:line-through;margin-left:6px;">₹{{ number_format($product->base_price) }}</span>@endif
+                        <strong class="ckbd-price-amount">₹{{ number_format($displayP) }}</strong>
+                        @if($hasDiscount)<span class="ckbd-price-strike">₹{{ number_format($product->base_price) }}</span>@endif
                     </td>
                 </tr>
                 @endif
@@ -514,6 +514,9 @@
             .cc-req{color:#ef4444;}
             .cc-input{width:100%;border:1.5px solid #e2e8f0;border-radius:9px;padding:10px 13px;font-size:.86rem;color:#111;background:#f9fafb;outline:none;transition:border-color .2s;font-family:inherit;}
             .cc-input:focus{border-color:#0f3460;box-shadow:0 0 0 3px rgba(15,52,96,.1);}
+            textarea.cc-input{height:auto;resize:vertical;}
+            .cc-label small{font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af;}
+            .cc-row2 .cc-field{margin-bottom:0;}
             .cc-phone-wrap{position:relative;}
             .cc-phone-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.84rem;font-weight:600;color:#64748b;pointer-events:none;z-index:1;}
             .cc-phone-input{padding-left:38px!important;}
@@ -584,8 +587,8 @@
                     </div>
                     @else
                     @if(!empty($errors) && $errors->any())
-                    <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:9px;padding:11px 14px;margin-bottom:13px;font-size:.79rem;color:#991b1b;">
-                        <strong>Please fix:</strong><ul style="margin:4px 0 0;padding-left:16px;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                    <div class="ckbd-error-box">
+                        <strong>Please fix:</strong><ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
                     </div>
                     @endif
                     <form action="{{ route('enquiry.store') }}" method="POST" id="cabEnqForm" novalidate>
@@ -626,16 +629,16 @@
                             else{$maxS=7;}
                         @endphp
                         <div class="cc-row2">
-                            <div class="cc-field" style="margin-bottom:0;">
-                                <label class="cc-label">Persons <small style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af;">(max {{ $maxS }})</small></label>
+                            <div class="cc-field">
+                                <label class="cc-label">Persons <small>(max {{ $maxS }})</small></label>
                                 <div class="cc-stepper" data-max="{{ $maxS }}">
                                     <button type="button" class="cc-stepper-btn" id="cabPMinus" aria-label="−">−</button>
                                     <span class="cc-stepper-val" id="cabPVal">1</span>
                                     <button type="button" class="cc-stepper-btn" id="cabPPlus"  aria-label="+">+</button>
                                 </div>
                             </div>
-                            <div class="cc-field" style="margin-bottom:0;">
-                                <label class="cc-label">Luggage <small style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af;">(bags)</small></label>
+                            <div class="cc-field">
+                                <label class="cc-label">Luggage <small>(bags)</small></label>
                                 <div class="cc-stepper">
                                     <button type="button" class="cc-stepper-btn" id="cabLMinus" aria-label="−">−</button>
                                     <span class="cc-stepper-val" id="cabLVal">0</span>
@@ -670,7 +673,7 @@
                         {{-- Notes --}}
                         <div class="cc-field">
                             <label class="cc-label">Special Instructions</label>
-                            <textarea class="cc-input" id="cab_message_visible" rows="2" style="height:auto;resize:vertical;">{{ old('message') }}</textarea>
+                            <textarea class="cc-input" id="cab_message_visible" rows="2">{{ old('message') }}</textarea>
                         </div>
 
                         <button type="submit" class="cc-submit">

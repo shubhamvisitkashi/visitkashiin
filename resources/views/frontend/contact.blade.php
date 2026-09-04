@@ -114,6 +114,7 @@
     line-height: 1.6;
 }
 .vk-contact-card__body a:hover { color: #D94F2B; }
+.vk-contact-card__body .vk-contact-note { margin-top: 4px; }
 
 .vk-contact-social { display: flex; gap: 10px; margin-top: 8px; }
 .vk-contact-social a {
@@ -162,6 +163,7 @@
     color: #444;
     margin-bottom: 6px;
 }
+.vk-form-group label .vk-req { color: #D94F2B; }
 .vk-form-group input,
 .vk-form-group select,
 .vk-form-group textarea {
@@ -321,7 +323,7 @@
                         <h3>Email Us</h3>
                         @php $contactEmail = websiteSetupValue('email'); @endphp
                         <a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a>
-                        <p style="margin-top:4px;">We respond within 24 hours</p>
+                        <p class="vk-contact-note">We respond within 24 hours</p>
                     </div>
                 </div>
 
@@ -374,12 +376,12 @@
                     @csrf
                     <div class="vk-form-row">
                         <div class="vk-form-group">
-                            <label for="c_name">Full Name <span style="color:#D94F2B">*</span></label>
+                            <label for="c_name">Full Name <span class="vk-req">*</span></label>
                             <input type="text" id="c_name" name="name" placeholder="Your name"
                                    value="{{ old('name') }}" required maxlength="100" />
                         </div>
                         <div class="vk-form-group">
-                            <label for="c_phone">Phone / WhatsApp <span style="color:#D94F2B">*</span></label>
+                            <label for="c_phone">Phone / WhatsApp <span class="vk-req">*</span></label>
                             <input type="tel" id="c_phone" name="phone" placeholder="+91 XXXXX XXXXX"
                                    value="{{ old('phone') }}" required maxlength="15" />
                         </div>
@@ -404,7 +406,7 @@
                     </div>
 
                     <div class="vk-form-group">
-                        <label for="c_message">Message <span style="color:#D94F2B">*</span></label>
+                        <label for="c_message">Message <span class="vk-req">*</span></label>
                         <textarea id="c_message" name="message" placeholder="Tell us about your travel plans, dates, number of people, or any specific requirements…" required maxlength="1000">{{ old('message') }}</textarea>
                     </div>
 

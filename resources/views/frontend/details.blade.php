@@ -190,6 +190,7 @@
 <style>
 /* ══ Listing Page ══════════════════════════════════════════════════ */
 .vkl-page { background:#f7f8fa; min-height:60vh; padding-bottom:72px; font-family:'Plus Jakarta Sans',sans-serif; }
+.vkl-tabs-spacer { margin-bottom:28px; }
 
 /* ── Hero ─────────────────────────────────────────────────────── */
 .vkl-hero {
@@ -595,7 +596,7 @@
         @endforeach
     </div>
     @else
-    <div style="margin-bottom:28px;"></div>
+    <div class="vkl-tabs-spacer"></div>
     @endif
 
     {{-- Product Grid --}}

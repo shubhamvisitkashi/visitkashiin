@@ -24,7 +24,7 @@
                                  decoding="async"
                                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
                             @endif
-                            <span class="vk-logo-text" style="display:{{ websiteSetupValue('logo') ? 'none' : 'flex' }};align-items:center;color:#fff;font-weight:800;font-size:1.25rem;letter-spacing:-.02em;font-family:'Plus Jakarta Sans',sans-serif;">
+                            <span class="vk-logo-text {{ websiteSetupValue('logo') ? 'vk-hidden' : '' }}">
                                 Visit Kashi
                             </span>
                         </a>
@@ -110,7 +110,7 @@
                  height="38"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
             @endif
-            <span style="display:{{ websiteSetupValue('logo') ? 'none' : 'block' }};color:#fff;font-weight:800;font-size:1.1rem;font-family:'Plus Jakarta Sans',sans-serif;">
+            <span class="vk-drawer-logo-text {{ websiteSetupValue('logo') ? 'vk-hidden' : '' }}">
                 Visit Kashi
             </span>
         </a>

@@ -45,14 +45,14 @@ body.vk-homepage *::after { box-sizing: border-box; }
 body.vk-homepage .navigation {
   position: sticky !important;
   top: 0;
-  background: rgba(10,16,30,0.98) !important;
+  background: linear-gradient(120deg,#4a0e57 0%,#701a75 55%,#8900a0 100%) !important;
   box-shadow: 0 2px 16px rgba(0,0,0,0.22) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border-bottom: 1px solid rgba(255,255,255,0.06) !important;
 }
 body.vk-homepage .navigation.vk-nav--scrolled {
-  background: rgba(10,16,30,0.98) !important;
+  background: linear-gradient(120deg,#4a0e57 0%,#701a75 55%,#8900a0 100%) !important;
   box-shadow: 0 2px 28px rgba(0,0,0,0.28) !important;
 }
 
@@ -1036,7 +1036,7 @@ body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opac
 
 /* ---------- 14. WhatsApp CTA Strip ---------- */
 .vk-cta-strip {
-  background: linear-gradient(180deg, #ff6600 0%, #00a995 100%);
+  background: linear-gradient(120deg,#4a0e57 0%,#701a75 55%,#8900a0 100%);
   padding: 32px 0;
   margin-bottom: 18px;
 }
@@ -1065,7 +1065,7 @@ body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opac
   align-items: center;
   gap: 9px;
   background: #fff;
-  color: #128c83 !important;
+  color: #8900a0 !important;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
   font-size: 14px;
@@ -1085,7 +1085,7 @@ body.vk-homepage .slider-button .slick-dots li.slick-active button:before { opac
 
 /* ---------- 15. Footer ---------- */
 body.vk-homepage footer,
-body.vk-homepage footer .footer-upper { background: #0F1B30; }
+body.vk-homepage footer .footer-upper { background: linear-gradient(165deg,#370640 0%,#5c1169 40%,#701a75 70%,#8900a0 100%); }
 
 body.vk-homepage .footer-upper {
   padding: 52px 0 40px;
@@ -1752,7 +1752,7 @@ body.vk-homepage #back-to-top a::after {
 
 /* ── CTA Strip — deeper vibrant gradient ── */
 .vk-cta-strip {
-  background: linear-gradient(180deg, #ff6600 0%, #00a995 100%) !important;
+  background: linear-gradient(120deg,#4a0e57 0%,#701a75 55%,#8900a0 100%) !important;
   margin-bottom: 18px;
   position: relative;
   overflow: hidden;
@@ -1768,7 +1768,7 @@ body.vk-homepage #back-to-top a::after {
 }
 .vk-cta-strip__btn {
   background: #fff !important;
-  color: #128c83 !important;
+  color: #8900a0 !important;
   margin-bottom: 15px;
   box-shadow: 0 4px 18px rgba(0,0,0,.14) !important;
 }

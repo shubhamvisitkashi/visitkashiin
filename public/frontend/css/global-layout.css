@@ -352,6 +352,12 @@ header .upper-head .contact-info a:hover {
   flex-shrink: 0;
 }
 .vk-drawer__logo img { height: 34px; width: auto; display: block; }
+
+/* Logo text fallback — shown only when no logo image is configured, or via
+   onerror JS if the configured logo image fails to load. */
+.vk-logo-text { display: flex; align-items: center; color: #fff; font-weight: 800; font-size: 1.25rem; letter-spacing: -.02em; font-family: 'Plus Jakarta Sans', sans-serif; }
+.vk-drawer-logo-text { display: block; color: #fff; font-weight: 800; font-size: 1.1rem; font-family: 'Plus Jakarta Sans', sans-serif; }
+.vk-hidden { display: none; }
 .vk-drawer__close {
   display: flex;
   align-items: center;
@@ -674,7 +680,7 @@ footer .footer-upper { background: #0F1B30; }
 .vk-why__card p { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; color: #717171; line-height: 1.65; margin: 0; }
 
 /* WhatsApp CTA Strip */
-.vk-cta-strip { background: #000; padding: 30px 0; margin-bottom: 18px; }
+.vk-cta-strip { background: linear-gradient(120deg,#4a0e57 0%,#701a75 55%,#8900a0 100%); padding: 30px 0; margin-bottom: 18px; }
 .vk-cta-strip__inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
 .vk-cta-strip__text strong { display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 3px; }
 .vk-cta-strip__text span  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; color: rgba(255,255,255,.80); }

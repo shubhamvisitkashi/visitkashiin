@@ -2998,7 +2998,8 @@ td.excludes ul li i {
 .map-frame iframe {
     height: 350px;
     width: 100%;
-    frameborder: 0
+    frameborder: 0;
+    border: 0
 }
 
 #sidebar-sticky {

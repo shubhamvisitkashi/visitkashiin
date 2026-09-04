@@ -5,6 +5,10 @@
     <meta name="description" content="Complete your boat booking payment">
     <meta name="keywords" content="payment, boat booking, QR code">
 @endsection
+@push('styles')
+<link rel="preload" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="{{ asset('frontend/css/boat-booking-payment.min.css') }}?v={{ filemtime(public_path('frontend/css/boat-booking-payment.min.css')) }}"></noscript>
+@endpush
 @section('content')
     <section class="breadcrumb-outer text-center">
         <div class="container">
@@ -67,7 +71,7 @@
                 <!-- Payment Instructions -->
                 <div class="col-lg-8">
                     <div class="card mb-4">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
+                        <div class="card-header bbp-gray-gradient-bg">
                             <h4 class="text-white mb-0"><i class="fa fa-credit-card me-2"></i>Payment Instructions</h4>
                         </div>
                         <div class="card-body">
@@ -127,7 +131,7 @@
 
                     <!-- Payment Confirmation Form -->
                     <div class="card">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
+                        <div class="card-header bbp-gray-gradient-bg">
                             <h4 class="text-white mb-0"><i class="fa fa-check-circle me-2"></i>Payment Confirmation</h4>
                         </div>
                         <div class="card-body">
@@ -172,7 +176,7 @@
                                 </div>
 
                                 <div class="text-center mt-4">
-                                    <button type="submit" class="btn btn-lg px-5" style="background: linear-gradient(135deg, #acbbcb, #6c757d); border: none; color: white; border-radius: 25px;">
+                                    <button type="submit" class="btn btn-lg px-5 bbp-gray-gradient-bg bbp-btn-gray-gradient bbp-radius-25">
                                         <i class="fa fa-check-circle me-2"></i>Confirm Payment
                                     </button>
                                 </div>
@@ -184,7 +188,7 @@
                 <!-- Booking Summary -->
                 <div class="col-lg-4">
                     <div class="card">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
+                        <div class="card-header bbp-gray-gradient-bg">
                             <h4 class="text-white mb-0"><i class="fa fa-receipt me-2"></i>Booking Summary</h4>
                         </div>
                         <div class="card-body">
@@ -237,7 +241,7 @@
 
                     <!-- Help Section -->
                     <div class="card mt-4">
-                        <div class="card-header" style="background: linear-gradient(135deg, #acbbcb, #6c757d);">
+                        <div class="card-header bbp-gray-gradient-bg">
                             <h5 class="text-white mb-0"><i class="fa fa-question-circle me-2"></i>Need Help?</h5>
                         </div>
                         <div class="card-body">

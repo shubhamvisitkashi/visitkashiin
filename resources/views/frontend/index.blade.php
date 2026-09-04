@@ -19,8 +19,8 @@
 {{-- ── Homepage stylesheet ── --}}
 @push('styles')
     {{-- homepage.css loaded async — critical above-fold styles are inlined in app.blade.php --}}
-    <link rel="preload" href="{{ asset('frontend/css/homepage.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link href="{{ asset('frontend/css/homepage.min.css') }}" rel="stylesheet" /></noscript>
+    <link rel="preload" href="{{ asset('frontend/css/homepage.min.css') }}?v={{ filemtime(public_path('frontend/css/homepage.min.css')) }}" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="{{ asset('frontend/css/homepage.min.css') }}?v={{ filemtime(public_path('frontend/css/homepage.min.css')) }}" rel="stylesheet" /></noscript>
 @endpush
 
 @section('content')
@@ -556,7 +556,7 @@ if (empty($desktopSliderSlides)) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
         🗺️ Packages
     </a>
-    <a href="https://wa.me/91{{ preg_replace('/\D/','',websiteSetupValue('contact_number')?:'7080109917') }}?text=Hi+VisitKashi%2C+I+need+help+with+my+booking" target="_blank" class="vk-mob-chip" style="background:#dcfce7;color:#15803d;">
+    <a href="https://wa.me/91{{ preg_replace('/\D/','',websiteSetupValue('contact_number')?:'7080109917') }}?text=Hi+VisitKashi%2C+I+need+help+with+my+booking" target="_blank" class="vk-mob-chip vk-mob-chip--whatsapp">
         <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075a8.167 8.167 0 0 1-2.385-1.475 8.166 8.166 0 0 1-1.653-2.059c-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.05 0A11.95 11.95 0 0 0 .057 11.893c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654A11.882 11.882 0 0 0 12.05 24c6.554 0 11.893-5.335 11.893-11.893A11.821 11.821 0 0 0 12.05 0z"/></svg>
         WhatsApp
     </a>
@@ -630,19 +630,19 @@ $svcData = [
           ? asset('backend/admin/product_images/' . $service_images[$s['slug']])
           : asset($s['fallback']);
       @endphp
-      <a href="{{ route('product.list', $s['slug']) }}" class="vksvc-card vksvc-card-{{ $i + 1 }}" aria-label="{{ $s['title'] }}">
+      <a href="{{ route('product.list', $s['slug']) }}" class="vksvc-card vksvc-card-{{ $i + 1 }}" aria-label="{{ $s['title'] }}" style="--vksvc-img:url('{{ $imgUrl }}'); --vksvc-accent:{{ $s['accent'] }};">
         {{-- Background image --}}
-        <div class="vksvc-img" style="background-image:url('{{ $imgUrl }}');"></div>
+        <div class="vksvc-img"></div>
         {{-- Bottom-only gradient overlay --}}
         <div class="vksvc-overlay"></div>
         {{-- Category label top-left --}}
-        <span class="vksvc-cat-tag" style="color:{{ $s['accent'] }};">{{ $s['label'] }}</span>
+        <span class="vksvc-cat-tag">{{ $s['label'] }}</span>
         {{-- Content --}}
         <div class="vksvc-content">
           <h3 class="vksvc-name">{{ $s['title'] }}</h3>
         </div>
         {{-- Accent bar --}}
-        <div class="vksvc-accent-bar" style="background:{{ $s['accent'] }};"></div>
+        <div class="vksvc-accent-bar"></div>
       </a>
       @endforeach
     </div>
@@ -651,6 +651,9 @@ $svcData = [
 </section>
 
 <style>
+/* Quick category chips — WhatsApp variant (extracted from inline style) */
+.vk-mob-chip--whatsapp { background: #dcfce7; color: #15803d; }
+
 /* ══ Our Services — Redesigned ════════════════════════════════════ */
 .vksvc-section {
   padding: 11px 0 11px;
@@ -687,9 +690,10 @@ $svcData = [
   text-decoration: none !important;
 }
 
-/* Background image */
+/* Background image (dynamic per-card URL via --vksvc-img custom property) */
 .vksvc-img {
   position: absolute; inset: 0;
+  background-image: var(--vksvc-img);
   background-size: cover;
   background-position: center;
   transition: transform .55s ease;
@@ -709,7 +713,7 @@ $svcData = [
 }
 .vksvc-card:hover .vksvc-overlay { opacity: .88; }
 
-/* Category label — top left */
+/* Category label — top left (dynamic per-card accent via --vksvc-accent) */
 .vksvc-cat-tag {
   position: absolute; top: 14px; left: 14px; z-index: 3;
   background: rgba(255,255,255,.90);
@@ -719,6 +723,7 @@ $svcData = [
   padding: 4px 12px;
   font-size: 11px; font-weight: 800;
   letter-spacing: .3px;
+  color: var(--vksvc-accent);
   transition: background .2s;
 }
 .vksvc-card:hover .vksvc-cat-tag { background: rgba(255,255,255,1); }
@@ -737,10 +742,11 @@ $svcData = [
   line-height: 1.2;
 }
 
-/* Accent bar — bottom */
+/* Accent bar — bottom (dynamic per-card accent via --vksvc-accent) */
 .vksvc-accent-bar {
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 3px;
+  background: var(--vksvc-accent);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform .32s ease;
