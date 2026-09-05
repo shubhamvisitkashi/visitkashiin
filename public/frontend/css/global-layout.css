@@ -245,6 +245,46 @@ header .upper-head .contact-info a:hover {
 /* Book Now CTA — hidden globally; homepage.css shows + styles it */
 .vk-nav__cta { display: none !important; }
 
+/* Login — visible on every page (unlike Book Now, which is homepage-only) */
+.vk-nav__login {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  margin-left: 14px;
+  padding: 9px 18px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.28);
+  border-radius: 50px;
+  color: #fff !important;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.vk-nav__login:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.45); color: #fff !important; transform: translateY(-1px); }
+@media(max-width:991px) { .vk-nav__login { display: none !important; } }
+
+/* Login — mobile drawer variant, sits above the WhatsApp button */
+.vk-drawer__login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px 20px;
+  margin-bottom: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 12px;
+  text-decoration: none !important;
+  transition: background 0.2s, transform 0.2s;
+}
+.vk-drawer__login:hover { background: rgba(255,255,255,0.16); transform: translateY(-1px); color: #fff !important; }
+
 /* Kill slicknav — replaced by vk-drawer */
 #slicknav-mobile,
 .slicknav_menu { display: none !important; }

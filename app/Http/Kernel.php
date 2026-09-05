@@ -69,5 +69,8 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         'calendar.pin'       => \App\Http\Middleware\CalendarPinGuard::class,
+        'auth.customer'      => \App\Http\Middleware\CustomerAuthenticate::class,
+        'customer.active'    => \App\Http\Middleware\EnsureCustomerActive::class,
+        'guest.customer'     => \App\Http\Middleware\RedirectIfCustomerAuthenticated::class,
     ];
 }
