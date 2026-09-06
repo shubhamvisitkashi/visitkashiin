@@ -47,7 +47,13 @@
     // The bare /boat category page (no subcategory) — scopes the boat-specific
     // topical content/FAQ/H1/schema override to this one page only.
     $isBoatMainPage = $isBoatCat && !$sub_category;
-    $breadcrumbLabel = $isBoatMainPage ? 'Boat Booking in Varanasi' : $catLabel;
+    // The bare /cab category page (no subcategory) — same treatment, scoped
+    // to this one page so individual vehicle hubs (Innova Crysta, Ertiga,
+    // Swift Dzire) keep targeting their own specific keywords.
+    $isCabMainPage = $isCabCat && !$sub_category;
+    // The bare /packages category page (no subcategory) — same treatment.
+    $isPackageMainPage = $isPackageCat && !$sub_category;
+    $breadcrumbLabel = $isBoatMainPage ? 'Boat Booking in Varanasi' : ($isCabMainPage ? 'Cab Booking in Varanasi' : ($isPackageMainPage ? 'Varanasi Tour Packages' : $catLabel));
 
     // This generic listing template is shared by every category/subcategory
     // combination on the site. $cabHubs is the single source of truth for
@@ -226,6 +232,23 @@
             ['q' => 'What is the distance from Varanasi to Prayagraj by cab?', 'a' => 'Varanasi to Prayagraj (Allahabad) is approximately 120–130 km and takes 2.5–3.5 hours by road. Visit Kashi offers one-way and return cab bookings for this route.'],
             ['q' => 'How do I book a cab in Varanasi through Visit Kashi?', 'a' => 'Browse the cab listings, select your preferred vehicle type, and use the enquiry or WhatsApp button. Our team confirms the booking with the driver details shared in advance — no surprise charges.'],
         ];
+    } elseif ($isPackageMainPage) {
+        $faqs = [
+            ['q' => 'What Varanasi tour packages are available?',
+             'a' => 'Packages range from a 1-night short visit to a 4-night in-depth stay, plus a combined Kashi, Prayagraj and Ayodhya pilgrimage tour and custom family/group packages. See the price table above for current starting rates.'],
+            ['q' => 'What is included in a Varanasi tour package?',
+             'a' => 'Inclusions vary by package, but generally cover hotel accommodation, a car with driver for sightseeing and transfers, and airport or railway station pickup and drop. Meals, temple entry fees and boat ride charges are sometimes separate — check the individual package listing for specifics.'],
+            ['q' => 'Does the tour package include the Ganga Aarti?',
+             'a' => 'Yes, the evening Ganga Aarti at Dashashwamedh Ghat is part of the standard Varanasi sightseeing covered in these packages.'],
+            ['q' => 'Can I visit Prayagraj and Ayodhya along with Varanasi?',
+             'a' => 'Yes, the Kashi, Prayagraj & Ayodhya tour package combines all three cities in one trip, including the Triveni Sangam in Prayagraj and Ram Janmabhoomi Mandir in Ayodhya.'],
+            ['q' => 'Can I customise a Varanasi tour package for my family or group?',
+             'a' => 'Yes, family and group packages can be adjusted around your preferred pace, hotel category and group size — mention your requirements when you enquire.'],
+            ['q' => 'How do I book a Varanasi tour package online?',
+             'a' => 'Open the package listing you want, fill in the enquiry form with your travel dates and group size, or message us on WhatsApp. Our team confirms the itinerary and final price before you book.'],
+            ['q' => 'How much does a Varanasi tour package cost?',
+             'a' => 'Starting prices depend on duration and package type — see the price table above. The final cost depends on hotel category, group size and any add-ons like meals or a longer itinerary.'],
+        ];
     } else {
         $faqs = [
             ['q' => 'What ' . strtolower($catLabel ?: 'experiences') . ' are available in Varanasi?',
@@ -269,10 +292,14 @@
         @endif
       ]
     },
-    @if($isBoatMainPage)
+    @if($isBoatMainPage || $isCabMainPage || $isPackageMainPage)
     {{-- WebPage + Service — references the existing global Organization
          (TravelAgency, declared once in the site layout) by name/url rather
          than redeclaring it, to avoid duplicate/conflicting schema. --}}
+    @php
+        $hubServiceType = $isBoatMainPage ? 'Boat Booking' : ($isCabMainPage ? 'Cab Booking' : 'Tour Package');
+        $hubServiceName = $isBoatMainPage ? 'Boat Booking in Varanasi' : ($isCabMainPage ? 'Cab Booking in Varanasi' : 'Varanasi Tour Packages');
+    @endphp
     {
       "@type": "WebPage",
       "@id": "{{ $canonicalUrl }}#webpage",
@@ -285,8 +312,8 @@
     {
       "@type": "Service",
       "@id": "{{ $canonicalUrl }}#service",
-      "serviceType": "Boat Booking",
-      "name": "Boat Booking in Varanasi",
+      "serviceType": "{{ $hubServiceType }}",
+      "name": "{{ $hubServiceName }}",
       "description": "{!! $jsonEsc(Str::limit($listingDesc, 200)) !!}",
       "provider": { "@type": "Organization", "name": "Visit Kashi", "url": "{{ url('/') }}" },
       "areaServed": { "@type": "City", "name": "Varanasi" },
@@ -348,7 +375,7 @@
 @endsection
 
 @push('styles')
-@if($activeCabHub || $isBoatMainPage)
+@if($activeCabHub || $isBoatMainPage || $isCabMainPage || $isPackageMainPage)
 <link rel="stylesheet" href="{{ asset('frontend/css/topic-cluster.min.css') }}?v={{ filemtime(public_path('frontend/css/topic-cluster.min.css')) }}">
 @endif
 <style>
@@ -723,6 +750,8 @@
         <h1 class="vkl-hero__title">
             @if($activeCabHub){{ $activeCabHub['vehicleName'] }} Cab Booking in Varanasi
             @elseif($isBoatMainPage)Boat Booking in Varanasi – Ganga Aarti, Sunrise &amp; Private Boat Rides
+            @elseif($isCabMainPage)Cab Booking in Varanasi – Airport, Local &amp; Outstation Taxi
+            @elseif($isPackageMainPage)Varanasi Tour Packages – Kashi, Prayagraj &amp; Ayodhya Tours
             @else{{ $seoTitle }} in Varanasi
             @endif
         </h1>
@@ -730,6 +759,8 @@
         <p class="vkl-hero__desc">
             @if($activeCabHub)Comfortable {{ $activeCabHub['vehicleName'] }} cab service for airport transfers, local sightseeing and outstation trips from Varanasi to Ayodhya, Prayagraj, Vindhyachal, Bodhgaya and Lucknow.
             @elseif($isBoatMainPage)Book a boat ride in Varanasi for the evening Ganga Aarti, a sunrise ride on the Ganga, or a private boat for your group — with transparent pricing and easy online booking through VisitKashi.
+            @elseif($isCabMainPage)Book a cab in Varanasi for airport transfers, local sightseeing or outstation trips — choose from Swift Dzire, Ertiga, Innova Crysta and Tempo Traveller, with transparent pricing and easy online booking.
+            @elseif($isPackageMainPage)Book a Varanasi tour package covering the ghats, evening Ganga Aarti, Kashi Vishwanath Temple and Sarnath — with combined trips to Prayagraj and Ayodhya also available.
             @else{{ Str::limit($listingDesc, 160) }}
             @endif
         </p>
@@ -821,8 +852,8 @@
                     </svg>
                     @endfor
                 </div>
-                <span class="vkl-star-val">{{ $isCabCat ? '4.9' : '4.8' }}</span>
-                <span class="vkl-star-count">{{ $isCabCat ? '(600+)' : '(50+)' }}</span>
+                <span class="vkl-star-val">{{ ($isCabCat || $isBoatCat) ? '4.9' : '4.8' }}</span>
+                <span class="vkl-star-count">{{ ($isCabCat || $isBoatCat) ? '(600+)' : '(50+)' }}</span>
             </div>
 
             @if($product->address)
@@ -869,6 +900,16 @@
     <x-boat-booking-hub :products="$products" />
     @endif
 
+    {{-- ── Cab booking topical content — scoped to the bare /cab page ── --}}
+    @if($isCabMainPage)
+    <x-cab-booking-hub :products="$products" />
+    @endif
+
+    {{-- ── Tour package topical content — scoped to the bare /packages page ── --}}
+    @if($isPackageMainPage)
+    <x-package-booking-hub :products="$products" />
+    @endif
+
     {{-- ── FAQ Section ───────────────────────────────────────────────── --}}
     <section class="vkl-faq" aria-label="Frequently Asked Questions">
         <div class="vkl-faq__head">
@@ -898,6 +939,22 @@
         <h2>Book With a Local Varanasi Boat Booking Service</h2>
         <p>VisitKashi has 10 years of experience in Varanasi travel and boat booking, arranging Ganga Aarti boat rides, private boats, morning boat rides, sunset boat rides and Ganga boat tours for travellers visiting the city. Booking is enquiry-based — you tell us your date, boat type and group size, and our local team confirms availability, the pickup ghat and the final price before you travel, rather than charging an unclear rate upfront.</p>
         <p>Looking for a trusted boat booking service in Varanasi? Book your Ganga Aarti boat, private boat, morning boat ride or sunset boat ride with VisitKashi. Call us at <a href="tel:+917080109917">7080109917</a>, <a href="tel:+917080109918">7080109918</a> or <a href="tel:+917080109919">7080109919</a>.</p>
+    </section>
+    @endif
+
+    @if($isCabMainPage)
+    <section class="tc-section" aria-label="About VisitKashi cab booking">
+        <h2>Book With a Local Varanasi Cab Booking Service</h2>
+        <p>VisitKashi has 10 years of experience in Varanasi travel services, arranging airport transfers, local sightseeing cabs and outstation trips in Swift Dzire, Ertiga, Innova Crysta and Tempo Traveller vehicles. Booking is enquiry-based — you tell us your date, vehicle and route, and our local team confirms availability, the driver details and the final price before you travel.</p>
+        <p>Looking for a trusted cab booking service in Varanasi? Book your airport transfer, local sightseeing cab or outstation trip with VisitKashi. Call us at <a href="tel:+917080109917">7080109917</a>, <a href="tel:+917080109918">7080109918</a> or <a href="tel:+917080109919">7080109919</a>.</p>
+    </section>
+    @endif
+
+    @if($isPackageMainPage)
+    <section class="tc-section" aria-label="About VisitKashi tour packages">
+        <h2>Plan Your Varanasi Trip With a Local Travel Service</h2>
+        <p>VisitKashi has 10 years of experience in Varanasi travel services, putting together tour packages that cover the ghats, the evening Ganga Aarti, Kashi Vishwanath Temple and Sarnath, with combined Prayagraj and Ayodhya itineraries also available. Booking is enquiry-based — you tell us your dates and group size, and our local team confirms the itinerary, hotel category and final price before you travel.</p>
+        <p>Looking for a trusted tour package service in Varanasi? Book your Kashi tour, spiritual triangle trip or family package with VisitKashi. Call us at <a href="tel:+917080109917">7080109917</a>, <a href="tel:+917080109918">7080109918</a> or <a href="tel:+917080109919">7080109919</a>.</p>
     </section>
     @endif
 
