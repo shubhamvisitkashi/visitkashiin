@@ -64,6 +64,15 @@
 .ckbd-description { font-size:.88rem; color:#374151; line-height:1.75; }
 .ckbd-description p { margin:0 0 12px; }
 .ckbd-description strong { color:#111; }
+.ckbd-description a { color:#0f3460; font-weight:600; text-decoration:underline; }
+.ckbd-description h2, .ckbd-description h3 { font-weight:800; color:#111; margin:20px 0 10px; }
+.ckbd-description h2 { font-size:1rem; }
+.ckbd-description h3 { font-size:.94rem; }
+.ckbd-description ul, .ckbd-description ol { margin:0 0 12px; padding-left:20px; }
+.ckbd-description li { margin-bottom:6px; }
+.ckbd-description table { width:100%; border-collapse:collapse; margin:0 0 16px; font-size:.85rem; }
+.ckbd-description table td, .ckbd-description table th { padding:8px 10px; border:1px solid #e5e7eb; text-align:left; }
+.ckbd-description table tr:nth-child(even) { background:#f8faff; }
 
 /* Specs table */
 .ckbd-specs { width:100%; border-collapse:collapse; font-size:.85rem; }

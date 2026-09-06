@@ -1,5 +1,13 @@
 @extends('frontend.layouts.app')
 
+@php
+    // This detail template is shared by every boat product. These flags scope
+    // product-specific SEO content/schema (FAQ, headings) to one product each,
+    // so other boat pages are unaffected.
+    $isPrivateGangaAartiMotorBoat = isset($product) && ($product->slug ?? '') === 'private-motor-boat-for-evening-ganga-aarti';
+    $isDashaswamedhGhatPickupBoat = isset($product) && ($product->slug ?? '') === 'pickup-dashaswamedh-ghat-private-boat-ride-for-evening-ganga-aarti';
+@endphp
+
 @section('meta')
     @isset($product)
         @php
@@ -8,7 +16,10 @@
             $metaImg   = (!empty($product->images) && is_array($product->images))
                 ? asset('backend/admin/product_images/'.$product->images[0])
                 : asset('backend/assets/images/placeholder.jpg');
-            $pageUrl   = url()->current();
+            // Canonical/OG url always points at the production domain (never /public/),
+            // matching the pattern already used in frontend.boat_listing.
+            $subSlugForUrl = optional($product->subCategory)->slug ?? 'motor-boat';
+            $pageUrl   = 'https://visitkashi.in/boat/'.$subSlugForUrl.'/'.$product->slug;
             $displayP  = ($product->discounted_price ?? 0) > 0 ? $product->discounted_price : ($product->base_price ?? 0);
         @endphp
         <link rel="canonical" href="{{ $pageUrl }}">
@@ -58,7 +69,10 @@
         }
         </script>
 
-        {{-- JSON-LD: FAQPage Schema --}}
+        {{-- JSON-LD: FAQPage Schema (generic) — suppressed for pages that ship their
+             own FAQPage schema further down, matching the FAQ actually visible on
+             that page (see $isPrivateGangaAartiMotorBoat / $isDashaswamedhGhatPickupBoat). --}}
+        @unless($isPrivateGangaAartiMotorBoat || $isDashaswamedhGhatPickupBoat)
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
@@ -92,6 +106,7 @@
             ]
         }
         </script>
+        @endunless
 
         {{-- JSON-LD: TouristAttraction + LocalBusiness --}}
         <script type="application/ld+json">
@@ -159,7 +174,7 @@
         }
         </script>
 
-        {{-- JSON-LD: Breadcrumb Schema --}}
+        {{-- JSON-LD: Breadcrumb Schema — kept in sync with the visible breadcrumb below --}}
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
@@ -167,7 +182,8 @@
             "itemListElement": [
                 {"@type": "ListItem","position": 1,"name": "Home","item": "{{ url('/') }}"},
                 {"@type": "ListItem","position": 2,"name": "{{ addslashes(optional($product->category)->name ?? 'Boat') }}","item": "{{ url('/boat') }}"},
-                {"@type": "ListItem","position": 3,"name": "{{ addslashes($product->name) }}","item": "{{ $pageUrl }}"}
+                {"@type": "ListItem","position": 3,"name": "{{ addslashes(optional($product->subCategory)->name ?? 'Motor Boat') }}","item": "{{ url('/boat/'.$subSlugForUrl) }}"},
+                {"@type": "ListItem","position": 4,"name": "{{ addslashes($product->name) }}","item": "{{ $pageUrl }}"}
             ]
         }
         </script>
@@ -207,12 +223,23 @@
 
     $isDevDiwali = str_contains(strtolower($subSlug), 'dev-diwali')
                    && now()->lte(\Carbon\Carbon::parse('2026-11-24')->endOfDay());
+
+    // Distinct, descriptive ALT text for this product's gallery photos (falls back
+    // to the generic "<name> – Photo N" pattern used by every other boat product).
+    $galleryAlts = $isPrivateGangaAartiMotorBoat ? [
+        'Private motor boat for Evening Ganga Aarti in Varanasi',
+        'Evening Ganga Aarti viewed from a private boat in Varanasi',
+        'Private motor boat ride on the Ganga River, Varanasi',
+    ] : [];
+    $galleryAlt = fn($i) => $galleryAlts[$i] ?? ($product->name.' – Photo '.($i + 1));
 @endphp
 
 {{-- Breadcrumb --}}
 <div class="vkbd-breadcrumb">
     <div class="container">
         <a href="{{ url('/') }}">Home</a>
+        <span>/</span>
+        <a href="{{ url('/'.$catSlug) }}">{{ $catName }}</a>
         <span>/</span>
         <a href="{{ route('product.sub.list', [$catSlug, $subSlug]) }}">{{ $subName }}</a>
         <span>/</span>
@@ -236,21 +263,25 @@
         </div>
     </div>
 
+    @if($isPrivateGangaAartiMotorBoat)
+    <p class="vkbd-intro-text">Book a <strong>private motor boat for Evening Ganga Aarti</strong> in Varanasi and watch the world-famous Ganga Aarti from the River Ganga — without sharing your boat with other travellers. The boat is positioned in front of the Ganga Aarti ceremony at Dashaswamedh / Lalita Ghat, giving you a peaceful river view of the diyas, temple bells and chants as the aarti unfolds. Ideal for couples, families and small groups, this private <a href="{{ route('product.detail', ['boat','motor-boat','evening-boat-ride-in-varanasi']) }}" class="vkbd-cat-link">evening boat ride</a> can be booked online or confirmed instantly on WhatsApp.</p>
+    @endif
+
     {{-- Gallery --}}
     <div class="vkbd-gallery" id="vkbdGallery">
         <div class="vkbd-gallery-item vkbd-gallery-hero" onclick="vkLbOpen(0)">
-            <img src="{{ $imgUrls[0] }}" alt="{{ $product->name }} – Photo 1" loading="eager"
+            <img src="{{ $imgUrls[0] }}" alt="{{ $galleryAlt(0) }}" loading="eager"
                  onerror="this.src='{{ $fallback }}'">
         </div>
         @if(isset($imgUrls[1]))
         <div class="vkbd-gallery-item" onclick="vkLbOpen(1)">
-            <img src="{{ $imgUrls[1] }}" alt="{{ $product->name }} – Photo 2" loading="lazy"
+            <img src="{{ $imgUrls[1] }}" alt="{{ $galleryAlt(1) }}" loading="lazy"
                  onerror="this.src='{{ $fallback }}'">
         </div>
         @endif
         @if(isset($imgUrls[2]))
         <div class="vkbd-gallery-item" onclick="vkLbOpen(2)">
-            <img src="{{ $imgUrls[2] }}" alt="{{ $product->name }} – Photo 3" loading="lazy"
+            <img src="{{ $imgUrls[2] }}" alt="{{ $galleryAlt(2) }}" loading="lazy"
                  onerror="this.src='{{ $fallback }}'">
         </div>
         @endif
@@ -341,7 +372,7 @@
             <div class="vkbd-divider"></div>
 
             {{-- Specs table --}}
-            <h2 class="vkbd-section-title">Varanasi Boat Ride – Pricing, Timings &amp; Booking Details</h2>
+            <h2 class="vkbd-section-title">{{ $isPrivateGangaAartiMotorBoat ? 'Private Motor Boat Capacity & Pricing' : 'Varanasi Boat Ride – Pricing, Timings & Booking Details' }}</h2>
             <table class="vkbd-specs" itemscope itemtype="https://schema.org/Service">
                 <tr>
                     <td class="vkbd-spec-label">Reporting Point</td>
@@ -349,7 +380,7 @@
                 </tr>
                 <tr>
                     <td class="vkbd-spec-label">Ganga Aarti</td>
-                    <td class="vkbd-spec-val"><i class="fa fa-clock-o"></i>Evening – Dashashwamedh Ghat <span class="vkbd-spec-note">(5:00 PM – 7:30 PM)</span></td>
+                    <td class="vkbd-spec-val"><i class="fa fa-clock-o"></i>Evening – Dashashwamedh Ghat <span class="vkbd-spec-note">(7:00 PM – 7:45 PM)</span></td>
                 </tr>
                 <tr>
                     <td class="vkbd-spec-label">Price</td>
@@ -368,7 +399,7 @@
                 </tr>
                 <tr>
                     <td class="vkbd-spec-label">Capacity</td>
-                    <td class="vkbd-spec-val"><i class="fa fa-users"></i>Up to 30 persons (extra @ ₹300/person)</td>
+                    <td class="vkbd-spec-val"><i class="fa fa-users"></i>Up to 10 persons (extra @ ₹500/person)</td>
                 </tr>
                 <tr>
                     <td class="vkbd-spec-label">Duration</td>
@@ -400,11 +431,44 @@
                 <li><i class="fa fa-check-circle"></i> Photo stops at key scenic ghats</li>
             </ul>
 
-            @if($product->youtube_link)
+            {{-- ── Evening Ganga Aarti Private Motor Boat — dedicated SEO content ── --}}
+            @if($isPrivateGangaAartiMotorBoat)
             <div class="vkbd-divider"></div>
-            <h2 class="vkbd-section-title">Watch the Experience</h2>
-            <div class="vkbd-video-wrap">
-                <iframe src="{{ $product->youtube_link }}" allowfullscreen loading="lazy"></iframe>
+            <div class="vkbd-event-content">
+                <h2 class="vkbd-section-title">Experience Evening Ganga Aarti from a Private Boat</h2>
+                <p>Watching the <strong>evening Ganga Aarti from a private motor boat</strong> is one of the most memorable ways to see this centuries-old ritual. As the sun sets over the River Ganga, your boat is positioned on the river in front of the ceremony at Dashaswamedh / Lalita Ghat — close enough to see the priests, the flaming diyas, and hear the temple bells and chants, without needing to stand in the crowd gathered on the ghat steps. Because the boat is private, it's just you, your family or group, and the boatman — no sharing with strangers.</p>
+
+                <h3 class="vkbd-sub-title">Private Boat Ride Along the Varanasi Ghats</h3>
+                <p>Before the aarti begins, your private motor boat cruises along the Varanasi riverfront, giving you a water-level view of the historic ghats that line the Ganga — the same stretch of river that has been central to life in Kashi for centuries.</p>
+
+                <h4 class="vkbd-h4-title">Assi Ghat to Namo Ghat Boat Ride</h4>
+                <p>The full private boat route runs along the Varanasi riverfront from <strong>Assi Ghat to Namo Ghat</strong> — a stretch of roughly 7 km. Explore the historic ghats along the Assi Ghat to Namo Ghat riverfront route before your boat is positioned for the evening Ganga Aarti.</p>
+
+                <h4 class="vkbd-h4-title">Important Ghats You Can See</h4>
+                <p>Depending on your pickup point and route, ghats along the way include Assi Ghat, Tulsi Ghat, Shivala Ghat, Harishchandra Ghat, Kedar Ghat, <strong>Dashashwamedh Ghat</strong>, <strong>Manikarnika Ghat</strong>, Rajendra Prasad Ghat and on to <strong>Namo Ghat</strong>.</p>
+
+                <h3 class="vkbd-sub-title">Evening Boat Ride – Timings &amp; Itinerary</h3>
+                <ol class="vkbd-steps">
+                    <li><strong>Reporting:</strong> Arrive at your selected pickup ghat around 5:30 PM.</li>
+                    <li><strong>Boat Departure:</strong> Your private motor boat departs at approximately 5:45 PM.</li>
+                    <li><strong>Ghat Sightseeing:</strong> Cruise along the Varanasi riverfront, viewing the ghats along the way.</li>
+                    <li><strong>Ganga Aarti:</strong> The boat is positioned in front of the Ganga Aarti ceremony at Dashaswamedh / Lalita Ghat for the 7:00 PM – 7:45 PM aarti.</li>
+                    <li><strong>Return:</strong> The boat returns to the pickup ghat once the ceremony ends, at approximately 7:45 PM.</li>
+                </ol>
+                <p class="vkbd-text-muted">Reporting time and route can vary slightly depending on your pickup ghat, river conditions and season — our team confirms the exact schedule on WhatsApp at the time of booking.</p>
+
+                <h3 class="vkbd-sub-title">Best Pickup Points for Evening Ganga Aarti</h3>
+                <p>This private motor boat can be picked up from <a href="{{ route('product.detail', ['boat','motor-boat','pickup-assi-ghat-private-boat-ride-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">Assi Ghat</a>, <a href="{{ route('product.detail', ['boat','motor-boat','pickup-dashaswamedh-ghat-private-boat-ride-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">Dashaswamedh Ghat</a>, <a href="{{ route('product.detail', ['boat','motor-boat','pickup-namo-ghat-private-boat-ride-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">Namo Ghat</a>, Ravidas Ghat and other nearby ghats — select your nearest pickup ghat in the booking form and our team will confirm the exact reporting point on WhatsApp.</p>
+
+                <h3 class="vkbd-sub-title">How to Book This Private Motor Boat</h3>
+                <ol class="vkbd-steps">
+                    <li>Fill in the booking form on this page with your date, time slot, number of guests and pickup ghat.</li>
+                    <li>Our team confirms availability and price on WhatsApp or by phone call.</li>
+                    <li>Confirm your booking — no advance payment is required to enquire.</li>
+                    <li>Arrive at your pickup ghat at the reporting time shared by our team and enjoy your private evening boat ride.</li>
+                </ol>
+
+                <p>Looking for other ways to see the Ganga Aarti? You can also check our <a href="{{ route('product.detail', ['boat','motor-boat','evening-boat-ride-in-varanasi']) }}" class="vkbd-cat-link">evening boat ride in Varanasi</a> (shared/group option) or the traditional <a href="{{ route('product.detail', ['boat','bajra-boat','private-bajra-boat-for-ganga-aarti']) }}" class="vkbd-cat-link">private Bajra boat for Ganga Aarti</a>.</p>
             </div>
             @endif
 
@@ -470,32 +534,20 @@
             </div>
             @endif
 
-            {{-- ── YouTube Video Gallery ── --}}
-            @isset($youtubeVideos)
-            @if($youtubeVideos->isNotEmpty() || $product->youtube_link)
+            {{-- ── Watch the Experience — reusable video slider component ──
+                 Combines this product's related YoutubeVideo rows with the
+                 legacy single youtube_link field (if set) into one list, so
+                 the section never renders twice for the same product. ── --}}
+            @php
+                $experienceVideos = isset($youtubeVideos) ? $youtubeVideos : collect();
+                if ($experienceVideos->isEmpty() && $product->youtube_link) {
+                    $experienceVideos = collect([new \App\Models\YoutubeVideo(['youtube_url' => $product->youtube_link, 'title' => $product->name])]);
+                }
+            @endphp
+            @if($experienceVideos->isNotEmpty())
             <div class="vkbd-divider"></div>
-            <h2 class="vkbd-section-title">Watch the Experience</h2>
-            <div class="vkbd-yt-grid">
-                @foreach($youtubeVideos as $vid)
-                @if($vid->video_id)
-                <div class="vkbd-yt-card" onclick="vkYtOpen('{{ $vid->embed_url }}')">
-                    <div class="vkbd-yt-thumb">
-                        <img src="{{ $vid->thumbnail }}" alt="{{ e($vid->title ?? $product->name.' – Video') }}" loading="lazy">
-                        <div class="vkbd-yt-play">&#9654;</div>
-                    </div>
-                    @if($vid->title)<p class="vkbd-yt-title">{{ $vid->title }}</p>@endif
-                </div>
-                @endif
-                @endforeach
-
-                @if($youtubeVideos->isEmpty() && $product->youtube_link)
-                <div class="vkbd-video-wrap">
-                    <iframe src="{{ $product->youtube_link }}" allowfullscreen loading="lazy" title="{{ $product->name }} Video"></iframe>
-                </div>
-                @endif
-            </div>
+            <x-video-slider :videos="$experienceVideos" :item-name="$product->name" />
             @endif
-            @endisset
 
             {{-- ── Instagram Reels ── --}}
             @isset($instagramReels)
@@ -524,7 +576,7 @@
 
             {{-- ── Trust & Reviews Section ── --}}
             <div class="vkbd-trust-section">
-                <h2 class="vkbd-section-title">Why 10,000+ Guests Trust Visit Kashi</h2>
+                <h2 class="vkbd-section-title">{{ $isPrivateGangaAartiMotorBoat ? 'Why Book Your Private Ganga Aarti Boat with Visit Kashi?' : 'Why 10,000+ Guests Trust Visit Kashi' }}</h2>
                 <div class="vkbd-trust-grid">
                     <div class="vkbd-trust-card">
                         <div class="vkbd-trust-icon">&#9733;</div>
@@ -581,6 +633,147 @@
             <div class="vkbd-divider"></div>
 
             {{-- FAQ --}}
+            @if($isPrivateGangaAartiMotorBoat)
+            <h2 class="vkbd-section-title">Frequently Asked Questions — Private Motor Boat for Evening Ganga Aarti</h2>
+            <div class="vkbd-faq">
+                @php
+                $faqs = [
+                    ['How can I book a private motor boat for Evening Ganga Aarti in Varanasi?',
+                     'Fill in the booking form on this page with your travel date, time slot, number of guests and pickup ghat, then submit — our team confirms your booking on WhatsApp or by phone call. You can also message or call us directly to book.'],
+                    ['How much does a private motor boat for Ganga Aarti cost?',
+                     'The price starts at ₹'.($displayPrice > 0 ? number_format($displayPrice) : '3,499').'/- for up to 10 persons on a private boat. Additional passengers beyond 10 are charged ₹500 per person. Final pricing can vary by date and availability — our team confirms the exact amount on WhatsApp before you book.'],
+                    ['What time should I report for the Evening Ganga Aarti boat ride?',
+                     'Reporting time is around 5:30 PM at your selected pickup ghat, with the boat departing at approximately 5:45 PM. Our team confirms the exact timing for your date at the time of booking.'],
+                    ['Can I book a private boat for my family?',
+                     'Yes. The boat is private for your group only — ideal for families, couples and small groups. Life jackets are provided for every passenger, including children.'],
+                    ['How many people can travel in the private motor boat?',
+                     'The base price includes up to 10 persons. Larger groups can be accommodated for an additional ₹500 per extra person — select your group size in the booking form for an instant price estimate.'],
+                    ['Can I see Ganga Aarti from the boat?',
+                     'Yes. During the ceremony, the boat is positioned on the river in front of the Ganga Aarti at Dashaswamedh / Lalita Ghat, giving you an open river view of the diyas, chants and temple bells.'],
+                    ['Which ghat is best for watching Ganga Aarti from a boat?',
+                     'The Ganga Aarti is performed at Dashashwamedh Ghat and Rajendra Prasad Ghat, and this is where your private boat is positioned during the 7:00 PM – 7:45 PM ceremony.'],
+                    ['Can I book a private boat from Assi Ghat?',
+                     'Yes, Assi Ghat is one of the supported pickup points for this private evening Ganga Aarti boat ride.'],
+                    ['Can I book a private boat from Dashashwamedh Ghat?',
+                     'Yes, Dashaswamedh Ghat is a supported pickup point, and it is also where the boat is positioned during the Aarti ceremony.'],
+                    ['Can I book a private boat from Namo Ghat?',
+                     'Yes, Namo Ghat is one of the supported pickup points for this private motor boat ride.'],
+                    ['Does the private boat cover the 84 Ghats of Varanasi?',
+                     'The full route runs along the Assi Ghat to Namo Ghat riverfront stretch, covering the historic ghats of Kashi along the way. Exact ghats seen depend on your pickup point and route on the day.'],
+                    ['How long is the evening boat ride?',
+                     'The ride runs for around two hours, from approximately 5:45 PM to 7:45 PM, including the Ganga Aarti viewing.'],
+                    ['Is the boat private or shared?',
+                     'This boat is completely private — it is not shared with other travellers or groups.'],
+                    ['Are life jackets provided?',
+                     'Yes, life jackets are provided for every passenger, including children.'],
+                    ['Can I book the boat online?',
+                     'Yes, you can book online using the form on this page. Our team confirms availability and pricing on WhatsApp or by phone.'],
+                    ['How do I confirm my booking?',
+                     'After you submit the enquiry form (or message us on WhatsApp), our team checks availability for your chosen date and time slot and confirms the booking with you directly.'],
+                    ['Can I contact Visit Kashi on WhatsApp?',
+                     'Yes, use the "Send Enquiry on WhatsApp" button on this page, or message/call us directly — our team is available to help with bookings and questions.'],
+                    ['Is the price fixed for all dates?',
+                     'The base price shown on this page applies under normal availability. On high-demand dates or festivals, pricing and boat availability may vary — our team confirms the exact price for your date on WhatsApp.'],
+                    ['Can I book the boat on the same day?',
+                     'Same-day booking may be possible subject to availability, especially in high season. Contact us on WhatsApp or by phone to check availability for today or tomorrow.'],
+                    ['What happens if weather conditions affect the boat ride?',
+                     'River and boat operations depend on safe weather and water conditions. If conditions are unsafe on your travel date, our team will advise on rescheduling — contact us on WhatsApp for the current status before you travel.'],
+                ];
+                @endphp
+                @foreach($faqs as $i => $faq)
+                <div class="vkbd-faq-item {{ $i === 0 ? 'open' : '' }}">
+                    <div class="vkbd-faq-q" onclick="vkFaqToggle(this)">
+                        <h3>{{ $faq[0] }}</h3>
+                        <div class="vkbd-faq-icon">&#8964;</div>
+                    </div>
+                    <div class="vkbd-faq-a">{{ $faq[1] }}</div>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- JSON-LD: FAQPage — mirrors the FAQ section directly above, exactly --}}
+            <script type="application/ld+json">
+            {!! json_encode([
+                '@context'   => 'https://schema.org',
+                '@type'      => 'FAQPage',
+                'mainEntity' => array_map(fn($f) => [
+                    '@type'          => 'Question',
+                    'name'           => $f[0],
+                    'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+                ], $faqs),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+            </script>
+            @elseif($isDashaswamedhGhatPickupBoat)
+            <h2 class="vkbd-section-title">Frequently Asked Questions About Private Motor Boat &amp; Ganga Aarti Boat Booking in Varanasi</h2>
+            <div class="vkbd-faq">
+                @php
+                $faqs = [
+                    ['How can I book a private motor boat for Evening Ganga Aarti in Varanasi?',
+                     'Fill in the booking form on this page with your travel date, number of guests and pickup preference, then submit — our team confirms your booking on WhatsApp or by phone call. You can also message us directly on WhatsApp to book.'],
+                    ['Can I book a private boat for Ganga Aarti from Dashashwamedh Ghat?',
+                     'Yes. This private motor boat is set up for pickup from Dashaswamedh Ghat, which is also where the boat is positioned during the evening Ganga Aarti ceremony.'],
+                    ['How much does Ganga Aarti boat booking cost in Varanasi?',
+                     'Pricing depends on the route and group size — see the price shown above for the current starting rate on this boat. Our team confirms the exact amount for your date and group size on WhatsApp before you book.'],
+                    ['What is the best boat for watching Ganga Aarti in Varanasi?',
+                     'A private motor boat positioned near Dashashwamedh Ghat during the 7:00 PM – 7:45 PM ceremony gives you a clear river view of the Aarti without needing to stand in the crowd on the ghat steps.'],
+                    ['What time should I book an evening boat ride for Ganga Aarti?',
+                     'Reporting time is around 5:30 PM at Dashaswamedh Ghat, with the boat departing at approximately 5:45 PM and returning by around 7:45 PM, after the Ganga Aarti ceremony ends.'],
+                    ['Is the motor boat private or shared for Ganga Aarti?',
+                     'This boat is completely private — it is not shared with other travellers or groups.'],
+                    ['Can I book a private motor boat online in Varanasi?',
+                     'Yes, you can start your booking online using the form on this page. Our team follows up on WhatsApp or by phone to confirm availability and pricing.'],
+                    ['How long is the Evening Ganga Aarti boat ride in Varanasi?',
+                     'The ride runs for around two hours, from approximately 5:45 PM to 7:45 PM, including the time positioned for the Ganga Aarti.'],
+                    ['Which ghat is best for a private Ganga Aarti boat ride?',
+                     'Dashashwamedh Ghat is where the main evening Ganga Aarti is performed, which is why it is a popular pickup point and viewing position for this private boat ride.'],
+                    ['Can I book a private motor boat from Dashashwamedh Ghat online?',
+                     'Yes, this page is set up for private motor boat booking with pickup from Dashaswamedh Ghat — fill in the form or message us on WhatsApp to check availability for your date.'],
+                    ['Which ghats can I see during this boat ride?',
+                     'Depending on the route, this ride can cover ghats including Assi Ghat, Tulsi Ghat, Shivala Ghat, Harishchandra Ghat, Dashashwamedh Ghat, Manikarnika Ghat and on towards Namo Ghat.'],
+                    ['Does this boat ride cover all 84 Ghats of Varanasi?',
+                     'A longer route option covering the Assi Ghat to Namo Ghat stretch (the 84-ghats route) is available in addition to the shorter route — ask our team on WhatsApp for the current price difference between routes.'],
+                    ['How many people can travel on this private motor boat?',
+                     'This private motor boat is set up for small to mid-sized groups. Exact seating capacity and any charges for additional guests beyond the base group size are confirmed on WhatsApp at the time of booking.'],
+                    ['Can I book this boat for a family or couple?',
+                     'Yes, this private boat is suitable for families, couples and small groups travelling together, since the entire boat is booked for your group only.'],
+                    ['Are life jackets provided on the boat?',
+                     'Yes, life jackets are provided for passengers on board.'],
+                    ['Can I book this boat on the same day?',
+                     'Same-day booking may be possible depending on availability, especially on weekends and during high-demand periods. Contact us on WhatsApp or by phone to check availability for today or tomorrow.'],
+                    ['How far in advance should I book this private boat?',
+                     'Booking a few days ahead is recommended, particularly for weekends and festival dates when boats are in higher demand. Contact our team on WhatsApp to check current availability for your travel date.'],
+                    ['What happens if weather conditions affect the boat ride?',
+                     'River and boat operations depend on safe weather and water conditions. If conditions are unsafe on your travel date, our team will advise on the situation — contact us on WhatsApp before you travel to confirm.'],
+                    ['How do I confirm my booking, and can I contact Visit Kashi on WhatsApp?',
+                     'After you submit the enquiry form, our team checks availability for your date and confirms the booking with you directly. You can reach us on WhatsApp or by call at +91-7080109917, 7080109918 or 7080109919.'],
+                    ['Why book a private Ganga Aarti boat with Visit Kashi?',
+                     'For a private motor boat experience for Evening Ganga Aarti in Varanasi, travellers can book through Visit Kashi, a Varanasi-focused travel booking website offering boat, cab, hotel and tour services, with WhatsApp booking confirmation and a local team on call for your travel dates.'],
+                ];
+                @endphp
+                @foreach($faqs as $i => $faq)
+                <div class="vkbd-faq-item {{ $i === 0 ? 'open' : '' }}">
+                    <div class="vkbd-faq-q" onclick="vkFaqToggle(this)">
+                        <h3>{{ $faq[0] }}</h3>
+                        <div class="vkbd-faq-icon">&#8964;</div>
+                    </div>
+                    <div class="vkbd-faq-a">{{ $faq[1] }}</div>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- JSON-LD: FAQPage — mirrors the FAQ section directly above, exactly --}}
+            <script type="application/ld+json">
+            {!! json_encode([
+                '@context'   => 'https://schema.org',
+                '@type'      => 'FAQPage',
+                'mainEntity' => array_map(fn($f) => [
+                    '@type'          => 'Question',
+                    'name'           => $f[0],
+                    'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+                ], $faqs),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+            </script>
+            @else
             <h2 class="vkbd-section-title">Frequently Asked Questions — Event Boat Booking Varanasi</h2>
             <div class="vkbd-faq">
                 @php
@@ -630,13 +823,14 @@
                 @foreach($faqs as $i => $faq)
                 <div class="vkbd-faq-item {{ $i === 0 ? 'open' : '' }}">
                     <div class="vkbd-faq-q" onclick="vkFaqToggle(this)">
-                        <span>{{ $faq[0] }}</span>
+                        <h3>{{ $faq[0] }}</h3>
                         <div class="vkbd-faq-icon">&#8964;</div>
                     </div>
                     <div class="vkbd-faq-a">{{ $faq[1] }}</div>
                 </div>
                 @endforeach
             </div>
+            @endif
 
             <div class="vkbd-divider"></div>
 
@@ -1017,16 +1211,6 @@
 
 </div>{{-- /container --}}
 
-{{-- YouTube Video Popup Modal --}}
-<div class="vkyt-modal" id="vkytModal">
-    <div class="vkyt-modal-inner">
-        <button class="vkyt-modal-close" onclick="vkYtClose()">&#x2715;</button>
-        <div class="vkyt-iframe-wrap">
-            <iframe id="vkytIframe" src="" allowfullscreen frameborder="0" title="YouTube Video"></iframe>
-        </div>
-    </div>
-</div>
-
 {{-- Mobile sticky bar --}}
 <div class="vkbd-mob-bar">
     <div class="vkbd-mob-bar-info">
@@ -1271,26 +1455,6 @@
     }
     @endif
 
-    /* ── YouTube popup ── */
-    var ytModal   = document.getElementById('vkytModal');
-    var ytIframe  = document.getElementById('vkytIframe');
-    window.vkYtOpen = function(embedUrl) {
-        ytIframe.src = embedUrl;
-        ytModal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    };
-    window.vkYtClose = function() {
-        ytIframe.src = '';
-        ytModal.classList.remove('open');
-        document.body.style.overflow = '';
-    };
-    if (ytModal) {
-        ytModal.addEventListener('click', function(e) { if (e.target === ytModal) vkYtClose(); });
-    }
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && ytModal && ytModal.classList.contains('open')) vkYtClose();
-    });
-
 })();
 </script>
 
@@ -1320,34 +1484,9 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-{{-- VideoObject Schema for YouTube Videos --}}
-@isset($youtubeVideos)
-@if($youtubeVideos->isNotEmpty())
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "{{ addslashes($product->name) }} – Videos",
-    "itemListElement": [
-        @foreach($youtubeVideos->where('video_id','!=','') as $i => $vid)
-        {
-            "@type": "VideoObject",
-            "position": {{ $i + 1 }},
-            "name": "{{ addslashes($vid->title ?? $product->name) }}",
-            "thumbnailUrl": "{{ $vid->thumbnail }}",
-            "embedUrl": "https://www.youtube.com/embed/{{ $vid->video_id }}",
-            "url": "{{ $vid->youtube_url }}",
-            "uploadDate": "{{ $vid->created_at->toIso8601String() }}",
-            "publisher": {"@type": "Organization","name": "Visit Kashi","url": "{{ url('/') }}"}
-        }{{ !$loop->last ? ',' : '' }}
-        @endforeach
-    ]
-}
-</script>
-@endif
-@endisset
-
-{{-- Extended FAQ Schema with all 20 FAQs --}}
+{{-- Extended FAQ Schema with all 20 FAQs — suppressed for pages that already ship
+     their own matching FAQPage schema right after their FAQ section above. --}}
+@unless($isPrivateGangaAartiMotorBoat || $isDashaswamedhGhatPickupBoat)
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
@@ -1377,4 +1516,5 @@ document.addEventListener('keydown', function(e) {
     ]
 }
 </script>
+@endunless
 @endpush

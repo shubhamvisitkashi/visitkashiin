@@ -17,7 +17,14 @@
         : 'Explore the best ' . $seoTitle . ' in Varanasi. Book verified, locally vetted options at the best prices with Visit Kashi — Varanasi\'s #1 travel platform.';
 
     $listingImg   = asset('frontend/images/logo1.png');
-    $canonicalUrl = url()->current();
+    // Canonical always points at the production domain (never /public/),
+    // matching the pattern already used on boat/cab product pages.
+    $canonicalPath = optional($sub_category)->slug
+        ? '/'.optional($category)->slug.'/'.optional($sub_category)->slug
+        : '/'.optional($category)->slug;
+    $canonicalUrl = 'https://visitkashi.in'.$canonicalPath;
+    // Avoid "... in Varanasi in Varanasi ..." when the meta title already names the city.
+    $listingTitleTag = stripos($listingTitle, 'varanasi') !== false ? $listingTitle : $listingTitle.' in Varanasi';
 
     $firstProduct = $products->first();
     if ($firstProduct && !empty($firstProduct->images) && is_array($firstProduct->images)) {
@@ -32,8 +39,81 @@
     $subCategories = optional($category)->subCategory ?? collect();
     $totalCount    = $products->count();
 
+    // This generic listing template is shared by every category/subcategory
+    // combination on the site. $cabHubs is the single source of truth for
+    // every "vehicle hub" page (Innova Crysta, Ertiga, Swift Dzire, ...) —
+    // add an entry here to bring a new vehicle type online with the same
+    // topical content/FAQ/H1/outstation-table treatment.
+    $cabHubs = [
+        'innova-crysta' => [
+            'vehicleName' => 'Innova Crysta', 'vehicleType' => 'AC SUV', 'capacity' => 6, 'perKm' => 18,
+            'airportPickupSlug' => 'innova-crysta-for-airport-pickup',
+            'airportDropSlug'   => 'innova-crysta-for-airport-drop',
+            'sightseeingSlug'   => 'innova-crysta-for-varanasi-local-sightseen',
+            'routes' => [
+                ['slug' => 'innova-crysta-for-varanasi-to-vindhyachal', 'label' => 'Varanasi to Vindhyachal', 'meta' => '~60 km · 2–3 hrs', 'blurb' => 'Vindhyachal cab for Vindhyavasini Temple, usually same-day'],
+                ['slug' => 'innova-crysta-for-varanasi-to-prayagraj',   'label' => 'Varanasi to Prayagraj',   'meta' => '~150 km · 2–3 hrs', 'blurb' => 'Prayagraj cab for Sangam and onward connections'],
+                ['slug' => 'innova-crysta-for-varanasi-to-ayodhya',     'label' => 'Varanasi to Ayodhya',     'meta' => 'Multi-hour drive', 'blurb' => 'Ayodhya cab for Ram Mandir and temple visits'],
+                ['slug' => 'innova-crysta-for-varanasi-to-bodhgaya',    'label' => 'Varanasi to Bodhgaya',    'meta' => '~255–300 km · 5–6 hrs', 'blurb' => 'Bodhgaya cab for the Mahabodhi Temple pilgrimage route'],
+                ['slug' => 'innova-crysta-for-varanasi-to-lucknow',     'label' => 'Varanasi to Lucknow',     'meta' => 'Multi-hour drive', 'blurb' => 'Lucknow cab for business travel or same-day return'],
+            ],
+        ],
+        'ertiga' => [
+            'vehicleName' => 'Ertiga', 'vehicleType' => 'AC MPV', 'capacity' => 7, 'perKm' => 16,
+            'airportPickupSlug' => 'ertiga-for-varanasi-airport-pickup',
+            'airportDropSlug'   => 'ertiga-for-varanasi-airport-drop',
+            'sightseeingSlug'   => 'ertiga-for-varanasi-local-sightseen',
+            'routes' => [
+                ['slug' => 'ertiga-for-varanasi-to-vindhyachal',    'label' => 'Varanasi to Vindhyachal', 'meta' => '~60 km · 2–3 hrs', 'blurb' => 'Vindhyachal cab for Vindhyavasini Temple, usually same-day'],
+                ['slug' => 'ertiga-cab-for-varanasi-to-prayagraj',  'label' => 'Varanasi to Prayagraj',   'meta' => '~150 km · 2–3 hrs', 'blurb' => 'Prayagraj cab for Sangam and onward connections'],
+                ['slug' => 'ertiga-cab-for-varanasi-to-ayodhya',    'label' => 'Varanasi to Ayodhya',     'meta' => 'Multi-hour drive', 'blurb' => 'Ayodhya cab for Ram Mandir and temple visits'],
+                ['slug' => 'ertiga-for-varanasi-to-bodhgaya',       'label' => 'Varanasi to Bodhgaya',    'meta' => 'Multi-hour drive', 'blurb' => 'Bodhgaya cab for the Mahabodhi Temple pilgrimage route'],
+                ['slug' => 'ertiga-cab-for-varanasi-to-lucknow',    'label' => 'Varanasi to Lucknow',     'meta' => 'Multi-hour drive', 'blurb' => 'Lucknow cab for business travel or same-day return'],
+            ],
+        ],
+        'swift-dzire' => [
+            'vehicleName' => 'Swift Dzire', 'vehicleType' => 'AC Sedan', 'capacity' => 4, 'perKm' => 12,
+            'airportPickupSlug' => 'swift-dzire-cab-airport-pickup',
+            'airportDropSlug'   => 'swift-dzire-cab-airport-drop',
+            'sightseeingSlug'   => 'varanasi-local-fullday-sightseeing',
+            'routes' => [
+                ['slug' => 'swift-dzire-cab-for-varanasi-to-vindhyachal', 'label' => 'Varanasi to Vindhyachal', 'meta' => '~65 km · 2–3 hrs', 'blurb' => 'Vindhyachal cab for Vindhyavasini Temple, usually same-day'],
+                ['slug' => 'swift-dzire-cab-for-varanasi-to-prayagraj',   'label' => 'Varanasi to Prayagraj',   'meta' => '~130 km · 3 hrs', 'blurb' => 'Prayagraj cab for Sangam and onward connections'],
+                ['slug' => 'swift-dzire-cab-for-varanasi-to-ayodhya',     'label' => 'Varanasi to Ayodhya',     'meta' => '~150 km · 3 hrs', 'blurb' => 'Ayodhya cab for Ram Mandir and temple visits'],
+                ['slug' => 'swift-dzire-cab-for-varanasi-to-bodhgaya',    'label' => 'Varanasi to Bodhgaya',    'meta' => '~250 km · 6–7 hrs', 'blurb' => 'Bodhgaya cab for the Mahabodhi Temple pilgrimage route'],
+                ['slug' => 'swift-dzire-cab-for-varanasi-to-lucknow',     'label' => 'Varanasi to Lucknow',     'meta' => '~320 km · 6–7 hrs', 'blurb' => 'Lucknow cab for business travel or same-day return'],
+            ],
+        ],
+    ];
+    $activeCabHubKey = optional($sub_category)->slug;
+    $activeCabHub = $isCabCat && $activeCabHubKey && isset($cabHubs[$activeCabHubKey]) ? $cabHubs[$activeCabHubKey] : null;
     // ── 10 context-aware FAQs ──────────────────────────────────────────
-    if ($isHotelCat && $sub_category) {
+    if ($activeCabHub) {
+        $vn = $activeCabHub['vehicleName'];
+        $routeNames = collect($activeCabHub['routes'])->map(fn($r) => str_replace('Varanasi to ', '', $r['label']))->join(', ', ' or ');
+        $faqs = [
+            ['q' => "How can I book an {$vn} in Varanasi?",
+             'a' => "Choose the service you need — airport transfer, local sightseeing, or an outstation route — from the listings on this page, then use the enquiry form or WhatsApp button on that page to confirm your booking."],
+            ['q' => "How much does an {$vn} cab cost in Varanasi?",
+             'a' => "Pricing depends on the service — airport transfer, local sightseeing, or outstation travel — and is shown on each listing above. Final fare can vary with distance, timing and group requirements; our team confirms the exact amount on WhatsApp before booking."],
+            ['q' => "Can I book an {$vn} with a driver?",
+             'a' => "Yes. Every {$vn} booking includes an experienced driver — self-drive is not offered."],
+            ['q' => "Is {$vn} available for airport pickup in Varanasi?",
+             'a' => "Yes, for pickup from Lal Bahadur Shastri International Airport, Varanasi, with drop to your hotel or any city address. See the Airport Pickup listing above."],
+            ['q' => "Can I book an {$vn} for Varanasi local sightseeing?",
+             'a' => "Yes, a full-day local sightseeing option is available, typically covering the Ganga ghats, the Kashi Vishwanath Temple area, Sarnath and BHU. See the Local Sightseeing listing above."],
+            ['q' => "Can I book an {$vn} from Varanasi to {$routeNames}?",
+             'a' => "Yes, each of these outstation routes has its own listing above with route-specific details — approximate distance, duration and what is included in the fare."],
+            ['q' => "Is one-way or round-trip {$vn} booking available?",
+             'a' => "Both are generally possible depending on the route — let our team know your requirement when booking and we will confirm availability and pricing for your dates."],
+            ['q' => "How many passengers can travel in an {$vn}?",
+             'a' => "The {$vn} seats up to {$activeCabHub['capacity']} passengers comfortably, with space for luggage."],
+            ['q' => "What is included in the {$vn} fare?",
+             'a' => "Inclusions vary slightly by route — typically parking charges, toll tax and driver allowance are covered. Each route listing above states what is included for that specific service."],
+            ['q' => "How do I confirm my {$vn} booking?",
+             'a' => "Submit the enquiry form on the relevant service page, or message us directly on WhatsApp at +91-7080109917, 7080109918 or 7080109919. Our team confirms availability and the final fare before your trip."],
+        ];
+    } elseif ($isHotelCat && $sub_category) {
         $loc = $subLabel; // e.g. "Near Kashi Vishwanath Temple"
         $faqs = [
             ['q' => 'What are the best hotels ' . $loc . ' in Varanasi?',
@@ -152,7 +232,10 @@
         { "@type": "ListItem", "position": {{ $i + 1 }}, "url": "{{ $pUrl }}", "name": "{{ addslashes($p->name ?? '') }}" }{{ !$loop->last ? ',' : '' }}
         @endforeach
       ]
-    },
+    }{{ $activeCabHub ? '' : ',' }}
+    {{-- FAQPage structured data intentionally omitted for vehicle hub pages
+         (Innova Crysta, Ertiga, Swift Dzire, ...) — see $activeCabHub. --}}
+    @unless($activeCabHub)
     {
       "@type": "FAQPage",
       "mainEntity": [
@@ -165,28 +248,32 @@
         @endforeach
       ]
     }
+    @endunless
   ]
 }
 </script>
 
 <link rel="canonical" href="{{ $canonicalUrl }}">
-<title>{{ $listingTitle }} in Varanasi | Visit Kashi</title>
+<title>{{ $listingTitleTag }} | Visit Kashi</title>
 <meta name="description" content="{{ Str::limit($listingDesc, 160) }}">
 <meta name="keywords" content="{{ $listingKw }}">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{ $canonicalUrl }}" />
-<meta property="og:title" content="{{ $listingTitle }} in Varanasi | Visit Kashi">
+<meta property="og:title" content="{{ $listingTitleTag }} | Visit Kashi">
 <meta property="og:description" content="{{ Str::limit($listingDesc, 200) }}">
 <meta property="og:image" content="{{ $listingImg }}">
 <meta property="og:site_name" content="Visit Kashi">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ $listingTitle }} in Varanasi">
+<meta name="twitter:title" content="{{ $listingTitleTag }}">
 <meta name="twitter:description" content="{{ Str::limit($listingDesc, 200) }}">
 <meta name="twitter:image" content="{{ $listingImg }}">
 @endsection
 
 @push('styles')
+@if($activeCabHub)
+<link rel="stylesheet" href="{{ asset('frontend/css/topic-cluster.min.css') }}?v={{ filemtime(public_path('frontend/css/topic-cluster.min.css')) }}">
+@endif
 <style>
 /* ══ Listing Page ══════════════════════════════════════════════════ */
 .vkl-page { background:#f7f8fa; min-height:60vh; padding-bottom:72px; font-family:'Plus Jakarta Sans',sans-serif; }
@@ -556,9 +643,9 @@
             @endif
         </nav>
 
-        <h1 class="vkl-hero__title">{{ $seoTitle }} in Varanasi</h1>
+        <h1 class="vkl-hero__title">{{ $activeCabHub ? $activeCabHub['vehicleName'].' Cab Booking in Varanasi' : $seoTitle.' in Varanasi' }}</h1>
 
-        <p class="vkl-hero__desc">{{ Str::limit($listingDesc, 160) }}</p>
+        <p class="vkl-hero__desc">{{ $activeCabHub ? 'Comfortable '.$activeCabHub['vehicleName'].' cab service for airport transfers, local sightseeing and outstation trips from Varanasi to Ayodhya, Prayagraj, Vindhyachal, Bodhgaya and Lucknow.' : Str::limit($listingDesc, 160) }}</p>
 
         <div class="vkl-hero__meta">
             <span class="vkl-hero__meta-item">
@@ -647,8 +734,8 @@
                     </svg>
                     @endfor
                 </div>
-                <span class="vkl-star-val">4.8</span>
-                <span class="vkl-star-count">(50+)</span>
+                <span class="vkl-star-val">{{ $isCabCat ? '4.9' : '4.8' }}</span>
+                <span class="vkl-star-count">{{ $isCabCat ? '(600+)' : '(50+)' }}</span>
             </div>
 
             @if($product->address)
@@ -685,6 +772,11 @@
       @endforelse
     </div>
 
+    {{-- ── Innova Crysta topical content — scoped to this hub only ──── --}}
+    @if($activeCabHub)
+    <x-cab-outstation-hub :hub="$activeCabHub" :hub-slug="$activeCabHubKey" :products="$products" />
+    @endif
+
     {{-- ── FAQ Section ───────────────────────────────────────────────── --}}
     <section class="vkl-faq" aria-label="Frequently Asked Questions">
         <div class="vkl-faq__head">
@@ -693,17 +785,17 @@
         </div>
 
         @foreach($faqs as $fi => $faq)
-        <div class="vkl-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <div class="vkl-faq-item" @unless($activeCabHub) itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" @endunless>
             <div class="vkl-faq-q" role="button" tabindex="0"
                  aria-expanded="false" aria-controls="faq-a-{{ $fi }}"
                  onclick="vklToggleFaq(this)"
                  onkeydown="if(event.key==='Enter'||event.key===' ')vklToggleFaq(this)">
-                <span class="vkl-faq-q__text" itemprop="name">{{ $faq['q'] }}</span>
+                <span class="vkl-faq-q__text" @unless($activeCabHub) itemprop="name" @endunless>{{ $faq['q'] }}</span>
                 <span class="vkl-faq-q__icon" aria-hidden="true">+</span>
             </div>
             <div class="vkl-faq-a" id="faq-a-{{ $fi }}"
-                 itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">{{ $faq['a'] }}</p>
+                 @unless($activeCabHub) itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer" @endunless>
+                <p @unless($activeCabHub) itemprop="text" @endunless>{{ $faq['a'] }}</p>
             </div>
         </div>
         @endforeach

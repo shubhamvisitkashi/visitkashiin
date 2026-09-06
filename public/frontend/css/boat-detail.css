@@ -29,6 +29,7 @@
 .vkbd-rating { font-weight: 700; color: #111; }
 .vkbd-cat-link { color: #2563eb; font-weight: 600; text-decoration: underline; }
 .vkbd-meta-dot { color: #9ca3af; }
+.vkbd-intro-text { font-size: .95rem; color: #374151; line-height: 1.7; margin: 14px 0 20px; }
 
 /* ── Gallery ────────────────────────────────────────────── */
 .vkbd-gallery {
@@ -99,6 +100,11 @@
 @media (max-width: 991px) {
     .vkbd-layout { grid-template-columns: 1fr; }
 }
+/* Grid items default to min-width:auto, which lets wide non-shrinking content
+   (e.g. the video slider's fixed-width cards) force this column — and the
+   whole page — wider than the viewport. min-width:0 lets it size to the
+   column and rely on child overflow-x for scrolling instead. */
+.vkbd-main { min-width: 0; }
 
 /* ── Booking Popup / Sidebar dual-mode ──────────────────── */
 
@@ -276,6 +282,7 @@
     gap: 12px; padding: 15px 0;
     cursor: pointer; font-size: .9rem; font-weight: 600; color: #111; user-select: none;
 }
+.vkbd-faq-q h3 { margin: 0; font: inherit; color: inherit; }
 .vkbd-faq-icon { font-size: 1.3rem; color: #6b7280; flex-shrink: 0; transition: transform .2s; }
 .vkbd-faq-item.open .vkbd-faq-icon { transform: rotate(180deg); }
 .vkbd-faq-a { font-size: .87rem; color: #4b5563; line-height: 1.65; padding: 0 0 14px; display: none; }
@@ -524,46 +531,8 @@
 .vkbd-steps { padding-left: 20px; }
 .vkbd-steps li { margin-bottom: 10px; font-size: .92rem; line-height: 1.7; }
 
-/* ══ YouTube Video Grid ══════════════════════════════════════════ */
-.vkbd-yt-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 16px; }
-.vkbd-yt-card { cursor: pointer; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 3px 14px rgba(0,0,0,.14); transition: transform .28s, box-shadow .28s; }
-.vkbd-yt-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 32px rgba(0,0,0,.22); }
-.vkbd-yt-thumb { position: relative; aspect-ratio: 9/16; background: #000; overflow: hidden; }
-.vkbd-yt-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
-.vkbd-yt-card:hover .vkbd-yt-thumb img { transform: scale(1.06); }
-.vkbd-yt-play {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-    width: 52px; height: 52px; border-radius: 50%;
-    background: rgba(255,0,0,.85); color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; padding-left: 4px;
-    box-shadow: 0 4px 16px rgba(255,0,0,.45);
-    transition: transform .2s, background .2s;
-}
-.vkbd-yt-card:hover .vkbd-yt-play { transform: translate(-50%,-50%) scale(1.14); background: #ff0000; }
-/* Shorts badge */
-.vkbd-yt-thumb::after {
-    content: '▶ Shorts';
-    position: absolute; bottom: 10px; left: 10px;
-    background: rgba(0,0,0,.70); color: #fff;
-    font-size: .6rem; font-weight: 700; letter-spacing: .04em;
-    padding: 3px 8px; border-radius: 4px;
-}
-.vkbd-yt-title { font-size: .75rem; font-weight: 600; color: #222; padding: 8px 10px 10px; margin: 0; background: #fff; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-/* YouTube modal */
-.vkyt-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 10000; align-items: center; justify-content: center; }
-.vkyt-modal.open { display: flex; }
-.vkyt-modal-inner { position: relative; width: 90vw; max-width: 900px; }
-.vkyt-iframe-wrap { position: relative; padding-bottom: 56.25%; height: 0; }
-.vkyt-iframe-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 8px; }
-.vkyt-modal-close {
-    position: absolute; top: -40px; right: 0;
-    background: rgba(255,255,255,.15); border: none; color: #fff;
-    width: 36px; height: 36px; border-radius: 50%; font-size: 18px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-}
-.vkyt-modal-close:hover { background: rgba(255,255,255,.3); }
+/* YouTube video slider now lives in the shared <x-video-slider> component —
+   see public/frontend/css/video-slider.css */
 
 /* ══ Instagram Reels Grid ════════════════════════════════════════ */
 .vkbd-ig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-top: 16px; }
@@ -614,10 +583,8 @@
     .vkbd-trust-grid  { grid-template-columns: repeat(2, 1fr); }
     .vkbd-reviews     { grid-template-columns: 1fr; }
     .vkbd-services-grid { grid-template-columns: repeat(2, 1fr); }
-    .vkbd-yt-grid     { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 600px) {
-    .vkbd-yt-grid     { grid-template-columns: repeat(2, 1fr); }
     .vkbd-ig-grid     { grid-template-columns: repeat(2, 1fr); }
     .vkbd-trust-grid  { grid-template-columns: 1fr 1fr; }
     .vkbd-services-grid { grid-template-columns: 1fr 1fr; }

@@ -8,16 +8,50 @@
     $metaImg     = (!empty($product->images) && is_array($product->images))
         ? asset('backend/admin/product_images/'.$product->images[0])
         : asset('backend/assets/images/placeholder.jpg');
-    $pageUrl     = rtrim(url()->current(), '/');
-    $displayP    = ($product->discounted_price ?? 0) > 0 ? $product->discounted_price : ($product->base_price ?? 0);
-    $hasDiscount = ($product->base_price??0)>0 && ($product->discounted_price??0)>0 && $product->base_price > $product->discounted_price;
+    // Canonical always points at the production domain (never /public/),
+    // matching the pattern already used for boat product pages.
     $catSlug     = optional($product->category)->slug ?? 'cab';
     $subSlug     = optional($product->subCategory)->slug ?? 'innova-crysta';
     $subName     = optional($product->subCategory)->name ?? 'Cab';
     $catName     = optional($product->category)->name ?? 'Cab';
+    $pageUrl     = 'https://visitkashi.in/'.$catSlug.'/'.$subSlug.'/'.$product->slug;
+    $displayP    = ($product->discounted_price ?? 0) > 0 ? $product->discounted_price : ($product->base_price ?? 0);
+    $hasDiscount = ($product->base_price??0)>0 && ($product->discounted_price??0)>0 && $product->base_price > $product->discounted_price;
     $phone       = '+91' . preg_replace('/\D/', '', websiteSetupValue('contact_number') ?: '7080109917');
-    $seoTitle    = $metaTitle . ' in Varanasi | Book Online – Visit Kashi';
+    // Avoid "... in Varanasi in Varanasi ..." when the meta title already names the city.
+    $seoTitle    = (stripos($metaTitle, 'varanasi') !== false ? $metaTitle : $metaTitle . ' in Varanasi') . ' | Book Online – Visit Kashi';
     $keywords    = $product->meta_keyword ?? strtolower($product->name) . ' varanasi, ' . strtolower($subName) . ' varanasi, varanasi cab booking, varanasi taxi, cab service varanasi';
+
+    // Vehicle route/service clusters (Innova Crysta, Ertiga, Swift Dzire, ...) —
+    // scopes small, targeted changes (FAQPage schema suppression) to these
+    // products only. Keep this list in sync with $cabHubs in frontend.details.
+    $vehicleClusterSlugs = [
+        'innova-crysta-for-airport-pickup',
+        'innova-crysta-for-airport-drop',
+        'innova-crysta-for-varanasi-local-sightseen',
+        'innova-crysta-for-varanasi-to-vindhyachal',
+        'innova-crysta-for-varanasi-to-prayagraj',
+        'innova-crysta-for-varanasi-to-ayodhya',
+        'innova-crysta-for-varanasi-to-bodhgaya',
+        'innova-crysta-for-varanasi-to-lucknow',
+        'ertiga-for-varanasi-airport-pickup',
+        'ertiga-for-varanasi-airport-drop',
+        'ertiga-for-varanasi-local-sightseen',
+        'ertiga-for-varanasi-to-vindhyachal',
+        'ertiga-cab-for-varanasi-to-prayagraj',
+        'ertiga-cab-for-varanasi-to-ayodhya',
+        'ertiga-for-varanasi-to-bodhgaya',
+        'ertiga-cab-for-varanasi-to-lucknow',
+        'swift-dzire-cab-airport-pickup',
+        'swift-dzire-cab-airport-drop',
+        'varanasi-local-fullday-sightseeing',
+        'swift-dzire-cab-for-varanasi-to-vindhyachal',
+        'swift-dzire-cab-for-varanasi-to-prayagraj',
+        'swift-dzire-cab-for-varanasi-to-ayodhya',
+        'swift-dzire-cab-for-varanasi-to-bodhgaya',
+        'swift-dzire-cab-for-varanasi-to-lucknow',
+    ];
+    $isVehicleCluster = in_array($product->slug, $vehicleClusterSlugs);
 
     // FAQ data — high-intent queries per cab type
     $faqs = [
@@ -210,7 +244,9 @@
 </script>
 @endif
 
-{{-- ══ SCHEMA 3: FAQPage (FAQ rich result) ════════════════════ --}}
+{{-- ══ SCHEMA 3: FAQPage (FAQ rich result) — suppressed for the Innova
+     Crysta route cluster, which does not add FAQPage structured data. ═ --}}
+@unless($isVehicleCluster)
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -226,6 +262,7 @@
   ]
 }
 </script>
+@endunless
 
 {{-- ══ SCHEMA 4: BreadcrumbList ════════════════════════════════ --}}
 <script type="application/ld+json">
@@ -455,18 +492,20 @@
             <div class="ckbd-divider"></div>
             @endif
 
-            {{-- FAQ Section (FAQPage schema content) --}}
+            {{-- FAQ Section — visible content only for the Innova Crysta route
+                 cluster (no FAQPage microdata); FAQPage schema for every other
+                 cab product elsewhere on this page. --}}
             <h2 class="ckbd-section-title">Frequently Asked Questions</h2>
-            <div class="ckbd-faq" itemscope itemtype="https://schema.org/FAQPage">
+            <div class="ckbd-faq" @unless($isVehicleCluster) itemscope itemtype="https://schema.org/FAQPage" @endunless>
               @foreach($faqs as $fi => $faq)
-              <div class="ckbd-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+              <div class="ckbd-faq-item" @unless($isVehicleCluster) itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" @endunless>
                 <button class="ckbd-faq-q" onclick="ckFaqToggle({{ $fi }})" aria-expanded="false" aria-controls="ckfaq{{ $fi }}">
-                  <span itemprop="name">{{ $faq['q'] }}</span>
+                  <span @unless($isVehicleCluster) itemprop="name" @endunless>{{ $faq['q'] }}</span>
                   <span class="ckbd-faq-icon" id="ckfaqicon{{ $fi }}">+</span>
                 </button>
                 <div class="ckbd-faq-a" id="ckfaq{{ $fi }}" hidden
-                     itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                  <p itemprop="text">{{ $faq['a'] }}</p>
+                     @unless($isVehicleCluster) itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer" @endunless>
+                  <p @unless($isVehicleCluster) itemprop="text" @endunless>{{ $faq['a'] }}</p>
                 </div>
               </div>
               @endforeach
