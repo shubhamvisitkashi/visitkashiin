@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\Sms\Msg91Client;
-use App\Services\Sms\SmsProviderInterface;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Monolog\Handler\NullHandler;
@@ -17,10 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Bound to an interface so the SMS vendor can be swapped later
-        // (e.g. Twilio, AWS SNS) without touching OtpService or any
-        // controller — see App\Services\Sms\SmsProviderInterface.
-        $this->app->bind(SmsProviderInterface::class, Msg91Client::class);
+        //
     }
 
     /**

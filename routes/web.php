@@ -356,6 +356,9 @@ Route::get('privacy-policy',     [PageController::class, 'privacyPolicy'])->name
 Route::get('cancellation-refund',[PageController::class, 'cancellationRefund'])->name('page.cancellation');
 Route::get('about-us',           [PageController::class, 'aboutUs'])->name('page.about');
 
+// Customer auth (/account/*) — must be before catch-all /{slug} too
+require __DIR__.'/customer.php';
+
 Route::get('/{slug}',[ProductController::class,'productList'])->name('product.list');
 Route::get('/{category_slug}/{sub_category_slug}',[ProductController::class,'productSubList'])->name('product.sub.list');
 Route::get('/{category_slug}/{sub_category_slug}/{product_slug}',[ProductController::class,'productDetail'])->name('product.detail');

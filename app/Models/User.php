@@ -22,9 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'pending_email',
         'phone',
-        'pending_phone',
         'password',
         'google_id',
         'profile_photo',
@@ -50,7 +48,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'phone_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
     ];
 

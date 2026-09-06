@@ -5,6 +5,7 @@
     $dd_devDiwaliEnd = \Carbon\Carbon::parse('2026-11-24')->endOfDay();
     $isDevDiwali     = optional($sub_category)->slug === 'dev-diwali-booking'
                        && $dd_now->lte($dd_devDiwaliEnd);
+    $isMotorBoat     = optional($sub_category)->slug === 'motor-boat';
 
     // Single source of truth for the Dev Diwali FAQ — used for both the
     // visible on-page FAQ section and the FAQPage JSON-LD schema, so the
@@ -55,6 +56,91 @@
             'a' => "It's best to confirm your Dev Diwali boat booking as early as possible. Seats across all boat categories fill up quickly in the weeks before 24 November, so early booking gives you the best choice of boat and price.",
         ],
     ] : [];
+
+    // Single source of truth for the Motor Boat FAQ — used for both the
+    // visible on-page FAQ section and the FAQPage JSON-LD schema.
+    $mbFaqs = $isMotorBoat ? [
+        [
+            'q' => 'How can I book a boat in Varanasi?',
+            'a' => 'Choose a boat from the options listed on this page, then submit the enquiry form with your name and phone number, or message us directly on WhatsApp. Our team confirms your Varanasi boat booking by call or WhatsApp with the reporting time and pickup ghat.',
+        ],
+        [
+            'q' => 'What is the price of a motor boat in Varanasi?',
+            'a' => 'Motor boat booking in Varanasi starts from around ₹3,499 per person for morning and evening rides. A private motor boat hire starts from around ₹3,499 for shorter routes and ₹3,999 for the full Assi Ghat to Namo Ghat route. Exact pricing for each boat is shown on its individual booking page.',
+        ],
+        [
+            'q' => 'Can I book a private motor boat for Ganga Aarti?',
+            'a' => 'Yes. VisitKashi offers a private motor boat for evening Ganga Aarti, with pickup options from Assi Ghat, Namo Ghat, Dashashwamedh Ghat and Shivala Ghat — so your group can watch the Aarti from the river without sharing the boat.',
+        ],
+        [
+            'q' => 'Can I book a private boat for all 84 ghats of Varanasi?',
+            'a' => 'Yes. The private motor boat route from Assi Ghat to Namo Ghat covers all 84 ghats of Varanasi over roughly 7 km along the riverfront, and is available for both morning and evening booking.',
+        ],
+        [
+            'q' => 'What is the best time for a boat ride in Varanasi?',
+            'a' => 'Both morning and evening boat rides are popular for different reasons — mornings for the sunrise and the quieter ghats before the day gets going, evenings for the Ganga Aarti ceremony and the illuminated riverfront.',
+        ],
+        [
+            'q' => 'What time does the morning boat ride start?',
+            'a' => 'The morning boat ride usually starts before sunrise and runs for about one to two hours, covering ghats such as Assi Ghat, Dashashwamedh Ghat, Manikarnika Ghat and Harishchandra Ghat.',
+        ],
+        [
+            'q' => 'What time is the evening Ganga Aarti boat ride?',
+            'a' => 'The Ganga Aarti takes place from 7:00 PM to 7:45 PM at Dashashwamedh Ghat. For the private motor boat, reporting time is 5:30 PM and the ride runs from 5:45 PM to 7:45 PM, so you are positioned on the river in time for the full ceremony.',
+        ],
+        [
+            'q' => 'Which ghats can I see during the boat ride?',
+            'a' => 'Depending on the route you choose, your boat ride can cover Assi Ghat, Tulsi Ghat, Shivala Ghat, Harishchandra Ghat, Kedar Ghat, Dashashwamedh Ghat, Manikarnika Ghat, Rajendra Prasad Ghat and Namo Ghat.',
+        ],
+        [
+            'q' => 'Can I book a boat from Assi Ghat?',
+            'a' => 'Yes, pickup from Assi Ghat is available for the private motor boat evening Ganga Aarti ride and other motor boat options on this page.',
+        ],
+        [
+            'q' => 'Can I book a boat from Dashashwamedh Ghat?',
+            'a' => 'Yes, Dashashwamedh Ghat is one of the pickup points available for the private motor boat Ganga Aarti ride, and it is also where the boat is positioned during the Aarti ceremony.',
+        ],
+        [
+            'q' => 'Can I book a boat from Namo Ghat?',
+            'a' => 'Yes, pickup from Namo Ghat is available, and it also marks one end of the full 84-ghat private boat route from Assi Ghat.',
+        ],
+        [
+            'q' => 'Is the motor boat private or shared?',
+            'a' => 'Both options are available. You can choose a shared/group motor boat ride at a lower per-person price, or book a fully private motor boat so your group has the boat to yourselves — this is shown on each boat listing above.',
+        ],
+        [
+            'q' => 'How many people can travel in a private motor boat?',
+            'a' => 'Capacity varies by boat — a private motor boat typically seats up to around 15 people. Exact capacity for each boat is shown on its individual booking page.',
+        ],
+        [
+            'q' => 'How long is the Varanasi boat ride?',
+            'a' => 'Morning and evening boat rides typically run for one to two hours. The private motor boat for evening Ganga Aarti runs for about two hours, from 5:45 PM to 7:45 PM.',
+        ],
+        [
+            'q' => 'How can I confirm my boat booking?',
+            'a' => 'Submit the enquiry form on this page, or call or WhatsApp us directly at +91-7080109917, 7080109918 or 7080109919. Our team confirms availability, price and your reporting point.',
+        ],
+        [
+            'q' => 'Can I book a Varanasi boat online?',
+            'a' => 'Yes, you can start your booking online on this page by choosing a boat and sending an enquiry — no advance payment is needed to enquire, and our team follows up by call or WhatsApp to confirm.',
+        ],
+        [
+            'q' => 'Is Ganga Aarti visible from the boat?',
+            'a' => 'Yes. On the evening ride, the boat is positioned near Dashashwamedh Ghat during the 7:00 PM to 7:45 PM Ganga Aarti, giving you a clear river view of the ceremony.',
+        ],
+        [
+            'q' => 'Can I book a morning private motor boat?',
+            'a' => 'Yes, a private motor boat is available for the morning ride as well, covering ghats such as Assi Ghat, Dashashwamedh Ghat, Manikarnika Ghat and Harishchandra Ghat.',
+        ],
+        [
+            'q' => 'What is the difference between morning and evening boat rides?',
+            'a' => 'The morning ride is built around sunrise, calmer ghats and the daily rituals along the river. The evening ride is timed around the Ganga Aarti ceremony and the illuminated ghats after sunset.',
+        ],
+        [
+            'q' => 'Why should I book my Varanasi boat ride with Visit Kashi?',
+            'a' => 'VisitKashi is a local Varanasi travel company with 5+ years of experience booking boat rides on the Ganga, transparent per-boat pricing, WhatsApp booking confirmation and a local team on call to help you choose the right boat for your group.',
+        ],
+    ] : [];
 @endphp
 
 {{-- ══ SEO META ══════════════════════════════════════════════════════════════ --}}
@@ -76,6 +162,14 @@
         $blDesc  = 'Book your Dev Diwali Varanasi Boat Booking for 24 November 2026 with VisitKashi. Reserve a boat or cruise, view illuminated ghats and Ganga Aarti from the river';
         $blKw    = 'dev diwali varanasi boat booking 2026, dev diwali boat booking varanasi, dev deepawali boat booking varanasi, dev diwali cruise booking varanasi, dev deepawali cruise booking 2026, varanasi dev diwali cruise booking, dev diwali boat ride varanasi, dev diwali ganga boat ride, dev diwali varanasi cruise, varanasi boat booking for dev diwali, dev diwali ganga cruise, dev diwali boat booking 2026, dev deepawali varanasi boat booking, varanasi dev diwali boat ride, dev diwali ganga aarti boat booking';
         $canonicalUrl = 'https://visitkashi.com/boat/dev-diwali-booking';
+        $pageTitleTag = $blTitle;
+    }
+
+    if ($isMotorBoat) {
+        $blTitle = 'Varanasi Boat Booking | Private Motor Boat for Ganga Aarti | Visit Kashi';
+        $blDesc  = 'Book your Varanasi boat ride online with Visit Kashi. Private motor boat for Ganga Aarti, morning & evening rides, and all 84 Ghats. Book Online today!';
+        $blKw    = 'varanasi boat booking, boat booking in varanasi, motor boat booking in varanasi, private motor boat in varanasi, book motor boat for ganga aarti, book private motor boat for evening ganga aarti, book private motor boat all 84 ghats, morning boat ride in varanasi, evening boat ride in varanasi, ganga aarti boat booking varanasi, private boat ride varanasi';
+        $canonicalUrl = 'https://visitkashi.in/boat/motor-boat';
         $pageTitleTag = $blTitle;
     }
 @endphp
@@ -115,46 +209,47 @@
 </script>
 
 {{-- JSON-LD: ItemList (listing of boat tours) --}}
+@php
+    // Built as a plain PHP array + json_encode (rather than string-interpolated
+    // JSON) so a raw newline/control character in a product's stored description
+    // can never produce invalid JSON-LD.
+    $blItemList = [
+        '@context' => 'https://schema.org',
+        '@type' => 'ItemList',
+        'name' => $blTitle,
+        'description' => $blDesc,
+        'url' => $pageUrl,
+        'numberOfItems' => $products->count(),
+        'itemListElement' => $products->values()->map(function ($p, $idx) {
+            $item = [
+                '@type' => 'TouristAttraction',
+                'name' => $p->name,
+                'description' => Str::limit(strip_tags($p->description ?? ''), 150),
+                'url' => route('product.detail', [optional($p->category)->slug ?? 'boat', optional($p->subCategory)->slug ?? 'motor-boat', $p->slug]),
+                'image' => !empty($p->images) ? asset('backend/admin/product_images/'.((is_array($p->images) ? $p->images : json_decode($p->images, true) ?? [])[0] ?? '')) : asset('backend/assets/images/placeholder.jpg'),
+                'touristType' => 'Family, Couple, Group',
+                'availableLanguage' => 'Hindi, English',
+                'address' => [
+                    '@type' => 'PostalAddress',
+                    'addressLocality' => 'Varanasi',
+                    'addressRegion' => 'Uttar Pradesh',
+                    'addressCountry' => 'IN',
+                ],
+            ];
+            if (($p->discounted_price ?? 0) > 0) {
+                $item['offers'] = [
+                    '@type' => 'Offer',
+                    'price' => (string) $p->discounted_price,
+                    'priceCurrency' => 'INR',
+                    'availability' => 'https://schema.org/InStock',
+                ];
+            }
+            return ['@type' => 'ListItem', 'position' => $idx + 1, 'item' => $item];
+        })->all(),
+    ];
+@endphp
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "name": "{{ $blTitle }}",
-  "description": "{{ $blDesc }}",
-  "url": "{{ $pageUrl }}",
-  "numberOfItems": {{ $products->count() }},
-  "itemListElement": [
-    @foreach($products as $idx => $p)
-    {
-      "@type": "ListItem",
-      "position": {{ $idx + 1 }},
-      "item": {
-        "@type": "TouristAttraction",
-        "name": "{{ addslashes($p->name) }}",
-        "description": "{{ addslashes(Str::limit(strip_tags($p->description ?? ''), 150)) }}",
-        "url": "{{ route('product.detail', [optional($p->category)->slug ?? 'boat', optional($p->subCategory)->slug ?? 'motor-boat', $p->slug]) }}",
-        "image": "{{ !empty($p->images) ? asset('backend/admin/product_images/'.((is_array($p->images)?$p->images:json_decode($p->images,true)??[])[0]??'')) : asset('backend/assets/images/placeholder.jpg') }}",
-        "touristType": "Family, Couple, Group",
-        "availableLanguage": "Hindi, English",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Varanasi",
-          "addressRegion": "Uttar Pradesh",
-          "addressCountry": "IN"
-        }
-        @if(($p->discounted_price ?? 0) > 0)
-        ,"offers": {
-          "@type": "Offer",
-          "price": "{{ $p->discounted_price }}",
-          "priceCurrency": "INR",
-          "availability": "https://schema.org/InStock"
-        }
-        @endif
-      }
-    }{{ !$loop->last ? ',' : '' }}
-    @endforeach
-  ]
-}
+{!! json_encode($blItemList, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
 </script>
 
 {{-- JSON-LD: LocalBusiness --}}
@@ -196,6 +291,44 @@
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
 </script>
 @endif
+
+@if($isMotorBoat)
+{{-- JSON-LD: Service — the motor boat booking service itself (distinct from the
+     per-boat Offers already in the ItemList above, so this does not duplicate them) --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Motor Boat Booking",
+  "name": "Varanasi Boat Booking – Private Motor Boat for Ganga Aarti & 84 Ghats",
+  "description": "{{ $blDesc }}",
+  "provider": {
+    "@type": "LocalBusiness",
+    "name": "Visit Kashi",
+    "url": "{{ url('/') }}",
+    "telephone": "{{ websiteSetupValue('contact_number') }}"
+  },
+  "areaServed": {
+    "@type": "City",
+    "name": "Varanasi"
+  },
+  "url": "{{ $canonicalUrl }}"
+}
+</script>
+
+{{-- JSON-LD: FAQPage — mirrors the visible FAQ section exactly --}}
+<script type="application/ld+json">
+{!! json_encode([
+    '@context'   => 'https://schema.org',
+    '@type'      => 'FAQPage',
+    'mainEntity' => array_map(fn($f) => [
+        '@type'          => 'Question',
+        'name'           => $f['q'],
+        'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f['a']],
+    ], $mbFaqs),
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
+@endif
 @endsection
 
 @push('styles')
@@ -212,7 +345,12 @@
 /* ── Hero improvements ── */
 .bl-hero{background:linear-gradient(150deg,#050e1f 0%,#0c2a50 50%,#0f3460 100%);padding:56px 0 0;position:relative;overflow:hidden;}
 .bl-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.bl-hero-intro{color:rgba(255,255,255,.72);font-size:.92rem;line-height:1.7;max-width:760px;margin:14px 0 0;}
 .bl-hero-stats{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:22px;}
+.bl-hero-ctas{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:26px;}
+.bl-hero-cta-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;background:linear-gradient(135deg,#0f3460,#1a5276);color:#fff;border-radius:11px;font-size:.88rem;font-weight:800;text-decoration:none;letter-spacing:.02em;transition:opacity .2s,transform .2s;}
+.bl-hero-cta-btn:hover{opacity:.9;transform:translateY(-1px);color:#fff;text-decoration:none;}
+.bl-hero-cta-btn--wa{background:#25D366;}
 .bl-hero-stat{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:30px;padding:6px 14px;}
 .bl-hero-stat-val{color:#fff;font-size:.88rem;font-weight:800;}
 .bl-hero-stat-lbl{color:rgba(255,255,255,.6);font-size:.72rem;font-weight:500;}
@@ -296,7 +434,11 @@
             Ganga River · Varanasi
         </div>
 
-        <h1>{{ $isDevDiwali ? 'Dev Diwali Varanasi Boat Booking 2026' : (optional($sub_category)->name ?? 'Motor Boat Rides in Varanasi') }}</h1>
+        <h1>{{ $isDevDiwali ? 'Dev Diwali Varanasi Boat Booking 2026' : ($isMotorBoat ? 'Varanasi Boat Booking – Private Motor Boat for Ganga Aarti & 84 Ghats' : (optional($sub_category)->name ?? 'Motor Boat Rides in Varanasi')) }}</h1>
+
+        @if($isMotorBoat)
+        <p class="bl-hero-intro">Book a private motor boat in Varanasi for a morning ride along the ghats or an evening ride timed to the Ganga Aarti. VisitKashi's motor boat booking covers the full stretch of the river from Assi Ghat to Namo Ghat — all 84 ghats of Varanasi — with private, no-sharing options for couples, families and small groups. Choose a sunrise ride to see the ghats wake up, or an evening ride to watch the Ganga Aarti and the diya-lit riverfront from the water. Every boat is booked online in minutes, confirmed by our local Varanasi team over call or WhatsApp, with clear per-boat pricing and no hidden charges.</p>
+        @endif
 
         <div class="bl-hero-meta">
             <div class="bl-hero-meta-item">
@@ -331,6 +473,19 @@
                 <span class="bl-hero-stat-lbl">Experience</span>
             </div>
         </div>
+
+        @if($isMotorBoat)
+        <div class="bl-hero-ctas">
+            <a href="#blGrid" class="bl-hero-cta-btn">
+                <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Check Boat Availability
+            </a>
+            <a href="https://wa.me/917080109917?text=Hi%2C+I+want+to+book+a+motor+boat+in+Varanasi" target="_blank" rel="noopener noreferrer" class="bl-hero-cta-btn bl-hero-cta-btn--wa">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.004 2.003C6.477 2.003 2 6.479 2 12.007c0 1.763.463 3.418 1.26 4.861L2 22l5.278-1.243A9.963 9.963 0 0012.004 22c5.527 0 10.004-4.477 10.004-10.004S17.531 2.003 12.004 2.003z"/></svg>
+                Chat on WhatsApp
+            </a>
+        </div>
+        @endif
 
     </div>
     <svg class="bl-hero-wave" viewBox="0 0 1440 52" fill="#fff" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
@@ -780,6 +935,147 @@
         <div class="dd-seo-faq">
             @foreach($ddFaqs as $faq)
             <div class="dd-seo-faq-item">
+                <h3>{{ $faq['q'] }}</h3>
+                <p>{{ $faq['a'] }}</p>
+            </div>
+            @endforeach
+        </div>
+
+    </div>
+</section>
+@endif
+
+{{-- ══ MOTOR BOAT SEO CONTENT ═════════════════════════════════════════════════ --}}
+@if($isMotorBoat)
+@php
+    $mbUrl = fn($slug) => route('product.detail', ['boat', 'motor-boat', $slug]);
+@endphp
+<style>
+.mb-seo{background:#fff;border-top:1px solid #f0f0f0;padding:48px 0;}
+.mb-seo-intro{max-width:820px;margin:0 0 8px;}
+.mb-seo h2{font-size:1.3rem;font-weight:800;color:#111;letter-spacing:-.02em;margin:44px 0 14px;}
+.mb-seo > .mb-seo-intro h2{margin-top:0;}
+.mb-seo h3{font-size:.98rem;font-weight:700;color:#1a2b4c;margin:0 0 6px;padding-left:12px;border-left:3px solid #0f3460;}
+.mb-seo p{font-size:.92rem;color:#444;line-height:1.75;margin:0 0 12px;max-width:820px;}
+.mb-seo-block{margin-bottom:18px;}
+.mb-seo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 28px;margin-top:18px;}
+.mb-seo-grid.cols-2{grid-template-columns:repeat(2,1fr);}
+.mb-seo-grid.cols-4{grid-template-columns:repeat(4,1fr);}
+.mb-seo-grid .mb-seo-block p{margin-bottom:0;}
+.mb-seo-link{font-size:.8rem;font-weight:700;color:#0f3460;text-decoration:none;display:inline-block;margin-top:2px;}
+.mb-seo-link:hover{text-decoration:underline;}
+.mb-seo-ghat-tags{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;}
+.mb-seo-ghat-tag{background:#f6f9fc;border:1px solid #e8eef4;border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;color:#1a2b4c;}
+.mb-seo-cta{display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:11px 26px;background:linear-gradient(135deg,#0f3460,#1a5276);color:#fff;border-radius:11px;font-size:.86rem;font-weight:800;text-decoration:none;letter-spacing:.02em;transition:opacity .2s,transform .2s;}
+.mb-seo-cta:hover{opacity:.9;transform:translateY(-1px);color:#fff;text-decoration:none;}
+.mb-seo-faq{max-width:900px;}
+.mb-seo-faq-item{border-bottom:1px solid #e5e7eb;padding:18px 0;}
+.mb-seo-faq-item:first-child{padding-top:0;}
+.mb-seo-faq-item:last-child{border-bottom:none;padding-bottom:0;}
+.mb-seo-faq-item h3{margin:0 0 8px;}
+.mb-seo-faq-item p{margin:0;max-width:none;}
+@media(max-width:900px){.mb-seo-grid{grid-template-columns:repeat(2,1fr);}.mb-seo-grid.cols-4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.mb-seo-grid,.mb-seo-grid.cols-2,.mb-seo-grid.cols-4{grid-template-columns:1fr;}}
+</style>
+
+<section class="mb-seo">
+    <div class="container">
+
+        {{-- H2 1: Private Motor Boat Booking in Varanasi --}}
+        <div class="mb-seo-intro">
+            <h2>Private Motor Boat Booking in Varanasi</h2>
+            <p>VisitKashi's private motor boat booking in Varanasi covers both the morning and evening river experience — from a peaceful sunrise ride along the ghats to a front-row seat on the water for the evening Ganga Aarti. Boats can be booked privately (no sharing) or as a shared group ride, with pickup available from Assi Ghat, Dashashwamedh Ghat, Namo Ghat and Shivala Ghat. Whether you want a short ride near the main ghats or the full Assi Ghat to Namo Ghat route covering all 84 ghats, you can check options and book online below.</p>
+        </div>
+
+        <div class="mb-seo-grid cols-3">
+            <div class="mb-seo-block">
+                <h3>Book Private Motor Boat for Evening Ganga Aarti</h3>
+                <p>Watch the Ganga Aarti from the river on a private motor boat, positioned near Dashashwamedh Ghat for the full 7:00 PM–7:45 PM ceremony.</p>
+                <a href="{{ $mbUrl('private-motor-boat-for-evening-ganga-aarti') }}" class="mb-seo-link">Book Evening Ganga Aarti Boat →</a>
+            </div>
+            <div class="mb-seo-block">
+                <h3>Book Private Motor Boat for Morning Ride</h3>
+                <p>Start before sunrise for a calm ride along Assi Ghat, Dashashwamedh Ghat, Manikarnika Ghat and Harishchandra Ghat.</p>
+                <a href="{{ $mbUrl('morning-boat-ride-in-varanasi') }}" class="mb-seo-link">Book Morning Boat Ride →</a>
+            </div>
+            <div class="mb-seo-block">
+                <h3>Book Private Motor Boat for All 84 Ghats</h3>
+                <p>Take the full Assi Ghat to Namo Ghat route — about 7 km along the riverfront, covering all 84 ghats of Varanasi.</p>
+                <a href="{{ $mbUrl('pickup-assi-ghat-private-boat-ride-for-evening-ganga-aarti') }}" class="mb-seo-link">Book 84 Ghats Boat Ride →</a>
+            </div>
+        </div>
+
+        {{-- H2 2: Morning Boat Ride --}}
+        <h2>Morning Boat Ride in Varanasi</h2>
+        <p>A morning boat ride in Varanasi usually starts before sunrise and runs for about one to two hours along the river. As the sky lightens over the Ganga, your boatman takes you past Assi Ghat, Dashashwamedh Ghat, Manikarnika Ghat and Harishchandra Ghat, where you can see the day's first rituals, yoga and bathing along the steps. Mornings tend to be quieter than the middle of the day, which makes a private morning boat ride a good choice for photography and for simply taking in the riverfront at a slower pace.</p>
+        <a href="{{ $mbUrl('morning-boat-ride-in-varanasi') }}" class="mb-seo-cta">
+            <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Book Morning Boat Ride in Varanasi
+        </a>
+
+        {{-- H2 3: Evening Boat Ride & Ganga Aarti --}}
+        <h2>Evening Boat Ride &amp; Ganga Aarti in Varanasi</h2>
+        <p>The evening boat ride is timed around the Ganga Aarti, which takes place from 7:00 PM to 7:45 PM at Dashashwamedh Ghat. For the private motor boat, reporting time is 5:30 PM and the ride runs from 5:45 PM to 7:45 PM, so you're on the water — not fighting the crowd on the steps — for the full ceremony of fire, chants and diyas along the riverfront.</p>
+        <div class="mb-seo-grid cols-3">
+            <div class="mb-seo-block">
+                <h3>Book Motor Boat for Ganga Aarti</h3>
+                <p>A shared or private motor boat ride positioned on the river for the evening Ganga Aarti ceremony.</p>
+                <a href="{{ $mbUrl('evening-boat-ride-in-varanasi') }}" class="mb-seo-link">Book Evening Boat Ride →</a>
+            </div>
+            <div class="mb-seo-block">
+                <h3>Book Private Motor Boat for Evening Ganga Aarti</h3>
+                <p>A no-sharing private motor boat for your group, with pickup from your choice of ghat.</p>
+                <a href="{{ $mbUrl('private-motor-boat-for-evening-ganga-aarti') }}" class="mb-seo-link">Book Private Evening Boat →</a>
+            </div>
+            <div class="mb-seo-block">
+                <h3>Best Ghats for Ganga Aarti Boat Pickup</h3>
+                <p>Pickup is available from Assi Ghat, Namo Ghat, Dashashwamedh Ghat and Shivala Ghat, whichever is closest to you.</p>
+                <a href="{{ $mbUrl('shivala-ghat-boat-booking-for-ganga-aarti-varanasi') }}" class="mb-seo-link">Book from Shivala Ghat →</a>
+            </div>
+        </div>
+
+        {{-- H2 4: 84 Ghats Boat Ride --}}
+        <h2>Varanasi 84 Ghats Boat Ride</h2>
+        <p>The private motor boat route from Assi Ghat to Namo Ghat covers roughly 7 km of the Varanasi riverfront — all 84 ghats — compared to the shorter Assi Ghat to Manikarnika Ghat route of about 3.5 km covering around 50 ghats. Both morning and evening departures are available, and the full route is a good fit for families, couples and small groups who want to see the entire riverfront in one ride rather than a short section.</p>
+        <div class="mb-seo-ghat-tags">
+            <span class="mb-seo-ghat-tag">Assi Ghat</span>
+            <span class="mb-seo-ghat-tag">Tulsi Ghat</span>
+            <span class="mb-seo-ghat-tag">Shivala Ghat</span>
+            <span class="mb-seo-ghat-tag">Harishchandra Ghat</span>
+            <span class="mb-seo-ghat-tag">Kedar Ghat</span>
+            <span class="mb-seo-ghat-tag">Dashashwamedh Ghat</span>
+            <span class="mb-seo-ghat-tag">Manikarnika Ghat</span>
+            <span class="mb-seo-ghat-tag">Rajendra Prasad Ghat</span>
+            <span class="mb-seo-ghat-tag">Namo Ghat</span>
+        </div>
+
+        {{-- H2 5: Why book with Visit Kashi --}}
+        <h2>Why Book Your Varanasi Boat Ride with Visit Kashi?</h2>
+        <div class="mb-seo-grid cols-4">
+            <div class="mb-seo-block"><h3>Verified Boat Services</h3><p>Every boat listed is checked and operated by an experienced local boatman.</p></div>
+            <div class="mb-seo-block"><h3>Private Boat Options</h3><p>Choose a fully private motor boat when you don't want to share your ride.</p></div>
+            <div class="mb-seo-block"><h3>Local Varanasi Team</h3><p>A Varanasi-based team that knows the ghats, the river and the Aarti timings.</p></div>
+            <div class="mb-seo-block"><h3>Online Booking</h3><p>Check availability and start your booking on this page in a few minutes.</p></div>
+            <div class="mb-seo-block"><h3>WhatsApp Confirmation</h3><p>Get your booking, reporting time and pickup ghat confirmed over WhatsApp.</p></div>
+            <div class="mb-seo-block"><h3>Transparent Pricing</h3><p>Per-boat pricing shown upfront, with no hidden charges added later.</p></div>
+            <div class="mb-seo-block"><h3>Customer Support</h3><p>Reach us by call or WhatsApp at +91-7080109917, 7080109918 or 7080109919.</p></div>
+            <div class="mb-seo-block"><h3>Experienced Travel Company</h3><p>5+ years booking boat rides and river experiences on the Ganga in Varanasi.</p></div>
+        </div>
+
+        {{-- Internal links to related boat pages --}}
+        <h2>Explore More Boat Options in Varanasi</h2>
+        <div class="mb-seo-grid cols-4">
+            <div class="mb-seo-block"><h3>Light Motor Boat</h3><p>A lighter motor boat option for smaller groups on the Ganga Aarti route.</p><a href="{{ $mbUrl('light-motor-boat-assi-ghat-boat-booking-for-ganga-aarti-varanasi') }}" class="mb-seo-link">View Light Motor Boat →</a></div>
+            <div class="mb-seo-block"><h3>Bajra Boat Booking</h3><p>A traditional Bajra boat for a slower, more scenic ride on the river.</p><a href="{{ route('product.sub.list', ['boat', 'bajra-boat']) }}" class="mb-seo-link">View Bajra Boats →</a></div>
+            <div class="mb-seo-block"><h3>Dev Diwali Boat Booking</h3><p>Book a boat for Dev Diwali, when the ghats are lit with lakhs of diyas.</p><a href="{{ route('product.sub.list', ['boat', 'dev-diwali-booking']) }}" class="mb-seo-link">View Dev Diwali Boats →</a></div>
+            <div class="mb-seo-block"><h3>Cruise &amp; Event Boat Booking</h3><p>Larger cruise boats and decorated event boats for celebrations on the Ganga.</p><a href="{{ route('product.sub.list', ['boat', 'event-boat']) }}" class="mb-seo-link">View Event Boats →</a></div>
+        </div>
+
+        {{-- FAQ --}}
+        <h2 id="mb-faq">Varanasi Boat Booking – Frequently Asked Questions</h2>
+        <div class="mb-seo-faq">
+            @foreach($mbFaqs as $faq)
+            <div class="mb-seo-faq-item">
                 <h3>{{ $faq['q'] }}</h3>
                 <p>{{ $faq['a'] }}</p>
             </div>
