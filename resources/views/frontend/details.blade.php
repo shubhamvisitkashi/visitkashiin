@@ -17,6 +17,11 @@
         : 'Explore the best ' . $seoTitle . ' in Varanasi. Book verified, locally vetted options at the best prices with Visit Kashi — Varanasi\'s #1 travel platform.';
 
     $listingImg   = asset('frontend/images/logo1.png');
+    // Escapes a string for embedding inside a JSON-LD string literal (the
+    // surrounding quotes are already in the template). The previous code used
+    // addslashes(), which escapes "'" as "\'" — not a legal JSON escape — and
+    // produced invalid JSON-LD whenever text contained an apostrophe (e.g. "isn't").
+    $jsonEsc = fn ($s) => substr(json_encode((string) $s, JSON_UNESCAPED_UNICODE), 1, -1);
     // Canonical always points at the production domain (never /public/),
     // matching the pattern already used on boat/cab product pages.
     $canonicalPath = optional($sub_category)->slug
@@ -38,6 +43,11 @@
     $catSlugMain   = optional($category)->slug ?? 'default';
     $subCategories = optional($category)->subCategory ?? collect();
     $totalCount    = $products->count();
+
+    // The bare /boat category page (no subcategory) — scopes the boat-specific
+    // topical content/FAQ/H1/schema override to this one page only.
+    $isBoatMainPage = $isBoatCat && !$sub_category;
+    $breadcrumbLabel = $isBoatMainPage ? 'Boat Booking in Varanasi' : $catLabel;
 
     // This generic listing template is shared by every category/subcategory
     // combination on the site. $cabHubs is the single source of truth for
@@ -112,6 +122,49 @@
              'a' => "Inclusions vary slightly by route — typically parking charges, toll tax and driver allowance are covered. Each route listing above states what is included for that specific service."],
             ['q' => "How do I confirm my {$vn} booking?",
              'a' => "Submit the enquiry form on the relevant service page, or message us directly on WhatsApp at +91-7080109917, 7080109918 or 7080109919. Our team confirms availability and the final fare before your trip."],
+        ];
+    } elseif ($isBoatMainPage) {
+        $faqs = [
+            ['q' => 'How much does a boat ride cost in Varanasi?',
+             'a' => 'It depends on the boat: a shared or private motor boat starts from around ₹3,499, a traditional Bajra boat from around ₹10,000, and a decorated boat for a celebration from around ₹6,999. The price table above shows current starting fares — the final amount depends on group size and any extras you add.'],
+            ['q' => 'How much does Ganga Aarti boat booking cost in Varanasi?',
+             'a' => 'A motor boat positioned for the evening Ganga Aarti starts from around ₹3,499 for either the shared or private option, and a private Bajra boat for the same route starts from around ₹10,000. Rates can vary slightly with the date and group size — confirm the exact fare on WhatsApp before booking.'],
+            ['q' => 'How can I book a boat for Ganga Aarti in Varanasi?',
+             'a' => 'Open the listing for the boat type you want above, fill in the enquiry form with your date and pickup ghat, or message us directly on WhatsApp. Our team checks availability and confirms your reporting time before the evening ceremony.'],
+            ['q' => 'Can I book a private boat for Ganga Aarti in Varanasi?',
+             'a' => 'Yes. Both a private motor boat and a private Bajra boat are available for the evening Ganga Aarti, so your group has the boat to itself rather than sharing it with other travellers.'],
+            ['q' => 'What is the best time for a boat ride in Varanasi?',
+             'a' => 'It depends on what you want to see. Mornings, before sunrise, suit travellers who want to watch the daily rituals and sunrise over the ghats with fewer crowds. Evenings suit those who want to end the day on the river during the Ganga Aarti. Both are genuinely popular — it comes down to your schedule and preference.'],
+            ['q' => 'What time is the morning boat ride in Varanasi?',
+             'a' => 'The morning ride departs before sunrise, so the exact reporting time shifts with the season rather than staying fixed year-round. Our team confirms the exact time for your travel date when you book.'],
+            ['q' => 'What time does the sunrise boat ride start in Varanasi?',
+             'a' => 'Like the morning boat ride, the sunrise-timed departure moves with the season since sunrise itself isn\'t at a fixed clock time through the year. Tell us your travel date and we\'ll confirm the reporting time that puts you on the river before sunrise.'],
+            ['q' => 'Where can I book a boat for Ganga Aarti in Varanasi?',
+             'a' => 'You can book directly on this page — choose the motor boat or Bajra boat listing, then submit the enquiry form or message us on WhatsApp. No need to visit the ghat in advance to arrange it.'],
+            ['q' => 'Where is the best place to board a boat in Varanasi?',
+             'a' => 'Assi Ghat, Dashashwamedh Ghat and Namo Ghat are the supported pickup points, depending on the boat and route you choose. Pick whichever is closest to where you\'re staying when you book.'],
+            ['q' => 'Can I book a boat near Dashashwamedh Ghat?',
+             'a' => 'Yes. Dashashwamedh Ghat is a supported pickup point, and it\'s also where the boat is positioned during the evening Ganga Aarti itself, since that\'s where the ceremony is performed.'],
+            ['q' => 'Can I book a boat near Assi Ghat in Varanasi?',
+             'a' => 'Yes, Assi Ghat is a supported pickup point for the evening Ganga Aarti route and is one of the ghats covered on the morning ride as well.'],
+            ['q' => 'How long is a Ganga boat ride in Varanasi?',
+             'a' => 'A standard motor boat ride runs for roughly 2 to 2.5 hours, covering ghat sightseeing plus the evening Ganga Aarti. Bajra boat and decorated-boat durations can differ by package — check the individual listing for the specifics.'],
+            ['q' => 'What is included in Varanasi boat booking?',
+             'a' => 'Every booking includes the boat itself, an experienced boatman, and life jackets for all passengers. Exact inclusions can vary a little by boat type, so check the individual listing if you need specifics for a particular boat.'],
+            ['q' => 'Can I book a boat online in Varanasi?',
+             'a' => 'Yes. Open any listing on this page, submit the enquiry form with your date and group size, or message us on WhatsApp — no need to arrange anything in person before you arrive.'],
+            ['q' => 'Which boat is best for Ganga Aarti in Varanasi?',
+             'a' => 'A private motor boat is the most flexible option for a couple or small group wanting the Aarti to themselves. A Bajra boat suits a larger group who want the traditional boat experience together. Neither is objectively "better" — it depends on your group size and whether you want to share.'],
+            ['q' => 'What is the difference between private and shared boat rides in Varanasi?',
+             'a' => 'On a shared ride, your fare covers your seats on a boat that may carry other travellers too. On a private ride, the entire boat is booked for your group only, with nobody else on board. Private bookings generally cost more per boat but give you the whole boat to yourselves.'],
+            ['q' => 'Can I book a morning Ganga boat ride in Varanasi?',
+             'a' => 'Yes, the morning boat ride is a separate listing from the evening options above, departing before sunrise and covering ghats including Assi Ghat, Dashashwamedh Ghat, Manikarnika Ghat and Harishchandra Ghat.'],
+            ['q' => 'Can I book a sunset boat ride in Varanasi?',
+             'a' => 'Yes — the evening boat ride departs a few hours before sunset and carries on into the Ganga Aarti, so it covers both the golden-hour view over the ghats and the evening ceremony in a single trip.'],
+            ['q' => 'How many people can travel in a private boat in Varanasi?',
+             'a' => 'The private motor boat is set up for up to 10 passengers, while the private Bajra boat can take a larger group of up to 50. Choose based on your group size when booking.'],
+            ['q' => 'Is advance booking required for a Ganga Aarti boat ride in Varanasi?',
+             'a' => 'Advance booking is recommended, especially on weekends when demand is higher. Same-day booking may be possible depending on availability — message us on WhatsApp to check before you travel.'],
         ];
     } elseif ($isHotelCat && $sub_category) {
         $loc = $subLabel; // e.g. "Near Kashi Vishwanath Temple"
@@ -209,17 +262,41 @@
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ url('/') }}" },
         @if($sub_category)
-        { "@type": "ListItem", "position": 2, "name": "{{ addslashes($catLabel) }}", "item": "{{ route('product.list', $catSlugMain) }}" },
-        { "@type": "ListItem", "position": 3, "name": "{{ addslashes($subLabel) }}", "item": "{{ $canonicalUrl }}" }
+        { "@type": "ListItem", "position": 2, "name": "{!! $jsonEsc($catLabel) !!}", "item": "{{ route('product.list', $catSlugMain) }}" },
+        { "@type": "ListItem", "position": 3, "name": "{!! $jsonEsc($subLabel) !!}", "item": "{{ $canonicalUrl }}" }
         @else
-        { "@type": "ListItem", "position": 2, "name": "{{ addslashes($catLabel) }}", "item": "{{ $canonicalUrl }}" }
+        { "@type": "ListItem", "position": 2, "name": "{!! $jsonEsc($breadcrumbLabel) !!}", "item": "{{ $canonicalUrl }}" }
         @endif
       ]
     },
+    @if($isBoatMainPage)
+    {{-- WebPage + Service — references the existing global Organization
+         (TravelAgency, declared once in the site layout) by name/url rather
+         than redeclaring it, to avoid duplicate/conflicting schema. --}}
+    {
+      "@type": "WebPage",
+      "@id": "{{ $canonicalUrl }}#webpage",
+      "url": "{{ $canonicalUrl }}",
+      "name": "{!! $jsonEsc($listingTitleTag) !!}",
+      "description": "{!! $jsonEsc(Str::limit($listingDesc, 200)) !!}",
+      "about": { "@type": "Service", "@id": "{{ $canonicalUrl }}#service" },
+      "isPartOf": { "@type": "WebSite", "url": "{{ url('/') }}", "name": "Visit Kashi" }
+    },
+    {
+      "@type": "Service",
+      "@id": "{{ $canonicalUrl }}#service",
+      "serviceType": "Boat Booking",
+      "name": "Boat Booking in Varanasi",
+      "description": "{!! $jsonEsc(Str::limit($listingDesc, 200)) !!}",
+      "provider": { "@type": "Organization", "name": "Visit Kashi", "url": "{{ url('/') }}" },
+      "areaServed": { "@type": "City", "name": "Varanasi" },
+      "url": "{{ $canonicalUrl }}"
+    },
+    @endif
     {
       "@type": "ItemList",
-      "name": "{{ addslashes($listingTitle) }}",
-      "description": "{{ addslashes($listingDesc) }}",
+      "name": "{!! $jsonEsc($listingTitle) !!}",
+      "description": "{!! $jsonEsc($listingDesc) !!}",
       "numberOfItems": {{ $totalCount }},
       "itemListElement": [
         @foreach($products->take(20) as $i => $p)
@@ -229,7 +306,7 @@
             ? route('product.detail', [$catSlugMain, $pSubSlug, $p->slug ?? '#'])
             : route('product.detail', [$catSlugMain, 'varanasi', $p->slug ?? '#']);
         @endphp
-        { "@type": "ListItem", "position": {{ $i + 1 }}, "url": "{{ $pUrl }}", "name": "{{ addslashes($p->name ?? '') }}" }{{ !$loop->last ? ',' : '' }}
+        { "@type": "ListItem", "position": {{ $i + 1 }}, "url": "{{ $pUrl }}", "name": "{!! $jsonEsc($p->name ?? '') !!}" }{{ !$loop->last ? ',' : '' }}
         @endforeach
       ]
     }{{ $activeCabHub ? '' : ',' }}
@@ -242,8 +319,8 @@
         @foreach($faqs as $fi => $faq)
         {
           "@type": "Question",
-          "name": "{{ addslashes($faq['q']) }}",
-          "acceptedAnswer": { "@type": "Answer", "text": "{{ addslashes($faq['a']) }}" }
+          "name": "{!! $jsonEsc($faq['q']) !!}",
+          "acceptedAnswer": { "@type": "Answer", "text": "{!! $jsonEsc($faq['a']) !!}" }
         }{{ $fi < count($faqs) - 1 ? ',' : '' }}
         @endforeach
       ]
@@ -271,7 +348,7 @@
 @endsection
 
 @push('styles')
-@if($activeCabHub)
+@if($activeCabHub || $isBoatMainPage)
 <link rel="stylesheet" href="{{ asset('frontend/css/topic-cluster.min.css') }}?v={{ filemtime(public_path('frontend/css/topic-cluster.min.css')) }}">
 @endif
 <style>
@@ -639,13 +716,23 @@
                 <span class="sep">›</span>
                 <span>{{ $subLabel }}</span>
             @else
-                <span>{{ $catLabel }}</span>
+                <span>{{ $breadcrumbLabel }}</span>
             @endif
         </nav>
 
-        <h1 class="vkl-hero__title">{{ $activeCabHub ? $activeCabHub['vehicleName'].' Cab Booking in Varanasi' : $seoTitle.' in Varanasi' }}</h1>
+        <h1 class="vkl-hero__title">
+            @if($activeCabHub){{ $activeCabHub['vehicleName'] }} Cab Booking in Varanasi
+            @elseif($isBoatMainPage)Boat Booking in Varanasi – Ganga Aarti, Sunrise &amp; Private Boat Rides
+            @else{{ $seoTitle }} in Varanasi
+            @endif
+        </h1>
 
-        <p class="vkl-hero__desc">{{ $activeCabHub ? 'Comfortable '.$activeCabHub['vehicleName'].' cab service for airport transfers, local sightseeing and outstation trips from Varanasi to Ayodhya, Prayagraj, Vindhyachal, Bodhgaya and Lucknow.' : Str::limit($listingDesc, 160) }}</p>
+        <p class="vkl-hero__desc">
+            @if($activeCabHub)Comfortable {{ $activeCabHub['vehicleName'] }} cab service for airport transfers, local sightseeing and outstation trips from Varanasi to Ayodhya, Prayagraj, Vindhyachal, Bodhgaya and Lucknow.
+            @elseif($isBoatMainPage)Book a boat ride in Varanasi for the evening Ganga Aarti, a sunrise ride on the Ganga, or a private boat for your group — with transparent pricing and easy online booking through VisitKashi.
+            @else{{ Str::limit($listingDesc, 160) }}
+            @endif
+        </p>
 
         <div class="vkl-hero__meta">
             <span class="vkl-hero__meta-item">
@@ -777,6 +864,11 @@
     <x-cab-outstation-hub :hub="$activeCabHub" :hub-slug="$activeCabHubKey" :products="$products" />
     @endif
 
+    {{-- ── Boat booking topical content — scoped to the bare /boat page ── --}}
+    @if($isBoatMainPage)
+    <x-boat-booking-hub :products="$products" />
+    @endif
+
     {{-- ── FAQ Section ───────────────────────────────────────────────── --}}
     <section class="vkl-faq" aria-label="Frequently Asked Questions">
         <div class="vkl-faq__head">
@@ -800,6 +892,14 @@
         </div>
         @endforeach
     </section>
+
+    @if($isBoatMainPage)
+    <section class="tc-section" aria-label="About VisitKashi boat booking">
+        <h2>Book With a Local Varanasi Boat Booking Service</h2>
+        <p>VisitKashi has 10 years of experience in Varanasi travel and boat booking, arranging Ganga Aarti boat rides, private boats, morning boat rides, sunset boat rides and Ganga boat tours for travellers visiting the city. Booking is enquiry-based — you tell us your date, boat type and group size, and our local team confirms availability, the pickup ghat and the final price before you travel, rather than charging an unclear rate upfront.</p>
+        <p>Looking for a trusted boat booking service in Varanasi? Book your Ganga Aarti boat, private boat, morning boat ride or sunset boat ride with VisitKashi. Call us at <a href="tel:+917080109917">7080109917</a>, <a href="tel:+917080109918">7080109918</a> or <a href="tel:+917080109919">7080109919</a>.</p>
+    </section>
+    @endif
 
   </div>
 </div>

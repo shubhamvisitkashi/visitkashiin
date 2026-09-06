@@ -80,12 +80,6 @@
                         Book Now
                     </a>
 
-                    {{-- Login (desktop only; hidden <992px alongside the rest of navbar-nav-wrapper) --}}
-                    <a href="/account/login" class="vk-nav__login">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                        Login
-                    </a>
-
                     {{-- Hamburger button (visible <992px) --}}
                     <button class="vk-hamburger" id="vkHamburger"
                             aria-label="Open navigation menu"
@@ -182,10 +176,6 @@
 
     {{-- Drawer footer --}}
     <div class="vk-drawer__foot">
-        <a href="/account/login" class="vk-drawer__login">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            Login / Sign Up
-        </a>
         <a href="https://wa.me/+917080109919"
            target="_blank" rel="noopener noreferrer"
            class="vk-drawer__whatsapp">

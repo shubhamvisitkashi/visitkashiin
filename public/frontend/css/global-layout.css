@@ -899,7 +899,7 @@ body:has(.hkbd-sticky-bar) .whatsapp {
    shown ≤767px in mobile-app.css) so the button floats above it instead
    of overlapping its top edge. */
 @media (max-width: 767px) {
-  .whatsapp { bottom: calc(60px + env(safe-area-inset-bottom)) !important; }
+  .whatsapp { bottom: calc(135px + env(safe-area-inset-bottom)) !important; }
 }
 @media (max-width: 575px) {
   .whatsapp { right: 16px; }
