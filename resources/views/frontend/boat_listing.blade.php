@@ -6,6 +6,7 @@
     $isDevDiwali     = optional($sub_category)->slug === 'dev-diwali-booking'
                        && $dd_now->lte($dd_devDiwaliEnd);
     $isMotorBoat     = optional($sub_category)->slug === 'motor-boat';
+    $isBajraBoat     = optional($sub_category)->slug === 'bajra-boat';
 
     // Single source of truth for the Dev Diwali FAQ — used for both the
     // visible on-page FAQ section and the FAQPage JSON-LD schema, so the
@@ -141,6 +142,43 @@
             'a' => 'VisitKashi is a local Varanasi travel company with 5+ years of experience booking boat rides on the Ganga, transparent per-boat pricing, WhatsApp booking confirmation and a local team on call to help you choose the right boat for your group.',
         ],
     ] : [];
+
+    // Single source of truth for the Bajra Boat FAQ — used for both the
+    // visible on-page FAQ section and the FAQPage JSON-LD schema.
+    $bbFaqs = $isBajraBoat ? [
+        [
+            'q' => 'What is a Bajra boat?',
+            'a' => 'A Bajra boat is a traditional, larger boat used on the Ganga in Varanasi — commonly booked privately for the evening Ganga Aarti or decorated for celebrations, since it comfortably seats bigger groups than a standard motor boat.',
+        ],
+        [
+            'q' => 'Can I book a private Bajra boat for Ganga Aarti?',
+            'a' => 'Yes. The private Bajra boat is positioned on the river in front of the Ganga Aarti ceremony at Dashaswamedh Ghat, so your group has the boat to yourselves rather than sharing it with other travellers.',
+        ],
+        [
+            'q' => 'How much does a Bajra boat cost in Varanasi?',
+            'a' => 'The private Bajra boat for Ganga Aarti starts from around ₹10,000, while a flower-decorated or event-decorated Bajra boat for a celebration starts from around ₹16,500. Exact pricing depends on group size and any decoration requirements.',
+        ],
+        [
+            'q' => 'How many people can travel in a Bajra boat?',
+            'a' => 'Capacity varies by boat and package — check the individual listing for the exact seating capacity of that specific Bajra boat before booking.',
+        ],
+        [
+            'q' => 'Can I book a decorated Bajra boat for a birthday or anniversary?',
+            'a' => 'Yes, flower-decorated and event-decoration Bajra boats are available for birthdays, anniversaries and similar celebrations on the Ganga.',
+        ],
+        [
+            'q' => 'What time is the evening Ganga Aarti from a Bajra boat?',
+            'a' => 'The evening Ganga Aarti at Dashashwamedh Ghat typically runs from around 7:00 PM to 7:45 PM. Reporting time and the exact schedule for your date are confirmed by our team on WhatsApp when you book.',
+        ],
+        [
+            'q' => 'Where can I board a Bajra boat in Varanasi?',
+            'a' => 'Pickup is generally available from Assi Ghat, Dashashwamedh Ghat or Namo Ghat, depending on the specific boat — select or confirm your preferred pickup point when booking.',
+        ],
+        [
+            'q' => 'How do I book a Bajra boat online?',
+            'a' => 'Browse the Bajra boat listings above, then use the enquiry form or WhatsApp button on the boat you want. Our team confirms availability, pickup point and the final price before your trip.',
+        ],
+    ] : [];
 @endphp
 
 {{-- ══ SEO META ══════════════════════════════════════════════════════════════ --}}
@@ -154,14 +192,24 @@
         ?? 'boat ride varanasi, ganga aarti boat, varanasi boat booking, motor boat varanasi, sunrise boat ride, ganga river tour';
     $pageUrl = url()->current();
     $ogImage = asset('frontend/images/logo1.png');
-    $canonicalUrl = $pageUrl;
+    // Canonical always points at the production domain (never /public/),
+    // for every boat subcategory — not just the two that had a hardcoded
+    // override below.
+    $canonicalUrl = 'https://visitkashi.in/boat/' . (optional($sub_category)->slug ?? '');
     $pageTitleTag = $blTitle . ' | Visit Kashi – Varanasi Boat Rides';
 
     if ($isDevDiwali) {
         $blTitle = 'Dev Diwali Varanasi Boat Booking 2026 | 24 November';
         $blDesc  = 'Book your Dev Diwali Varanasi Boat Booking for 24 November 2026 with VisitKashi. Reserve a boat or cruise, view illuminated ghats and Ganga Aarti from the river';
         $blKw    = 'dev diwali varanasi boat booking 2026, dev diwali boat booking varanasi, dev deepawali boat booking varanasi, dev diwali cruise booking varanasi, dev deepawali cruise booking 2026, varanasi dev diwali cruise booking, dev diwali boat ride varanasi, dev diwali ganga boat ride, dev diwali varanasi cruise, varanasi boat booking for dev diwali, dev diwali ganga cruise, dev diwali boat booking 2026, dev deepawali varanasi boat booking, varanasi dev diwali boat ride, dev diwali ganga aarti boat booking';
-        $canonicalUrl = 'https://visitkashi.com/boat/dev-diwali-booking';
+        $canonicalUrl = 'https://visitkashi.in/boat/dev-diwali-booking';
+        $pageTitleTag = $blTitle;
+    }
+
+    if ($isBajraBoat) {
+        $blTitle = 'Bajra Boat Booking in Varanasi';
+        $blDesc  = 'Book a traditional Bajra boat in Varanasi — private for the evening Ganga Aarti, or decorated for a birthday or anniversary celebration on the Ganga. Book online today!';
+        $blKw    = 'bajra boat booking varanasi, private bajra boat for ganga aarti, bajra boat ganga aarti varanasi, decorated bajra boat varanasi, bajra boat price varanasi, book bajra boat online';
         $pageTitleTag = $blTitle;
     }
 
@@ -329,6 +377,44 @@
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
 </script>
 @endif
+
+@if($isBajraBoat)
+{{-- JSON-LD: Service — the Bajra boat booking service itself (distinct from
+     the per-boat Offers already in the ItemList above) --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Bajra Boat Booking",
+  "name": "Bajra Boat Booking in Varanasi – Ganga Aarti & Private Boat",
+  "description": "{{ $blDesc }}",
+  "provider": {
+    "@type": "LocalBusiness",
+    "name": "Visit Kashi",
+    "url": "{{ url('/') }}",
+    "telephone": "{{ websiteSetupValue('contact_number') }}"
+  },
+  "areaServed": {
+    "@type": "City",
+    "name": "Varanasi"
+  },
+  "url": "{{ $canonicalUrl }}"
+}
+</script>
+
+{{-- JSON-LD: FAQPage — mirrors the visible FAQ section exactly --}}
+<script type="application/ld+json">
+{!! json_encode([
+    '@context'   => 'https://schema.org',
+    '@type'      => 'FAQPage',
+    'mainEntity' => array_map(fn($f) => [
+        '@type'          => 'Question',
+        'name'           => $f['q'],
+        'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f['a']],
+    ], $bbFaqs),
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
+@endif
 @endsection
 
 @push('styles')
@@ -434,7 +520,7 @@
             Ganga River · Varanasi
         </div>
 
-        <h1>{{ $isDevDiwali ? 'Dev Diwali Varanasi Boat Booking 2026' : ($isMotorBoat ? 'Varanasi Boat Booking – Private Motor Boat for Ganga Aarti & 84 Ghats' : (optional($sub_category)->name ?? 'Motor Boat Rides in Varanasi')) }}</h1>
+        <h1>{{ $isDevDiwali ? 'Dev Diwali Varanasi Boat Booking 2026' : ($isMotorBoat ? 'Varanasi Boat Booking – Private Motor Boat for Ganga Aarti & 84 Ghats' : ($isBajraBoat ? 'Bajra Boat Booking in Varanasi' : (optional($sub_category)->name ?? 'Motor Boat Rides in Varanasi'))) }}</h1>
 
         @if($isMotorBoat)
         <p class="bl-hero-intro">Book a private motor boat in Varanasi for a morning ride along the ghats or an evening ride timed to the Ganga Aarti. VisitKashi's motor boat booking covers the full stretch of the river from Assi Ghat to Namo Ghat — all 84 ghats of Varanasi — with private, no-sharing options for couples, families and small groups. Choose a sunrise ride to see the ghats wake up, or an evening ride to watch the Ganga Aarti and the diya-lit riverfront from the water. Every boat is booked online in minutes, confirmed by our local Varanasi team over call or WhatsApp, with clear per-boat pricing and no hidden charges.</p>
@@ -946,41 +1032,72 @@
 @endif
 
 {{-- ══ MOTOR BOAT SEO CONTENT ═════════════════════════════════════════════════ --}}
-@if($isMotorBoat)
+@if($isMotorBoat || $isBajraBoat)
 @php
     $mbUrl = fn($slug) => route('product.detail', ['boat', 'motor-boat', $slug]);
+    $bbUrl = fn($slug) => route('product.detail', ['boat', 'bajra-boat', $slug]);
 @endphp
-<style>
-.mb-seo{background:#fff;border-top:1px solid #f0f0f0;padding:48px 0;}
-.mb-seo-intro{max-width:820px;margin:0 0 8px;}
-.mb-seo h2{font-size:1.3rem;font-weight:800;color:#111;letter-spacing:-.02em;margin:44px 0 14px;}
-.mb-seo > .mb-seo-intro h2{margin-top:0;}
-.mb-seo h3{font-size:.98rem;font-weight:700;color:#1a2b4c;margin:0 0 6px;padding-left:12px;border-left:3px solid #0f3460;}
-.mb-seo p{font-size:.92rem;color:#444;line-height:1.75;margin:0 0 12px;max-width:820px;}
-.mb-seo-block{margin-bottom:18px;}
-.mb-seo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 28px;margin-top:18px;}
-.mb-seo-grid.cols-2{grid-template-columns:repeat(2,1fr);}
-.mb-seo-grid.cols-4{grid-template-columns:repeat(4,1fr);}
-.mb-seo-grid .mb-seo-block p{margin-bottom:0;}
-.mb-seo-link{font-size:.8rem;font-weight:700;color:#0f3460;text-decoration:none;display:inline-block;margin-top:2px;}
-.mb-seo-link:hover{text-decoration:underline;}
-.mb-seo-ghat-tags{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;}
-.mb-seo-ghat-tag{background:#f6f9fc;border:1px solid #e8eef4;border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;color:#1a2b4c;}
-.mb-seo-cta{display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:11px 26px;background:linear-gradient(135deg,#0f3460,#1a5276);color:#fff;border-radius:11px;font-size:.86rem;font-weight:800;text-decoration:none;letter-spacing:.02em;transition:opacity .2s,transform .2s;}
-.mb-seo-cta:hover{opacity:.9;transform:translateY(-1px);color:#fff;text-decoration:none;}
-.mb-seo-faq{max-width:900px;}
-.mb-seo-faq-item{border-bottom:1px solid #e5e7eb;padding:18px 0;}
-.mb-seo-faq-item:first-child{padding-top:0;}
-.mb-seo-faq-item:last-child{border-bottom:none;padding-bottom:0;}
-.mb-seo-faq-item h3{margin:0 0 8px;}
-.mb-seo-faq-item p{margin:0;max-width:none;}
-@media(max-width:900px){.mb-seo-grid{grid-template-columns:repeat(2,1fr);}.mb-seo-grid.cols-4{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:560px){.mb-seo-grid,.mb-seo-grid.cols-2,.mb-seo-grid.cols-4{grid-template-columns:1fr;}}
-</style>
 
 <section class="mb-seo">
     <div class="container">
 
+    @if($isBajraBoat)
+        {{-- H2: Bajra Boat Booking in Varanasi --}}
+        <div class="mb-seo-intro">
+            <h2>Bajra Boat Booking in Varanasi</h2>
+            <p>A Bajra boat is a traditional, larger boat on the Ganga — commonly booked privately for the evening Ganga Aarti, or decorated for a birthday, anniversary or other celebration. Pickup is generally available from Assi Ghat, Dashashwamedh Ghat or Namo Ghat depending on the boat, and pricing is shown on each listing below.</p>
+        </div>
+
+        <div class="mb-seo-grid cols-3">
+            <div class="mb-seo-block">
+                <h3>Private Bajra Boat for Ganga Aarti</h3>
+                <p>A private Bajra boat positioned in front of the evening Ganga Aarti at Dashashwamedh Ghat, with no sharing with other groups.</p>
+                <a href="{{ $bbUrl('private-bajra-boat-for-ganga-aarti') }}" class="mb-seo-link">Book Private Bajra Boat →</a>
+            </div>
+            <div class="mb-seo-block">
+                <h3>Flower Decorated Bajra Boat</h3>
+                <p>A Bajra boat decorated with flowers for anniversaries, proposals and other special river celebrations.</p>
+                <a href="{{ $bbUrl('flower-decorated-bajra-boat') }}" class="mb-seo-link">Book Flower Decorated Boat →</a>
+            </div>
+            <div class="mb-seo-block">
+                <h3>Surprise Event Decoration Bajra Boat</h3>
+                <p>A custom-decorated Bajra boat for birthday or anniversary surprises on the river.</p>
+                <a href="{{ $bbUrl('surprise-event-decoration-bajra-boat-booking-for-birthdayanniversary') }}" class="mb-seo-link">Book Event Decoration Boat →</a>
+            </div>
+        </div>
+
+        {{-- H2: Evening Ganga Aarti from a Bajra Boat --}}
+        <h2>Evening Ganga Aarti from a Bajra Boat</h2>
+        <p>The evening Ganga Aarti at Dashashwamedh Ghat typically runs from around 7:00 PM to 7:45 PM. A private Bajra boat is positioned on the river for the ceremony, giving your group a river view of the diyas, chants and temple bells without sharing the boat with other travellers. Exact reporting time and pickup point are confirmed by our team when you book.</p>
+        <a href="{{ $bbUrl('private-bajra-boat-for-ganga-aarti') }}" class="mb-seo-cta">
+            <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Book Private Bajra Boat for Ganga Aarti
+        </a>
+
+        {{-- H2: Ghats covered --}}
+        <h2>Ghats Along the Bajra Boat Route</h2>
+        <p>Depending on the route, a Bajra boat ride can take in a number of the historic ghats of Varanasi along the riverfront.</p>
+        <div class="mb-seo-ghat-tags">
+            <span class="mb-seo-ghat-tag">Assi Ghat</span>
+            <span class="mb-seo-ghat-tag">Shivala Ghat</span>
+            <span class="mb-seo-ghat-tag">Harishchandra Ghat</span>
+            <span class="mb-seo-ghat-tag">Dashashwamedh Ghat</span>
+            <span class="mb-seo-ghat-tag">Manikarnika Ghat</span>
+            <span class="mb-seo-ghat-tag">Rajendra Prasad Ghat</span>
+            <span class="mb-seo-ghat-tag">Namo Ghat</span>
+        </div>
+
+        {{-- Internal links to related boat pages --}}
+        <h2>Explore More Boat Options in Varanasi</h2>
+        <div class="mb-seo-grid cols-4">
+            <div class="mb-seo-block"><h3>Private Motor Boat</h3><p>A faster, more flexible private motor boat for the evening Ganga Aarti.</p><a href="{{ $mbUrl('private-motor-boat-for-evening-ganga-aarti') }}" class="mb-seo-link">View Motor Boats →</a></div>
+            <div class="mb-seo-block"><h3>Motor Boat Booking</h3><p>Shared and private motor boat rides for mornings and evenings on the Ganga.</p><a href="{{ route('product.sub.list', ['boat', 'motor-boat']) }}" class="mb-seo-link">View Motor Boats →</a></div>
+            <div class="mb-seo-block"><h3>Dev Diwali Boat Booking</h3><p>Book a boat for Dev Diwali, when the ghats are lit with lakhs of diyas.</p><a href="{{ route('product.sub.list', ['boat', 'dev-diwali-booking']) }}" class="mb-seo-link">View Dev Diwali Boats →</a></div>
+            <div class="mb-seo-block"><h3>Event Boat Booking</h3><p>Larger decorated boats for birthdays, anniversaries and other celebrations.</p><a href="{{ route('product.sub.list', ['boat', 'event-boat']) }}" class="mb-seo-link">View Event Boats →</a></div>
+        </div>
+    @endif
+
+    @if($isMotorBoat)
         {{-- H2 1: Private Motor Boat Booking in Varanasi --}}
         <div class="mb-seo-intro">
             <h2>Private Motor Boat Booking in Varanasi</h2>
@@ -1070,11 +1187,13 @@
             <div class="mb-seo-block"><h3>Dev Diwali Boat Booking</h3><p>Book a boat for Dev Diwali, when the ghats are lit with lakhs of diyas.</p><a href="{{ route('product.sub.list', ['boat', 'dev-diwali-booking']) }}" class="mb-seo-link">View Dev Diwali Boats →</a></div>
             <div class="mb-seo-block"><h3>Cruise &amp; Event Boat Booking</h3><p>Larger cruise boats and decorated event boats for celebrations on the Ganga.</p><a href="{{ route('product.sub.list', ['boat', 'event-boat']) }}" class="mb-seo-link">View Event Boats →</a></div>
         </div>
+    @endif
 
-        {{-- FAQ --}}
-        <h2 id="mb-faq">Varanasi Boat Booking – Frequently Asked Questions</h2>
+        {{-- FAQ — shared markup, sourced from whichever subcategory's FAQ array is active --}}
+        @php $activeFaqs = $isMotorBoat ? $mbFaqs : ($isBajraBoat ? $bbFaqs : []); @endphp
+        <h2 id="mb-faq">{{ $isBajraBoat ? 'Bajra Boat Booking – Frequently Asked Questions' : 'Varanasi Boat Booking – Frequently Asked Questions' }}</h2>
         <div class="mb-seo-faq">
-            @foreach($mbFaqs as $faq)
+            @foreach($activeFaqs as $faq)
             <div class="mb-seo-faq-item">
                 <h3>{{ $faq['q'] }}</h3>
                 <p>{{ $faq['a'] }}</p>
