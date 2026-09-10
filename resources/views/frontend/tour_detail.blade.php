@@ -4,10 +4,15 @@
 @isset($product)
 @php
     $isFestival = str_contains(strtolower(optional($product->category)->slug ?? ''), 'festival');
+    $isDevDeepawali = isset($product) && ($product->slug ?? '') === 'dev-deepawali';
     $tourImg    = (!empty($product->images) && is_array($product->images))
                     ? asset('backend/admin/product_images/' . $product->images[0])
                     : asset('frontend/images/logo1.png');
-    $pageTitle  = (optional($product)->meta_title ?: optional($product)->name) . ' in Varanasi | Visit Kashi';
+    // Avoid "...Varanasi in Varanasi..." / "...Visit Kashi | Visit Kashi" when the
+    // admin-entered meta_title already contains these (as it now does for this product).
+    $rawTitle   = optional($product)->meta_title ?: optional($product)->name;
+    $pageTitle  = (stripos($rawTitle, 'varanasi') !== false ? $rawTitle : $rawTitle . ' in Varanasi')
+                . (stripos($rawTitle, 'visit kashi') !== false ? '' : ' | Visit Kashi');
     $pageDesc   = optional($product)->meta_description
                     ?: 'Explore ' . optional($product)->name . ' in Varanasi — one of India\'s most sacred cities. Book experiences with Visit Kashi, the city\'s most trusted travel platform.';
     $pageKw     = optional($product)->meta_keyword ?? '';
@@ -94,6 +99,7 @@
 @section('content')
 @php
     $isFestival   = $isFestival ?? str_contains(strtolower(optional($product->category)->slug ?? ''), 'festival');
+    $isDevDeepawali = $isDevDeepawali ?? (isset($product) && ($product->slug ?? '') === 'dev-deepawali');
     $catName      = $catName    ?? (optional($product->category)->name ?? 'Festivals');
     $catSlugLD    = $catSlugLD  ?? (optional($product->category)->slug ?? 'festivals');
 @endphp
@@ -129,6 +135,10 @@
 .fest-sidebar__wa { display:flex; align-items:center; justify-content:center; gap:8px; background:#25D366; color:#fff; padding:12px; border-radius:10px; font-size:.88rem; font-weight:700; text-decoration:none !important; }
 .fest-sidebar__wa:hover { opacity:.9; }
 .fest-sidebar__wa img { width:20px !important; height:20px !important; flex-shrink:0; }
+.fest-sidebar__wa--boat { background:#D94F2B; margin-bottom:10px; }
+.fest-sidebar__phones { font-size:.78rem; color:#777; text-align:center; margin:0; line-height:1.6; }
+.fest-sidebar__phones a { color:#D94F2B; font-weight:700; text-decoration:none; }
+.fest-sidebar__phones a:hover { text-decoration:underline; }
 @media(max-width:991px){ .fest-sidebar { position:relative; top:auto; margin-bottom:24px; } }
 
 /* ── Popular Packages slider (shown right before "Why Travelers Choose") ──
@@ -186,6 +196,24 @@
    full 512x512 natural size instead of the intended 22x22 icon. */
 .td-cta-wa img { width:22px !important; height:22px !important; flex-shrink:0; }
 @media(max-width:575px){ .td-cta-box { flex-direction:column; align-items:stretch; text-align:center; } .td-cta-wa { justify-content:center; } }
+
+/* Admin-authored tables inside the description (e.g. Dev Deepawali's timing
+   table) can be wider than the mobile viewport; scope a scroll container so
+   the page itself never overflows horizontally. */
+.description-content { overflow-x:auto; }
+
+/* ── "Book Your Dev Diwali Boat Ride" CTA ── */
+.dd-boat-cta { background:linear-gradient(135deg,#fff7f3,#ffffff); border:1px solid #f7ddd2; }
+.dd-boat-cta .td-section { margin-bottom:12px; }
+.dd-boat-cta p { font-size:.92rem; color:#555; line-height:1.7; margin-bottom:18px; }
+.dd-boat-cta__row { display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
+.dd-boat-cta__btn { display:inline-flex; align-items:center; gap:8px; background:#D94F2B; color:#fff; padding:12px 22px; border-radius:10px; font-size:.9rem; font-weight:700; text-decoration:none !important; white-space:nowrap; transition:background .2s; }
+.dd-boat-cta__btn:hover { background:#B83D1F; color:#fff; }
+.dd-boat-cta__phones { font-size:.85rem; color:#555; }
+.dd-boat-cta__phones span { display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; color:#999; font-weight:700; margin-bottom:3px; }
+.dd-boat-cta__phones a { color:#D94F2B; font-weight:700; text-decoration:none; }
+.dd-boat-cta__phones a:hover { text-decoration:underline; }
+@media(max-width:575px){ .dd-boat-cta__row { flex-direction:column; align-items:stretch; text-align:center; } }
 </style>
 @endpush
 
@@ -523,6 +551,25 @@
                                 {!! safe_html($product->description) !!}
                             </div>
                         </div>
+
+                        @if($isDevDeepawali)
+                        <div class="dd-boat-cta detail-box">
+                            <h2 class="td-section">Book Your Dev Diwali Boat Ride with Visit Kashi</h2>
+                            <p>Dev Deepawali is best experienced from the river, watching the diyas light up all 84 ghats from a boat on the Ganga. Visit Kashi is a Varanasi-focused travel booking service handling Dev Diwali boat booking, along with regular Ganga Aarti and private boat rides through the rest of the year.</p>
+                            <div class="dd-boat-cta__row">
+                                <a href="{{ route('product.sub.list', ['boat', 'dev-diwali-booking']) }}" class="dd-boat-cta__btn">
+                                    <i class="fa fa-ship" aria-hidden="true"></i> View Dev Diwali Boat Options
+                                </a>
+                                <div class="dd-boat-cta__phones">
+                                    <span>Call / WhatsApp</span>
+                                    <a href="tel:+917080109917">+91-7080109917</a>,
+                                    <a href="tel:+917080109918">7080109918</a>,
+                                    <a href="tel:+917080109919">7080109919</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         @if ($product->youtube_link)
                             <div class="comments-form detail-box">
                                 <div class="detail-title">
@@ -1440,6 +1487,20 @@
                                 <p class="td-coming-soon">More festivals coming soon.</p>
                                 @endforelse
                             </div>
+                            @if($isDevDeepawali)
+                            <span class="fest-sidebar__divider">Dev Diwali Boat Booking</span>
+                            <div class="fest-sidebar__cta">
+                                <a href="{{ route('product.sub.list', ['boat', 'dev-diwali-booking']) }}" class="fest-sidebar__wa fest-sidebar__wa--boat">
+                                    <i class="fa fa-ship" aria-hidden="true"></i>
+                                    View Boat Options
+                                </a>
+                                <p class="fest-sidebar__phones">Call / WhatsApp Visit Kashi<br>
+                                    <a href="tel:+917080109917">+91-7080109917</a> ·
+                                    <a href="tel:+917080109918">7080109918</a> ·
+                                    <a href="tel:+917080109919">7080109919</a>
+                                </p>
+                            </div>
+                            @endif
                             <span class="fest-sidebar__divider">Plan your visit</span>
                             <div class="fest-sidebar__cta">
                                 <a href="https://wa.me/{{ whatsAppNumber() }}"

@@ -538,6 +538,8 @@ if (empty($desktopSliderSlides)) {
 </script>
 @endif
 
+@include('frontend._db_promo_banner', ['position' => 'after_hero'])
+
 {{-- ── Mobile App: Quick-action chips (below hero, mobile only) ── --}}
 <div class="vk-mob-chips" role="navigation" aria-label="Quick categories">
     <a href="{{ route('product.list','boat') }}" class="vk-mob-chip">
@@ -771,6 +773,8 @@ $svcData = [
 }
 </style>
 
+@include('frontend._db_promo_banner', ['position' => 'after_our_services'])
+
 {{-- ════════════════════════════════════════════
      4. ON-HOME CATEGORIES (dynamic loop)
      Preserved exactly:
@@ -842,13 +846,17 @@ $svcData = [
         </div>
     </section>
 
+    @if($on_home_category->slug === 'cab')
+    @include('frontend._db_promo_banner', ['position' => 'after_cab'])
+    @elseif($on_home_category->slug === 'boat')
+    @include('frontend._db_promo_banner', ['position' => 'after_boat'])
+    @endif
 
     @endforeach
 @endif
 </div>{{-- /#vk-categories --}}
 
-
-{{-- Promo Banner: after_categories --}}
+@include('frontend._db_promo_banner', ['position' => 'after_categories'])
 
 {{-- ════════════════════════════════════════════
      4. POPULAR PACKAGES (dynamic loop)
@@ -919,9 +927,14 @@ $svcData = [
 @endif
 
 
-{{-- Promo Banner: after_packages --}}
+@include('frontend._db_promo_banner', ['position' => 'after_packages'])
 
-{{-- Why, CTA Strip, and Weather are now rendered globally via _before_footer.blade.php --}}
+{{-- Why, CTA Strip, and Weather are now rendered globally via _before_footer.blade.php.
+     The after_trust / after_why / after_cta promo-banner positions are NOT wired up here:
+     there's no dedicated "trust bar" section on this homepage, and the Why/CTA blocks live
+     in _before_footer.blade.php, which renders on every page site-wide, not just the home
+     page — including a homepage-only position there would leak the banner onto every
+     product/category page too. --}}
 
 {{-- ════════════════════════════════════════════
      Search JS — preserved exactly

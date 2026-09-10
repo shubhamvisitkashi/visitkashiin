@@ -28,8 +28,18 @@ class CategoryController extends Controller
             $search = $request->search;
             $list = $list->where('name', 'like', '%' . $search. '%');
         }
-        $list = $list->paginate(40);
-        return view('admin.category.index', compact('list', 'search'), ['page_title' => 'Category']);
+        $list = $list->paginate(40)->withQueryString();
+
+        // Site-wide counts (not scoped to the current search/page) for the
+        // summary cards above the table.
+        $totalCount        = Category::count();
+        $activeCount       = Category::where('is_active', 'active')->count();
+        $onHomeCount       = Category::where('on_home', '1')->count();
+        $priceVisibleCount = Category::where('show_price', '1')->count();
+
+        return view('admin.category.index', compact(
+            'list', 'search', 'totalCount', 'activeCount', 'onHomeCount', 'priceVisibleCount'
+        ), ['page_title' => 'Category']);
     }
 
     /**
@@ -100,7 +110,15 @@ class CategoryController extends Controller
     {
         $list = Category::orderBy('name', 'asc')->paginate(40);
         $edit_data = Category::find($id);
-        return view('admin.category.index', compact('list', 'edit_data'), ['page_title' => 'Category']);
+
+        $totalCount        = Category::count();
+        $activeCount       = Category::where('is_active', 'active')->count();
+        $onHomeCount       = Category::where('on_home', '1')->count();
+        $priceVisibleCount = Category::where('show_price', '1')->count();
+
+        return view('admin.category.index', compact(
+            'list', 'edit_data', 'totalCount', 'activeCount', 'onHomeCount', 'priceVisibleCount'
+        ), ['page_title' => 'Category']);
     }
 
     /**

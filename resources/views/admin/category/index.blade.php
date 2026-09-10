@@ -53,6 +53,33 @@
 /* Empty */
 .cat-empty{text-align:center;padding:44px;color:#94A3B8;}
 .cat-empty i[data-feather]{width:48px;height:48px;opacity:.2;display:block;margin:0 auto 12px;}
+.cat-empty a{color:#4F46E5;font-weight:700;text-decoration:none;}
+.cat-empty a:hover{text-decoration:underline;}
+
+/* Stats row */
+.cat-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.cat-stat{background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.cat-stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cat-stat-icon i[data-feather]{width:17px;height:17px;}
+.cat-stat-num{font-size:1.25rem;font-weight:800;color:#0F172A;line-height:1.1;}
+.cat-stat-label{font-size:.7rem;color:#64748B;font-weight:600;margin-top:1px;}
+.cat-stat--total .cat-stat-icon{background:#EEF2FF;}.cat-stat--total .cat-stat-icon i{stroke:#4F46E5;}
+.cat-stat--active .cat-stat-icon{background:#ECFDF5;}.cat-stat--active .cat-stat-icon i{stroke:#10B981;}
+.cat-stat--home .cat-stat-icon{background:#FFF7ED;}.cat-stat--home .cat-stat-icon i{stroke:#EA580C;}
+.cat-stat--price .cat-stat-icon{background:#EFF6FF;}.cat-stat--price .cat-stat-icon i{stroke:#2563EB;}
+@media(max-width:768px){.cat-stats{grid-template-columns:repeat(2,1fr);}}
+
+/* Pagination */
+.cat-pag{padding:12px 18px;border-top:1px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.cat-pag-info{font-size:.75rem;color:#64748B;font-weight:600;}
+
+/* Row being edited */
+.cat-row-editing{background:#EEF2FF !important;}
+.cat-row-editing .cat-name::after{content:'Editing';margin-left:8px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#4F46E5;background:#E0E7FF;padding:2px 7px;border-radius:20px;vertical-align:middle;}
+
+/* Character counter */
+.cat-counter{font-size:.68rem;color:#94A3B8;margin-top:4px;text-align:right;}
+.cat-counter.cat-counter--over{color:#DC2626;font-weight:700;}
 
 /* Form card */
 .cat-form-card{background:#fff;border-radius:14px;border:1px solid #E2E8F0;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;position:sticky;top:80px;}
@@ -106,6 +133,26 @@
     </div>
 </div>
 
+{{-- Summary stats --}}
+<div class="cat-stats">
+    <div class="cat-stat cat-stat--total">
+        <div class="cat-stat-icon"><i data-feather="grid"></i></div>
+        <div><div class="cat-stat-num">{{ $totalCount }}</div><div class="cat-stat-label">Total Categories</div></div>
+    </div>
+    <div class="cat-stat cat-stat--active">
+        <div class="cat-stat-icon"><i data-feather="check-circle"></i></div>
+        <div><div class="cat-stat-num">{{ $activeCount }}</div><div class="cat-stat-label">Active</div></div>
+    </div>
+    <div class="cat-stat cat-stat--home">
+        <div class="cat-stat-icon"><i data-feather="home"></i></div>
+        <div><div class="cat-stat-num">{{ $onHomeCount }}</div><div class="cat-stat-label">Shown on Home</div></div>
+    </div>
+    <div class="cat-stat cat-stat--price">
+        <div class="cat-stat-icon"><i data-feather="tag"></i></div>
+        <div><div class="cat-stat-num">{{ $priceVisibleCount }}</div><div class="cat-stat-label">Price Visible</div></div>
+    </div>
+</div>
+
 <div class="cat-layout">
 
     {{-- Categories Table --}}
@@ -129,8 +176,8 @@
                     </thead>
                     <tbody>
                         @forelse($list as $i => $data)
-                        <tr>
-                            <td style="color:#94A3B8;font-size:.78rem;">{{ $i+1 }}</td>
+                        <tr class="{{ isset($edit_data) && $edit_data->id === $data->id ? 'cat-row-editing' : '' }}">
+                            <td style="color:#94A3B8;font-size:.78rem;">{{ $list->firstItem() + $i }}</td>
                             <td>
                                 <div class="cat-name">{{ $data->name }}</div>
                                 @if($data->meta_title)
@@ -139,31 +186,31 @@
                             </td>
                             <td class="text-center">
                                 <label class="cat-switch">
-                                    <input type="checkbox" class="show_price" value="{{ $data->id }}" {{ $data->show_price=='1'?'checked':'' }}>
+                                    <input type="checkbox" class="show_price" value="{{ $data->id }}" {{ $data->show_price=='1'?'checked':'' }} aria-label="Show price for {{ $data->name }}">
                                     <span class="cat-switch-slider"></span>
                                 </label>
                             </td>
                             <td class="text-center">
                                 <label class="cat-switch">
-                                    <input type="checkbox" class="on_home" value="{{ $data->id }}" {{ $data->on_home=='1'?'checked':'' }}>
+                                    <input type="checkbox" class="on_home" value="{{ $data->id }}" {{ $data->on_home=='1'?'checked':'' }} aria-label="Show {{ $data->name }} on home page">
                                     <span class="cat-switch-slider"></span>
                                 </label>
                             </td>
                             <td class="text-center">
                                 <label class="cat-switch">
-                                    <input type="checkbox" class="status_update" value="{{ $data->id }}" {{ $data->is_active==='active'?'checked':'' }}>
+                                    <input type="checkbox" class="status_update" value="{{ $data->id }}" {{ $data->is_active==='active'?'checked':'' }} aria-label="Activate {{ $data->name }}">
                                     <span class="cat-switch-slider"></span>
                                 </label>
                             </td>
                             <td class="text-center">
                                 <div class="cat-actions" style="justify-content:center;">
-                                    <a href="{{ route('category.edit', $data->id) }}" class="cat-act cat-act-edit" title="Edit">
+                                    <a href="{{ route('category.edit', $data->id) }}" class="cat-act cat-act-edit" title="Edit" aria-label="Edit {{ $data->name }}">
                                         <i data-feather="edit-2"></i>
                                     </a>
                                     @can('category-delete')
                                     <form action="{{ route('category.destroy', $data->id) }}" method="POST" style="display:contents;" onsubmit="return confirm('Delete {{ addslashes($data->name) }}?')">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="cat-act cat-act-del" title="Delete">
+                                        <button type="submit" class="cat-act cat-act-del" title="Delete" aria-label="Delete {{ $data->name }}">
                                             <i data-feather="trash-2"></i>
                                         </button>
                                     </form>
@@ -175,19 +222,32 @@
                         <tr><td colspan="6">
                             <div class="cat-empty">
                                 <i data-feather="grid"></i>
+                                @if($search)
+                                <p style="font-weight:700;color:#374151;margin:0 0 4px;">No categories match "{{ $search }}"</p>
+                                <p style="font-size:.82rem;margin:0;"><a href="{{ route('category.index') }}">Clear search</a></p>
+                                @else
                                 <p style="font-weight:700;color:#374151;margin:0 0 4px;">No categories found</p>
-                                <p style="font-size:.82rem;margin:0;">Create your first category using the form →</p>
+                                <p style="font-size:.82rem;margin:0;">Create your first category using the form <a href="#cat-form">→</a></p>
+                                @endif
                             </div>
                         </td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+            @if($list->hasPages())
+            <div class="cat-pag">
+                <div class="cat-pag-info">
+                    Showing {{ $list->firstItem() }}–{{ $list->lastItem() }} of {{ $list->total() }}
+                </div>
+                {!! $list->links() !!}
+            </div>
+            @endif
         </div>
     </div>
 
     {{-- Create / Edit Form --}}
-    <div>
+    <div id="cat-form">
         <div class="cat-form-card">
             <div class="cat-form-head">
                 <div class="cat-form-head-icon">
@@ -223,8 +283,9 @@
 
                 <div class="cat-field">
                     <label class="cat-label">Meta Title</label>
-                    <input type="text" name="meta_title" class="cat-input" placeholder="60 characters recommended"
+                    <input type="text" name="meta_title" id="cat-meta-title" class="cat-input" placeholder="60 characters recommended" maxlength="70"
                            value="{{ $edit_data->meta_title ?? old('meta_title') }}">
+                    <div class="cat-counter" id="cat-meta-title-counter"></div>
                 </div>
                 <div class="cat-field">
                     <label class="cat-label">Meta Keywords</label>
@@ -233,7 +294,8 @@
                 </div>
                 <div class="cat-field">
                     <label class="cat-label">Meta Description</label>
-                    <textarea name="meta_description" class="cat-input" rows="2" placeholder="155 characters recommended">{{ $edit_data->meta_description ?? old('meta_description') }}</textarea>
+                    <textarea name="meta_description" id="cat-meta-desc" class="cat-input" rows="3" maxlength="200" placeholder="155 characters recommended">{{ $edit_data->meta_description ?? old('meta_description') }}</textarea>
+                    <div class="cat-counter" id="cat-meta-desc-counter"></div>
                 </div>
 
                 <div class="cat-btn-row">
@@ -257,15 +319,40 @@ function showToast(icon, title) {
     Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:3000,timerProgressBar:true})
         .fire({icon:icon,title:title});
 }
-$(".status_update").change(function(){
-    $.get("{{ route('category.show','') }}/"+$(this).val(), function(d){ showToast(d.res,d.message); });
-});
-$(".on_home").change(function(){
-    $.get("{{ route('admin.update.on.home.status','') }}/"+$(this).val(), function(d){ showToast(d.res,d.message); });
-});
-$(".show_price").change(function(){
-    $.get("{{ route('admin.update.show.price.status','') }}/"+$(this).val(), function(d){ showToast(d.res,d.message); });
-});
+
+/* Toggle switches: revert the checkbox and show an error toast if the
+   AJAX update fails, so the UI never silently disagrees with the DB. */
+function bindToggle(selector, urlBase) {
+    $(selector).change(function(){
+        var $box = $(this);
+        var wasChecked = !$box.prop('checked'); // state before this change
+        $.get(urlBase + "/" + $box.val())
+            .done(function(d){ showToast(d.res, d.message); })
+            .fail(function(){
+                $box.prop('checked', wasChecked);
+                showToast('error', 'Could not save the change — please try again.');
+            });
+    });
+}
+bindToggle(".status_update", "{{ route('category.show','') }}");
+bindToggle(".on_home", "{{ route('admin.update.on.home.status','') }}");
+bindToggle(".show_price", "{{ route('admin.update.show.price.status','') }}");
+
+/* Live character counters for the SEO fields */
+function bindCounter(fieldId, counterId, recommended) {
+    var $field = $('#'+fieldId), $counter = $('#'+counterId);
+    if (!$field.length) return;
+    function update() {
+        var len = $field.val().length;
+        $counter.text(len + ' / ' + recommended + ' characters');
+        $counter.toggleClass('cat-counter--over', len > recommended);
+    }
+    $field.on('input', update);
+    update();
+}
+bindCounter('cat-meta-title', 'cat-meta-title-counter', 60);
+bindCounter('cat-meta-desc', 'cat-meta-desc-counter', 155);
+
 document.addEventListener('DOMContentLoaded',function(){ feather.replace(); });
 </script>
 @endsection
