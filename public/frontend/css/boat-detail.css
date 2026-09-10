@@ -187,7 +187,7 @@
 .vkbd-provider-logo {
     width: 100%; height: 100%; object-fit: contain; display: block;
 }
-.vkbd-provider-info h4 { font-size: .94rem; font-weight: 700; color: #111; margin: 0 0 2px; }
+.vkbd-provider-info .vkbd-provider-name { font-size: .94rem; font-weight: 700; color: #111; margin: 0 0 2px; }
 .vkbd-provider-info p  { font-size: .8rem; color: #6b7280; margin: 0; }
 
 /* Highlights */
@@ -199,8 +199,15 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 1.05rem; flex-shrink: 0;
 }
-.vkbd-highlight-text h5 { font-size: .9rem; font-weight: 700; color: #111; margin: 0 0 4px; }
+.vkbd-highlight-text .vkbd-highlight-title { font-size: .9rem; font-weight: 700; color: #111; margin: 0 0 4px; }
 .vkbd-highlight-text p  { font-size: .84rem; color: #4b5563; margin: 0; line-height: 1.55; }
+
+/* Quick Answer — AEO/AI-search definition box */
+.vkbd-quick-answer { background: #f8faff; border: 1px solid #e0e8f5; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; }
+.vkbd-quick-answer .vkbd-section-title { margin-bottom: 8px; }
+.vkbd-quick-answer p { font-size: .9rem; color: #374151; line-height: 1.7; margin: 0 0 8px; }
+.vkbd-quick-answer p:last-child { margin-bottom: 0; }
+.vkbd-quick-answer-best { font-size: .84rem !important; color: #4b5563 !important; }
 
 /* Description */
 .vkbd-description p { font-size: .9rem; color: #374151; line-height: 1.7; margin: 0 0 12px; }
@@ -554,7 +561,7 @@
 .vkbd-trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 18px 0 24px; }
 .vkbd-trust-card { background: #f8faff; border: 1px solid #e0e8f5; border-radius: 12px; padding: 18px 16px; text-align: center; }
 .vkbd-trust-icon { font-size: 28px; margin-bottom: 8px; }
-.vkbd-trust-card h4 { font-size: .88rem; font-weight: 700; color: #1a2b4c; margin: 0 0 6px; }
+.vkbd-trust-card h3 { font-size: .88rem; font-weight: 700; color: #1a2b4c; margin: 0 0 6px; }
 .vkbd-trust-card p { font-size: .78rem; color: #666; margin: 0; line-height: 1.55; }
 
 /* Review cards */
@@ -575,7 +582,7 @@
 }
 .vkbd-svc-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); transform: translateY(-3px); border-color: #d4850a; }
 .vkbd-svc-icon { font-size: 26px; margin-bottom: 8px; }
-.vkbd-svc-card h4 { font-size: .88rem; font-weight: 700; color: #1a2b4c; margin: 0 0 5px; }
+.vkbd-svc-card h3 { font-size: .88rem; font-weight: 700; color: #1a2b4c; margin: 0 0 5px; }
 .vkbd-svc-card p { font-size: .78rem; color: #777; margin: 0; line-height: 1.5; }
 
 /* ══ Responsive ═════════════════════════════════════════════════ */

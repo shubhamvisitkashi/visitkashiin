@@ -6,6 +6,8 @@
     // so other boat pages are unaffected.
     $isPrivateGangaAartiMotorBoat = isset($product) && ($product->slug ?? '') === 'private-motor-boat-for-evening-ganga-aarti';
     $isDashaswamedhGhatPickupBoat = isset($product) && ($product->slug ?? '') === 'pickup-dashaswamedh-ghat-private-boat-ride-for-evening-ganga-aarti';
+    $isMorningBoatRide            = isset($product) && ($product->slug ?? '') === 'morning-boat-ride-in-varanasi';
+    $isEveningBoatRide            = isset($product) && ($product->slug ?? '') === 'evening-boat-ride-in-varanasi';
 @endphp
 
 @section('meta')
@@ -72,7 +74,7 @@
         {{-- JSON-LD: FAQPage Schema (generic) — suppressed for pages that ship their
              own FAQPage schema further down, matching the FAQ actually visible on
              that page (see $isPrivateGangaAartiMotorBoat / $isDashaswamedhGhatPickupBoat). --}}
-        @unless($isPrivateGangaAartiMotorBoat || $isDashaswamedhGhatPickupBoat)
+        @unless($isPrivateGangaAartiMotorBoat || $isDashaswamedhGhatPickupBoat || $isMorningBoatRide || $isEveningBoatRide)
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
@@ -157,7 +159,7 @@
             "@context": "https://schema.org",
             "@type": "Service",
             "name": "{{ addslashes($product->name) }}",
-            "serviceType": "Event Boat Booking",
+            "serviceType": "{{ $isMorningBoatRide ? 'Morning Boat Ride' : ($isEveningBoatRide ? 'Evening Boat Ride' : 'Event Boat Booking') }}",
             "provider": {
                 "@type": "LocalBusiness",
                 "name": "Visit Kashi",
@@ -230,7 +232,15 @@
         'Private motor boat for Evening Ganga Aarti in Varanasi',
         'Evening Ganga Aarti viewed from a private boat in Varanasi',
         'Private motor boat ride on the Ganga River, Varanasi',
-    ] : [];
+    ] : ($isMorningBoatRide ? [
+        'Morning boat ride in Varanasi before sunrise on the Ganga River',
+        'Sunrise view over the Ganga during a morning boat ride in Varanasi',
+        'Private morning boat ride passing Varanasi ghats at dawn',
+    ] : ($isEveningBoatRide ? [
+        'Evening boat ride on Ganga River in Varanasi at sunset',
+        'Sunset boat ride Varanasi ghats seen from the river',
+        'Ganga Aarti boat ride Varanasi near Dashashwamedh Ghat',
+    ] : []));
     $galleryAlt = fn($i) => $galleryAlts[$i] ?? ($product->name.' – Photo '.($i + 1));
 @endphp
 
@@ -265,6 +275,10 @@
 
     @if($isPrivateGangaAartiMotorBoat)
     <p class="vkbd-intro-text">Book a <strong>private motor boat for Evening Ganga Aarti</strong> in Varanasi and watch the world-famous Ganga Aarti from the River Ganga — without sharing your boat with other travellers. The boat is positioned in front of the Ganga Aarti ceremony at Dashaswamedh / Lalita Ghat, giving you a peaceful river view of the diyas, temple bells and chants as the aarti unfolds. Ideal for couples, families and small groups, this private <a href="{{ route('product.detail', ['boat','motor-boat','evening-boat-ride-in-varanasi']) }}" class="vkbd-cat-link">evening boat ride</a> can be booked online or confirmed instantly on WhatsApp.</p>
+    @elseif($isMorningBoatRide)
+    <p class="vkbd-intro-text">A <strong>morning boat ride in Varanasi</strong> is one of the most peaceful ways to see the Ganga ghats come alive — the ride starts before sunrise and runs for about an hour or two, well ahead of the daytime crowds. As your boatman rows past Assi Ghat, Dashashwamedh Ghat, Manikarnika Ghat and Harishchandra Ghat, you'll see the city's early rituals up close: people bathing, praying and doing yoga on the ghat steps, along with the spectacular sunrise breaking over the river. This private boat ride is booked for your group only — no sharing with other travellers — and can be confirmed online or on WhatsApp. Prefer to watch the evening ceremony instead? See our <a href="{{ route('product.detail', ['boat','motor-boat','private-motor-boat-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">private Ganga Aarti boat ride</a>.</p>
+    @elseif($isEveningBoatRide)
+    <p class="vkbd-intro-text">An <strong>evening boat ride in Varanasi</strong> is one of the most atmospheric ways to experience the Ganga River — the ride sets out a few hours before sunset and continues into the evening, as the ghats light up with lamps and the sky turns gold over the water. Your boatman takes you along the riverfront past Dashashwamedh Ghat and Manikarnika Ghat, giving you a water-level view of the city's skyline, its temples, and the evening Aarti ceremony taking place on the steps. This ride works well as a <strong>sunset boat ride</strong>, an <strong>evening Ganga boat ride</strong>, or a way to watch <strong>Ganga Aarti</strong> from the water, and it's booked as a private boat for your group. Prefer to go before sunrise instead? See our <a href="{{ route('product.detail', ['boat','motor-boat','morning-boat-ride-in-varanasi']) }}" class="vkbd-cat-link">morning boat ride in Varanasi</a>.</p>
     @endif
 
     {{-- Gallery --}}
@@ -305,6 +319,15 @@
         {{-- ── MAIN CONTENT ──────────────────────────────────── --}}
         <div class="vkbd-main">
 
+            @if($isEveningBoatRide)
+            {{-- Quick Answer — direct, AI/AEO-friendly definition of the service --}}
+            <div class="vkbd-quick-answer">
+                <h2 class="vkbd-section-title">What Is an Evening Boat Ride in Varanasi?</h2>
+                <p>An evening boat ride in Varanasi is a Ganga River boat ride that runs in the hours before and around sunset, covering ghats such as Dashashwamedh Ghat and Manikarnika Ghat, with views of the evening Aarti ceremony from the water.</p>
+                <p class="vkbd-quick-answer-best"><strong>Best for:</strong> Sunset views &middot; Ganga Aarti viewing &middot; Evening sightseeing &middot; Photography &middot; Couples &middot; Families &middot; Private groups</p>
+            </div>
+            @endif
+
             {{-- Provider bar --}}
             <div class="vkbd-provider-bar">
                 <div class="vkbd-provider-avatar">
@@ -312,7 +335,7 @@
                          alt="Visit Kashi Logo" class="vkbd-provider-logo" />
                 </div>
                 <div class="vkbd-provider-info">
-                    <h4>Provided by Visit Kashi</h4>
+                    <p class="vkbd-provider-name">Provided by Visit Kashi</p>
                     <p>Verified Boat Service &nbsp;&middot;&nbsp; Best Price Guaranteed &nbsp;&middot;&nbsp; Instant WhatsApp Booking</p>
                 </div>
             </div>
@@ -324,32 +347,32 @@
                 <div class="vkbd-highlight-item">
                     <div class="vkbd-highlight-icon"><i class="fa fa-ship"></i></div>
                     <div class="vkbd-highlight-text">
-                        <h5>Private Boat – No Sharing, Complete Privacy</h5>
+                        <p class="vkbd-highlight-title">Private Boat – No Sharing, Complete Privacy</p>
                         <p>The entire boat is exclusively yours. Ideal for families, couples, and small groups seeking a peaceful and private ride on the sacred Ganga.</p>
                     </div>
                 </div>
                 <div class="vkbd-highlight-item">
                     <div class="vkbd-highlight-icon"><i class="fa fa-map-marker"></i></div>
                     <div class="vkbd-highlight-text">
-                        <h5>Ride Covering All 84 Ghats of Varanasi</h5>
+                        <p class="vkbd-highlight-title">Ride Covering All 84 Ghats of Varanasi</p>
                         <p>Cruise the full 7 km stretch from Assi Ghat to NAMO Ghat, passing all 84 historic ghats of Kashi including Dashashwamedh Ghat, Manikarnika Ghat, and Harishchandra Ghat.</p>
                     </div>
                 </div>
                 <div class="vkbd-highlight-item">
                     <div class="vkbd-highlight-icon"><i class="fa fa-star"></i></div>
                     <div class="vkbd-highlight-text">
-                        <h5>Witness Evening Ganga Aarti from the River</h5>
+                        <p class="vkbd-highlight-title">Witness Evening Ganga Aarti from the River</p>
                         <p>Experience the world-famous Ganga Aarti at Dashashwamedh Ghat from your private boat — no crowd, no standing, just a divine front-row view.</p>
                     </div>
                 </div>
                 <div class="vkbd-highlight-item">
                     <div class="vkbd-highlight-icon"><i class="fa fa-tag"></i></div>
                     <div class="vkbd-highlight-text">
-                        <h5>Best Price Guarantee
+                        <p class="vkbd-highlight-title">Best Price Guarantee
                             @if($displayPrice > 0 && !$isDevDiwali)
                             – Starting ₹{{ number_format($displayPrice) }}/-
                             @endif
-                        </h5>
+                        </p>
                         <p>Visit Kashi offers the most competitive price for boat rides in Varanasi. Trusted local partner with 5+ years of experience and 4.9-star Google rating.</p>
                     </div>
                 </div>
@@ -372,16 +395,23 @@
             <div class="vkbd-divider"></div>
 
             {{-- Specs table --}}
-            <h2 class="vkbd-section-title">{{ $isPrivateGangaAartiMotorBoat ? 'Private Motor Boat Capacity & Pricing' : 'Varanasi Boat Ride – Pricing, Timings & Booking Details' }}</h2>
+            <h2 class="vkbd-section-title">{{ $isPrivateGangaAartiMotorBoat ? 'Private Motor Boat Capacity & Pricing' : ($isMorningBoatRide ? 'Morning Boat Ride – Price, Duration & Timing' : ($isEveningBoatRide ? 'Evening Boat Ride in Varanasi Price' : 'Varanasi Boat Ride – Pricing, Timings & Booking Details')) }}</h2>
             <table class="vkbd-specs" itemscope itemtype="https://schema.org/Service">
                 <tr>
                     <td class="vkbd-spec-label">Reporting Point</td>
-                    <td class="vkbd-spec-val"><i class="fa fa-map-marker"></i>NAMO Ghat / Dashashwamedh Ghat / Ravidas Ghat</td>
+                    <td class="vkbd-spec-val"><i class="fa fa-map-marker"></i>{{ $isMorningBoatRide ? 'Assi Ghat / Dashashwamedh Ghat' : 'NAMO Ghat / Dashashwamedh Ghat / Ravidas Ghat' }}</td>
                 </tr>
+                @if($isMorningBoatRide)
+                <tr>
+                    <td class="vkbd-spec-label">Ride Timing</td>
+                    <td class="vkbd-spec-val"><i class="fa fa-clock-o"></i>Starts before sunrise <span class="vkbd-spec-note">(exact time varies by season – confirmed on WhatsApp)</span></td>
+                </tr>
+                @else
                 <tr>
                     <td class="vkbd-spec-label">Ganga Aarti</td>
                     <td class="vkbd-spec-val"><i class="fa fa-clock-o"></i>Evening – Dashashwamedh Ghat <span class="vkbd-spec-note">(7:00 PM – 7:45 PM)</span></td>
                 </tr>
+                @endif
                 <tr>
                     <td class="vkbd-spec-label">Price</td>
                     <td class="vkbd-spec-val">
@@ -403,7 +433,7 @@
                 </tr>
                 <tr>
                     <td class="vkbd-spec-label">Duration</td>
-                    <td class="vkbd-spec-val"><i class="fa fa-clock-o"></i>Approx. 2 Hours 30 Minutes</td>
+                    <td class="vkbd-spec-val"><i class="fa fa-clock-o"></i>{{ ($isMorningBoatRide || $isEveningBoatRide) ? 'Approx. 1 – 2 Hours' : 'Approx. 2 Hours 30 Minutes' }}</td>
                 </tr>
                 <tr>
                     <td class="vkbd-spec-label">Languages</td>
@@ -469,6 +499,74 @@
                 </ol>
 
                 <p>Looking for other ways to see the Ganga Aarti? You can also check our <a href="{{ route('product.detail', ['boat','motor-boat','evening-boat-ride-in-varanasi']) }}" class="vkbd-cat-link">evening boat ride in Varanasi</a> (shared/group option) or the traditional <a href="{{ route('product.detail', ['boat','bajra-boat','private-bajra-boat-for-ganga-aarti']) }}" class="vkbd-cat-link">private Bajra boat for Ganga Aarti</a>.</p>
+            </div>
+            @endif
+
+            {{-- ── Morning Boat Ride — dedicated SEO content ── --}}
+            @if($isMorningBoatRide)
+            <div class="vkbd-divider"></div>
+            <div class="vkbd-event-content">
+                <h2 class="vkbd-section-title">What You Can See on a Morning Boat Ride in Varanasi</h2>
+                <p>A <strong>morning boat ride in Varanasi</strong> takes you past the ghats before the day's crowds arrive, while the city is still waking up. From the boat you'll see everyday life on the riverfront — people bathing, doing yoga and praying on the ghat steps — along with the cremation ghats, where the last rites of the deceased are performed. The ride is timed to end with the <strong>sunrise over the Ganga</strong>, one of the most photographed views in Varanasi.</p>
+
+                <h3 class="vkbd-sub-title">Morning Boat Ride vs Sunrise Boat Ride</h3>
+                <p>"Morning boat ride" and "sunrise boat ride" describe the same experience in Varanasi — the boat sets out before sunrise so that you're on the water as the sun comes up over the Ganga. There isn't a separate, later "morning" slot; booking this ride means you'll be on the river for the sunrise itself, not after it.</p>
+
+                <h3 class="vkbd-sub-title">Morning Boat Ride Timing</h3>
+                <p>The ride starts <strong>before sunrise</strong> and runs for about <strong>one to two hours</strong>. Because sunrise time in Varanasi shifts across the year, we don't fix a single departure time on this page — our team confirms the exact reporting time for your travel date on WhatsApp or by phone when you book.</p>
+
+                <h3 class="vkbd-sub-title">Ghats You'll See on This Morning Boat Ride</h3>
+                <p>The most popular ghats covered on a morning boat ride are <strong>Assi Ghat</strong>, <strong>Dashashwamedh Ghat</strong>, <strong>Manikarnika Ghat</strong> and <strong>Harishchandra Ghat</strong>. Exact ghats covered can vary slightly with your pickup point and river conditions on the day.</p>
+
+                <h3 class="vkbd-sub-title">Private Morning Boat Ride</h3>
+                <p>This morning boat ride is booked as a <strong>private boat for your group</strong> — it isn't shared with other travellers. The base price covers up to 10 persons, with additional guests charged ₹500 per person, so it works well for couples, families and small groups who want the ghats and sunrise to themselves.</p>
+
+                <h3 class="vkbd-sub-title">How to Book This Morning Boat Ride</h3>
+                <ol class="vkbd-steps">
+                    <li>Fill in the booking form on this page with your travel date, number of guests and pickup ghat.</li>
+                    <li>Our team confirms availability, exact reporting time and price on WhatsApp or by phone call.</li>
+                    <li>Confirm your booking — no advance payment is required to enquire.</li>
+                    <li>Arrive at your pickup ghat at the confirmed reporting time and enjoy your sunrise boat ride.</li>
+                </ol>
+                <p class="vkbd-text-muted">Due to high demand, same-day booking may be subject to availability — WhatsApp us to check before you plan your morning.</p>
+
+                <p>Prefer to see the river in the evening instead? Check our <a href="{{ route('product.detail', ['boat','motor-boat','evening-boat-ride-in-varanasi']) }}" class="vkbd-cat-link">evening boat ride in Varanasi</a>, or browse all <a href="{{ route('product.sub.list', ['boat','motor-boat']) }}" class="vkbd-cat-link">motor boat rides in Varanasi</a>.</p>
+            </div>
+            @endif
+
+            {{-- ── Evening Boat Ride — dedicated SEO content ── --}}
+            @if($isEveningBoatRide)
+            <div class="vkbd-divider"></div>
+            <div class="vkbd-event-content">
+                <h2 class="vkbd-section-title">What You Can Experience on an Evening Boat Ride</h2>
+                <p>An evening boat ride in Varanasi runs in the hours before and during sunset, giving you a water-level view of the Ganga ghats as the city changes for the evening. As your boatman rows along the riverfront, you'll pass illuminated ghats and temples, watch devotees gather for the evening Aarti on the steps, and see the sky shift through shades of orange and gold over the river. It's a quieter, more atmospheric alternative to walking the ghats on foot — and a good option for photography.</p>
+
+                <h2 class="vkbd-section-title">Ganga Aarti Boat Ride in Varanasi</h2>
+                <p>This evening boat ride passes Dashashwamedh Ghat, where the main Ganga Aarti ceremony is held, so you can watch the diyas, temple bells and chanting from the river rather than from the crowd on the steps. The Aarti itself is generally held in the evening around 7:00 PM – 7:45 PM at Dashashwamedh Ghat; your own boat's schedule and viewing position on the day are confirmed by our team on WhatsApp or by phone when you book. If you want a boat positioned specifically in front of the Aarti for the full ceremony, our <a href="{{ route('product.detail', ['boat','motor-boat','private-motor-boat-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">private motor boat for Evening Ganga Aarti</a> is built around that exact experience, with dedicated pickup from <a href="{{ route('product.detail', ['boat','motor-boat','pickup-assi-ghat-private-boat-ride-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">Assi Ghat</a> or <a href="{{ route('product.detail', ['boat','motor-boat','pickup-dashaswamedh-ghat-private-boat-ride-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">Dashashwamedh Ghat</a>.</p>
+
+                <h2 class="vkbd-section-title">Sunset Boat Ride in Varanasi</h2>
+                <p>Timed a few hours before sunset, this ride is also a natural choice if sunset views over the Ganga are your main interest. As the sun goes down, the ghats and the water take on changing shades of orange and gold, and being on the river gives you an open view of the sky that's harder to get from the crowded ghat steps. Exact sunset time shifts through the year, so the ride's start time is confirmed for your travel date rather than fixed — and, as with any outdoor river experience, conditions like cloud cover can affect how the sunset itself looks on a given evening.</p>
+
+                <h2 class="vkbd-section-title">Private Evening Boat Ride in Varanasi</h2>
+                <p>This evening boat ride is booked as a private boat for your group — it isn't shared with other travellers. The base price covers up to 10 persons, with additional guests charged ₹500 per person, which makes it a practical option for couples, families and small groups who'd rather not share their sunset or Aarti view with strangers. It also works well for anniversaries, casual photography sessions and small celebrations, since you can move at your own pace along the river within the boat's route and timing.</p>
+
+                <h2 class="vkbd-section-title">Where You Can Board This Evening Boat Ride</h2>
+                <p>Boarding for this evening boat ride is generally arranged from ghats including NAMO Ghat, Dashashwamedh Ghat and Ravidas Ghat — our team confirms the exact pickup ghat closest to you when you book. Along the route, the ride passes Dashashwamedh Ghat and Manikarnika Ghat, two of the most recognisable ghats on the Varanasi riverfront. If you specifically want pickup from Assi Ghat or Dashashwamedh Ghat for a Ganga Aarti-focused private ride, see our dedicated <a href="{{ route('product.detail', ['boat','motor-boat','pickup-assi-ghat-private-boat-ride-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">Assi Ghat</a> and <a href="{{ route('product.detail', ['boat','motor-boat','pickup-dashaswamedh-ghat-private-boat-ride-for-evening-ganga-aarti']) }}" class="vkbd-cat-link">Dashashwamedh Ghat</a> pickup options.</p>
+
+                <h2 class="vkbd-section-title">Evening Boat Ride Timing in Varanasi</h2>
+                <p>This ride starts a few hours before sunset and runs for about one to two hours, so the exact departure time shifts with the season as sunset time changes across the year. Because timing also depends on Ganga Aarti scheduling and boat availability on the day, our team confirms the exact reporting time for your travel date on WhatsApp or by phone rather than fixing a single time on this page.</p>
+
+                <h2 class="vkbd-section-title">How to Book an Evening Boat Ride in Varanasi?</h2>
+                <ol class="vkbd-steps">
+                    <li>Select your travel date and preferred time.</li>
+                    <li>Choose your pickup ghat and number of passengers.</li>
+                    <li>Submit the booking form on this page, or message us on WhatsApp.</li>
+                    <li>Our team confirms availability, exact reporting time and price.</li>
+                    <li>Arrive at the confirmed ghat and enjoy your evening boat ride.</li>
+                </ol>
+                <p class="vkbd-text-muted">Due to high demand, same-day booking may be subject to availability — WhatsApp us to check before you plan your evening.</p>
+
+                <p>Looking for an evening boat ride in Varanasi? Book your evening Ganga boat ride, sunset boat ride, Ganga Aarti boat, or private boat with Visit Kashi — call or WhatsApp us at <a href="tel:+917080109917" class="vkbd-cat-link">+91-7080109917</a>, <a href="tel:+917080109918" class="vkbd-cat-link">7080109918</a> or <a href="tel:+917080109919" class="vkbd-cat-link">7080109919</a>. Prefer to go before sunrise? See our <a href="{{ route('product.detail', ['boat','motor-boat','morning-boat-ride-in-varanasi']) }}" class="vkbd-cat-link">morning boat ride in Varanasi</a>, or browse all <a href="{{ route('product.sub.list', ['boat','motor-boat']) }}" class="vkbd-cat-link">motor boat rides in Varanasi</a>.</p>
             </div>
             @endif
 
@@ -576,36 +674,39 @@
 
             {{-- ── Trust & Reviews Section ── --}}
             <div class="vkbd-trust-section">
-                <h2 class="vkbd-section-title">{{ $isPrivateGangaAartiMotorBoat ? 'Why Book Your Private Ganga Aarti Boat with Visit Kashi?' : 'Why 10,000+ Guests Trust Visit Kashi' }}</h2>
+                <h2 class="vkbd-section-title">{{ $isPrivateGangaAartiMotorBoat ? 'Why Book Your Private Ganga Aarti Boat with Visit Kashi?' : ($isMorningBoatRide ? 'Why Choose This Morning Boat Ride with Visit Kashi?' : ($isEveningBoatRide ? 'Why Book Your Evening Boat Ride with Visit Kashi?' : 'Why 10,000+ Guests Trust Visit Kashi')) }}</h2>
+                @if($isEveningBoatRide)
+                <p>If you're looking for an experienced local service for boat booking in Varanasi, Visit Kashi is a trusted choice for arranging evening boat rides, Ganga Aarti boat rides, private boats and other Ganga experiences — with around 10 years of experience in Varanasi travel services covering evening, sunset, morning and private boat rides, alongside wider Varanasi travel services like cab, hotel and tour package booking.</p>
+                @endif
                 <div class="vkbd-trust-grid">
                     <div class="vkbd-trust-card">
                         <div class="vkbd-trust-icon">&#9733;</div>
-                        <h4>4.9 Google Rating</h4>
+                        <h3>4.9 Google Rating</h3>
                         <p>Rated 4.9/5 by 248+ verified guests on Google. Consistently top-rated boat service in Varanasi.</p>
                     </div>
                     <div class="vkbd-trust-card">
                         <div class="vkbd-trust-icon">&#128274;</div>
-                        <h4>100% Safe &amp; Certified</h4>
+                        <h3>100% Safe &amp; Certified</h3>
                         <p>Government-approved life jackets, licensed boatmen, and Varanasi Boat Association certified operations.</p>
                     </div>
                     <div class="vkbd-trust-card">
                         <div class="vkbd-trust-icon">&#9989;</div>
-                        <h4>Instant Confirmation</h4>
+                        <h3>Instant Confirmation</h3>
                         <p>WhatsApp confirmation within 30 minutes of booking. No long waits, no uncertainty about your booking.</p>
                     </div>
                     <div class="vkbd-trust-card">
                         <div class="vkbd-trust-icon">&#128176;</div>
-                        <h4>Best Price Guarantee</h4>
+                        <h3>Best Price Guarantee</h3>
                         <p>We match or beat any price for the same boat experience. Transparent pricing with no hidden charges.</p>
                     </div>
                     <div class="vkbd-trust-card">
                         <div class="vkbd-trust-icon">&#127775;</div>
-                        <h4>5+ Years Experience</h4>
+                        <h3>5+ Years Experience</h3>
                         <p>Operating since 2017 with 10,000+ happy guests from India and abroad. Local experts with deep Varanasi knowledge.</p>
                     </div>
                     <div class="vkbd-trust-card">
                         <div class="vkbd-trust-icon">&#128241;</div>
-                        <h4>24/7 Support</h4>
+                        <h3>24/7 Support</h3>
                         <p>Our team is available from 5 AM to 10 PM, 7 days a week on WhatsApp, phone, and email for all queries.</p>
                     </div>
                 </div>
@@ -773,6 +874,122 @@
                 ], $faqs),
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
             </script>
+            @elseif($isMorningBoatRide)
+            <h2 class="vkbd-section-title">Frequently Asked Questions — Morning Boat Ride in Varanasi</h2>
+            <div class="vkbd-faq">
+                @php
+                $faqs = [
+                    ['What time does the morning boat ride in Varanasi start?',
+                     'The ride starts before sunrise and runs for about one to two hours. Since sunrise time changes through the year, we confirm the exact reporting time for your travel date on WhatsApp or by phone at the time of booking.'],
+                    ['Is a morning boat ride the same as a sunrise boat ride?',
+                     'Yes. A morning boat ride in Varanasi is timed to be on the water as the sun rises over the Ganga, so "morning" and "sunrise" boat ride describe the same experience.'],
+                    ['How much does the morning boat ride cost?',
+                     'The price starts at ₹'.($displayPrice > 0 ? number_format($displayPrice) : '3,499').'/- for up to 10 persons on a private boat. Additional passengers beyond 10 are charged ₹500 per person. Our team confirms the exact amount for your date on WhatsApp.'],
+                    ['How long does the morning boat ride last?',
+                     'The ride takes about one to two hours, covering the main ghats before returning to the pickup point.'],
+                    ['Which ghats can I see on the morning boat ride?',
+                     'The most popular ghats covered are Assi Ghat, Dashashwamedh Ghat, Manikarnika Ghat and Harishchandra Ghat. The exact ghats seen can vary slightly with your pickup point and conditions on the day.'],
+                    ['Is the morning boat ride private or shared?',
+                     'This boat is private for your group only — it is not shared with other travellers.'],
+                    ['Can I see the sunrise from the boat?',
+                     'Yes, the ride is timed so you are on the river as the sun rises over the Ganga.'],
+                    ['Will I see cremation ghats during the ride?',
+                     'Yes, the route passes Manikarnika Ghat and Harishchandra Ghat, which are active cremation ghats — please be respectful while observing from the boat.'],
+                    ['How many people can travel on the morning boat ride?',
+                     'The base price includes up to 10 persons. Larger groups can be accommodated for an additional ₹500 per extra person — select your group size in the booking form for an instant price estimate.'],
+                    ['Can I book the morning boat ride on the same day?',
+                     'Same-day booking may be possible depending on availability, especially in high season. Contact us on WhatsApp or by phone to check availability before you plan your morning.'],
+                    ['How do I book this morning boat ride?',
+                     'Fill in the booking form on this page with your date, number of guests and pickup ghat — our team confirms availability, exact reporting time and price on WhatsApp or by phone call. You can also reach Visit Kashi directly on WhatsApp or by phone at +91-7080109917, 7080109918 or 7080109919 to book.'],
+                    ['Are life jackets provided on the morning boat ride?',
+                     'Yes, life jackets are provided for every passenger, including children.'],
+                    ['What happens if weather conditions affect the morning boat ride?',
+                     'River and boat operations depend on safe weather and water conditions. If conditions are unsafe on your travel date, our team will advise on rescheduling — contact us on WhatsApp for the current status before you travel.'],
+                ];
+                @endphp
+                @foreach($faqs as $i => $faq)
+                <div class="vkbd-faq-item {{ $i === 0 ? 'open' : '' }}">
+                    <div class="vkbd-faq-q" onclick="vkFaqToggle(this)">
+                        <h3>{{ $faq[0] }}</h3>
+                        <div class="vkbd-faq-icon">&#8964;</div>
+                    </div>
+                    <div class="vkbd-faq-a">{{ $faq[1] }}</div>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- JSON-LD: FAQPage — mirrors the FAQ section directly above, exactly --}}
+            <script type="application/ld+json">
+            {!! json_encode([
+                '@context'   => 'https://schema.org',
+                '@type'      => 'FAQPage',
+                'mainEntity' => array_map(fn($f) => [
+                    '@type'          => 'Question',
+                    'name'           => $f[0],
+                    'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+                ], $faqs),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+            </script>
+            @elseif($isEveningBoatRide)
+            <h2 class="vkbd-section-title">Frequently Asked Questions — Evening Boat Ride in Varanasi</h2>
+            <div class="vkbd-faq">
+                @php
+                $faqs = [
+                    ['What is the best time for an evening boat ride in Varanasi?',
+                     'The best time for an evening boat ride in Varanasi depends on whether you want sunset views, general evening sightseeing, or Ganga Aarti viewing. This ride starts a few hours before sunset and runs for about one to two hours, so the exact time shifts with the season — our team confirms the reporting time for your travel date on WhatsApp or by phone when you book.'],
+                    ['Can I see Ganga Aarti from a boat in Varanasi?',
+                     'This evening boat ride lets you see the Ganga Aarti from the river, since the route passes Dashashwamedh Ghat, where the main evening Aarti is held. The ceremony is generally held around 7:00 PM – 7:45 PM, and the boat\'s exact position and timing for viewing it are confirmed on WhatsApp when you book.'],
+                    ['How much does an evening boat ride in Varanasi cost?',
+                     'The evening boat ride in Varanasi starts at ₹'.($displayPrice > 0 ? number_format($displayPrice) : '3,499').'/- for a private boat covering up to 10 persons, with additional passengers charged ₹500 per person. Final pricing can vary slightly with date and availability, and our team confirms the exact amount on WhatsApp before you book.'],
+                    ['How can I book a Ganga Aarti boat in Varanasi?',
+                     'A Ganga Aarti boat in Varanasi can be booked through Visit Kashi by filling in the booking form on this page with your date, pickup ghat and number of guests, or by messaging us directly on WhatsApp. Our team confirms availability, exact timing and price before your booking is finalised.'],
+                    ['Can I book a private evening boat in Varanasi?',
+                     'This evening boat ride is already booked as a private boat for your group, not shared with other travellers. The base fare covers up to 10 persons, with extra guests charged ₹500 per person, which you can select in the booking form for an instant price estimate.'],
+                    ['What is the difference between a sunset boat ride and a Ganga Aarti boat ride?',
+                     'A sunset boat ride is timed around sunset and focuses on the changing light over the Ganga and the ghats, while a Ganga Aarti boat ride is timed so you\'re on the river during the evening Aarti ceremony at Dashashwamedh Ghat. This evening boat ride combines both, since it runs through the sunset hours and passes the Aarti location — for a boat positioned specifically for the full ceremony, our private motor boat for Evening Ganga Aarti is built around that exact timing.'],
+                    ['Where can I board an evening boat in Varanasi?',
+                     'Boarding for this evening boat ride is generally arranged from ghats including NAMO Ghat, Dashashwamedh Ghat and Ravidas Ghat. Our team confirms the exact pickup ghat closest to you when you book.'],
+                    ['Can I book a boat near Dashashwamedh Ghat?',
+                     'Dashashwamedh Ghat is one of the supported boarding points for this evening boat ride, and it\'s also the ghat where the main Ganga Aarti is held. For a private boat with dedicated pickup from Dashashwamedh Ghat, see the Dashashwamedh Ghat pickup option for the Evening Ganga Aarti boat on this site.'],
+                    ['Can I book a boat near Assi Ghat?',
+                     'Assi Ghat pickup is available through the dedicated private boat option for the Evening Ganga Aarti, which is set up specifically for pickup from Assi Ghat. Message our team on WhatsApp to confirm Assi Ghat pickup for your travel date.'],
+                    ['How long is an evening Ganga boat ride?',
+                     'An evening Ganga boat ride with Visit Kashi runs for about one to two hours, starting a few hours before sunset and continuing through the sunset and evening Aarti period. Exact duration on the day can vary slightly with river conditions and your chosen route.'],
+                    ['Can I book an evening boat online in Varanasi?',
+                     'You can book an evening boat online in Varanasi using the form on this page — enter your travel date, number of guests and pickup ghat, then submit. Our team follows up on WhatsApp or by phone to confirm availability and pricing; no advance payment is required to enquire.'],
+                    ['Which boat is best for Ganga Aarti?',
+                     'For watching the Ganga Aarti from the water, a boat positioned near Dashashwamedh Ghat during the ceremony gives the clearest view. This evening boat ride passes Dashashwamedh Ghat during its route, while the dedicated private motor boat for Evening Ganga Aarti is built specifically around the Aarti timing for travellers who want the boat positioned there for the full ceremony.'],
+                    ['How many people can travel in a private boat?',
+                     'This private evening boat ride includes up to 10 persons in the base price, with additional passengers charged ₹500 per person. Select your group size in the booking form for an instant price estimate.'],
+                    ['Is advance booking recommended for an evening boat ride?',
+                     'Advance booking is recommended for an evening boat ride, especially on weekends and during festival season when demand is higher. Same-day booking may be possible depending on availability — contact our team on WhatsApp or by phone to check before you travel.'],
+                    ['How can I contact Visit Kashi for evening boat booking?',
+                     'Visit Kashi can be reached for evening boat booking on WhatsApp or by phone at +91-7080109917, 7080109918 or 7080109919, or through the booking form on this page. Our team confirms availability, timing and price for your travel date.'],
+                ];
+                @endphp
+                @foreach($faqs as $i => $faq)
+                <div class="vkbd-faq-item {{ $i === 0 ? 'open' : '' }}">
+                    <div class="vkbd-faq-q" onclick="vkFaqToggle(this)">
+                        <h3>{{ $faq[0] }}</h3>
+                        <div class="vkbd-faq-icon">&#8964;</div>
+                    </div>
+                    <div class="vkbd-faq-a">{{ $faq[1] }}</div>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- JSON-LD: FAQPage — mirrors the FAQ section directly above, exactly --}}
+            <script type="application/ld+json">
+            {!! json_encode([
+                '@context'   => 'https://schema.org',
+                '@type'      => 'FAQPage',
+                'mainEntity' => array_map(fn($f) => [
+                    '@type'          => 'Question',
+                    'name'           => $f[0],
+                    'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+                ], $faqs),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+            </script>
             @else
             <h2 class="vkbd-section-title">Frequently Asked Questions — Event Boat Booking Varanasi</h2>
             <div class="vkbd-faq">
@@ -840,32 +1057,32 @@
                 <div class="vkbd-services-grid">
                     <a href="{{ url('/boat') }}" class="vkbd-svc-card">
                         <div class="vkbd-svc-icon">&#9975;</div>
-                        <h4>Ganga Boat Rides</h4>
+                        <h3>Ganga Boat Rides</h3>
                         <p>Private boat rides covering all 84 ghats of Varanasi</p>
                     </a>
                     <a href="{{ url('/packages') }}" class="vkbd-svc-card">
                         <div class="vkbd-svc-icon">&#127758;</div>
-                        <h4>Varanasi Tour Packages</h4>
+                        <h3>Varanasi Tour Packages</h3>
                         <p>Curated 1–5 day Varanasi sightseeing packages</p>
                     </a>
                     <a href="{{ url('/hotels') }}" class="vkbd-svc-card">
                         <div class="vkbd-svc-icon">&#127968;</div>
-                        <h4>Hotels in Varanasi</h4>
+                        <h3>Hotels in Varanasi</h3>
                         <p>Verified budget to luxury hotels near the ghats</p>
                     </a>
                     <a href="{{ url('/cab') }}" class="vkbd-svc-card">
                         <div class="vkbd-svc-icon">&#128663;</div>
-                        <h4>Cab Booking Varanasi</h4>
+                        <h3>Cab Booking Varanasi</h3>
                         <p>Reliable cab service for airport, station &amp; city tours</p>
                     </a>
                     <a href="{{ url('/things-to-do') }}" class="vkbd-svc-card">
                         <div class="vkbd-svc-icon">&#10024;</div>
-                        <h4>Things to Do in Varanasi</h4>
+                        <h3>Things to Do in Varanasi</h3>
                         <p>Top experiences — ghats, temples, food &amp; culture</p>
                     </a>
                     <a href="{{ url('/boat') }}" class="vkbd-svc-card">
                         <div class="vkbd-svc-icon">&#127751;</div>
-                        <h4>Ganga Aarti Boat Ride</h4>
+                        <h3>Ganga Aarti Boat Ride</h3>
                         <p>Watch the divine Ganga Aarti from the river</p>
                     </a>
                 </div>
@@ -1486,7 +1703,7 @@ document.addEventListener('keydown', function(e) {
 
 {{-- Extended FAQ Schema with all 20 FAQs — suppressed for pages that already ship
      their own matching FAQPage schema right after their FAQ section above. --}}
-@unless($isPrivateGangaAartiMotorBoat || $isDashaswamedhGhatPickupBoat)
+@unless($isPrivateGangaAartiMotorBoat || $isDashaswamedhGhatPickupBoat || $isMorningBoatRide || $isEveningBoatRide)
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
