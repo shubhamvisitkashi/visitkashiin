@@ -350,6 +350,20 @@
             margin-bottom: 7px;
             letter-spacing: 0.01em;
         }
+        .al-field__label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .al-field__label-row label { margin-bottom: 7px; }
+        .al-forgot-link {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--brand);
+            text-decoration: none;
+            margin-bottom: 7px;
+        }
+        .al-forgot-link:hover { text-decoration: underline; }
         .al-field__inner {
             position: relative;
             display: flex;
@@ -668,7 +682,10 @@
 
                 {{-- Password field --}}
                 <div class="al-field al-fade al-fade--3">
-                    <label for="password">Password</label>
+                    <div class="al-field__label-row">
+                        <label for="password">Password</label>
+                        <a href="{{ route('admin.password.request') }}" class="al-forgot-link">Forgot password?</a>
+                    </div>
                     <div class="al-field__inner">
                         <i class="fas fa-lock al-field__icon"></i>
                         <input type="password"

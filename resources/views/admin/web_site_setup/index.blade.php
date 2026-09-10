@@ -317,6 +317,86 @@
             </div>
         </div>
     </div>
+
+    <div class="ws-card">
+        <div class="ws-card-head">
+            <div class="ws-card-head-icon"><i data-feather="grid"></i></div>
+            <div>
+                <div class="ws-card-head-title">Homepage Services — Cover Images</div>
+                <div class="ws-card-head-sub">Cover photo for each card in the "Our Services" section on the homepage. Leave blank to use the category's default product photo.</div>
+            </div>
+        </div>
+        <div class="ws-card-body">
+            <div class="ws-grid ws-grid-3">
+
+                {{-- Hotels / Stay --}}
+                <div class="ws-field">
+                    <label class="ws-label">Stay / Hotels Card</label>
+                    <input type="file" name="service_hotels_image" class="ws-file" accept="image/*">
+                    <input type="hidden" name="type[]" value="service_hotels_image">
+                    <p class="ws-hint">Recommended size ~600×400px (3:2 ratio). Max 2 MB.</p>
+                    @if(websiteSetupValue('service_hotels_image'))
+                    <div class="ws-preview">
+                        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('service_hotels_image')) }}"
+                             onerror="this.closest('.ws-preview').remove()">
+                        <span>Current cover image</span>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Cab --}}
+                <div class="ws-field">
+                    <label class="ws-label">Cab Booking Card</label>
+                    <input type="file" name="service_cab_image" class="ws-file" accept="image/*">
+                    <input type="hidden" name="type[]" value="service_cab_image">
+                    <p class="ws-hint">Recommended size ~600×400px (3:2 ratio). Max 2 MB.</p>
+                    @if(websiteSetupValue('service_cab_image'))
+                    <div class="ws-preview">
+                        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('service_cab_image')) }}"
+                             onerror="this.closest('.ws-preview').remove()">
+                        <span>Current cover image</span>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Boat --}}
+                <div class="ws-field">
+                    <label class="ws-label">Boat Rides Card</label>
+                    <input type="file" name="service_boat_image" class="ws-file" accept="image/*">
+                    <input type="hidden" name="type[]" value="service_boat_image">
+                    <p class="ws-hint">Recommended size ~600×400px (3:2 ratio). Max 2 MB.</p>
+                    @if(websiteSetupValue('service_boat_image'))
+                    <div class="ws-preview">
+                        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('service_boat_image')) }}"
+                             onerror="this.closest('.ws-preview').remove()">
+                        <span>Current cover image</span>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Packages --}}
+                <div class="ws-field">
+                    <label class="ws-label">Tour Packages Card</label>
+                    <input type="file" name="service_packages_image" class="ws-file" accept="image/*">
+                    <input type="hidden" name="type[]" value="service_packages_image">
+                    <p class="ws-hint">Recommended size ~600×400px (3:2 ratio). Max 2 MB.</p>
+                    @if(websiteSetupValue('service_packages_image'))
+                    <div class="ws-preview">
+                        <img src="{{ asset('backend/admin/website_setup/'.websiteSetupValue('service_packages_image')) }}"
+                             onerror="this.closest('.ws-preview').remove()">
+                        <span>Current cover image</span>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="ws-card-save-row">
+                <button type="submit" class="ws-save-btn">
+                    <i data-feather="save"></i> Save Homepage Services Images
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 </form>
 

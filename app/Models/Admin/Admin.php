@@ -10,10 +10,21 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\AdminResetPasswordNotification;
 
 class Admin extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles;
+
+    /**
+     * The base CanResetPassword trait's notification points at the
+     * customer-facing "password.reset" route, which doesn't exist for the
+     * admin guard — send the admin-specific one instead.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new AdminResetPasswordNotification($token));
+    }
 
     protected $fillable = [
         'name',

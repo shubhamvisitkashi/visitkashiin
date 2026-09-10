@@ -10,6 +10,8 @@ use App\Http\Controllers\HotelEnquiryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Auth\LoginController;
+use App\Http\Controllers\Admin\Auth\ForgotPasswordController;
+use App\Http\Controllers\Admin\Auth\ResetPasswordController;
 use App\Http\Controllers\Admin\ImageUploadController;
 use App\Http\Controllers\Admin\AgentServiceController;
 use App\Http\Controllers\Admin\ChangePasswordController;
@@ -33,6 +35,12 @@ Route::group(['prefix' => 'admin'], function () {
     });
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('admin.login');
     Route::post('login', [LoginController::class, 'login'])->name('admin.login.submit')->middleware('throttle:10,1');
+
+    // Forgot / reset password (email reset link — no OTP)
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('admin.password.request');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('admin.password.email')->middleware('throttle:5,1');
+    Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('admin.password.reset');
+    Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('admin.password.update')->middleware('throttle:5,1');
 
     // Web app manifest — lets "Add to Home screen" on mobile use the app logo as an app icon
     Route::get('manifest.webmanifest', function () {

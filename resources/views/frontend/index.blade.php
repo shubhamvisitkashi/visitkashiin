@@ -626,9 +626,15 @@ $svcData = [
     <div class="vksvc-grid">
       @foreach($svcData as $i => $s)
       @php
-        $imgUrl = isset($service_images[$s['slug']]) && $service_images[$s['slug']]
-          ? asset('backend/admin/product_images/' . $service_images[$s['slug']])
-          : asset($s['fallback']);
+        // Cover image priority: admin-set override (Website Setup → Homepage
+        // Services) first, then the auto-picked first product image for the
+        // category, then the static fallback shipped with the theme.
+        $wsImg  = websiteSetupValue('service_' . $s['slug'] . '_image');
+        $imgUrl = $wsImg
+          ? asset('backend/admin/website_setup/' . $wsImg)
+          : (isset($service_images[$s['slug']]) && $service_images[$s['slug']]
+              ? asset('backend/admin/product_images/' . $service_images[$s['slug']])
+              : asset($s['fallback']));
       @endphp
       <a href="{{ route('product.list', $s['slug']) }}" class="vksvc-card vksvc-card-{{ $i + 1 }}" aria-label="{{ $s['title'] }}" style="--vksvc-img:url('{{ $imgUrl }}'); --vksvc-accent:{{ $s['accent'] }};">
         {{-- Background image --}}
