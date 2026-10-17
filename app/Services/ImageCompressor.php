@@ -53,11 +53,24 @@ class ImageCompressor
             return false;
         }
 
+        // A PNG with no real transparency is almost always a photo saved in
+        // the wrong (lossless) format. Palette PNGs in particular can come
+        // out of imagepalettetotruecolor() *larger* than the original at
+        // every dimension down to MIN_DIMENSION (verified: a 640KB indexed
+        // product photo re-saved as truecolor PNG came out at 1MB+ even
+        // after shrinking to the floor), so the size check below never
+        // passes and the file is left uncompressed. JPEG handles gradients/
+        // photographic detail far better, so re-encode as JPEG instead —
+        // but only when there's nothing transparent to lose (logos/icons
+        // stay PNG).
+        $encodeAsJpeg = false;
         if ($type === IMAGETYPE_PNG) {
             imagepalettetotruecolor($image);
             imagealphablending($image, true);
             imagesavealpha($image, true);
+            $encodeAsJpeg = !self::hasTransparency($image);
         }
+        $saveType = $encodeAsJpeg ? IMAGETYPE_JPEG : $type;
 
         // Cap the longest edge before doing anything else.
         $longest = max($width, $height);
@@ -69,10 +82,10 @@ class ImageCompressor
         }
 
         $tmp     = $path . '.compress.tmp';
-        $quality = $type === IMAGETYPE_PNG ? 9 : 85;
+        $quality = $saveType === IMAGETYPE_PNG ? 9 : 85;
 
         for ($i = 0; $i < 20; $i++) {
-            self::save($image, $tmp, $type, $quality);
+            self::save($image, $tmp, $saveType, $quality);
             clearstatcache(true, $tmp);
             $newSize = filesize($tmp);
 
@@ -82,7 +95,7 @@ class ImageCompressor
 
             $canShrink = max($width, $height) > self::MIN_DIMENSION;
 
-            if ($type === IMAGETYPE_PNG) {
+            if ($saveType === IMAGETYPE_PNG) {
                 // PNG quality (0-9) is lossless compression effort, not visual
                 // quality — once at 9, the only lever left is dimensions.
                 if (!$canShrink) {
@@ -111,6 +124,32 @@ class ImageCompressor
 
         if (is_file($tmp)) {
             @unlink($tmp);
+        }
+
+        return false;
+    }
+
+    /**
+     * Sample a grid of pixels (not every one — overkill for a yes/no check
+     * on a multi-megapixel image) for any non-zero alpha, i.e. real use of
+     * transparency rather than an incidentally-PNG photo.
+     *
+     * @param resource|\GdImage $image
+     */
+    private static function hasTransparency($image): bool
+    {
+        $width  = imagesx($image);
+        $height = imagesy($image);
+        $stepX  = max(1, (int) ($width / 200));
+        $stepY  = max(1, (int) ($height / 200));
+
+        for ($x = 0; $x < $width; $x += $stepX) {
+            for ($y = 0; $y < $height; $y += $stepY) {
+                // GD alpha: 0 = opaque, 127 = fully transparent.
+                if ((imagecolorat($image, $x, $y) >> 24) & 0x7F) {
+                    return true;
+                }
+            }
         }
 
         return false;
