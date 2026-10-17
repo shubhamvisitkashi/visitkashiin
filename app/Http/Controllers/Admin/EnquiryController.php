@@ -12,7 +12,7 @@ class EnquiryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:enquiry-list', ['only' => ['index', 'latestCheck']]);
+        $this->middleware('permission:enquiry-list', ['only' => ['index', 'latestCheck', 'bulkDestroy']]);
     }
 
     public function index(Request $request)
@@ -129,6 +129,24 @@ class EnquiryController extends Controller
             'latest_enquiry_id'  => $latestEnquiryId,
             'latest_hotel_id'    => $latestHotelId,
         ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:enquiry,hotel',
+            'ids' => 'required|array|min:1|max:100',
+            'ids.*' => 'required|integer|min:1|distinct',
+        ]);
+
+        $model = $validated['type'] === 'hotel' ? HotelEnquiry::class : Enquiry::class;
+        $deleted = $model::whereIn('id', $validated['ids'])->delete();
+
+        if (!$deleted) {
+            return back()->with('error', 'No enquiries found to delete.');
+        }
+
+        return back()->with('success', $deleted . ' enquiries deleted successfully.');
     }
 
     public function destroy($id)

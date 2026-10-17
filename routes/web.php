@@ -228,6 +228,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('package-status-update/{id}', 'PackageController@statusUpdate')->name('package.statusUpdate');
 
             //Enquiry
+            Route::delete('enquiries/bulk-delete', 'EnquiryController@bulkDestroy')->name('enquiry.bulk-delete');
             Route::get('enquiry-index','EnquiryController@index')->name('enquiry.index');
             Route::delete('enquiry-delete/{id}','EnquiryController@destroy')->name('enquiry.delete');
             Route::delete('hotel-enquiry-delete/{id}','EnquiryController@destroyHotel')->name('hotel-enquiry.admin.delete');

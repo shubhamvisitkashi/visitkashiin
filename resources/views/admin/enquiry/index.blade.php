@@ -358,6 +358,21 @@
         </div>
     @endif
 
+    <form id="bulk-delete-form" action="{{ route('enquiry.bulk-delete') }}" method="POST" class="search-card d-flex flex-wrap align-items-center gap-3">
+        @csrf
+        @method('DELETE')
+        <input type="hidden" name="type" value="{{ $category === 'hotel' ? 'hotel' : 'enquiry' }}">
+        <label class="d-flex align-items-center gap-2 mb-0" for="select-all-enquiries">
+            <input type="checkbox" id="select-all-enquiries">
+            Select all on this page
+        </label>
+        <span id="enquiry-selection-count" class="text-muted small" aria-live="polite">0 selected</span>
+        <button type="submit" id="bulk-delete-button" class="btn btn-danger btn-sm" disabled>Delete selected</button>
+    </form>
+    @if($errors->any())
+        <div class="alert alert-danger">{{ $errors->first() }}</div>
+    @endif
+
     {{-- ═══════════════════════════════════════════════
          TABLE — Hotel Tab (hotel_enquiries table)
     ═══════════════════════════════════════════════ --}}
@@ -368,6 +383,7 @@
                 <table class="table enq-table mb-0">
                     <thead>
                         <tr>
+                            <th>Select</th>
                             <th>#</th>
                             <th>Hotel / Homestay</th>
                             <th>Guest</th>
@@ -383,6 +399,10 @@
                     <tbody>
                         @forelse ($hotelEnquiries as $key => $h)
                             <tr>
+                                <td data-label="Select">
+                                    <input type="checkbox" class="enquiry-select" name="ids[]" form="bulk-delete-form"
+                                           value="{{ $h->id }}" aria-label="Select enquiry {{ $h->id }}">
+                                </td>
                                 <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($hotelEnquiries->currentPage() - 1) * $hotelEnquiries->perPage() }}
                                 </td>
@@ -451,7 +471,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10">
+                                <td colspan="11">
                                     <div class="empty-state">
                                         <div class="empty-icon">&#127968;</div>
                                         <div style="font-size:1rem;font-weight:600;color:#475569;">No hotel enquiries yet</div>
@@ -485,6 +505,7 @@
                 <table class="table enq-table mb-0">
                     <thead>
                         <tr>
+                            <th>Select</th>
                             <th>#</th>
                             <th>Customer</th>
                             <th>Cab</th>
@@ -511,6 +532,10 @@
                                 $cabShowPrice = $cabDiscPrice > 0 ? $cabDiscPrice : $cabBasePrice;
                             @endphp
                             <tr>
+                                <td data-label="Select">
+                                    <input type="checkbox" class="enquiry-select" name="ids[]" form="bulk-delete-form"
+                                           value="{{ $enquiry->id }}" aria-label="Select enquiry {{ $enquiry->id }}">
+                                </td>
                                 <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
@@ -614,7 +639,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10">
+                                <td colspan="11">
                                     <div class="empty-state">
                                         <div class="empty-icon">&#128663;</div>
                                         <div style="font-size:1rem;font-weight:600;color:#475569;">No cab enquiries yet</div>
@@ -648,6 +673,7 @@
                 <table class="table enq-table mb-0">
                     <thead>
                         <tr>
+                            <th>Select</th>
                             <th>#</th>
                             <th>Customer</th>
                             <th>Boat / Package</th>
@@ -674,6 +700,10 @@
                                 $showPrice  = $enquiry->booking_amount > 0 ? $enquiry->booking_amount : ($discPrice > 0 ? $discPrice : $basePrice);
                             @endphp
                             <tr>
+                                <td data-label="Select">
+                                    <input type="checkbox" class="enquiry-select" name="ids[]" form="bulk-delete-form"
+                                           value="{{ $enquiry->id }}" aria-label="Select enquiry {{ $enquiry->id }}">
+                                </td>
                                 <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
@@ -760,7 +790,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7">
+                                <td colspan="8">
                                     <div class="empty-state">
                                         <div class="empty-icon">&#9971;</div>
                                         <div style="font-size:1rem;font-weight:600;color:#475569;">No boat enquiries yet</div>
@@ -794,6 +824,7 @@
                 <table class="table enq-table mb-0">
                     <thead>
                         <tr>
+                            <th>Select</th>
                             <th>#</th>
                             <th>Customer</th>
                             <th>Package &#128506;</th>
@@ -825,6 +856,10 @@
                                 $tShowPrice = $tDiscPrice > 0 ? $tDiscPrice : $tBasePrice;
                             @endphp
                             <tr>
+                                <td data-label="Select">
+                                    <input type="checkbox" class="enquiry-select" name="ids[]" form="bulk-delete-form"
+                                           value="{{ $enquiry->id }}" aria-label="Select enquiry {{ $enquiry->id }}">
+                                </td>
                                 <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
@@ -931,7 +966,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9">
+                                <td colspan="10">
                                     <div class="empty-state">
                                         <div class="empty-icon">&#128506;</div>
                                         <div style="font-size:1rem;font-weight:600;color:#475569;">No tour package enquiries yet</div>
@@ -965,6 +1000,7 @@
                 <table class="table enq-table mb-0">
                     <thead>
                         <tr>
+                            <th>Select</th>
                             <th>#</th>
                             <th>Customer</th>
                             <th>Category</th>
@@ -991,6 +1027,10 @@
                                 });
                             @endphp
                             <tr>
+                                <td data-label="Select">
+                                    <input type="checkbox" class="enquiry-select" name="ids[]" form="bulk-delete-form"
+                                           value="{{ $enquiry->id }}" aria-label="Select enquiry {{ $enquiry->id }}">
+                                </td>
                                 <td class="text-muted fw-semibold" data-label="#">
                                     {{ $key + 1 + ($enquires->currentPage() - 1) * $enquires->perPage() }}
                                 </td>
@@ -1068,7 +1108,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8">
+                                <td colspan="9">
                                     <div class="empty-state">
                                         <div class="empty-icon">&#128140;</div>
                                         <div style="font-size:1rem;font-weight:600;color:#475569;">No enquiries found</div>
@@ -2123,6 +2163,35 @@ document.querySelectorAll('.all-copy-lead-btn').forEach(function (btn) {
         });
     });
 });
+
+// Bulk selection is limited to the rows displayed on the current page.
+var bulkForm = document.getElementById('bulk-delete-form');
+var selectAll = document.getElementById('select-all-enquiries');
+var enquiryBoxes = Array.from(document.querySelectorAll('.enquiry-select'));
+var bulkButton = document.getElementById('bulk-delete-button');
+function updateEnquirySelection() {
+    var count = enquiryBoxes.filter(function (box) { return box.checked; }).length;
+    selectAll.checked = count > 0 && count === enquiryBoxes.length;
+    selectAll.indeterminate = count > 0 && count < enquiryBoxes.length;
+    selectAll.disabled = enquiryBoxes.length === 0;
+    bulkButton.disabled = count === 0;
+    document.getElementById('enquiry-selection-count').textContent = count + ' selected';
+}
+selectAll.addEventListener('change', function () {
+    enquiryBoxes.forEach(function (box) { box.checked = selectAll.checked; });
+    updateEnquirySelection();
+});
+enquiryBoxes.forEach(function (box) { box.addEventListener('change', updateEnquirySelection); });
+bulkForm.addEventListener('submit', function (event) {
+    var count = enquiryBoxes.filter(function (box) { return box.checked; }).length;
+    if (!count || !confirm('Delete ' + count + ' selected enquiries? This cannot be undone.')) {
+        event.preventDefault();
+        return;
+    }
+    bulkButton.disabled = true;
+});
+window.addEventListener('pageshow', updateEnquirySelection);
+updateEnquirySelection();
 
 // Delete confirmation
 document.querySelectorAll('.delete-form').forEach(function(form) {
