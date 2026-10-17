@@ -122,8 +122,11 @@ body{
 }
 .vt-label{color:rgba(255,255,255,.6);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;}
 .vt-number{color:#fff;font-size:17px;font-weight:900;letter-spacing:.05em;font-family:monospace;}
-.vt-date-lbl{color:rgba(255,255,255,.5);font-size:7.5px;text-transform:uppercase;letter-spacing:.06em;text-align:center;}
-.vt-date-val{color:#bae6fd;font-size:11px;font-weight:700;text-align:center;margin-top:1px;}
+/* Solid white + shadow, not the low-opacity/light-blue this had before —
+   the title bar's gradient runs into a much lighter orange on the right
+   (where this sits), and that low-contrast combo made it nearly unreadable. */
+.vt-date-lbl{color:rgba(255,255,255,.9);font-size:7.5px;text-transform:uppercase;letter-spacing:.06em;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.45);}
+.vt-date-val{color:#fff;font-size:11px;font-weight:700;text-align:center;margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.45);}
 .vt-badge{
   padding:5px 16px;border-radius:20px;
   font-size:9px;font-weight:800;
@@ -459,7 +462,7 @@ body{
         <div class="vh-logo-area">
           @if(websiteSetupValue('logo'))
             <img src="{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}"
-                 style="height:54px;border-radius:10px;background:#fff;padding:4px;" alt="Logo">
+                 style="height:54px;width:auto;object-fit:contain;" alt="Logo">
           @else
             <div class="vh-logo-circle">VK</div>
           @endif

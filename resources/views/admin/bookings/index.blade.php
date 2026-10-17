@@ -58,10 +58,13 @@
 .bk-hbtn.primary:hover { background:#f0f0ff; color:var(--h-indigo); }
 .bk-hbtn.primary svg { stroke:var(--h-indigo); }
 
-/* ── Stats ── */
-.bk-stats { display:grid; grid-template-columns:repeat(7,1fr); gap:12px; margin-bottom:20px; }
-@media(max-width:1200px){ .bk-stats{ grid-template-columns:repeat(4,1fr); } }
-@media(max-width:640px) { .bk-stats{ grid-template-columns:repeat(2,1fr); } }
+/* ── Stats — 6 cards (Total, Confirmed, Ongoing, Completed, Cancelled,
+   With Due): column counts below are picked to divide 6 evenly at each
+   breakpoint so no row ever ends with a lone orphan card. ── */
+.bk-stats { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:20px; }
+@media(max-width:1200px){ .bk-stats{ grid-template-columns:repeat(3,1fr); } }
+/* The ≤900px mobile-card breakpoint below (.bk-stats grid-template-columns:repeat(2,1fr))
+   is the only one needed under 1200px — two further duplicates at 640px/480px were removed. */
 
 .bk-stat {
   background:var(--h-card); border-radius:12px;
@@ -493,23 +496,34 @@
   .bk-header-actions  { gap:5px; }
   .bk-hbtn { padding:6px 10px; font-size:.72rem; }
 
-  /* ── Stats ── */
-  .bk-stats { grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:12px; }
+  /* ── Stats: 3 columns x 2 rows (6 cards) — tighter cards + smaller value
+     so 3-up still fits comfortably on a narrow phone. ── */
+  .bk-stats { grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .bk-stat { padding:8px 9px; }
+  .bk-stat-label { font-size:.56rem; white-space:nowrap; }
+  .bk-stat-value { font-size:1.05rem; margin-top:1px; }
 
-  /* ── Tabs: horizontal scroll ── */
+  /* ── Tabs: horizontal scroll, icons only (label text hidden) ── */
   .bk-cats {
     flex-wrap:nowrap; overflow-x:auto; gap:6px;
     padding-bottom:4px; margin-bottom:12px;
     -webkit-overflow-scrolling:touch; scrollbar-width:none;
   }
   .bk-cats::-webkit-scrollbar { display:none; }
-  .bk-cat { flex-shrink:0; padding:7px 13px; font-size:.74rem; }
+  .bk-cat { flex-shrink:0; padding:7px 10px; font-size:.74rem; gap:4px; }
+  .bk-cat-label { display:none; }
+  .bk-cat-emoji { font-size:1.05rem; }
 
   /* ── Filter ── */
   .bk-filter { padding:10px 12px; }
   .bk-filter form > div { flex-direction:column !important; gap:8px !important; }
   .bk-filter .form-select, .bk-filter .form-control { width:100% !important; max-width:none !important; }
   .bk-filter .input-group { width:100% !important; max-width:none !important; }
+  /* The date-range input-group (From – To) must stay one line: the blanket
+     .form-control width:100% rule above was making each date input claim
+     the full row, which (combined with the group's own flex-wrap) pushed
+     them onto separate lines with the "–" stranded between them. */
+  .bk-filter .input-group .form-control { width:auto !important; flex:1 1 0; min-width:0; }
   .bk-filter .btn { width:100% !important; }
 
   /* ── Table → Card view ── */
@@ -534,25 +548,26 @@
   /* Hide checkbox column on mobile */
   .bkt-table tbody td:first-child { display:none; }
 
-  /* All data cells */
+  /* All data cells — label above, value below (block, not a single-line
+     flex row). Several cells (Guest, Type, Amount) hold 2-3 stacked lines
+     of content; forcing them into one flex row left no room for it and
+     the row's own overflow:hidden silently clipped the rest. */
   .bkt-table tbody td {
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+    display:block;
     padding:10px 16px;
     border:none;
     border-bottom:1px solid #F3F4F6;
     font-size:.82rem;
-    min-height:42px;
   }
   .bkt-table tbody td:last-child { border-bottom:none; }
 
   /* Label prefix for each cell */
   .bkt-table tbody td[data-label]::before {
     content: attr(data-label);
+    display:block;
     font-size:.64rem; font-weight:700; color:#9CA3AF;
     text-transform:uppercase; letter-spacing:.6px;
-    flex-shrink:0; min-width:82px; margin-right:8px;
+    margin-bottom:3px;
   }
 
   /* Booking ID cell — card header strip */
@@ -560,10 +575,6 @@
     background:linear-gradient(135deg,#EEF2FF,#F5F3FF);
     border-bottom:2px solid #E0E7FF;
     padding:11px 16px;
-    min-height:auto;
-    align-items:flex-start;
-    flex-direction:column;
-    gap:2px;
   }
   .bkt-table tbody td[data-label="Booking ID"]::before { display:none; }
 
@@ -609,7 +620,6 @@
 }
 
 @media(max-width:480px){
-  .bk-stats { grid-template-columns:repeat(2,1fr); }
   .bkt-table tbody td { font-size:.8rem; padding:9px 14px; }
 }
 
@@ -806,16 +816,9 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
       <a href="{{ route('tour-booking.create') }}" class="bk-hbtn primary" style="background:linear-gradient(135deg,#7C3AED,#5B21B6);box-shadow:0 4px 14px rgba(124,58,237,.35);">
         <i data-feather="map"></i> New Tour Booking
       </a>
-      @else
-      <a href="{{ route('bookings.create-direct') }}" class="bk-hbtn primary">
-        <i data-feather="plus"></i> New Booking
-      </a>
       @endif
       <a href="{{ route('bookings.calendar') }}" class="bk-hbtn">
         <i data-feather="calendar"></i> <span class="d-none d-md-inline">Calendar</span>
-      </a>
-      <a href="{{ route('bookings.trash') }}" class="bk-hbtn">
-        <i data-feather="trash-2"></i> <span class="d-none d-md-inline">Trash</span>
       </a>
     </div>
   </div>
@@ -877,10 +880,6 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
       <div class="bk-stat-label">Total</div>
       <div class="bk-stat-value">{{ $stats['total'] }}</div>
     </a>
-    <a href="{{ route('bookings.index') }}?status=not_started" class="bk-stat" style="--stat-color:#64748B;">
-      <div class="bk-stat-label">Not Started</div>
-      <div class="bk-stat-value">{{ $stats['not_started'] }}</div>
-    </a>
     <a href="{{ route('bookings.index') }}?status=confirmed" class="bk-stat" style="--stat-color:#3B82F6;">
       <div class="bk-stat-label">Confirmed</div>
       <div class="bk-stat-value">{{ $stats['confirmed'] }}</div>
@@ -927,7 +926,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     <a href="{{ route('bookings.index') }}"
        class="bk-cat cat-all {{ !$activeCat ? 'active' : '' }}">
       <span class="bk-cat-emoji">📋</span>
-      All Bookings
+      <span class="bk-cat-label">All Bookings</span>
       <span class="bk-cat-count">{{ $countAll }}</span>
     </a>
 
@@ -935,7 +934,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     <a href="{{ route('boat-booking.index') }}"
        class="bk-cat cat-boat">
       <span class="bk-cat-emoji">⛵</span>
-      Boat
+      <span class="bk-cat-label">Boat</span>
       <span class="bk-cat-count">{{ $countBoat }}</span>
     </a>
 
@@ -943,7 +942,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     <a href="{{ route('bookings.index') }}?service_type=stay"
        class="bk-cat cat-stay {{ str_contains(strtolower($activeCat),'stay') || str_contains(strtolower($activeCat),'hotel') ? 'active' : '' }}">
       <span class="bk-cat-emoji">🏨</span>
-      Stay
+      <span class="bk-cat-label">Stay</span>
       <span class="bk-cat-count">{{ $countStay }}</span>
     </a>
 
@@ -951,7 +950,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     <a href="{{ route('cab-bookings.index') }}"
        class="bk-cat cat-cab">
       <span class="bk-cat-emoji">🚗</span>
-      Cab
+      <span class="bk-cat-label">Cab</span>
       <span class="bk-cat-count">{{ $countCab }}</span>
     </a>
 
@@ -959,7 +958,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     <a href="{{ route('bookings.index') }}?service_type=tour"
        class="bk-cat cat-tour {{ str_contains(strtolower($activeCat),'tour') ? 'active' : '' }}">
       <span class="bk-cat-emoji">🗺️</span>
-      Tour Packages
+      <span class="bk-cat-label">Tour Packages</span>
       <span class="bk-cat-count">{{ $countTour }}</span>
     </a>
   </div>
@@ -970,6 +969,10 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   @endphp
   <div class="bk-filter" style="padding:14px 20px;">
     <form method="GET" action="{{ route('bookings.index') }}">
+      {{-- service_type no longer has a visible dropdown (removed), but it's
+           still driven by the category tabs above — preserve it as a hidden
+           field so submitting other filters doesn't silently drop it. --}}
+      <input type="hidden" name="service_type" value="{{ request('service_type') }}">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
         <select name="status" class="form-select form-select-sm" style="width:130px;">
@@ -979,20 +982,6 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
           <option value="in_progress"  {{ request('status')=='in_progress'  ? 'selected':'' }}>Ongoing</option>
           <option value="completed"    {{ request('status')=='completed'    ? 'selected':'' }}>Completed</option>
           <option value="cancelled"    {{ request('status')=='cancelled'    ? 'selected':'' }}>Cancelled</option>
-        </select>
-
-        <select name="payment_status" class="form-select form-select-sm" style="width:130px;">
-          <option value="">All Payment</option>
-          <option value="unpaid"         {{ request('payment_status')=='unpaid'         ? 'selected':'' }}>Unpaid</option>
-          <option value="partially_paid" {{ request('payment_status')=='partially_paid' ? 'selected':'' }}>Partial</option>
-          <option value="fully_paid"     {{ request('payment_status')=='fully_paid'     ? 'selected':'' }}>Fully Paid</option>
-        </select>
-
-        <select name="service_type" class="form-select form-select-sm" style="width:130px;">
-          <option value="">All Types</option>
-          @foreach($serviceTypes as $st)
-            <option value="{{ strtolower($st->name) }}" {{ request('service_type')==strtolower($st->name) ? 'selected':'' }}>{{ $st->name }}</option>
-          @endforeach
         </select>
 
         @if(auth('admin')->user()->hasAnyRole(['Super Admin','Admin','Manager']))
@@ -1082,14 +1071,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               <th style="width:36px;padding:10px 8px;">
                 <input type="checkbox" class="bk-row-check" id="bkCheckAll" title="Select All">
               </th>
-              <th>Guest</th>
-              <th>Type</th>
-              <th>Travel Date</th>
-              <th>Status</th>
-              <th>Amount</th>
-              @if($staffList->count())
-              <th>Added By</th>
-              @endif
+              <th>Booking</th>
               <th style="display:none;">Assigned</th>
               <th style="width:1%;white-space:nowrap;">Actions</th>
             </tr>
@@ -1146,7 +1128,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                 @else
                   onclick="window.location='{{ route('bookings.show', $booking->id) }}'"
                 @endif
-                style="cursor:pointer;" id="bk-row-{{ $booking->id }}">
+                style="cursor:pointer;background:{{ $typeKey === 'tour' ? '#F5F3FF' : '#F0FDF4' }};" id="bk-row-{{ $booking->id }}">
 
                 {{-- CHECKBOX --}}
                 <td onclick="event.stopPropagation()" style="padding:0 8px;vertical-align:middle;border-bottom:none !important;">
@@ -1158,83 +1140,27 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
                          onchange="bkUpdateBulk()">
                 </td>
 
-                {{-- GUEST --}}
-                <td data-label="Guest">
-                  <div style="font-size:.85rem;font-weight:700;{{ $booking->pending_amount > 0 ? 'color:#c12f00;background:#FEF08A;padding:1px 6px;border-radius:4px;display:inline-block;' : 'color:#111827;' }}">{{ $booking->lead->guest_name ?? 'N/A' }}</div>
-                  <div style="font-size:.73rem;color:#6B7280;margin-top:2px;">{{ $booking->lead->contact ?? '–' }}</div>
-                </td>
-
-                {{-- TYPE / PACKAGE --}}
-                <td data-label="Type">
-                  <span class="bkt-type bkt-type-{{ $typeKey }}">{{ $typeEmoji }} {{ $typeLabel }}</span>
-                  @if($typeKey === 'stay')
-                    @php
-                      $ciD = $booking->lead?->booking_start_date;
-                      $coD = $booking->lead?->booking_end_date;
-                    @endphp
-                    @if($ciD && $coD)
-                      <div style="font-size:.7rem;color:#065F46;font-weight:600;margin-top:3px;white-space:nowrap;">
-                        📅 {{ \Carbon\Carbon::parse($ciD)->format('d M') }} → {{ \Carbon\Carbon::parse($coD)->format('d M Y') }}
-                      </div>
-                    @elseif($ciD)
-                      <div style="font-size:.7rem;color:#065F46;font-weight:600;margin-top:3px;white-space:nowrap;">
-                        📅 Check-in: {{ \Carbon\Carbon::parse($ciD)->format('d M Y') }}
-                      </div>
-                    @endif
-                  @elseif($typeKey === 'tour')
-                    @php
-                      $pkgName = $booking->quotation?->items?->first()?->serviceTemplate?->name
-                              ?? ($booking->lead?->short_plan ? Str::limit(strip_tags($booking->lead->short_plan), 40) : null);
-                    @endphp
-                    @if($pkgName)
-                      <div style="font-size:.7rem;color:#6D28D9;font-weight:600;margin-top:3px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $pkgName }}">📦 {{ $pkgName }}</div>
-                    @endif
-                    @php
-                      $tdays = null;
-                      if($booking->lead?->booking_start_date && $booking->lead?->booking_end_date) {
-                          $tdays = \Carbon\Carbon::parse($booking->lead->booking_start_date)->diffInDays(\Carbon\Carbon::parse($booking->lead->booking_end_date)) + 1;
-                      }
-                    @endphp
-                    @if($tdays)
-                      <div style="font-size:.68rem;color:#9CA3AF;margin-top:1px;">{{ $tdays }}D/{{ $tdays-1 }}N</div>
-                    @endif
-                  @endif
-                </td>
-
-                {{-- TRAVEL DATE --}}
-                <td data-label="Travel Date">
-                  <span style="font-size:.82rem;color:#374151;font-weight:600;white-space:nowrap;">{{ $travelDate }}</span>
-                </td>
-
-                {{-- STATUS --}}
-                <td data-label="Status">
-                  <span class="bkt-status bkt-s-{{ $statusKey }}">{{ $statusLabel }}</span>
-                </td>
-
-                {{-- AMOUNT --}}
-                <td data-label="Amount">
-                  <div class="bkt-amount">₹{{ number_format($booking->total_amount, 0) }}</div>
-                  @if($booking->pending_amount > 0)
-                    <div class="bkt-due-blink">Due ₹{{ number_format($booking->pending_amount, 0) }}</div>
-                  @endif
-                </td>
-
-                {{-- ADDED BY (admin/manager only) --}}
-                @if($staffList->count())
-                <td data-label="Added By" onclick="event.stopPropagation()">
-                  @php $creator = $booking->createdBy; @endphp
-                  @if($creator)
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;">
-                      {{ strtoupper(substr($creator->name, 0, 1)) }}
+                {{-- GUEST / TRAVEL DATE / ADDED BY — merged into one compact row --}}
+                <td data-label="Booking">
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;">
+                    <div>
+                      <span style="font-size:.85rem;font-weight:700;{{ $booking->pending_amount > 0 ? 'color:#c12f00;background:#FEF08A;padding:1px 6px;border-radius:4px;' : 'color:#111827;' }}">{{ $booking->lead->guest_name ?? 'N/A' }}</span>
+                      <span style="font-size:.73rem;color:#6B7280;margin-left:6px;">{{ $booking->lead->contact ?? '–' }}</span>
                     </div>
-                    <span style="font-size:.78rem;font-weight:600;color:#374151;white-space:nowrap;">{{ $creator->name }}</span>
+                    <span style="font-size:.78rem;color:#374151;font-weight:600;white-space:nowrap;">📅 {{ $travelDate }}</span>
+                    @if($staffList->count())
+                      @php $creator = $booking->createdBy; @endphp
+                      @if($creator)
+                      <span style="font-size:.76rem;color:#374151;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;">
+                        <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;">{{ strtoupper(substr($creator->name, 0, 1)) }}</span>
+                        {{ $creator->name }}
+                      </span>
+                      @else
+                      <span style="font-size:.75rem;color:#9CA3AF;">—</span>
+                      @endif
+                    @endif
                   </div>
-                  @else
-                  <span style="font-size:.75rem;color:#9CA3AF;">—</span>
-                  @endif
                 </td>
-                @endif
 
                 {{-- ASSIGNED --}}
                 <td data-label="Assigned" style="display:none;">
@@ -1410,40 +1336,25 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               @endphp
               <tr style="cursor:pointer;background:#F0F9FF;" onclick="window.location='{{ route('boat-booking.show', $bk->booking_id) }}'">
                 <td onclick="event.stopPropagation()" style="padding:0 8px;vertical-align:middle;"></td>
-                <td data-label="Guest">
-                  <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $bk->name }}</div>
-                  <div style="font-size:.73rem;color:#6B7280;">{{ $bk->phone }}</div>
-                </td>
-                <td data-label="Type">
-                  <span class="bkt-type" style="background:#E0F2FE;color:#0369A1;">⛵ Boat</span>
-                  <div style="font-size:.7rem;color:#6B7280;margin-top:2px;">{{ $bBoatName }}</div>
-                  <div style="font-size:.7rem;color:#0369A1;font-weight:600;margin-top:2px;white-space:nowrap;">
-                    📅 {{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}
+                <td data-label="Booking">
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;">
+                    <div>
+                      <span style="font-size:.85rem;font-weight:700;color:#111827;">{{ $bk->name }}</span>
+                      <span style="font-size:.73rem;color:#6B7280;margin-left:6px;">{{ $bk->phone }}</span>
+                    </div>
+                    <span style="font-size:.78rem;color:#374151;font-weight:600;white-space:nowrap;">
+                      📅 {{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}
+                    </span>
+                    @if($staffList->count())
+                      @if($bCreator)
+                      <span style="font-size:.76rem;color:#374151;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;">
+                        <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#0369A1,#0EA5E9);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;">{{ strtoupper(substr($bCreator->name,0,1)) }}</span>
+                        {{ $bCreator->name }}
+                      </span>
+                      @else<span style="font-size:.75rem;color:#9CA3AF;">—</span>@endif
+                    @endif
                   </div>
                 </td>
-                <td data-label="Travel Date">
-                  <span style="font-size:.82rem;color:#374151;font-weight:600;white-space:nowrap;">
-                    {{ \Carbon\Carbon::parse($bk->booking_date)->format('d M Y') }}
-                  </span>
-                </td>
-                <td data-label="Status">
-                  <span class="bkt-status bkt-s-{{ $bkSt }}">{{ ucfirst($bkSt) }}</span>
-                  <span class="bkt-status bkt-s-{{ $bPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($bPaySt) }}</span>
-                </td>
-                <td data-label="Amount">
-                  <div class="bkt-amount">₹{{ number_format($bk->final_amount) }}</div>
-                  @if($bDue > 0)<div class="bkt-due-blink">Due ₹{{ number_format($bDue) }}</div>@endif
-                </td>
-                @if($staffList->count())
-                <td data-label="Added By" onclick="event.stopPropagation()">
-                  @if($bCreator)
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#0369A1,#0EA5E9);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;">{{ strtoupper(substr($bCreator->name,0,1)) }}</div>
-                    <span style="font-size:.78rem;font-weight:600;color:#374151;white-space:nowrap;">{{ $bCreator->name }}</span>
-                  </div>
-                  @else<span style="font-size:.75rem;color:#9CA3AF;">—</span>@endif
-                </td>
-                @endif
                 <td style="display:none;"></td>
                 <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
                   <div class="bkt-acts">
@@ -1471,40 +1382,25 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
               @endphp
               <tr style="cursor:pointer;background:#FFFBEB;" onclick="window.location='{{ route('cab-bookings.show', $cb->id) }}'">
                 <td onclick="event.stopPropagation()" style="padding:0 8px;vertical-align:middle;"></td>
-                <td data-label="Guest">
-                  <div style="font-size:.85rem;font-weight:700;color:#111827;">{{ $cb->customer_name }}</div>
-                  <div style="font-size:.73rem;color:#6B7280;">{{ $cb->customer_phone }}</div>
-                </td>
-                <td data-label="Type">
-                  <span class="bkt-type" style="background:#FEF3C7;color:#92400E;">🚗 Cab</span>
-                  <div style="font-size:.7rem;color:#6B7280;margin-top:2px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($cb->pickup_address,15) }} → {{ Str::limit($cb->drop_address,15) }}</div>
-                  <div style="font-size:.7rem;color:#B45309;font-weight:600;margin-top:2px;white-space:nowrap;">
-                    📅 {{ \Carbon\Carbon::parse($cb->pickup_date)->format('d M Y') }}
+                <td data-label="Booking">
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;">
+                    <div>
+                      <span style="font-size:.85rem;font-weight:700;color:#111827;">{{ $cb->customer_name }}</span>
+                      <span style="font-size:.73rem;color:#6B7280;margin-left:6px;">{{ $cb->customer_phone }}</span>
+                    </div>
+                    <span style="font-size:.78rem;color:#374151;font-weight:600;white-space:nowrap;">
+                      📅 {{ \Carbon\Carbon::parse($cb->pickup_date)->format('d M Y') }}
+                    </span>
+                    @if($staffList->count())
+                      @if($cCreator)
+                      <span style="font-size:.76rem;color:#374151;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;">
+                        <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#B45309,#F59E0B);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;">{{ strtoupper(substr($cCreator->name,0,1)) }}</span>
+                        {{ $cCreator->name }}
+                      </span>
+                      @else<span style="font-size:.75rem;color:#9CA3AF;">—</span>@endif
+                    @endif
                   </div>
                 </td>
-                <td data-label="Travel Date">
-                  <span style="font-size:.82rem;color:#374151;font-weight:600;white-space:nowrap;">
-                    {{ \Carbon\Carbon::parse($cb->pickup_date)->format('d M Y') }}
-                  </span>
-                </td>
-                <td data-label="Status">
-                  <span class="bkt-status bkt-s-{{ $cBkSt }}">{{ ucfirst($cBkSt) }}</span>
-                  <span class="bkt-status bkt-s-{{ $cPaySt }}" style="margin-top:3px;display:block;">{{ ucfirst($cPaySt) }}</span>
-                </td>
-                <td data-label="Amount">
-                  <div class="bkt-amount">₹{{ number_format($cb->total_amount) }}</div>
-                  @if($cDue > 0)<div class="bkt-due-blink">Due ₹{{ number_format($cDue) }}</div>@endif
-                </td>
-                @if($staffList->count())
-                <td data-label="Added By" onclick="event.stopPropagation()">
-                  @if($cCreator)
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#B45309,#F59E0B);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;">{{ strtoupper(substr($cCreator->name,0,1)) }}</div>
-                    <span style="font-size:.78rem;font-weight:600;color:#374151;white-space:nowrap;">{{ $cCreator->name }}</span>
-                  </div>
-                  @else<span style="font-size:.75rem;color:#9CA3AF;">—</span>@endif
-                </td>
-                @endif
                 <td style="display:none;"></td>
                 <td onclick="event.stopPropagation()" style="white-space:nowrap;padding:6px 8px!important;">
                   <div class="bkt-acts">

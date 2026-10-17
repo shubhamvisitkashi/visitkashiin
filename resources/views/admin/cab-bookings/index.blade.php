@@ -315,7 +315,12 @@ body{background:var(--cb-bg);}
       </thead>
       <tbody>
         @foreach($query as $b)
-        <tr>
+        @php
+          // Light status tint so rows are distinguishable at a glance — same
+          // hue family as the .cb-badge status colors above.
+          $cbRowBg = ['pending'=>'#FFFBEB','confirmed'=>'#EFF6FF','assigned'=>'#F0F9FF','completed'=>'#ECFDF5','cancelled'=>'#FEF2F2'][$b->booking_status] ?? '#fff';
+        @endphp
+        <tr style="background:{{ $cbRowBg }};">
           <td data-label="Customer">
             <div class="cb-cust-name">{{ $b->customer_name }}</div>
             <div class="cb-cust-phone">📞 {{ $b->customer_phone }}</div>

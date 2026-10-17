@@ -470,6 +470,16 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
   .pk-topbar-right { gap: 4px; }
   .pk-id-tag { font-size: .74rem; padding: 3px 9px; }
 
+  /* ── Stay banner: a long property name was being squeezed into ~140px
+     next to the fixed-width Duration box. Give the name a width floor and
+     let flex-wrap push Duration to its own row (at its natural compact
+     size, not stretched) once a long name can't fit beside it. ── */
+  .pk-stay-banner { flex-wrap: wrap; }
+  /* !important beats the inline min-width:0 (which otherwise lets this
+     item shrink indefinitely instead of ever wrapping) */
+  .pk-stay-banner__info { flex-basis: 190px; min-width: 190px !important; }
+  .pk-stay-banner__duration { margin-top: 10px; }
+
   /* ── Hero ── */
   .pk-hero { padding: 18px 16px; border-radius: 16px; margin-bottom: 12px; }
   .pk-hero-inner { flex-direction: column; gap: 14px; }
@@ -855,9 +865,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
         <div>
 
             {{-- Guest Details --}}
-            <div class="pk-card">
-                <div class="pk-card-head">
-                    <h6 class="pk-card-title"><i data-feather="user"></i> Guest Details</h6>
+            <div class="pk-card" style="border-top:3px solid #4F46E5;">
+                <div class="pk-card-head" style="background:linear-gradient(to right,#EEF2FF,#fff);">
+                    <h6 class="pk-card-title" style="color:#4338CA;"><i data-feather="user" style="color:#4F46E5;"></i> Guest Details</h6>
                 </div>
                 <div class="pk-card-body">
                     <div class="pk-info-grid">
@@ -939,10 +949,10 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                 <div class="pk-card-body">
 
                     {{-- ── Property Banner ── --}}
-                    <div style="background:linear-gradient(135deg,#0d9488 0%,#059669 100%);border-radius:16px;padding:20px 22px;margin-bottom:18px;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden;">
+                    <div class="pk-stay-banner" style="background:linear-gradient(135deg,#0d9488 0%,#059669 100%);border-radius:16px;padding:20px 22px;margin-bottom:18px;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden;">
                         <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
                         <div style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;">🏨</div>
-                        <div style="flex:1;min-width:0;position:relative;z-index:1;">
+                        <div class="pk-stay-banner__info" style="flex:1;min-width:0;position:relative;z-index:1;">
                             <div style="font-size:.65rem;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.6px;">Property / Hotel</div>
                             <div style="font-size:1.18rem;font-weight:900;color:#fff;line-height:1.2;margin-top:3px;">{{ $stayProperty }}</div>
                             @if($stayRooms !== '—')
@@ -951,7 +961,7 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                             </div>
                             @endif
                         </div>
-                        <div style="text-align:center;flex-shrink:0;background:rgba(255,255,255,.15);border-radius:12px;padding:10px 16px;border:1px solid rgba(255,255,255,.25);position:relative;z-index:1;">
+                        <div class="pk-stay-banner__duration" style="text-align:center;flex-shrink:0;background:rgba(255,255,255,.15);border-radius:12px;padding:10px 16px;border:1px solid rgba(255,255,255,.25);position:relative;z-index:1;">
                             <div style="font-size:.6rem;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px;">Duration</div>
                             <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1;margin:3px 0;">{{ explode(' ', $stayNights)[0] ?? '—' }}</div>
                             <div style="font-size:.68rem;color:rgba(255,255,255,.8);font-weight:600;">night(s)</div>
@@ -1113,9 +1123,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
 
             {{-- WhatsApp Share (collapsible — auto-opened right after a booking is created) --}}
             @php $justBooked = (bool) session('show_whatsapp'); @endphp
-            <div class="pk-card" id="waCard" @if($justBooked) style="border:2px solid #25D366;box-shadow:0 0 0 4px rgba(37,211,102,.15);" @endif>
-                <div class="pk-card-head" style="cursor:pointer;" onclick="document.getElementById('waCollapse').classList.toggle('d-none')">
-                    <h6 class="pk-card-title">
+            <div class="pk-card" id="waCard" style="border-top:3px solid #25D366; @if($justBooked) border:2px solid #25D366;box-shadow:0 0 0 4px rgba(37,211,102,.15); @endif">
+                <div class="pk-card-head" style="cursor:pointer;background:linear-gradient(to right,#F0FDF4,#fff);" onclick="document.getElementById('waCollapse').classList.toggle('d-none')">
+                    <h6 class="pk-card-title" style="color:#15803D;">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
                         WhatsApp Share
                         @if($justBooked)<span style="background:#DCFCE7;color:#15803D;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">Booking created — share now</span>@endif
@@ -1145,9 +1155,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             </div>
 
             {{-- Payment Records --}}
-            <div class="pk-card">
-                <div class="pk-card-head">
-                    <h6 class="pk-card-title"><i data-feather="credit-card"></i> Payment Records</h6>
+            <div class="pk-card" style="border-top:3px solid #059669;">
+                <div class="pk-card-head" style="background:linear-gradient(to right,#ECFDF5,#fff);">
+                    <h6 class="pk-card-title" style="color:#047857;"><i data-feather="credit-card" style="color:#059669;"></i> Payment Records</h6>
                     <button type="button" class="pk-btn pk-btn-emerald" style="padding:6px 12px;font-size:.78rem"
                         data-bs-toggle="modal" data-bs-target="#addPaymentModal">
                         <i data-feather="plus" style="width:12px;height:12px"></i> Add Payment
@@ -1218,9 +1228,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
 
             {{-- Activity Timeline --}}
             @if($activities && count($activities) > 0)
-            <div class="pk-card">
-                <div class="pk-card-head">
-                    <h6 class="pk-card-title"><i data-feather="activity"></i> Activity History</h6>
+            <div class="pk-card" style="border-top:3px solid #7C3AED;">
+                <div class="pk-card-head" style="background:linear-gradient(to right,#F5F3FF,#fff);">
+                    <h6 class="pk-card-title" style="color:#6D28D9;"><i data-feather="activity" style="color:#7C3AED;"></i> Activity History</h6>
                 </div>
                 <div class="pk-card-body">
                     <x-activity-timeline :activities="$activities" />
@@ -1362,9 +1372,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
 
             {{-- Booking Status Actions --}}
             @if($booking->booking_status !== 'cancelled')
-            <div class="pk-card">
-                <div class="pk-card-head">
-                    <h6 class="pk-card-title"><i data-feather="activity"></i> Update Status</h6>
+            <div class="pk-card" style="border-top:3px solid #D97706;">
+                <div class="pk-card-head" style="background:linear-gradient(to right,#FFFBEB,#fff);">
+                    <h6 class="pk-card-title" style="color:#B45309;"><i data-feather="activity" style="color:#D97706;"></i> Update Status</h6>
                 </div>
                 <div class="pk-card-body" style="display:flex;flex-direction:column;gap:8px;">
                     <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -1388,9 +1398,9 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             @endif
 
             {{-- Downloads --}}
-            <div class="pk-card">
-                <div class="pk-card-head">
-                    <h6 class="pk-card-title"><i data-feather="download"></i> Download / Invoice</h6>
+            <div class="pk-card" style="border-top:3px solid #2563EB;">
+                <div class="pk-card-head" style="background:linear-gradient(to right,#EFF6FF,#fff);">
+                    <h6 class="pk-card-title" style="color:#1D4ED8;"><i data-feather="download" style="color:#2563EB;"></i> Download / Invoice</h6>
                     @if($guestPhone)
                     <button type="button" id="shareInvoicePdfBtn" class="pk-btn pk-btn-wa" style="padding:5px 12px;font-size:.76rem;" onclick="shareInvoicePdf(this)">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>

@@ -467,8 +467,11 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
 
           $boatEmojis = ['Normal Motor Boat'=>'🚤','Light Motor Boat'=>'⛵','Premium Light Motor Boat'=>'⚡','Luxury Mini Yacht'=>'🛥','Bajra Boat'=>'🛶','Cruise'=>'🚢'];
           $boatEmoji  = $boatEmojis[$boatName] ?? '⛵';
+          // Light status tint so rows are distinguishable at a glance — same
+          // hue family as the .bs-* status badge colors below.
+          $bbRowBg = ['confirmed'=>'#EFF6FF','completed'=>'#ECFDF5','cancelled'=>'#FEF2F2','pending'=>'#FFFBEB'][$bkStatus] ?? '#fff';
         @endphp
-        <tr>
+        <tr style="background:{{ $bbRowBg }};">
           {{-- Guest --}}
           <td>
             <div class="bb-guest">
@@ -596,8 +599,9 @@ table.bb-tbl { width:100%; border-collapse:collapse; }
       $boatName  = $bk->boat?->boatType?->name ?? 'Boat';
       $boatEmojis= ['Normal Motor Boat'=>'🚤','Light Motor Boat'=>'⛵','Premium Light Motor Boat'=>'⚡','Luxury Mini Yacht'=>'🛥','Bajra Boat'=>'🛶','Cruise'=>'🚢'];
       $boatEmoji = $boatEmojis[$boatName] ?? '⛵';
+      $bbRowBg = ['confirmed'=>'#EFF6FF','completed'=>'#ECFDF5','cancelled'=>'#FEF2F2','pending'=>'#FFFBEB'][$bkStatus] ?? '#fff';
     @endphp
-    <div class="bb-mob-card">
+    <div class="bb-mob-card" style="background:{{ $bbRowBg }};">
       {{-- Card Top: ID + Guest + Status --}}
       <div class="bb-mob-card-top">
         <div class="bb-avatar" style="flex-shrink:0;">{{ $initials }}</div>
