@@ -15,12 +15,15 @@ use App\Models\ServiceType;
 use App\Models\ServiceTemplate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TourBookingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:booking-create');
+        // publicVoucher is reachable via a signed URL (no admin login) —
+        // that route's own `signed` middleware is what guards it instead.
+        $this->middleware('permission:booking-create')->except(['publicVoucher']);
     }
 
     /**
@@ -377,6 +380,41 @@ class TourBookingController extends Controller
         return view('admin.bookings.tour-voucher', compact('booking'), [
             'page_title' => 'Tour Booking Voucher',
         ]);
+    }
+
+    /**
+     * Same voucher, reachable without admin login via a signed URL — for
+     * sharing with the guest on WhatsApp.
+     */
+    public function publicVoucher($id)
+    {
+        return $this->voucher($id);
+    }
+
+    /**
+     * Same voucher as a real PDF file (not an HTML page) — lets the admin's
+     * browser hand the actual file to the OS share sheet (navigator.share),
+     * so "Share on WhatsApp" attaches the PDF itself instead of a text link.
+     */
+    public function voucherPdf($id)
+    {
+        $booking = Booking::with([
+            'lead',
+            'quotation.items.serviceTemplate.serviceType',
+            'quotation.items.serviceType',
+            'payments',
+        ])->withSum('payments', 'amount')->findOrFail($id);
+
+        $pdf = Pdf::loadView('admin.bookings.tour-voucher', compact('booking'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'defaultFont'          => 'sans-serif',
+                'dpi'                  => 150,
+            ]);
+
+        return $pdf->download('Voucher-' . $booking->booking_number . '.pdf');
     }
 
     /** Show printable confirmation page */

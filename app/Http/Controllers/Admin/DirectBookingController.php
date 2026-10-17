@@ -330,7 +330,8 @@ class DirectBookingController extends Controller
             ]);
 
             return redirect()->route('bookings.show', $booking->id)
-                ->with('success', 'Booking created successfully! Booking Number: ' . $booking->booking_number);
+                ->with('success', 'Booking created successfully! Booking Number: ' . $booking->booking_number)
+                ->with('show_whatsapp', true);
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -413,9 +413,12 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
           ['❄️', 'AC Required',       $booking->ac_required            ?? true],
         ];
         $activePrefs = array_filter($prefs, fn($p) => $p[2]);
+        // "Internal Notes" is explicitly staff-only (its admin form label
+        // says "Not shown to guest") — hide it on the guest-facing share link.
+        $showNotes   = !empty($booking->notes) && !($guestView ?? false);
         $hasExtras   = count($activePrefs) > 0
                     || !empty($booking->luggage_details)
-                    || !empty($booking->notes);
+                    || $showNotes;
       @endphp
       @if($hasExtras)
       <div class="card">
@@ -433,7 +436,7 @@ body{font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;background:#b8
             <span>🧳</span> <strong>Luggage:</strong> {{ $booking->luggage_details }}
           </div>
           @endif
-          @if(!empty($booking->notes))
+          @if($showNotes)
           <div class="pref-detail" style="margin-top:6px;">
             <span>📝</span> <strong>Notes:</strong> {{ $booking->notes }}
           </div>

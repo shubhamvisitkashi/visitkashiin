@@ -63,6 +63,17 @@ Route::group(['prefix' => 'admin'], function () {
         ])->header('Content-Type', 'application/manifest+json');
     })->name('admin.manifest');
 
+    // Public, signed voucher links — for admins to share a guest's booking
+    // voucher on WhatsApp without the guest needing to log in. The `signed`
+    // middleware rejects any URL whose signature doesn't match (the booking
+    // id alone isn't enough to guess a valid link).
+    Route::group(['namespace' => 'App\Http\Controllers\Admin', 'middleware' => ['signed']], function () {
+        Route::get('voucher/boat/{booking_id}', 'BoatBookingController@publicVoucher')->name('public.voucher.boat');
+        Route::get('voucher/cab/{id}', 'CabBookingController@publicInvoice')->name('public.voucher.cab');
+        Route::get('voucher/stay/{id}', 'BookingController@publicVoucher')->name('public.voucher.stay');
+        Route::get('voucher/tour/{id}', 'TourBookingController@publicVoucher')->name('public.voucher.tour');
+    });
+
     Route::middleware(['auth:admin'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('dashboard/pending-bookings', [DashboardController::class, 'pendingBookings'])->name('admin.dashboard.pending-bookings');
@@ -116,6 +127,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::put('bookings/tour/{id}', 'TourBookingController@update')->name('tour-booking.update');
             Route::get('bookings/tour/{id}/confirmation', 'TourBookingController@confirmation')->name('tour-booking.confirmation');
             Route::get('bookings/tour/{id}/voucher', 'TourBookingController@voucher')->name('tour-booking.voucher');
+            Route::get('bookings/tour/{id}/voucher/pdf', 'TourBookingController@voucherPdf')->name('tour-booking.voucher.pdf');
             Route::get('bookings/tour/{id}/pdf', 'TourBookingController@downloadPdf')->name('tour-booking.pdf');
             
             Route::get('bookings', 'BookingController@index')->name('bookings.index');
@@ -136,6 +148,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::post('bookings/{id}/add-service', 'BookingController@addService')->name('bookings.add-service');
             Route::delete('bookings/{id}/delete-service/{itemId}', 'BookingController@deleteService')->name('bookings.delete-service');
             Route::get('booking-invoice/{id}', 'BookingController@invoice')->name('booking.invoice');
+            Route::get('booking-invoice/{id}/pdf', 'BookingController@invoicePdf')->name('booking.invoice.pdf');
             Route::get('booking-voucher/{id}', 'BookingController@voucher')->name('booking.voucher');
             Route::get('booking-gst-invoice/{id}', 'BookingController@gstInvoice')->name('booking.gst-invoice');
             // Reports
@@ -164,6 +177,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::delete('cab-bookings/{id}/payments/{paymentId}',                 'CabBookingController@deletePayment')->name('cab-bookings.delete-payment');
             Route::post('cab-bookings/{id}/update-status',                          'CabBookingController@updateStatus')->name('cab-bookings.update-status');
             Route::get('cab-bookings/{id}/invoice',                                 'CabBookingController@invoice')->name('cab-bookings.invoice');
+            Route::get('cab-bookings/{id}/invoice/pdf',                             'CabBookingController@invoicePdf')->name('cab-bookings.invoice.pdf');
 
             // Service Calendar
             Route::get('service-calendar', 'ServiceCalendarController@index')->name('service-calendar.index');

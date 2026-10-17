@@ -11,6 +11,7 @@ use App\Models\CabBooking;
 use App\Services\GstInvoiceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BookingController extends Controller
 {
@@ -781,6 +782,15 @@ class BookingController extends Controller
     }
 
     /**
+     * Same voucher, reachable without admin login via a signed URL — for
+     * sharing with the guest on WhatsApp.
+     */
+    public function publicVoucher($id)
+    {
+        return $this->voucher($id);
+    }
+
+    /**
      * Generate invoice for booking
      */
     public function invoice($id)
@@ -804,6 +814,43 @@ class BookingController extends Controller
         $view = $isStayBooking ? 'admin.bookings.invoice-hotel' : 'admin.bookings.invoice';
 
         return view($view, compact('booking'), ['page_title' => 'Booking Invoice']);
+    }
+
+    /**
+     * Same invoice as a real PDF file (not an HTML page) — lets the admin's
+     * browser hand the actual file to the OS share sheet (navigator.share),
+     * so "Share on WhatsApp" attaches the PDF itself instead of a text link.
+     */
+    public function invoicePdf($id)
+    {
+        $booking = Booking::with([
+            'lead',
+            'quotation.items.serviceTemplate.serviceType',
+            'quotation.items.serviceType',
+            'payments.paymentAccount',
+            'createdBy'
+        ])
+        ->withSum('payments', 'amount')
+        ->findOrFail($id);
+
+        $firstItem = $booking->quotation?->items?->first();
+        $stName = strtolower($firstItem?->serviceTemplate?->serviceType?->name ?? $firstItem?->serviceType?->name ?? '');
+        $shortPlan = strtolower($booking->lead?->short_plan ?? '');
+        $isStayBooking = str_contains($stName, 'stay') || str_contains($stName, 'hotel')
+            || str_contains($shortPlan, 'check-in:');
+
+        $view = $isStayBooking ? 'admin.bookings.invoice-hotel' : 'admin.bookings.invoice';
+
+        $pdf = Pdf::loadView($view, compact('booking'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'defaultFont'          => 'sans-serif',
+                'dpi'                  => 150,
+            ]);
+
+        return $pdf->download('Invoice-' . $booking->booking_number . '.pdf');
     }
 
     /**

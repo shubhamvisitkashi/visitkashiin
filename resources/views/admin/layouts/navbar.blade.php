@@ -254,14 +254,9 @@
                     return;
                 }
 
+                // Badge still updates silently; the spoken/chime announcement
+                // on new bookings was turned off at the admin's request.
                 updateBadge(data.new_count);
-                // Alert if the count grew since our last poll, OR this is the
-                // first poll of a fresh page load and there's already an
-                // unseen enquiry (e.g. it arrived while this tab was closed).
-                if (data.new_count > 0 && (lastKnownCount === null || data.new_count > lastKnownCount)) {
-                    console.log('[vk-enquiry] speaking alert');
-                    speakNewEnquiry();
-                }
                 lastKnownCount = data.new_count;
             })
             .catch(function(e) { console.warn('[vk-enquiry] check errored', e); });

@@ -19,6 +19,8 @@
   $boatTimingRaw = $booking->pickup_time ?? $booking->boat_timing ?? null;
   $boatTimingFmt = $boatTimingRaw ? \Carbon\Carbon::parse($boatTimingRaw)->format('g:i A') : '—';
   $bookingDateFmt = $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : '—';
+  // Signed link to the voucher that works for the guest without an admin login.
+  $voucherUrl = \Illuminate\Support\Facades\URL::signedRoute('public.voucher.boat', ['booking_id' => $booking->booking_id]);
 
   $waLines = [
     "⛵ *Visit Kashi – Boat Booking Confirmed!*",
@@ -48,6 +50,8 @@
     $waLines[] = "✨ *Add-ons:* " . implode(', ', $addonsList);
   }
 
+  $waLines[] = "";
+  $waLines[] = "🎫 *Your Voucher:* {$voucherUrl}";
   $waLines[] = "";
   $waLines[] = "📞 Support: 7080109917 | 7080109918";
   $waLines[] = "";
@@ -169,6 +173,13 @@
 .sv-pay-input:focus{border-color:#0EA5E9 !important;outline:none !important;}
 .sv-pay-btn{background:linear-gradient(135deg,#0EA5E9,#0284C7);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.8rem;font-weight:800;cursor:pointer;width:100%;margin-top:10px;}
 .qact{display:flex;align-items:center;gap:8px;border-radius:9px;padding:10px 14px;text-decoration:none;font-size:.8rem;font-weight:600;transition:.18s;width:100%;border:1px solid;margin-bottom:8px;}
+
+/* ── Mobile sticky action bar (WhatsApp / Payment / Edit) ──
+   bottom is offset by the admin layout's own sa-mob-nav bar (68px, see
+   admin-saas.css) so this bar sits above it instead of hidden underneath. */
+.pk-mob-bar{position:fixed;bottom:calc(var(--sa-mob-nav-h, 68px) + env(safe-area-inset-bottom, 0px));left:0;right:0;z-index:150;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:10px 14px;display:none;gap:8px;box-shadow:0 -4px 20px rgba(0,0,0,.08);}
+.pk-mob-bar a,.pk-mob-bar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;border-radius:14px;color:#fff;padding:10px 6px;cursor:pointer;font-size:.7rem;font-weight:700;text-decoration:none;}
+@media(max-width:768px){.pk-mob-bar{display:flex;}.sv-page{padding-bottom:160px;}}
 </style>
 
 <div class="sv-page">
@@ -559,6 +570,24 @@
 </div>{{-- /layout --}}
 </div>{{-- /sv-page --}}
 
+{{-- Mobile Sticky Bar --}}
+<div class="pk-mob-bar">
+    @if($guestPhone)
+    <button type="button" onclick="shareVoucherPdf(this)" style="background:#25D366;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075a8.167 8.167 0 01-2.385-1.475 8.166 8.166 0 01-1.653-2.059c-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Share PDF
+    </button>
+    @endif
+    <a href="{{ route('boat-booking.payment', $booking->booking_id) }}" style="background:#6366f1;">
+        <i data-feather="plus-circle" style="width:20px;height:20px;"></i>
+        Payment
+    </a>
+    <a href="{{ route('boat-booking.edit', $booking->booking_id) }}" style="background:#f59e0b;">
+        <i data-feather="edit-2" style="width:20px;height:20px;stroke:#fff;"></i>
+        Edit
+    </a>
+</div>
+
 {{-- Hidden cancel form --}}
 <form id="boatCancelForm" action="{{ route('boat-booking.cancel', $booking->booking_id) }}" method="POST" style="display:none">
   @csrf
@@ -650,6 +679,49 @@
 
 <script>
 const boatPaidTotal = {{ (float)$paidAmt }};
+
+// ── Share the actual voucher PDF (not a text link) ──
+// wa.me links can only pre-fill text, never attach a file — the only way to
+// hand WhatsApp a real file is the OS share sheet via navigator.share(),
+// which needs the PDF as an in-memory File. Falls back to a plain download
+// (to attach manually) wherever file sharing isn't supported.
+async function shareVoucherPdf(btn) {
+    const pdfUrl = '{{ route("boat-booking.voucher.pdf", $booking->booking_id) }}';
+    const fileName = 'VK-Voucher-{{ $booking->booking_id }}.pdf';
+    const originalHtml = btn ? btn.innerHTML : '';
+
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Preparing…'; }
+
+    try {
+        const resp = await fetch(pdfUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!resp.ok) throw new Error('PDF fetch failed: HTTP ' + resp.status);
+        const blob = await resp.blob();
+        const file = new File([blob], fileName, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                files: [file],
+                title: 'Boat Booking Voucher',
+                text: 'Voucher for booking {{ $booking->booking_id }}',
+            });
+        } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            alert('Direct file share isn\'t supported on this browser — PDF downloaded, attach it in WhatsApp manually.');
+        }
+    } catch (e) {
+        if (e.name !== 'AbortError') { // user cancelled the native share sheet — not an error
+            console.warn('shareVoucherPdf failed', e);
+            window.open(pdfUrl, '_blank');
+        }
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+    }
+}
 
 function openCancelModal() {
   const modal = new bootstrap.Modal(document.getElementById('boatCancelModal'));

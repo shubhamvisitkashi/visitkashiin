@@ -12,12 +12,15 @@ use App\Models\PaymentAccount;
 use App\Models\Admin\Admin;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CabBookingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin');
+        // publicInvoice is reachable via a signed URL (no admin login) —
+        // that route's own `signed` middleware is what guards it instead.
+        $this->middleware('auth:admin')->except(['publicInvoice']);
     }
 
     // ── INDEX ─────────────────────────────────────────────────────
@@ -407,7 +410,7 @@ class CabBookingController extends Controller
     }
 
     // ── INVOICE ───────────────────────────────────────────────────
-    public function invoice($id)
+    public function invoice($id, $guestView = false)
     {
         $booking = CabBooking::with([
             'vehicle', 'payments.paymentAccount', 'createdBy', 'leadSource',
@@ -415,7 +418,44 @@ class CabBookingController extends Controller
 
         $setup = \App\Models\WebsiteSetup::first();
 
-        return view('admin.cab-bookings.invoice', compact('booking', 'setup'));
+        return view('admin.cab-bookings.invoice', compact('booking', 'setup', 'guestView'));
+    }
+
+    /**
+     * Same invoice, reachable without admin login via a signed URL — for
+     * sharing with the guest on WhatsApp. $guestView=true hides the
+     * "Internal Notes" field (admin-only per its own form label).
+     */
+    public function publicInvoice($id)
+    {
+        return $this->invoice($id, true);
+    }
+
+    /**
+     * Same invoice as a real PDF file (not an HTML page) — lets the admin's
+     * browser hand the actual file to the OS share sheet (navigator.share),
+     * so "Share on WhatsApp" attaches the PDF itself instead of a text link.
+     * guestView=true for the same reason as publicInvoice() above.
+     */
+    public function invoicePdf($id)
+    {
+        $booking = CabBooking::with([
+            'vehicle', 'payments.paymentAccount', 'createdBy', 'leadSource',
+        ])->findOrFail($id);
+
+        $setup = \App\Models\WebsiteSetup::first();
+        $guestView = true;
+
+        $pdf = Pdf::loadView('admin.cab-bookings.invoice', compact('booking', 'setup', 'guestView'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'defaultFont'          => 'sans-serif',
+                'dpi'                  => 150,
+            ]);
+
+        return $pdf->download('Invoice-' . $booking->booking_number . '.pdf');
     }
 
     // ── DESTROY ───────────────────────────────────────────────────

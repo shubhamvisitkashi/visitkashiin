@@ -224,6 +224,14 @@ class BoatBookingController extends Controller
         ]);
     }
 
+    /**
+     * Same voucher, reachable without admin login via a signed URL — for
+     * sharing with the guest on WhatsApp.
+     */
+    public function publicVoucher($booking_id) {
+        return $this->voucher($booking_id);
+    }
+
     public function voucherPdf($booking_id) {
         $booking = BoatBooking::where('booking_id', $booking_id)
             ->with(['boat.boatType', 'payments'])

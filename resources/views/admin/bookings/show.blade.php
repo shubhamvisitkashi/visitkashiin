@@ -403,9 +403,13 @@ body.pk-dark .pk-profit-lbl { color: #fde68a; }
 .pk-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .pk-toast [data-feather] { width: 15px; height: 15px; color: #10b981; }
 
-/* ── Mobile Sticky Actions ── */
+/* ── Mobile Sticky Actions ──
+   bottom is offset by the admin layout's own sa-mob-nav bar (68px, see
+   admin-saas.css) — at bottom:0 this bar was rendering directly underneath
+   it and getting hidden. z-index stays below sa-mob-nav's (1000) on purpose:
+   it should sit above it, never over it. */
 .pk-mob-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+    position: fixed; bottom: calc(var(--sa-mob-nav-h, 68px) + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; z-index: 150;
     background: var(--pk-card);
     border-top: 1px solid var(--pk-border);
     padding: 10px 16px;
@@ -455,8 +459,8 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
 ═══════════════════════════════════════════════ */
 @media(max-width:768px) {
 
-  /* ── Page ── */
-  .pk-page { padding-bottom: 90px; }
+  /* ── Page ── (extra room for pk-mob-bar now sitting above sa-mob-nav) */
+  .pk-page { padding-bottom: 160px; }
   .pk-wrap { padding: 0 10px; }
 
   /* ── Sticky topbar ── */
@@ -716,6 +720,8 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
     $editTotal = $netTotal;
 
     // WhatsApp message
+    // Signed link to the voucher that works for the guest without an admin login.
+    $voucherUrl = \Illuminate\Support\Facades\URL::signedRoute('public.voucher.stay', ['id' => $booking->id]);
     if ($isStay) {
         $stayDisplayTotal = $grossTotal;
         $stayPendForWa    = $pendAmt;
@@ -727,6 +733,7 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             . ($discountAmt > 0 ? "\nDiscount: -₹" . number_format($discountAmt, 2) : "")
             . "\nAdvance Paid: ₹" . number_format($paidAmt, 2)
             . "\nBalance Due: ₹" . number_format($stayPendForWa, 2)
+            . "\n\n🎫 Your Voucher: {$voucherUrl}"
             . "\n\nThank you! 🙏\n*Visit Kashi Team*";
     } else {
         $waMsg = "Namaste *{$lead?->guest_name}* 🙏\n\nYour booking with *Visit Kashi* is confirmed! ✅\n\n🧾 *Booking Details*\nBooking ID: *{$booking->booking_number}*\nTravel Date: *{$booking->booking_date->format('d M Y')}*\nBoat: *{$boatType}*\nPickup Ghat: *{$pickupGhat}*\nPickup Time: *{$pickupTime}*\nGuests: *{$adults} Adult(s)" . ($children ? ", {$children} Child(ren)" : "") . "*"
@@ -734,6 +741,7 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             . "\n\n💰 *Payment Summary*\nTotal: ₹" . number_format($booking->total_amount, 2)
             . "\nAdvance Paid: ₹" . number_format($paidAmt, 2)
             . "\nBalance Due: ₹" . number_format($pendAmt, 2)
+            . "\n\n🎫 Your Voucher: {$voucherUrl}"
             . "\n\nThank you! 🙏\n*Visit Kashi Team*";
     }
 
@@ -1103,12 +1111,14 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             </div>
             @endif
 
-            {{-- WhatsApp Share (collapsible) --}}
-            <div class="pk-card">
+            {{-- WhatsApp Share (collapsible — auto-opened right after a booking is created) --}}
+            @php $justBooked = (bool) session('show_whatsapp'); @endphp
+            <div class="pk-card" id="waCard" @if($justBooked) style="border:2px solid #25D366;box-shadow:0 0 0 4px rgba(37,211,102,.15);" @endif>
                 <div class="pk-card-head" style="cursor:pointer;" onclick="document.getElementById('waCollapse').classList.toggle('d-none')">
                     <h6 class="pk-card-title">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
                         WhatsApp Share
+                        @if($justBooked)<span style="background:#DCFCE7;color:#15803D;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">Booking created — share now</span>@endif
                     </h6>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <button type="button" class="pk-btn pk-btn-wa" style="padding:5px 12px;font-size:.76rem;" onclick="event.stopPropagation();shareWA()">
@@ -1118,7 +1128,7 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
                         <i data-feather="chevron-down" style="width:14px;height:14px;color:var(--pk-muted);"></i>
                     </div>
                 </div>
-                <div id="waCollapse" class="d-none">
+                <div id="waCollapse" class="{{ $justBooked ? '' : 'd-none' }}">
                     <div class="pk-card-body">
                         <textarea class="pk-wa-box" id="waBox">{{ $waMsg }}</textarea>
                         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
@@ -1381,6 +1391,12 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
             <div class="pk-card">
                 <div class="pk-card-head">
                     <h6 class="pk-card-title"><i data-feather="download"></i> Download / Invoice</h6>
+                    @if($guestPhone)
+                    <button type="button" id="shareInvoicePdfBtn" class="pk-btn pk-btn-wa" style="padding:5px 12px;font-size:.76rem;" onclick="shareInvoicePdf(this)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
+                        Share PDF
+                    </button>
+                    @endif
                 </div>
                 <div class="pk-card-body" style="display:flex;flex-direction:column;gap:8px">
                     @if($booking->is_gst_invoice)
@@ -1440,11 +1456,11 @@ body.pk-dark .pk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
 
 {{-- Mobile Sticky Bar --}}
 <div class="pk-mob-bar">
-    {{-- WhatsApp --}}
-    <button type="button" onclick="shareWA()"
+    {{-- WhatsApp — shares the actual invoice PDF via the OS share sheet --}}
+    <button type="button" id="mobBarShareBtn" onclick="shareInvoicePdf(this)"
         style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#25D366;border:none;border-radius:14px;color:#fff;padding:10px 6px;cursor:pointer;font-size:.7rem;font-weight:700;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.555 4.104 1.524 5.83L.057 23.882l6.197-1.625A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.359-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 112 12a9.818 9.818 0 0110 9.818z"/></svg>
-        WhatsApp
+        Share PDF
     </button>
     {{-- Add Payment --}}
     <button type="button" data-bs-toggle="modal" data-bs-target="#addPaymentModal"
@@ -1763,6 +1779,59 @@ function shareWA() {
     const url = 'https://wa.me/91' + phone + '?text=' + encodeURIComponent(msg);
     window.open(url, '_blank');
 }
+
+// ── Share the actual invoice PDF (not a text link) ──
+// wa.me links can only pre-fill text, never attach a file — the only way to
+// hand WhatsApp a real file is the OS share sheet via navigator.share(),
+// which needs the PDF as an in-memory File. Falls back to a plain download
+// (to attach manually) wherever file sharing isn't supported — desktop
+// browsers mainly, since this is built for the mobile share sheet.
+async function shareInvoicePdf(btn) {
+    btn = btn || document.getElementById('shareInvoicePdfBtn');
+    const pdfUrl = '{{ route("booking.invoice.pdf", $booking->id) }}';
+    const fileName = 'Invoice-{{ $booking->booking_number }}.pdf';
+    const originalHtml = btn ? btn.innerHTML : '';
+
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Preparing…'; }
+
+    try {
+        const resp = await fetch(pdfUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!resp.ok) throw new Error('PDF fetch failed: HTTP ' + resp.status);
+        const blob = await resp.blob();
+        const file = new File([blob], fileName, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                files: [file],
+                title: 'Booking Invoice',
+                text: 'Invoice for booking {{ $booking->booking_number }}',
+            });
+        } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            showToast('Direct file share isn\'t supported on this browser — PDF downloaded, attach it in WhatsApp manually.', 'info');
+        }
+    } catch (e) {
+        if (e.name !== 'AbortError') { // user cancelled the native share sheet — not an error
+            console.warn('shareInvoicePdf failed', e);
+            window.open(pdfUrl, '_blank');
+        }
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+    }
+}
+
+@if($justBooked)
+// Booking was just created — bring the already-expanded WhatsApp card into view.
+document.addEventListener('DOMContentLoaded', function () {
+    const card = document.getElementById('waCard');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+@endif
 
 // ── Status Update ──
 function updateStatus(status) {
