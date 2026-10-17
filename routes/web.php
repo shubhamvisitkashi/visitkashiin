@@ -44,22 +44,38 @@ Route::group(['prefix' => 'admin'], function () {
 
     // Web app manifest — lets "Add to Home screen" on mobile use the app logo as an app icon
     Route::get('manifest.webmanifest', function () {
-        $logo = websiteSetupValue('app_logo') ?: websiteSetupValue('logo');
-        $iconUrl = $logo
-            ? asset('backend/admin/website_setup/' . $logo)
-            : asset('favicon.ico');
+        $logo     = websiteSetupValue('app_logo') ?: websiteSetupValue('logo');
         $siteName = websiteSetupValue('site_name') ?: 'Visit Kashi';
+        $bgColor  = '#0F172A';
+
+        // The uploaded logo is a wide navbar banner, not square — Android/iOS
+        // install icons must be square or they come out squished/cropped/
+        // blank. Pad it onto a square canvas instead of using it as-is.
+        $icon = ['src' => asset('favicon.ico'), 'sizes' => 'any', 'type' => 'image/x-icon', 'purpose' => 'any'];
+        if ($logo) {
+            $squarePath = \App\Services\PwaIconGenerator::squareIconPath(
+                public_path('backend/admin/website_setup/' . $logo),
+                $bgColor
+            );
+            $icon = $squarePath
+                // Generated, guaranteed-square icon — safe to also use as the
+                // masked/adaptive icon since it was padded with a safe zone.
+                ? ['src' => asset('backend/admin/website_setup/' . basename($squarePath)) . '?v=' . filemtime($squarePath),
+                   'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable']
+                // Generation failed (unreadable source) — fall back to the raw
+                // (non-square) logo rather than nothing; don't claim it's
+                // maskable-safe since it wasn't padded for that.
+                : ['src' => asset('backend/admin/website_setup/' . $logo), 'sizes' => 'any', 'type' => 'image/png', 'purpose' => 'any'];
+        }
 
         return response()->json([
             'name' => $siteName . ' Admin',
             'short_name' => $siteName,
             'start_url' => route('admin.dashboard'),
             'display' => 'standalone',
-            'background_color' => '#0F172A',
-            'theme_color' => '#0F172A',
-            'icons' => [
-                ['src' => $iconUrl, 'sizes' => 'any', 'purpose' => 'any maskable'],
-            ],
+            'background_color' => $bgColor,
+            'theme_color' => $bgColor,
+            'icons' => [$icon],
         ])->header('Content-Type', 'application/manifest+json');
     })->name('admin.manifest');
 

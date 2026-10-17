@@ -17,9 +17,23 @@
     @php
         $appIconSource = websiteSetupValue('app_logo') ?: websiteSetupValue('logo');
         $appIcon = $appIconSource ? asset('backend/admin/website_setup/' . $appIconSource) : asset('favicon.ico');
+
+        // iOS home-screen icons must be square, same as the manifest icon
+        // (admin.manifest route) — the raw logo is a wide banner, so reuse
+        // the same padded-square generator rather than the raw file here.
+        $touchIcon = $appIcon;
+        if ($appIconSource) {
+            $squareTouchIcon = \App\Services\PwaIconGenerator::squareIconPath(
+                public_path('backend/admin/website_setup/' . $appIconSource),
+                '#0F172A'
+            );
+            if ($squareTouchIcon) {
+                $touchIcon = asset('backend/admin/website_setup/' . basename($squareTouchIcon)) . '?v=' . filemtime($squareTouchIcon);
+            }
+        }
     @endphp
     <link rel="icon" href="{{ $appIcon }}">
-    <link rel="apple-touch-icon" href="{{ $appIcon }}">
+    <link rel="apple-touch-icon" href="{{ $touchIcon }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
