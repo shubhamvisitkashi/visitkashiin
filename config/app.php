@@ -54,6 +54,18 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Application Domain
+    |--------------------------------------------------------------------------
+    |
+    | Used in frontend views (titles, og:site_name, schema) instead of calling
+    | env() directly, since env() returns null once config is cached.
+    |
+    */
+
+    'domain' => env('APP_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+
     'asset_url' => env('ASSET_URL', null),
 
     /*

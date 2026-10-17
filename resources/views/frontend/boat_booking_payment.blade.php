@@ -1,7 +1,7 @@
 @extends('frontend.layouts.app')
 @section('meta')
     <link rel="canonical" href="{{url()->full()}}">
-    <title>Payment - {{env('APP_NAME')}}</title>
+    <title>Payment - {{config('app.name')}}</title>
     <meta name="description" content="Complete your boat booking payment">
     <meta name="keywords" content="payment, boat booking, QR code">
 @endsection

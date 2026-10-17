@@ -21,4 +21,4 @@ Allow: /backend/admin/website_setup/
 Allow: /backend/admin/product_images/
 
 # Sitemap
-Sitemap: http://localhost/visitkashiin/public/sitemap.xml
+Sitemap: https://visitkashi.in/sitemap.xml

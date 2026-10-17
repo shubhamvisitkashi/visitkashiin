@@ -25,7 +25,7 @@
             $displayP  = ($product->discounted_price ?? 0) > 0 ? $product->discounted_price : ($product->base_price ?? 0);
         @endphp
         <link rel="canonical" href="{{ $pageUrl }}">
-        <title>{{ $metaTitle }} - {{ env('APP_DOMAIN') }}</title>
+        <title>{{ $metaTitle }} - {{ config('app.domain') }}</title>
         <meta name="description" content="{{ $metaDesc }}">
         <meta name="keywords"    content="{{ $product->meta_keyword }}">
         <meta name="robots"      content="index, follow">
@@ -36,7 +36,7 @@
         <meta property="og:description" content="{{ $metaDesc }}">
         <meta property="og:url"         content="{{ $pageUrl }}">
         <meta property="og:image"       content="{{ $metaImg }}">
-        <meta property="og:site_name"   content="{{ env('APP_DOMAIN') }}">
+        <meta property="og:site_name"   content="{{ config('app.domain') }}">
 
         {{-- Twitter Card --}}
         <meta name="twitter:card"        content="summary_large_image">

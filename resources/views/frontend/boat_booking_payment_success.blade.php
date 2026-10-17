@@ -1,7 +1,7 @@
 @extends('frontend.layouts.app')
 @section('meta')
     <link rel="canonical" href="{{url()->full()}}">
-    <title>Payment Successful - {{env('APP_NAME')}}</title>
+    <title>Payment Successful - {{config('app.name')}}</title>
     <meta name="description" content="Your boat booking payment has been completed successfully">
     <meta name="keywords" content="payment success, boat booking, confirmation">
 @endsection

@@ -3,11 +3,11 @@
 {{-- ── SEO: All existing meta tags, canonical, OG tags preserved exactly ── --}}
 @section('meta')
     <link rel="canonical" href="{{ url()->full() }}">
-    <title>Varanasi #1 Travel Website | Book Stay, Boat, {{ env('APP_DOMAIN') }}</title>
+    <title>Varanasi #1 Travel Website | Book Stay, Boat, Cab - {{ config('app.domain') }}</title>
     <meta name="description" content="Visit Kashi is a Varanasi local travel company operating an online marketplace and operates inbound tours of Varanasi, Prayagraj, Ayodhya, and Bodhgaya. We directly connect to a service provider for Hotel, Boat Booking, Cab Booking, and Local Guide.">
     <meta name="keywords" content="Varanasi tour packages booking, Book Varanasi tour packages online at best price, best travel company in varanasi, Day tour packages for varanasi, Things must to do in varanasi">
     <meta property="og:title" content="Varanasi #1 Travel Website | Book Stay, Boat, Cab-visitkashi.com">
-    <meta property="og:site_name" content="{{ env('APP_URL') }}">
+    <meta property="og:site_name" content="{{ config('app.url') }}">
     <meta property="og:description" content="Visit Kashi is a Varanasi local travel company operating an online marketplace and operates inbound tours of Varanasi, Prayagraj, Ayodhya, and Bodhgaya. We directly connect to a service provider for Hotel, Boat Booking, Cab Booking, and Local Guide.">
     <meta property="og:keywords" content="Varanasi tour packages booking, Book Varanasi tour packages online at best price, best travel company in varanasi, Day tour packages for varanasi, Things must to do in varanasi">
 @endsection

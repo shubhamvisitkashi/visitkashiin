@@ -4,7 +4,7 @@
     @isset($product)
         @php $hotelImg = !empty($product->images) ? asset('backend/admin/product_images/'.$product->images[0]) : asset('frontend/images/logo1.png'); @endphp
         <link rel="canonical" href="{{ url()->current() }}">
-        <title>{{ optional($product)->meta_title ?? $product->name }} | Hotel in Varanasi - {{ env('APP_DOMAIN') }}</title>
+        <title>{{ optional($product)->meta_title ?? $product->name }} | Hotel in Varanasi - {{ config('app.domain') }}</title>
         <meta name="description" content="{{ optional($product)->meta_description }}">
         <meta name="keywords"    content="{{ optional($product)->meta_keyword }}">
         <meta name="robots" content="index, follow">

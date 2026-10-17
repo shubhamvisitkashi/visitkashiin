@@ -1,7 +1,7 @@
 @extends('frontend.layouts.app')
 @section('meta')
     <link rel="canonical" href="{{url()->full()}}">
-    <title>Payment Error - {{env('APP_NAME')}}</title>
+    <title>Payment Error - {{config('app.name')}}</title>
     <meta name="description" content="Payment failed for your boat booking">
     <meta name="keywords" content="payment error, boat booking, failed transaction">
 @endsection

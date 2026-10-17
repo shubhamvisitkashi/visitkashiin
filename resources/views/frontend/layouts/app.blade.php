@@ -25,7 +25,7 @@
           "@context": "https://schema.org",
           "@type": "TravelAgency",
           "name": "{{ websiteSetupValue('site_name') ?? 'Visit Kashi' }}",
-          "url": "{{ env('APP_URL') }}",
+          "url": "{{ config('app.url') }}",
           "logo": "{{ asset('backend/admin/website_setup/' . websiteSetupValue('logo')) }}",
           "description": "Visit Kashi is Varanasi's #1 travel platform for boat rides, hotel bookings, tour packages, and cab services.",
           "address": {

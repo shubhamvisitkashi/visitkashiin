@@ -2,22 +2,22 @@
 @section('meta')
     @isset($sub_category)
         <link rel="canonical" href="{{url()->full()}}">
-        <title>{{optional($sub_category)->meta_title}} - {{env('APP_DOMAIN')}}</title>
+        <title>{{optional($sub_category)->meta_title}} - {{config('app.domain')}}</title>
         <meta name="description" content="{{optional($sub_category)->meta_description}}">
         <meta name="keywords" content="{{optional($sub_category)->meta_keyword}}">
         <meta property="og:title" content="{{optional($sub_category)->meta_title}}">
-        <meta property="og:site_name" content="{{env('APP_URL')}}">
+        <meta property="og:site_name" content="{{config('app.url')}}">
         <meta property="og:description" content="{{optional($sub_category)->meta_description}}">
         <meta property="og:keywords" content="{{optional($sub_category)->meta_keyword}}">
 
     @elseif($category)
 
         <link rel="canonical" href="{{url()->full()}}">
-        <title>{{optional($category)->meta_title}} - {{env('APP_DOMAIN')}}</title>
+        <title>{{optional($category)->meta_title}} - {{config('app.domain')}}</title>
         <meta name="description" content="{{optional($category)->meta_description}}">
         <meta name="keywords" content="{{optional($category)->meta_keyword}}">
         <meta property="og:title" content="{{optional($category)->meta_title}}">
-        <meta property="og:site_name" content="{{env('APP_URL')}}">
+        <meta property="og:site_name" content="{{config('app.url')}}">
         <meta property="og:description" content="{{optional($category)->meta_description}}">
         <meta property="og:keywords" content="{{optional($category)->meta_keyword}}">
     @endisset

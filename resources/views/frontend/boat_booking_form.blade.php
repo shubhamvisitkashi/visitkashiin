@@ -1,11 +1,11 @@
 @extends('frontend.layouts.app')
 @section('meta')
     <link rel="canonical" href="{{url()->full()}}">
-    <title>{{$boat_type->seo_title}} - {{env('APP_NAME')}}</title>
+    <title>{{$boat_type->seo_title}} - {{config('app.name')}}</title>
     <meta name="description" content="{{optional($boat_type)->seo_description}}">
     <meta name="keywords" content="{{optional($boat_type)->seo_keyword}}">
     <meta property="og:title" content="{{optional($boat_type)->seo_title}}">
-    <meta property="og:site_name" content="{{env('APP_URL')}}">
+    <meta property="og:site_name" content="{{config('app.url')}}">
     <meta property="og:description" content="{{optional($boat_type)->seo_description}}">
     <meta property="og:keywords" content="{{optional($boat_type)->seo_keyword}}">
 @endsection
