@@ -300,4 +300,11 @@
     .vkf-explore__group { flex-direction: column; gap: 4px; }
     .vkf-bottom { padding: 14px 0; margin-bottom: 0 !important; }
 }
+
+/* A third-party plugin in plugin.js sets a stray inline margin-bottom on
+   <body> (varies ~29-55px per load) that has no purpose once .vk-mob-nav
+   is hidden — it just leaves dead space below the footer on tablet/desktop. */
+@media(min-width: 768px) {
+    body { margin-bottom: 0 !important; }
+}
 </style>
