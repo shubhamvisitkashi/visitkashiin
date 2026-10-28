@@ -262,6 +262,8 @@ class BookingController extends Controller
             'booking_end_date'   => 'nullable|date',
             'booking_status'     => 'nullable|in:not_started,confirmed,in_progress,completed,cancelled',
             'discount'           => 'nullable|numeric|min:0',
+            'vendor_cost'        => 'nullable|numeric|min:0',
+            'b2b_vendor_cost'    => 'nullable|numeric|min:0',
             'notes'              => 'nullable|string',
             // Existing service rows
             'services'                    => 'nullable|array',
@@ -381,11 +383,13 @@ class BookingController extends Controller
             }
 
             $booking->update([
-                'booking_date'   => $validated['booking_date'],
-                'booking_status' => $validated['booking_status'] ?? $booking->booking_status,
-                'total_amount'   => $netTotal,
-                'paid_amount'    => $currentPaid,
-                'pending_amount' => max(0, $netTotal - $currentPaid),
+                'booking_date'     => $validated['booking_date'],
+                'booking_status'   => $validated['booking_status'] ?? $booking->booking_status,
+                'total_amount'     => $netTotal,
+                'paid_amount'      => $currentPaid,
+                'pending_amount'   => max(0, $netTotal - $currentPaid),
+                'vendor_cost'      => $request->filled('vendor_cost') ? $validated['vendor_cost'] : $booking->vendor_cost,
+                'b2b_vendor_cost'  => $request->filled('b2b_vendor_cost') ? $validated['b2b_vendor_cost'] : $booking->b2b_vendor_cost,
             ]);
 
             DB::commit();

@@ -622,6 +622,40 @@
         </div>
       </div>
 
+      {{-- Vendor Costs (Internal) --}}
+      <div class="nb-card">
+        <div class="nb-card-head">
+          <div class="nb-card-icon" style="background:#FFF1F2;color:#E11D48;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="8"/><path d="M12 7.5v9M9.5 9.75c0-.97 1.12-1.75 2.5-1.75s2.5.78 2.5 1.75-1.12 1.25-2.5 1.25-2.5.78-2.5 1.75 1.12 1.75 2.5 1.75 2.5-.78 2.5-1.75"/></svg>
+          </div>
+          <div class="nb-card-title">Vendor Costs &nbsp;<span style="font-size:.7rem;font-weight:400;color:#94A3B8;">Internal only — not shown to guest</span></div>
+        </div>
+        <div class="nb-card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="nb-label">Vendor Cost (₹)</label>
+              <div class="nb-rupee-wrap">
+                <span class="nb-rupee">₹</span>
+                <input type="number" name="vendor_cost" class="form-control nb-input nb-rupee-input"
+                       placeholder="0" min="0" step="0.01"
+                       value="{{ old('vendor_cost', $booking->vendor_cost) }}">
+              </div>
+              @error('vendor_cost')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+            </div>
+            <div class="col-md-6">
+              <label class="nb-label">B2B Vendor Cost (₹)</label>
+              <div class="nb-rupee-wrap">
+                <span class="nb-rupee">₹</span>
+                <input type="number" name="b2b_vendor_cost" class="form-control nb-input nb-rupee-input"
+                       placeholder="0" min="0" step="0.01"
+                       value="{{ old('b2b_vendor_cost', $booking->b2b_vendor_cost) }}">
+              </div>
+              @error('b2b_vendor_cost')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>{{-- /left --}}
 
     {{-- ═══ SIDEBAR ═══ --}}
