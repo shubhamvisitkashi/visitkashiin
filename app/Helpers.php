@@ -74,6 +74,8 @@ if(!function_exists('timeFormat')){
 
 if(!function_exists('moneyFormatIndia')){
     function moneyFormatIndia($num) {
+        $negative = $num < 0;
+        $num = (string) abs((int) round((float) $num));
         $explrestunits = "" ;
         if(strlen($num)>3) {
             $lastthree = substr($num, strlen($num)-3, strlen($num));
@@ -92,7 +94,7 @@ if(!function_exists('moneyFormatIndia')){
         } else {
             $thecash = $num;
         }
-        return $thecash; // writes the final format where $currency is the currency symbol.
+        return ($negative ? '-' : '') . $thecash; // writes the final format where $currency is the currency symbol.
     }
 }
 

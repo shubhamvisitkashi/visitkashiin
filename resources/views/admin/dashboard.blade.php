@@ -125,6 +125,16 @@ body.dark-mode .kpi-icon          { opacity:.85; }
 .kpi-card-wide .kpi-body { display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
 .kpi-card-wide .kpi-progress { flex:1; min-width:220px; }
 @media(max-width:600px){ .kpi-card-wide .kpi-body { flex-direction:column; align-items:flex-start; gap:10px; } }
+/* Pending-payments card reads as a plain stat otherwise, so give it a
+   stronger border/glow and a pulsing icon ring to signal "needs action"
+   rather than "FYI" — only while there's actually something due. */
+.kpi-card-urgent { border-color:#F59E0B; box-shadow:0 0 0 1px rgba(245,158,11,.22), var(--shadow); }
+.kpi-card-urgent .kpi-icon { animation: kpi-urgent-pulse 2.2s ease-in-out infinite; }
+@keyframes kpi-urgent-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), 0 0 0 0 rgba(245,158,11,.4); }
+  50%      { box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), 0 0 0 7px rgba(245,158,11,0); }
+}
+body.dark-mode .kpi-card-urgent { border-color:#F59E0B !important; }
 /* Soft left accent bar (replaces the old bottom bar) — reads better against
    the icon chip and gives each card a clearer color identity at a glance. */
 .kpi-card::after {
@@ -373,14 +383,14 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         <div style="margin-bottom:12px;">
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
             <span style="font-weight:700;color:var(--text);">💰 Revenue</span>
-            <span style="color:var(--muted);font-size:.7rem;">₹{{ number_format($totalRevenueMonth,0) }} <span style="font-weight:700;color:#4F46E5;">({{ $revPct }}%)</span></span>
+            <span style="color:var(--muted);font-size:.7rem;">₹{{ moneyFormatIndia($totalRevenueMonth) }} <span style="font-weight:700;color:#4F46E5;">({{ $revPct }}%)</span></span>
           </div>
           <div class="prog-bar"><div class="prog-fill" style="width:{{ $revPct }}%;background:#4F46E5;"></div></div>
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
             <span style="font-weight:700;color:var(--text);">📉 Expense</span>
-            <span style="color:var(--muted);font-size:.7rem;">₹{{ number_format($totalExpenseMonth,0) }} <span style="font-weight:700;color:#F43F5E;">({{ $expPct }}%)</span></span>
+            <span style="color:var(--muted);font-size:.7rem;">₹{{ moneyFormatIndia($totalExpenseMonth) }} <span style="font-weight:700;color:#F43F5E;">({{ $expPct }}%)</span></span>
           </div>
           <div class="prog-bar"><div class="prog-fill" style="width:{{ $expPct }}%;background:#F43F5E;"></div></div>
         </div>
@@ -414,7 +424,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         <div style="margin-bottom:12px;">
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:.76rem;margin-bottom:5px;">
             <span style="font-weight:700;color:var(--text);">{{ $expIcons[$i] ?? '' }} {{ $row['label'] }}</span>
-            <span style="color:var(--muted);font-size:.7rem;">₹{{ number_format($row['val'],0) }} <span style="font-weight:700;color:{{ $expColors[$i] ?? '#94A3B8' }};">({{ $pct }}%)</span></span>
+            <span style="color:var(--muted);font-size:.7rem;">₹{{ moneyFormatIndia($row['val']) }} <span style="font-weight:700;color:{{ $expColors[$i] ?? '#94A3B8' }};">({{ $pct }}%)</span></span>
           </div>
           <div class="prog-bar"><div class="prog-fill" style="width:{{ $pct }}%;background:{{ $expColors[$i] ?? '#94A3B8' }};"></div></div>
         </div>
@@ -443,7 +453,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="kpi-icon">💰</div>
     <div class="kpi-body">
       <div class="kpi-label">This Month Revenue</div>
-      <div class="kpi-value">₹{{ number_format($totalRevenueMonth) }}</div>
+      <div class="kpi-value">₹{{ moneyFormatIndia($totalRevenueMonth) }}</div>
       <div class="kpi-sub">
         @if($revenueGrowth > 0)
           <span class="kpi-badge up">↑ {{ abs($revenueGrowth) }}% vs last month</span>
@@ -456,12 +466,17 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     </div>
   </div>
 
-  <div class="kpi-card" style="--kpi-color:var(--amber);--kpi-bg:#FEF3C7;cursor:pointer;" onclick="openPendingModal()" title="Click to view pending bookings">
+  <div class="kpi-card{{ $totalPending > 0 ? ' kpi-card-urgent' : '' }}" style="--kpi-color:var(--amber);--kpi-bg:#FEF3C7;cursor:pointer;" onclick="openPendingModal()" title="Click to view pending bookings">
     <div class="kpi-icon">⚠️</div>
     <div class="kpi-body">
       <div class="kpi-label">Pending Amount</div>
-      <div class="kpi-value">₹{{ number_format($totalPending) }}</div>
-      <div class="kpi-sub">{{ $pendingPaymentsCount }} bookings have due balance <span style="color:var(--amber);font-weight:700;margin-left:4px;">→</span></div>
+      <div class="kpi-value">₹{{ moneyFormatIndia($totalPending) }}</div>
+      <div class="kpi-sub">
+        <span>{{ $pendingPaymentsCount }} bookings have due balance</span>
+        @if($totalPending > 0)
+        <span class="kpi-badge" style="background:#FEF3C7;color:#92400E;">Review →</span>
+        @endif
+      </div>
     </div>
   </div>
 
@@ -470,7 +485,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="kpi-body">
       <div class="kpi-label">This Month Bookings</div>
       <div class="kpi-value">{{ $totalBookingsMonth }}</div>
-      <div class="kpi-sub">All-time: <strong>{{ number_format($allTimeBookings) }}</strong> · ₹{{ number_format($allTimeRevenue) }}</div>
+      <div class="kpi-sub">All-time: <strong>{{ number_format($allTimeBookings) }}</strong> · ₹{{ moneyFormatIndia($allTimeRevenue) }}</div>
     </div>
   </div>
 
@@ -492,8 +507,8 @@ body.dark-mode .kpi-icon          { opacity:.85; }
           <div style="height:100%;width:{{ $teamTargetPct }}%;background:{{ $tkColor }};border-radius:99px;transition:width .5s;"></div>
         </div>
         <div class="kpi-sub" style="justify-content:space-between;">
-          <span>Achieved: <strong style="color:{{ $tkColor }};">₹{{ number_format($teamTotalAchieved) }}</strong></span>
-          <span>Target: <strong>₹{{ number_format($teamTotalTarget) }}</strong></span>
+          <span>Achieved: <strong style="color:{{ $tkColor }};">₹{{ moneyFormatIndia($teamTotalAchieved) }}</strong></span>
+          <span>Target: <strong>₹{{ moneyFormatIndia($teamTotalTarget) }}</strong></span>
         </div>
       </div>
     </div>
@@ -522,7 +537,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
           <div class="upcoming-name">{{ $b->lead?->guest_name ?? '—' }}</div>
           <div class="upcoming-sub">{{ $b->booking_number }} · {{ $b->lead?->pax ?? 1 }} pax</div>
         </div>
-        <div class="upcoming-amt">₹{{ number_format($b->total_amount) }}</div>
+        <div class="upcoming-amt">₹{{ moneyFormatIndia($b->total_amount) }}</div>
       </div>
       @endforeach
     @else
@@ -563,7 +578,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
           <span class="sb sb-{{ $tb['status'] }}" style="font-size:.62rem;">{{ ucwords(str_replace('_',' ',$tb['status'])) }}</span>
         </div>
       </div>
-      <div class="upcoming-amt">₹{{ number_format($tb['amount']) }}</div>
+      <div class="upcoming-amt">₹{{ moneyFormatIndia($tb['amount']) }}</div>
     </div>
     @empty
     <div style="padding:28px;text-align:center;color:var(--muted);font-size:.82rem;">No bookings today</div>
@@ -681,11 +696,11 @@ body.dark-mode .kpi-icon          { opacity:.85; }
           <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .5s;"></div>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.72rem;">
-          <span style="color:var(--muted);">Achieved: <strong style="color:{{ $color }};">₹{{ number_format($t->achieved_margin) }}</strong></span>
-          <span style="color:var(--muted);">Target: <strong style="color:var(--text);">₹{{ number_format($t->target_margin) }}</strong></span>
+          <span style="color:var(--muted);">Achieved: <strong style="color:{{ $color }};">₹{{ moneyFormatIndia($t->achieved_margin) }}</strong></span>
+          <span style="color:var(--muted);">Target: <strong style="color:var(--text);">₹{{ moneyFormatIndia($t->target_margin) }}</strong></span>
         </div>
         @if($remain > 0)
-        <div style="font-size:.68rem;color:var(--muted);margin-top:3px;text-align:right;">₹{{ number_format($remain) }} remaining</div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:3px;text-align:right;">₹{{ moneyFormatIndia($remain) }} remaining</div>
         @endif
       </div>
       @endforeach
@@ -731,15 +746,15 @@ body.dark-mode .kpi-icon          { opacity:.85; }
       {{-- Progress bar --}}
       <div style="margin-bottom:18px;">
         <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:6px;">
-          <span>Margin Achieved: <strong style="color:{{ $color }};font-size:.85rem;">₹{{ number_format($mt->achieved_margin) }}</strong></span>
-          <span>Target: <strong style="color:var(--text);font-size:.85rem;">₹{{ number_format($mt->target_margin) }}</strong></span>
+          <span>Margin Achieved: <strong style="color:{{ $color }};font-size:.85rem;">₹{{ moneyFormatIndia($mt->achieved_margin) }}</strong></span>
+          <span>Target: <strong style="color:var(--text);font-size:.85rem;">₹{{ moneyFormatIndia($mt->target_margin) }}</strong></span>
         </div>
         <div style="height:10px;background:#E2E8F0;border-radius:99px;overflow:hidden;">
           <div style="height:100%;width:{{ $pct }}%;background:{{ $color }};border-radius:99px;transition:width .6s;"></div>
         </div>
         @if($remain > 0)
         <div style="font-size:.7rem;color:var(--muted);margin-top:5px;text-align:right;">
-          ₹{{ number_format($remain) }} more to hit target
+          ₹{{ moneyFormatIndia($remain) }} more to hit target
         </div>
         @endif
       </div>
@@ -759,54 +774,54 @@ body.dark-mode .kpi-icon          { opacity:.85; }
         {{-- Stay row --}}
         <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
           <span style="color:var(--text);font-weight:600;">🏨 Stay <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['stay']['count'] }})</span></span>
-          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['stay']['amount']) }}</span>
-          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['stay']['vendor']) }}</span>
-          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['stay']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['stay']['margin']) }}</span>
+          <span style="text-align:right;color:var(--text);">₹{{ moneyFormatIndia($myTargetDetail['stay']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ moneyFormatIndia($myTargetDetail['stay']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['stay']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ moneyFormatIndia($myTargetDetail['stay']['margin']) }}</span>
         </div>
 
         {{-- Package row --}}
         <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
           <span style="color:var(--text);font-weight:600;">🗺️ Package <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['package']['count'] }})</span></span>
-          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['package']['amount']) }}</span>
-          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['package']['vendor']) }}</span>
-          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['package']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['package']['margin']) }}</span>
+          <span style="text-align:right;color:var(--text);">₹{{ moneyFormatIndia($myTargetDetail['package']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ moneyFormatIndia($myTargetDetail['package']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['package']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ moneyFormatIndia($myTargetDetail['package']['margin']) }}</span>
         </div>
 
         {{-- Cab row --}}
         <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
           <span style="color:var(--text);font-weight:600;">🚗 Cab <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['cab']['count'] }})</span></span>
-          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['cab']['amount']) }}</span>
-          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['cab']['vendor']) }}</span>
-          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['cab']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['cab']['margin']) }}</span>
+          <span style="text-align:right;color:var(--text);">₹{{ moneyFormatIndia($myTargetDetail['cab']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ moneyFormatIndia($myTargetDetail['cab']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['cab']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ moneyFormatIndia($myTargetDetail['cab']['margin']) }}</span>
         </div>
 
         {{-- Boat row --}}
         <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px dashed #E2E8F0;">
           <span style="color:var(--text);font-weight:600;">⛵ Boat <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['boat']['count'] }})</span></span>
-          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['boat']['amount']) }}</span>
-          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['boat']['vendor']) }}</span>
-          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['boat']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ number_format($myTargetDetail['boat']['margin']) }}</span>
+          <span style="text-align:right;color:var(--text);">₹{{ moneyFormatIndia($myTargetDetail['boat']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ moneyFormatIndia($myTargetDetail['boat']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:{{ $myTargetDetail['boat']['margin'] >= 0 ? '#10B981' : '#EF4444' }};">₹{{ moneyFormatIndia($myTargetDetail['boat']['margin']) }}</span>
         </div>
 
         {{-- Guide row --}}
         <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.78rem;padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:8px;opacity:{{ $myTargetDetail['guide']['count'] > 0 ? '1' : '.45' }};">
           <span style="color:var(--text);font-weight:600;">🧭 Guide <span style="font-weight:400;color:var(--muted);">({{ $myTargetDetail['guide']['count'] }})</span></span>
-          <span style="text-align:right;color:var(--text);">₹{{ number_format($myTargetDetail['guide']['amount']) }}</span>
-          <span style="text-align:right;color:#EF4444;">₹{{ number_format($myTargetDetail['guide']['vendor']) }}</span>
-          <span style="text-align:right;font-weight:700;color:#10B981;">₹{{ number_format($myTargetDetail['guide']['margin']) }}</span>
+          <span style="text-align:right;color:var(--text);">₹{{ moneyFormatIndia($myTargetDetail['guide']['amount']) }}</span>
+          <span style="text-align:right;color:#EF4444;">₹{{ moneyFormatIndia($myTargetDetail['guide']['vendor']) }}</span>
+          <span style="text-align:right;font-weight:700;color:#10B981;">₹{{ moneyFormatIndia($myTargetDetail['guide']['margin']) }}</span>
         </div>
 
         {{-- Totals row --}}
         <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:4px 16px;font-size:.82rem;padding:4px 0;">
           <span style="font-weight:800;color:var(--text);">Total</span>
-          <span style="text-align:right;font-weight:800;color:var(--text);">₹{{ number_format($myTargetDetail['total_amount']) }}</span>
-          <span style="text-align:right;font-weight:800;color:#EF4444;">₹{{ number_format($myTargetDetail['vendor_cost']) }}</span>
-          <span style="text-align:right;font-weight:900;color:{{ $color }};">₹{{ number_format($myTargetDetail['margin']) }}</span>
+          <span style="text-align:right;font-weight:800;color:var(--text);">₹{{ moneyFormatIndia($myTargetDetail['total_amount']) }}</span>
+          <span style="text-align:right;font-weight:800;color:#EF4444;">₹{{ moneyFormatIndia($myTargetDetail['vendor_cost']) }}</span>
+          <span style="text-align:right;font-weight:900;color:{{ $color }};">₹{{ moneyFormatIndia($myTargetDetail['margin']) }}</span>
         </div>
 
         {{-- Formula label --}}
         <div style="margin-top:10px;padding:8px 12px;background:{{ $bgColor }};border-radius:8px;font-size:.72rem;font-weight:700;color:{{ $txtColor }};text-align:center;">
-          ₹{{ number_format($myTargetDetail['total_amount']) }} − ₹{{ number_format($myTargetDetail['vendor_cost']) }} = ₹{{ number_format($myTargetDetail['margin']) }} Margin
+          ₹{{ moneyFormatIndia($myTargetDetail['total_amount']) }} − ₹{{ moneyFormatIndia($myTargetDetail['vendor_cost']) }} = ₹{{ moneyFormatIndia($myTargetDetail['margin']) }} Margin
         </div>
       </div>
 
@@ -823,7 +838,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="type-card-info">
       <div class="type-card-label">Stay / Hotel</div>
       <div class="type-card-count">{{ $stayMonth }} <span style="font-size:.8rem;font-weight:500;color:var(--muted)">this month</span></div>
-      <div class="type-card-rev">₹{{ number_format($stayRevMonth) }} revenue</div>
+      <div class="type-card-rev">₹{{ moneyFormatIndia($stayRevMonth) }} revenue</div>
       <div class="type-stat-row">
         <span class="type-stat" style="background:#DBEAFE;color:#1E40AF;">✓ {{ $stayConfirmed }} Confirmed</span>
         <span class="type-stat" style="background:#D1FAE5;color:#065F46;">✔ {{ $stayCompleted }} Done</span>
@@ -836,7 +851,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="type-card-info">
       <div class="type-card-label">Cab / Transport</div>
       <div class="type-card-count">{{ $cabMonth }} <span style="font-size:.8rem;font-weight:500;color:var(--muted)">this month</span></div>
-      <div class="type-card-rev">₹{{ number_format($cabRevMonth) }} revenue</div>
+      <div class="type-card-rev">₹{{ moneyFormatIndia($cabRevMonth) }} revenue</div>
       <div class="type-stat-row">
         <a href="{{ route('cab-bookings.index') }}" class="type-stat" style="background:#FEF3C7;color:#B45309;text-decoration:none;">View All Cabs →</a>
       </div>
@@ -848,7 +863,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
     <div class="type-card-info">
       <div class="type-card-label">Boat / Ghat</div>
       <div class="type-card-count">{{ $boatMonth }} <span style="font-size:.8rem;font-weight:500;color:var(--muted)">this month</span></div>
-      <div class="type-card-rev">₹{{ number_format($boatRevMonth) }} revenue</div>
+      <div class="type-card-rev">₹{{ moneyFormatIndia($boatRevMonth) }} revenue</div>
       <div class="type-stat-row">
         <span class="type-stat" style="background:#FEE2E2;color:#991B1B;">{{ $boatPending }} pending payment</span>
       </div>
@@ -917,7 +932,7 @@ body.dark-mode .kpi-icon          { opacity:.85; }
             <td><a href="{{ $b['url'] }}" class="bk-link">{{ $b['number'] }}</a></td>
             <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b['guest'] }}</td>
             <td class="mob-hide"><span class="sb sb-{{ $b['type'] }}">{{ $b['icon'] }} {{ ucfirst($b['type']) }}</span></td>
-            <td style="font-weight:700;color:var(--emerald);white-space:nowrap;">₹{{ number_format($b['amount']) }}</td>
+            <td style="font-weight:700;color:var(--emerald);white-space:nowrap;">₹{{ moneyFormatIndia($b['amount']) }}</td>
             <td class="mob-hide"><span class="sb sb-{{ $b['status'] }}">{{ ucwords(str_replace('_',' ',$b['status'] ?? 'pending')) }}</span></td>
             <td class="mob-hide" style="color:var(--sub);font-size:.77rem;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $b['added_by'] }}</td>
             <td class="mob-hide" style="color:var(--muted);font-size:.77rem;">{{ $b['date'] ? \Carbon\Carbon::parse($b['date'])->format('d M') : '—' }}</td>
