@@ -1290,6 +1290,10 @@ function openPendingModal() {
 
       data.forEach(b => {
         const statusCls = {'confirmed':'confirmed','completed':'completed','cancelled':'cancelled'}[b.status] || 'in_progress';
+        const isStay = !!(b.check_in || b.check_out);
+        const dateCell = isStay
+          ? `<div>In: ${b.check_in || '—'}</div><div>Out: ${b.check_out || '—'}</div>`
+          : b.date;
         html += `<tr>
           <td><a href="${b.url}" class="bk-link" target="_blank">${b.number}</a></td>
           <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.guest}</td>
@@ -1299,7 +1303,7 @@ function openPendingModal() {
           <td style="color:#EF4444;font-weight:800;white-space:nowrap;">₹${b.pending_amount.toLocaleString('en-IN')}</td>
           <td><span class="sb sb-${statusCls}">${b.status.replace(/_/g,' ')}</span></td>
           <td style="font-size:.77rem;color:var(--sub);font-weight:600;white-space:nowrap;">${b.added_by}</td>
-          <td style="color:var(--muted);font-size:.77rem;white-space:nowrap;">${b.date}</td>
+          <td style="color:var(--muted);font-size:.77rem;white-space:nowrap;">${dateCell}</td>
         </tr>`;
       });
 

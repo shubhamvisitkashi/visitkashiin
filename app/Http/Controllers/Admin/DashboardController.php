@@ -437,6 +437,8 @@ class DashboardController extends Controller
                 'pending_amount' => (int) $b->pending_amount,
                 'status'         => $b->booking_status,
                 'date'           => $b->booking_date ? \Carbon\Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                'check_in'       => $b->lead?->booking_start_date ? \Carbon\Carbon::parse($b->lead->booking_start_date)->format('d M Y') : null,
+                'check_out'      => $b->lead?->booking_end_date   ? \Carbon\Carbon::parse($b->lead->booking_end_date)->format('d M Y')   : null,
                 'url'            => route('bookings.show', $b->id),
             ]);
 
