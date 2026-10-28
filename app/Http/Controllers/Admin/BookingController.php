@@ -34,8 +34,21 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
+        // Month filter — defaults to the current month. Format: Y-m (e.g. 2026-10).
+        $monthParam = $request->input('month');
+        if ($monthParam && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $monthParam)) {
+            $selectedMonth = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam . '-01')->startOfMonth();
+        } else {
+            $selectedMonth = now()->startOfMonth();
+        }
+        $monthStr     = $selectedMonth->format('Y-m');
+        $prevMonthStr = $selectedMonth->copy()->subMonth()->format('Y-m');
+        $nextMonthStr = $selectedMonth->copy()->addMonth()->format('Y-m');
+
         // Build base query without status filter (for statistics)
         $baseQuery = Booking::query()
+            ->whereYear('booking_date', $selectedMonth->year)
+            ->whereMonth('booking_date', $selectedMonth->month)
             ->search($request->search)
             // Payment status filtering
             ->when($request->payment_status, fn($q, $paymentStatus) => $q->byPaymentStatus($paymentStatus))
@@ -86,6 +99,8 @@ class BookingController extends Controller
 
         // Build the full query with all filters (including status) for results
         $bookings = Booking::with(['lead', 'quotation', 'createdBy'])
+            ->whereYear('booking_date', $selectedMonth->year)
+            ->whereMonth('booking_date', $selectedMonth->month)
             ->search($request->search)
             ->when($request->status, fn($q, $status) => $q->byStatus($status))
             // Payment status filtering
@@ -141,6 +156,8 @@ class BookingController extends Controller
 
         $recentBoatBookings = \App\Models\BoatBooking::with(['boat.boatType', 'createdBy'])
             ->withSum('payments', 'amount')
+            ->whereYear('booking_date', $selectedMonth->year)
+            ->whereMonth('booking_date', $selectedMonth->month)
             ->when(!$isAdminUser, fn($q) => $q->where('created_by', $authId))
             ->when($request->search, fn($q) => $q->where('name','like','%'.$request->search.'%')->orWhere('phone','like','%'.$request->search.'%')->orWhere('booking_id','like','%'.$request->search.'%'))
             ->latest()
@@ -148,13 +165,15 @@ class BookingController extends Controller
             ->get();
 
         $recentCabBookings = \App\Models\CabBooking::with(['payments', 'createdBy'])
+            ->whereYear('pickup_date', $selectedMonth->year)
+            ->whereMonth('pickup_date', $selectedMonth->month)
             ->when(!$isAdminUser, fn($q) => $q->where('created_by', $authId))
             ->when($request->search, fn($q) => $q->where('customer_name','like','%'.$request->search.'%')->orWhere('customer_phone','like','%'.$request->search.'%')->orWhere('booking_number','like','%'.$request->search.'%'))
             ->latest()
             ->limit(20)
             ->get();
 
-        return view('admin.bookings.index', compact('bookings', 'stats', 'staffList', 'serviceTypes', 'recentBoatBookings', 'recentCabBookings'), ['page_title' => 'Bookings']);
+        return view('admin.bookings.index', compact('bookings', 'stats', 'staffList', 'serviceTypes', 'recentBoatBookings', 'recentCabBookings', 'selectedMonth', 'monthStr', 'prevMonthStr', 'nextMonthStr'), ['page_title' => 'Bookings']);
     }
 
     public function show($id)

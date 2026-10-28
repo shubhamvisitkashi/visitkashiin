@@ -111,6 +111,20 @@
 .bk-filter-body label { font-size:.72rem; font-weight:700; color:var(--h-sub);
   text-transform:uppercase; letter-spacing:.3px; margin-bottom:5px; }
 
+/* ── Month navigator ── */
+.bk-month-nav { display:flex; align-items:center; gap:4px; background:#FAFBFF;
+  border:1.5px solid var(--h-border); border-radius:8px; padding:2px; }
+.bk-month-arrow {
+  display:flex; align-items:center; justify-content:center; width:26px; height:26px;
+  border-radius:6px; color:var(--h-sub); text-decoration:none; transition:background var(--h-t),color var(--h-t);
+}
+.bk-month-arrow:hover { background:var(--h-indigo); color:#fff; }
+.bk-month-input {
+  border:none !important; background:transparent !important; box-shadow:none !important;
+  font-size:.82rem; font-weight:700; color:var(--h-text); padding:6px 4px !important;
+  width:132px; text-align:center; cursor:pointer;
+}
+
 /* ── Compact booking list ── */
 .bk-list-card {
   background:var(--h-card); border-radius:var(--h-r);
@@ -828,7 +842,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   @php
     $tourBase = \App\Models\Booking::whereHas('quotation.items.serviceType', fn($q) => $q->where('name','like','%tour%'));
     $todayRev = (clone $tourBase)->whereDate('booking_date', today())->sum('total_amount');
-    $monthRev = (clone $tourBase)->whereMonth('booking_date', now()->month)->whereYear('booking_date', now()->year)->sum('total_amount');
+    $monthRev = (clone $tourBase)->whereMonth('booking_date', $selectedMonth->month)->whereYear('booking_date', $selectedMonth->year)->sum('total_amount');
     $todayTours = (clone $tourBase)->whereDate('booking_date', today())->count();
     $pendingPay = (clone $tourBase)->where('pending_amount','>',0)->count();
     $totalConf  = (clone $tourBase)->where('booking_status','confirmed')->count();
@@ -862,7 +876,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     <div class="tm-card c5">
       <div class="tm-lbl">Monthly Revenue</div>
       <div class="tm-val">₹{{ number_format($monthRev/1000,1) }}K</div>
-      <div class="tm-sub">{{ now()->format('M Y') }}</div>
+      <div class="tm-sub">{{ $selectedMonth->format('M Y') }}</div>
       <div class="tm-icon">📊</div>
     </div>
     <div class="tm-card c6">
@@ -876,27 +890,27 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
 
   {{-- ── Stats ── --}}
   <div class="bk-stats">
-    <a href="{{ route('bookings.index') }}" class="bk-stat" style="--stat-color:#4F46E5;">
+    <a href="{{ route('bookings.index') }}?month={{ $monthStr }}" class="bk-stat" style="--stat-color:#4F46E5;">
       <div class="bk-stat-label">Total</div>
       <div class="bk-stat-value">{{ $stats['total'] }}</div>
     </a>
-    <a href="{{ route('bookings.index') }}?status=confirmed" class="bk-stat" style="--stat-color:#3B82F6;">
+    <a href="{{ route('bookings.index') }}?status=confirmed&month={{ $monthStr }}" class="bk-stat" style="--stat-color:#3B82F6;">
       <div class="bk-stat-label">Confirmed</div>
       <div class="bk-stat-value">{{ $stats['confirmed'] }}</div>
     </a>
-    <a href="{{ route('bookings.index') }}?status=in_progress" class="bk-stat" style="--stat-color:#F59E0B;">
+    <a href="{{ route('bookings.index') }}?status=in_progress&month={{ $monthStr }}" class="bk-stat" style="--stat-color:#F59E0B;">
       <div class="bk-stat-label">Ongoing</div>
       <div class="bk-stat-value">{{ $stats['in_progress'] }}</div>
     </a>
-    <a href="{{ route('bookings.index') }}?status=completed" class="bk-stat" style="--stat-color:#10B981;">
+    <a href="{{ route('bookings.index') }}?status=completed&month={{ $monthStr }}" class="bk-stat" style="--stat-color:#10B981;">
       <div class="bk-stat-label">Completed</div>
       <div class="bk-stat-value">{{ $stats['completed'] }}</div>
     </a>
-    <a href="{{ route('bookings.index') }}?status=cancelled" class="bk-stat" style="--stat-color:#EF4444;">
+    <a href="{{ route('bookings.index') }}?status=cancelled&month={{ $monthStr }}" class="bk-stat" style="--stat-color:#EF4444;">
       <div class="bk-stat-label">Cancelled</div>
       <div class="bk-stat-value">{{ $stats['cancelled'] }}</div>
     </a>
-    <a href="{{ route('bookings.index') }}?has_due=1" class="bk-stat" style="--stat-color:#F97316;">
+    <a href="{{ route('bookings.index') }}?has_due=1&month={{ $monthStr }}" class="bk-stat" style="--stat-color:#F97316;">
       <div class="bk-stat-label">With Due</div>
       <div class="bk-stat-value">{{ $stats['with_due'] }}</div>
     </a>
@@ -906,24 +920,30 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   @php
     $activeCat = request('service_type', '');
 
-    // Stay & Tour come from the bookings table — filtered by role
+    // Stay & Tour come from the bookings table — filtered by role + selected month
     $isAdminTab = auth('admin')->user()->hasAnyRole(['Super Admin', 'Admin', 'Manager']);
     $myIdTab    = auth('admin')->id();
     $catBase  = \App\Models\Booking::where('booking_status','confirmed')
+                    ->whereYear('booking_date', $selectedMonth->year)
+                    ->whereMonth('booking_date', $selectedMonth->month)
                     ->when(!$isAdminTab, fn($q) => $q->where('created_by', $myIdTab));
     $countStay = (clone $catBase)->whereHas('quotation.items.serviceTemplate.serviceType',
         function($q){ $q->where('name','LIKE','%stay%')->orWhere('name','LIKE','%hotel%'); })->count();
     $countTour = (clone $catBase)->whereHas('quotation.items.serviceTemplate.serviceType',
         function($q){ $q->where('name','LIKE','%tour%')->orWhere('name','LIKE','%package%'); })->count();
 
-    // Boat & Cab have their own dedicated tables — filtered by role
-    $countBoat = $isAdminTab ? \App\Models\BoatBooking::count() : \App\Models\BoatBooking::where('created_by', $myIdTab)->count();
-    $countCab  = $isAdminTab ? \App\Models\CabBooking::count()  : \App\Models\CabBooking::where('created_by', $myIdTab)->count();
+    // Boat & Cab have their own dedicated tables — filtered by role + selected month
+    $countBoat = \App\Models\BoatBooking::whereYear('booking_date', $selectedMonth->year)
+                    ->whereMonth('booking_date', $selectedMonth->month)
+                    ->when(!$isAdminTab, fn($q) => $q->where('created_by', $myIdTab))->count();
+    $countCab  = \App\Models\CabBooking::whereYear('pickup_date', $selectedMonth->year)
+                    ->whereMonth('pickup_date', $selectedMonth->month)
+                    ->when(!$isAdminTab, fn($q) => $q->where('created_by', $myIdTab))->count();
     $countAll  = $stats['total'] + $countBoat + $countCab;
   @endphp
   <div class="bk-cats">
     {{-- All --}}
-    <a href="{{ route('bookings.index') }}"
+    <a href="{{ route('bookings.index') }}?month={{ $monthStr }}"
        class="bk-cat cat-all {{ !$activeCat ? 'active' : '' }}">
       <span class="bk-cat-emoji">📋</span>
       <span class="bk-cat-label">All Bookings</span>
@@ -939,7 +959,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     </a>
 
     {{-- Stay --}}
-    <a href="{{ route('bookings.index') }}?service_type=stay"
+    <a href="{{ route('bookings.index') }}?service_type=stay&month={{ $monthStr }}"
        class="bk-cat cat-stay {{ str_contains(strtolower($activeCat),'stay') || str_contains(strtolower($activeCat),'hotel') ? 'active' : '' }}">
       <span class="bk-cat-emoji">🏨</span>
       <span class="bk-cat-label">Stay</span>
@@ -955,7 +975,7 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
     </a>
 
     {{-- Tour Packages --}}
-    <a href="{{ route('bookings.index') }}?service_type=tour"
+    <a href="{{ route('bookings.index') }}?service_type=tour&month={{ $monthStr }}"
        class="bk-cat cat-tour {{ str_contains(strtolower($activeCat),'tour') ? 'active' : '' }}">
       <span class="bk-cat-emoji">🗺️</span>
       <span class="bk-cat-label">Tour Packages</span>
@@ -966,6 +986,10 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
   {{-- ── Filters (single line) ── --}}
   @php
     $activeFilters = collect(['status','payment_status','service_date_from','service_date_to','has_due','staff_id','service_type','search'])->filter(fn($k)=>request($k))->count();
+    $isCurrentMonth = $monthStr === now()->format('Y-m');
+    $prevMonthUrl = route('bookings.index') . '?' . http_build_query(array_merge(request()->except('month'), ['month' => $prevMonthStr]));
+    $nextMonthUrl = route('bookings.index') . '?' . http_build_query(array_merge(request()->except('month'), ['month' => $nextMonthStr]));
+    $todayMonthUrl = route('bookings.index') . '?' . http_build_query(array_merge(request()->except('month'), ['month' => now()->format('Y-m')]));
   @endphp
   <div class="bk-filter" style="padding:14px 20px;">
     <form method="GET" action="{{ route('bookings.index') }}">
@@ -974,6 +998,20 @@ tr.bk-row-selected > td { background:#EEF2FF !important; }
            field so submitting other filters doesn't silently drop it. --}}
       <input type="hidden" name="service_type" value="{{ request('service_type') }}">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+
+        {{-- Month navigator — defaults to the current month; arrows preserve every other active filter. --}}
+        <div class="bk-month-nav" role="group" aria-label="Select month">
+          <a href="{{ $prevMonthUrl }}" class="bk-month-arrow" title="Previous month" aria-label="Previous month">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </a>
+          <input type="month" name="month" value="{{ $monthStr }}" class="form-control form-control-sm bk-month-input" onchange="this.form.submit()" title="Jump to month">
+          <a href="{{ $nextMonthUrl }}" class="bk-month-arrow" title="Next month" aria-label="Next month">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+        @unless($isCurrentMonth)
+          <a href="{{ $todayMonthUrl }}" class="btn btn-outline-primary btn-sm" style="white-space:nowrap;">This Month</a>
+        @endunless
 
         <select name="status" class="form-select form-select-sm" style="width:130px;">
           <option value="">All Status</option>
