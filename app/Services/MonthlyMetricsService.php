@@ -74,6 +74,14 @@ class MonthlyMetricsService
         $cabExpMonth  = (float)($cabExpData->exp ?? 0) ?: round($cabSaleMonth * 0.30);
         $boatExpMonth = (float)($boatExpData->exp ?? 0) ?: round($boatSaleMonth * 0.30);
 
+        // Flag when a category's expense is the 30% guess rather than a real
+        // recorded vendor cost, so the dashboard can mark it as an estimate
+        // instead of presenting it as actual data.
+        $stayExpEstimated = !(float)($stayExpData->exp ?? 0) && $staySaleMonth > 0;
+        $cabExpEstimated  = !(float)($cabExpData->exp ?? 0)  && $cabSaleMonth > 0;
+        $boatExpEstimated = !(float)($boatExpData->exp ?? 0) && $boatSaleMonth > 0;
+        $expenseEstimated = $stayExpEstimated || $cabExpEstimated || $boatExpEstimated;
+
         $totalExpenseMonth = $stayExpMonth + $cabExpMonth + $boatExpMonth + $manualExpenseMonth;
         $totalProfitMonth  = $totalRevenueMonth - $totalExpenseMonth;
 
@@ -95,7 +103,8 @@ class MonthlyMetricsService
             'stayRevMonth', 'cabRevMonth', 'boatRevMonth', 'totalRevenueMonth',
             'stayPending', 'cabPending', 'boatPendingAmount', 'totalPending', 'pendingPaymentsCount',
             'stayExpMonth', 'cabExpMonth', 'boatExpMonth', 'manualExpenseMonth', 'totalExpenseMonth', 'totalProfitMonth',
-            'expenseSplit', 'typeLabels', 'typeData'
+            'expenseSplit', 'typeLabels', 'typeData',
+            'stayExpEstimated', 'cabExpEstimated', 'boatExpEstimated', 'expenseEstimated'
         );
     }
 }

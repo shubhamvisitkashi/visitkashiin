@@ -208,7 +208,7 @@ class DashboardController extends Controller
                     'bg'        => $isPackage ? '#EDE9FE' : '#EEF2FF',
                     'number'    => $b->booking_number,
                     'guest'     => $b->lead?->guest_name ?? '—',
-                    'phone'     => $b->lead?->phone ?? '—',
+                    'phone'     => $b->lead?->contact ?? '—',
                     'date_from' => $b->lead?->booking_start_date ? \Carbon\Carbon::parse($b->lead->booking_start_date)->format('d M Y') : '—',
                     'date_to'   => $b->lead?->booking_end_date   ? \Carbon\Carbon::parse($b->lead->booking_end_date)->format('d M Y')   : '—',
                     'amount'    => (int) $b->total_amount,
@@ -251,26 +251,31 @@ class DashboardController extends Controller
 
         // Boat: single-day event — show rides scheduled for today
         $todayBoat = (clone $boatQ)->with('createdBy:id,name')
+            ->withSum('payments', 'amount')
             ->whereDate('booking_date', $today)
             ->where('booking_status', '!=', 'cancelled')
             ->get()
-            ->map(fn($b) => [
-                'type'      => 'Boat',
-                'icon'      => '⛵',
-                'color'     => '#0EA5E9',
-                'bg'        => '#E0F2FE',
-                'number'    => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
-                'guest'     => $b->name ?? '—',
-                'phone'     => $b->phone ?? '—',
-                'date_from' => $b->booking_date ? \Carbon\Carbon::parse($b->booking_date)->format('d M Y') : '—',
-                'date_to'   => '—',
-                'amount'    => (int) $b->final_amount,
-                'paid'      => (int) $b->final_amount,
-                'pending'   => 0,
-                'status'    => $b->booking_status,
-                'added_by'  => $b->createdBy?->name ?? '—',
-                'url'       => route('boat-booking.show', $b->id),
-            ]);
+            ->map(function ($b) {
+                $paid    = (float) ($b->payments_sum_amount ?? 0);
+                $pending = max((float) $b->final_amount - $paid, 0);
+                return [
+                    'type'      => 'Boat',
+                    'icon'      => '⛵',
+                    'color'     => '#0EA5E9',
+                    'bg'        => '#E0F2FE',
+                    'number'    => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                    'guest'     => $b->name ?? '—',
+                    'phone'     => $b->phone ?? '—',
+                    'date_from' => $b->booking_date ? \Carbon\Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                    'date_to'   => '—',
+                    'amount'    => (int) $b->final_amount,
+                    'paid'      => (int) $paid,
+                    'pending'   => (int) $pending,
+                    'status'    => $b->booking_status,
+                    'added_by'  => $b->createdBy?->name ?? '—',
+                    'url'       => route('boat-booking.show', $b->id),
+                ];
+            });
 
         $todayAllBookings = $todayStay->concat($todayCab)->concat($todayBoat)->values();
 
@@ -317,7 +322,7 @@ class DashboardController extends Controller
             'stayConfirmed', 'stayCompleted', 'boatPending',
             'monthLabels', 'stayRevTrend', 'cabRevTrend', 'boatRevTrend',
             'totalRevTrend', 'bookingsTrend', 'totalExpTrend', 'totalProfitTrend',
-            'totalExpenseMonth', 'totalProfitMonth', 'expenseSplit',
+            'totalExpenseMonth', 'totalProfitMonth', 'expenseSplit', 'expenseEstimated',
             'typeLabels', 'typeData',
             'dailyLabels', 'dailyRevenue',
             'collectionLabels', 'dailyCollection',
@@ -376,20 +381,25 @@ class DashboardController extends Controller
         $boatBookings = BoatBooking::where('created_by', $userId)
             ->whereYear('booking_date', $year)
             ->whereMonth('booking_date', $month)
+            ->withSum('payments', 'amount')
             ->orderByDesc('booking_date')
             ->get()
-            ->map(fn($b) => [
-                'type'           => 'Boat',
-                'icon'           => '⛵',
-                'number'         => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
-                'guest'          => $b->name ?? '—',
-                'total_amount'   => (int) $b->final_amount,
-                'paid_amount'    => (int) ($b->payment_status === 'paid' ? $b->final_amount : 0),
-                'pending_amount' => (int) ($b->payment_status !== 'paid' ? $b->final_amount : 0),
-                'status'         => $b->booking_status,
-                'date'           => $b->booking_date ? Carbon::parse($b->booking_date)->format('d M Y') : '—',
-                'url'            => route('boat-booking.show', $b->id),
-            ]);
+            ->map(function ($b) {
+                $paid    = (float) ($b->payments_sum_amount ?? 0);
+                $pending = max((float) $b->final_amount - $paid, 0);
+                return [
+                    'type'           => 'Boat',
+                    'icon'           => '⛵',
+                    'number'         => 'BT-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                    'guest'          => $b->name ?? '—',
+                    'total_amount'   => (int) $b->final_amount,
+                    'paid_amount'    => (int) $paid,
+                    'pending_amount' => (int) $pending,
+                    'status'         => $b->booking_status,
+                    'date'           => $b->booking_date ? Carbon::parse($b->booking_date)->format('d M Y') : '—',
+                    'url'            => route('boat-booking.show', $b->id),
+                ];
+            });
 
         $bookings = $stayBookings->concat($cabBookings)->concat($boatBookings)
             ->sortByDesc('date')

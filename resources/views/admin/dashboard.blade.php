@@ -364,7 +364,11 @@ body.dark-mode .kpi-card-urgent { border-color:#F59E0B !important; }
   <div class="chart-card">
     <div class="chart-head">
       <div class="chart-title">📊 Revenue vs Expense</div>
-      <span style="font-size:.7rem;color:var(--muted);">This Month</span>
+      @if($expenseEstimated)
+        <span style="font-size:.63rem;font-weight:700;color:#92400E;background:#FEF3C7;padding:2px 8px;border-radius:20px;cursor:help;" title="Vendor cost wasn't recorded for every booking this month, so part of this expense figure is a 30%-of-sale estimate, not actual data.">~ Partly estimated</span>
+      @else
+        <span style="font-size:.7rem;color:var(--muted);">This Month</span>
+      @endif
     </div>
     <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
       <div class="mix-donut" style="width:120px;flex-shrink:0;position:relative;">
@@ -402,7 +406,11 @@ body.dark-mode .kpi-card-urgent { border-color:#F59E0B !important; }
   <div class="chart-card">
     <div class="chart-head">
       <div class="chart-title">📊 Expense Cost Split</div>
-      <span style="font-size:.7rem;color:var(--muted);">This Month</span>
+      @if($expenseEstimated)
+        <span style="font-size:.63rem;font-weight:700;color:#92400E;background:#FEF3C7;padding:2px 8px;border-radius:20px;cursor:help;" title="Vendor cost wasn't recorded for every booking this month, so part of this split is a 30%-of-sale estimate, not actual data.">~ Partly estimated</span>
+      @else
+        <span style="font-size:.7rem;color:var(--muted);">This Month</span>
+      @endif
     </div>
     <div class="chart-body mix-wrap" style="display:flex;align-items:center;gap:18px;">
       <div class="mix-donut" style="width:120px;flex-shrink:0;position:relative;">
